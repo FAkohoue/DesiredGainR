@@ -1,0 +1,24 @@
+cff-version: 1.2.0
+message: "If you use DesiredGainR, cite the software and the method implemented in your analysis."
+title: "DesiredGainR: Desired-Gain and Quadratic Genomic Selection Indices"
+type: software
+version: 0.3.0
+authors:
+  - family-names: Akohoue
+    given-names: Félicien
+    email: akohoue.f@gmail.com
+    orcid: "https://orcid.org/0000-0002-2160-0182"
+license: MIT
+repository-code: "https://github.com/FAkohoue/DesiredGainR"
+url: "https://FAkohoue.github.io/DesiredGainR/"
+date-released: 2026-07-26
+preferred-citation:
+  type: software
+  title: "DesiredGainR: Desired-Gain and Quadratic Genomic Selection Indices"
+  authors:
+    - family-names: Akohoue
+      given-names: Félicien
+      orcid: "https://orcid.org/0000-0002-2160-0182"
+  version: 0.3.0
+  year: 2026
+  repository-code: "https://github.com/FAkohoue/DesiredGainR"

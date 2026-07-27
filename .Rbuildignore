@@ -1,0 +1,16 @@
+^DesiredGainR\.Rproj$
+^\.Rproj\.user$
+^README\.Rmd$
+^_pkgdown\.yml$
+^pkgdown$
+^docs$
+^\.github$
+^scripts$
+^LICENSE\.md$
+^\.RData$
+^\.Rhistory$
+^\.git$
+^\.gitattributes$
+^\.gitignore$
+^CITATION\.cff$
+^data$

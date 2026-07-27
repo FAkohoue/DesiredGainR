@@ -1,0 +1,290 @@
+---
+title: "DesiredGainR: DGSI and QGSI Workflows"
+author: "Félicien Akohoue"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{DesiredGainR: DGSI and QGSI Workflows}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+library(DesiredGainR)
+set.seed(42)
+```
+
+# Scope
+
+DesiredGainR provides two distinct multi-trait selection indices. DGSI
+calibrates a linear score towards breeder-defined desired responses. QGSI
+predicts a quadratic economic merit from genomic estimated breeding values
+(GEBVs). The package does not infer genetic values, fit the upstream genomic
+model, or treat desired gains as economic weights.
+
+```{r data}
+traits <- c("yield", "protein", "disease")
+n <- 60
+candidates <- data.frame(
+  GenoID = paste0("G", seq_len(n)),
+  Family = rep(paste0("F", 1:6), each = 10),
+  yield = rnorm(n),
+  protein = rnorm(n),
+  disease = rnorm(n)
+)
+G <- cov(candidates[traits])
+dimnames(G) <- list(traits, traits)
+```
+
+# Optimised desired-gain index
+
+`run_dgsi()` requires the genetic covariance matrix `G`. If `P` is omitted,
+the function estimates an empirical working covariance from the reference
+values and reports that provenance explicitly.
+
+```{r dgsi}
+dgsi <- run_dgsi(
+  init_data = candidates[c("GenoID", "Family")],
+  cand_data = candidates,
+  trait_cols = traits,
+  dg = c(yield = 0.6, protein = 0.3, disease = 0.4),
+  G = G,
+  lower_is_better = "disease",
+  n_select = 10,
+  n_iter = 100,
+  n_rep = 5,
+  seed = 42
+)
+
+dgsi$best_replicate
+dgsi$replicate_diagnostics
+head(dgsi$ranked_geno)
+```
+
+All stochastic replicates run internally. DesiredGainR returns the replicate
+with the smallest response objective automatically. The breeder reviews the
+objective, plateau, coefficient, rank-correlation, and selected-set agreement
+diagnostics but does not choose among runs manually.
+
+In `select_mode = "eligible_top_n"`, thresholds define the eligible pool after
+traits have been oriented so that larger is favourable. The index then ranks
+eligible candidates. Missing data stop the analysis unless an explicit
+complete-case or reference-mean-imputation policy is requested.
+
+# Approximating genetic covariance
+
+The covariance of BLUPs or GEBVs is a covariance of predictions. It is
+generally smaller than total genetic covariance because predictions are
+shrunken. DesiredGainR does not silently use it as `G`.
+
+`estimate_genetic_covariance()` makes an approximation explicit and returns
+its estimand, provenance, assumptions, component matrices, and numerical
+diagnostics.
+
+```{r covariance-working}
+G_working <- estimate_genetic_covariance(
+  values = candidates,
+  trait_cols = traits,
+  method = "prediction_covariance"
+)
+G_working
+G_working$provenance
+```
+
+When full cross-trait prediction-error covariance (PEV) is available for
+compatible multivariate BLUPs, the package can apply
+
+\[
+\widehat G =
+\operatorname{Cov}(\widehat u) + \overline{\operatorname{PEV}}.
+\]
+
+```{r covariance-pev}
+pev <- diag(c(yield = 0.10, protein = 0.08, disease = 0.12))
+dimnames(pev) <- list(traits, traits)
+
+G_approx <- estimate_genetic_covariance(
+  values = candidates,
+  trait_cols = traits,
+  method = "pev_corrected",
+  prediction_error_covariance = pev
+)
+G_approx$G
+G_approx$assumptions
+```
+
+Pass the complete `G_approx` object as `G` in `run_dgsi()` to retain its
+estimation method, estimand, assumptions, and diagnostics in
+`dgsi$covariance_provenance$G`. A genuine covariance matrix from an upstream
+model can still be passed directly.
+
+A common trait-by-trait PEV matrix or a trait-by-trait-by-genotype PEV array
+can be supplied. If only prediction standard errors are available,
+`method = "se_diagonal_corrected"` corrects the diagonal but cannot recover
+cross-trait prediction-error covariance. `method =
+"relationship_adjusted"` accounts for a named genotype relationship matrix
+but does not undo prediction shrinkage.
+
+BLUEs, adjusted phenotypic means, and raw phenotypes contain residual or
+environmental covariance. Their covariance is not a genetic covariance
+estimate unless an upstream genetic model or suitable genetic and replication
+structure separates those components.
+
+# Quadratic genomic selection index
+
+For each candidate, QGSI evaluates
+
+\[
+I_{qg} = \mathbf w^\mathsf{T}\hat{\boldsymbol\gamma}
++ \hat{\boldsymbol\gamma}^\mathsf{T}
+\mathbf W\hat{\boldsymbol\gamma}.
+\]
+
+The breeder supplies linear economic weights \(\mathbf w\) and a symmetric
+matrix \(\mathbf W\) of squared and cross-product economic weights. The
+off-diagonal coefficient multiplying \(\gamma_i\gamma_j\) is \(2W_{ij}\).
+Negative diagonal curvature represents stabilising selection around the
+chosen origin, whereas positive curvature favours extremes. DesiredGainR does
+not infer this economic objective from desired gains or correlations.
+
+```{r qgsi}
+W <- matrix(
+  c(
+     0.10, 0.02, -0.01,
+     0.02, 0.05,  0.00,
+    -0.01, 0.00, -0.08
+  ),
+  3,
+  dimnames = list(traits, traits)
+)
+
+qgsi <- run_qgsi(
+  init_data = candidates[c("GenoID", "Family")],
+  gebv_data = candidates,
+  trait_cols = traits,
+  linear_weights = c(yield = 1, protein = 0.5, disease = 0.7),
+  W = W,
+  lower_is_better = "disease",
+  n_select = 10
+)
+
+qgsi
+head(qgsi$ranked_geno)
+```
+
+GEBVs are centred by default because QGSI theory assumes zero means.
+`lower_is_better` changes the trait direction before scoring. Economic weights
+must describe the resulting favourable-direction trait space. When scaling is
+requested, the weights must also refer to standard-deviation units.
+
+## Estimating genomic covariance
+
+Without a supplied `Gamma`, the function estimates the genomic covariance
+matrix from reference GEBVs with Supplementary Equation 19.2 of Cerón-Rojas
+et al. (2026):
+
+\[
+\hat{\Gamma} = g^{-1}\hat{\gamma}^{\mathsf T}\hat{\gamma}.
+\]
+
+Candidate GEBVs serve as the reference when `reference_gebv_data` is absent.
+A separate reference population may be supplied. With a named genomic
+relationship matrix \(\Phi\), the function instead evaluates Supplementary
+Equation 19.1:
+
+\[
+\hat{\Gamma} =
+g^{-1}\hat{\gamma}^{\mathsf T}\Phi^{-1}\hat{\gamma}.
+\]
+
+A spectral Moore–Penrose inverse is used and reported for a rank-deficient
+positive-semidefinite relationship matrix.
+
+```{r qgsi-covariance}
+qgsi$Gamma
+qgsi$covariance_provenance
+```
+
+## Model-based parameters
+
+DesiredGainR reports the model expected index, its linear and quadratic
+variance components, normal-selection intensity, expected quadratic
+net-merit response, and expected per-trait gains from Supplementary Equation
+16.
+
+```{r qgsi-theory}
+qgsi$theoretical_parameters
+qgsi$expected_gain_per_trait
+```
+
+Squared index–merit correlation and mean squared prediction error require
+`true_G`. That matrix is generally known only in simulation. These quantities
+remain unavailable for empirical data instead of being calculated under the
+unverifiable assumption that estimated `Gamma` is the true covariance.
+
+The selected candidates' mean GEBV shift is returned separately:
+
+```{r qgsi-observed}
+qgsi$observed_selection_differential
+```
+
+This is an observed differential among supplied predictions, not realised
+genetic gain. Realised gain requires later-cycle observations.
+
+Candidate-specific contribution tables reproduce the linear and quadratic
+score:
+
+```{r qgsi-contributions}
+head(qgsi$linear_contributions)
+head(qgsi$quadratic_contributions)
+```
+
+They explain each candidate's score. A nonlinear QGSI contribution is not one
+global additive marker-effect vector.
+
+# Comparing the methods
+
+The combined pipeline requires separate objectives:
+
+```{r both}
+both <- run_dgsi_qgsi_pipeline(
+  mode = "both",
+  init_data = candidates[c("GenoID", "Family")],
+  trait_cols = traits,
+  dg = c(yield = 0.6, protein = 0.3, disease = 0.4),
+  cand_data = candidates,
+  G = G,
+  n_select = 10,
+  n_iter = 50,
+  n_rep = 3,
+  gebv_data = candidates,
+  qgsi_linear_weights = c(yield = 1, protein = 0.5, disease = 0.7),
+  W = W,
+  qgsi_n_select = 10,
+  lower_is_better = "disease",
+  debug = FALSE
+)
+
+head(both$comparison_result$comparison_table)
+```
+
+Rank agreement is descriptive. DGSI targets desired responses; QGSI predicts
+a quadratic economic merit. Agreement therefore does not validate either
+method.
+
+# Interpretation and reporting
+
+Report the upstream genetic model, target population and environments,
+covariance provenance, trait directions, transformations, selection
+intensity, DGSI desired responses, QGSI economic weights, random seed,
+optimisation diagnostics, and independent later-cycle evaluation.
+
+The algorithms calculate results from the supplied genetic values and
+parameters. Their breeding relevance is driven by whether those inputs
+represent the target programme and whether the breeder's objectives are
+scientifically and economically defensible.
+
+```{r session}
+packageVersion("DesiredGainR")
+sessionInfo()
+```

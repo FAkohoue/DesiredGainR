@@ -1,0 +1,16 @@
+# R session artifacts
+.Rhistory
+.RData
+.Ruserdata
+.Renviron
+
+# RStudio project files
+.Rproj.user
+*.Rproj
+!DesiredGainR.Rproj
+
+# R package build artifacts
+.Rcheck/
+*.Rcheck
+*.tar.gz
+*.zip

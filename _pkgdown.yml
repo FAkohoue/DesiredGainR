@@ -1,0 +1,50 @@
+url: https://FAkohoue.github.io/DesiredGainR/
+
+template:
+  bootstrap: 5
+  bslib:
+    primary: "#0C4C80"
+    secondary: "#3AA0FF"
+    success: "#7ED957"
+    base_font: {google: "Inter"}
+    heading_font: {google: "Inter"}
+    code_font: {google: "Fira Code"}
+
+authors:
+  Félicien Akohoue:
+    href: https://github.com/FAkohoue
+
+home:
+  title: DesiredGainR
+  description: Auditable desired-gain and quadratic genomic selection indices.
+
+navbar:
+  bg: primary
+  structure:
+    left: [home, reference, articles]
+    right: [github]
+  components:
+    github:
+      icon: fa-github
+      href: https://github.com/FAkohoue/DesiredGainR
+      aria-label: GitHub repository
+
+reference:
+  - title: Core workflows
+    contents:
+      - run_dgsi
+      - estimate_genetic_covariance
+      - run_qgsi
+      - run_qgsi_desired_gain
+      - run_dgsi_qgsi_pipeline
+  - title: Supporting tools
+    contents:
+      - compare_dg_and_qgsi
+  - title: Package
+    contents:
+      - DesiredGainR-package
+
+articles:
+  - title: Get started
+    contents:
+      - DesiredGainR-introduction

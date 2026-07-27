@@ -1,0 +1,10 @@
+utils::globalVariables(c(
+  "..trait_cols",
+  "Chosen",
+  "Eligible",
+  "LinearPart",
+  "QGSI",
+  "QuadraticPart",
+  "Rank",
+  "Replicate"
+))
