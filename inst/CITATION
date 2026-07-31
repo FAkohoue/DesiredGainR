@@ -1,7 +1,7 @@
 citHeader("To cite DesiredGainR in publications, use:")
 
-citEntry(
-  entry = "Manual",
+bibentry(
+  bibtype = "Manual",
   title = "DesiredGainR: Desired-Gain and Quadratic Genomic Selection Indices",
   author = person(
     given = "Félicien",
@@ -11,12 +11,12 @@ citEntry(
     comment = c(ORCID = "0000-0002-2160-0182")
   ),
   year = "2026",
-  note = "R package version 0.3.0",
+  note = "R package version 0.3.1",
   url = "https://github.com/FAkohoue/DesiredGainR",
   textVersion = paste(
     "Akohoue F (2026).",
     "DesiredGainR: Desired-Gain and Quadratic Genomic Selection Indices.",
-    "R package version 0.3.0.",
+    "R package version 0.3.1.",
     "https://github.com/FAkohoue/DesiredGainR"
   )
 )

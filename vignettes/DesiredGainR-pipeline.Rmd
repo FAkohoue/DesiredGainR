@@ -1,0 +1,680 @@
+---
+title: "Full pipeline: from trait values to a defended selection decision"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Full pipeline: from trait values to a defended selection decision}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  message = FALSE,
+  warning = FALSE
+)
+library(DesiredGainR)
+data(dgr_traits, package = "DesiredGainR")
+data(dgr_G, package = "DesiredGainR")
+data(dgr_P, package = "DesiredGainR")
+data(dgr_candidates, package = "DesiredGainR")
+data(dgr_gebv, package = "DesiredGainR")
+data(dgr_history, package = "DesiredGainR")
+data(dgr_hap1, package = "DesiredGainR")
+data(dgr_hap2, package = "DesiredGainR")
+data(dgr_map, package = "DesiredGainR")
+```
+
+## Purpose
+
+This vignette assumes no prior knowledge of DesiredGainR. It runs the entire
+package on the shipped example programme, one stage at a time, showing every
+call, every output, and the decision each one feeds. Nothing is skipped and
+nothing is left to be inferred from another document.
+
+Sixteen stages in four phases:
+
+| Phase | Stages | Question answered |
+|---|---|---|
+| **Evidence** | 1-4 | What do we have, and can it be trusted? |
+| **Objective** | 5-8 | What should we select for, and is it possible? |
+| **Index** | 9-12 | Which index, and what does it actually do? |
+| **Looking ahead** | 13-16 | Does this objective still hold over several cycles? |
+
+Every stage names the vignette that carries its full statistical detail. This
+document is the connective walkthrough; those are the references.
+
+---
+
+# Phase 1: Evidence
+
+## Stage 1 — What you need before you start
+
+DesiredGainR begins *after* the genetic evaluation. It does not analyse field
+trials, does not fit a mixed model, and does not estimate breeding values. You
+must arrive with four things.
+
+| Input | What it is | Where it comes from |
+|---|---|---|
+| Trait values | One adjusted mean, BLUP or GEBV per candidate per trait | Your multi-trait genetic evaluation |
+| $\mathbf{G}$ | Genetic variance-covariance matrix | The same fitted model |
+| $\mathbf{P}$ | Phenotypic variance-covariance matrix | The same fitted model |
+| Trait directions | Which traits improve by rising, which by falling | The product profile |
+
+If you have no fitted $\mathbf{G}$, Stage 3 shows the supported
+approximations. If you have no trait directions written down, stop and write
+them down: every later stage depends on them.
+
+## Stage 2 — Load and inspect the data
+
+```{r stage2}
+dgr_traits
+```
+
+Read this table before anything else. It carries the units, the direction of
+improvement, the heritability and the genetic standard deviation for each
+trait. Two columns decide most of what follows.
+
+```{r stage2-directions}
+traits <- dgr_traits$trait
+lower_is_better <- dgr_traits$trait[dgr_traits$direction == "decrease"]
+lower_is_better
+```
+
+`lower_is_better` is passed to nearly every function in the package. Supplying
+it means you state gains as *improvements* everywhere, and the package handles
+the sign conventions internally. Signing values by hand is the commonest source
+of a confidently wrong answer.
+
+```{r stage2-candidates}
+str(dgr_candidates, max.level = 1)
+head(dgr_candidates[, c("GenoID", "GY", "PHT", "GLS")], 3)
+```
+
+## Stage 3 — Check the covariance matrices
+
+Every index in this package is computed by inverting $\mathbf{P}$,
+$\mathbf{G}$, or both. An ill-conditioned matrix produces coefficients that are
+numerically meaningless while looking entirely plausible, so this check comes
+before anything is built on top of them.
+
+```{r stage3}
+diagnostics_G <- matrix_diagnostics(dgr_G, "G")
+c(
+  condition_number = diagnostics_G$condition_number,
+  positive_definite = diagnostics_G$positive_definite,
+  numerical_rank = diagnostics_G$numerical_rank
+)
+```
+
+A condition number near $1.9 \times 10^{4}$ looks alarming until it is
+decomposed. Almost all of it comes from the trait scales rather than from the
+correlations:
+
+```{r stage3-decompose}
+matrix_diagnostics(stats::cov2cor(dgr_G))$condition_number
+```
+
+Standardising the traits removes three orders of magnitude of ill-conditioning.
+This is the practical form of an observation by Crosbie et al. (1980): equal
+weights applied to unstandardised traits concentrate selection on whichever
+trait happens to carry the largest variance. It is why DesiredGainR
+standardises by default.
+
+**If you have no fitted $\mathbf{G}$.** Use
+`estimate_genetic_covariance()`, which returns labelled approximations rather
+than relabelling a covariance of predictions as a genetic covariance:
+
+```{r stage3-estimate}
+G_working <- estimate_genetic_covariance(
+  values = dgr_candidates, trait_cols = traits,
+  method = "adjusted_means_surrogate"
+)
+G_working$estimand
+```
+
+Four methods are available: `prediction_covariance`, `pev_corrected`,
+`se_diagonal_corrected`, `relationship_adjusted`, and
+`adjusted_means_surrogate`. The last implements what the CGIAR implementation
+guideline recommends for operational use when no fitted matrix exists.
+
+## Stage 4 — Confirm units and heritabilities
+
+The declared heritabilities must be recoverable from the two matrices. If they
+are not, the metadata and the matrices are describing different things.
+
+```{r stage4}
+round(diag(dgr_G) / diag(dgr_P), 2)
+dgr_traits$heritability
+```
+
+Check the spread of trait scales, because it determines whether standardisation
+is optional or essential:
+
+```{r stage4-scales}
+genetic_sd <- stats::setNames(dgr_traits$genetic_sd, dgr_traits$trait)
+round(sort(genetic_sd, decreasing = TRUE), 2)
+round(max(genetic_sd) / min(genetic_sd))
+```
+
+A spread of 120-fold means standardisation is essential here. The package warns
+automatically above fivefold.
+
+---
+
+# Phase 2: Objective
+
+## Stage 5 — State a first objective
+
+There are two ways to state a breeding objective, and they are equivalent.
+
+**Economic weights** $\mathbf{w}$ say what a unit of each trait is worth.
+**Desired gains** $\mathbf{d}$ say how much of each trait you want. The
+Smith-Hazel index uses the first, $\mathbf{b} = \mathbf{P}^{-1}\mathbf{G}\mathbf{w}$;
+the Pesek-Baker desired-gain index uses the second,
+$\mathbf{b} = \mathbf{P}^{-1}\mathbf{G}(\mathbf{G}\mathbf{P}^{-1}\mathbf{G})^{-1}\mathbf{d}$.
+
+Most breeders find desired gains easier, so start there. State them as
+improvements, in genetic standard deviations, and let `lower_is_better` handle
+direction.
+
+```{r stage5}
+desired_gains <- c(GY = 1.0, PHT = 0.4, AD = 0.6, ASI = 0.5,
+                   EPP = 0.4, GLS = 0.6)
+```
+
+This says: one standard deviation of extra yield, four tenths of a standard
+deviation shorter plants, six tenths earlier flowering, and so on.
+
+## Stage 6 — Translate to economic weights
+
+Setting the two index formulae equal gives an exact translation in both
+directions:
+
+$$\mathbf{w} = \mathbf{G}^{-1}\mathbf{P}\mathbf{G}^{-1}\mathbf{d},
+\qquad
+\mathbf{d} = \mathbf{G}\mathbf{P}^{-1}\mathbf{G}\mathbf{w}.$$
+
+```{r stage6}
+implied <- implied_economic_weights(
+  desired_gains, dgr_G, dgr_P,
+  lower_is_better = lower_is_better, gain_units = "genetic_sd"
+)
+round(implied, 2)
+```
+
+**Two of these are negative, for traits you asked to improve.** That is
+correct. Once oriented, grain yield correlates $+0.55$ with the
+anthesis-silking interval and $+0.45$ with ears per plant, so selecting hard
+for yield would carry both *past* the smaller gains you requested. To deliver
+the ratio you asked for, the index must hold them back. A negative weight never
+means the trait should get worse.
+
+**The magnitudes are not comparable.** A weight carries inverse trait units, so
+a trait on a small scale gets a big number for the same emphasis. Always
+rescale before comparing:
+
+```{r stage6-rescale}
+round(sort(implied * genetic_sd[names(implied)], decreasing = TRUE), 2)
+```
+
+Ears per plant had the largest raw number and is one of the smaller effects.
+
+Confirm the translation inverts, which costs one line and catches unit errors:
+
+```{r stage6-invert}
+round(
+  implied_desired_gains(
+    implied, dgr_G, dgr_P,
+    lower_is_better = lower_is_better, gain_units = "genetic_sd"
+  ),
+  3
+)
+```
+
+## Stage 7 — Test whether the objective is attainable
+
+**This is the stage most often skipped, and the one that most often changes the
+answer.**
+
+For any linear index the response is
+$\mathbf{R} = i\,\mathbf{G}\mathbf{b}/\sqrt{\mathbf{b}^\mathsf{T}\mathbf{P}\mathbf{b}}$,
+so the attainable responses lie on an ellipsoid and a stated target requires
+exactly
+
+$$i_{\text{required}} = \sqrt{\mathbf{d}^\mathsf{T}\mathbf{G}^{-1}\mathbf{P}\mathbf{G}^{-1}\mathbf{d}}.$$
+
+```{r stage7}
+feasibility <- gain_feasibility(
+  desired_gains, dgr_G, dgr_P,
+  n_candidates = nrow(dgr_candidates), n_select = 20L,
+  lower_is_better = lower_is_better, gain_units = "genetic_sd"
+)
+feasibility
+```
+
+The request looked unremarkable and requires selecting fewer than one candidate
+from two hundred. About fifty-five per cent of it is available at the intensity
+actually planned:
+
+```{r stage7-attainable}
+round(feasibility$attainable_response_input_units, 3)
+```
+
+**Two consequences worth understanding now.** First, the classical desired-gain
+index honours only the *direction* of $\mathbf{d}$; multiplying every element
+by a constant changes nothing, because the magnitude is fixed by selection
+intensity. Second, an antagonistic correlation structure can make a
+modest-looking target unreachable, and no amount of optimisation will fix that.
+
+## Stage 8 — Recover what the programme already selects for, then adjust
+
+If your programme has been selecting without a formal index, the differentials
+it achieved already encode its objective:
+
+$$\mathbf{b} = \mathbf{P}^{-1}\mathbf{s}$$
+
+where $\mathbf{s}$ holds the differences between the selected group and the
+whole population.
+
+```{r stage8}
+recovered <- retrospective_weights(
+  selected_values = dgr_candidates[dgr_history$selected, traits],
+  population_values = dgr_candidates[, traits],
+  trait_cols = traits
+)
+recovered
+```
+
+```{r stage8-differentials}
+round(recovered$selection_differential_sd, 2)
+```
+
+This is how an index was introduced at both CIMMYT and IRRI. Treat it as a
+starting point: it reproduces past decisions including any bias in them, and
+must be adjusted deliberately against the product profile before it becomes a
+forward-looking objective.
+
+---
+
+# Phase 3: Index
+
+## Stage 9 — Build candidate indices
+
+`selection_index()` provides every classical family through one interface.
+
+```{r stage9}
+economic_weights <- c(GY = 1.0, PHT = 0.2, AD = 0.5,
+                      ASI = 0.4, EPP = 0.3, GLS = 0.5)
+
+smith_hazel <- selection_index(
+  dgr_candidates, traits, method = "smith_hazel",
+  G = dgr_G, P = dgr_P, economic_weights = economic_weights,
+  lower_is_better = lower_is_better, n_select = 20L, main_trait = "GY"
+)
+rank_sum <- selection_index(
+  dgr_candidates, traits, method = "mulamba_mock",
+  lower_is_better = lower_is_better, n_select = 20L
+)
+smith_hazel
+```
+
+| Method | Needs weights | Needs $\mathbf{G}$, $\mathbf{P}$ | Use when |
+|---|---|---|---|
+| `smith_hazel` | yes | yes | Weights are defensible |
+| `base` | yes | no | A quick comparator; often nearly as good |
+| `pesek_baker` | desired gains | $\mathbf{G}$ only | Gains easier than weights |
+| `yamada` | desired gains | yes | Same index, better conditioned route |
+| `mulamba_mock` | no | no | Weights unavailable or untrusted |
+| `independent_culling` | thresholds | no | Non-compensatory requirements |
+| `tandem` | trait order | no | Comparator for sequential selection |
+
+## Stage 10 — Evaluate and compare
+
+The four criteria reported are those of Rahimi and Debnath (2023), which the
+established selection-index software also reports.
+
+| Criterion | Meaning |
+|---|---|
+| $R_{HI}$ | Correlation between index and net merit |
+| $\Delta H$ | Expected gain in aggregate merit |
+| RE | Efficiency relative to direct selection on the main trait |
+| $CV_I$ | Coefficient of variation of the index |
+
+**Relative efficiency below 1 is not a failure.** It is the intended trade of
+response in the main trait for response elsewhere. Every value reported by
+Rahimi and Debnath was below 1.
+
+Compare families by rank correlation *and* by overlap of the selected sets,
+because the two must be consistent with each other:
+
+```{r stage10}
+paired <- merge(
+  smith_hazel$ranking[, c("id", "score")],
+  rank_sum$ranking[, c("id", "score")],
+  by = "id", suffixes = c("_sh", "_mm")
+)
+round(stats::cor(paired$score_sh, paired$score_mm, method = "spearman"), 3)
+length(intersect(smith_hazel$selected$id, rank_sum$selected$id))
+```
+
+A high correlation with a nearly empty intersection indicates a fault, not a
+finding. That exact check caught a row-alignment bug during development.
+
+Check which traits the index is really acting on:
+
+```{r stage10-effective}
+smith_hazel$effective_weights[, c("Trait", "Genetic_share")]
+```
+
+## Stage 11 — Optimise the desired-gain vector
+
+`run_dgsi()` implements the iterative method of Joukhadar et al. (2024). It
+samples desired-gain vectors, builds the index from each, and keeps the one
+whose *realised* response in the selected set comes closest to your target.
+
+```{r stage11}
+dgsi <- run_dgsi(
+  init_data = dgr_candidates[, c("GenoID", "Family")],
+  cand_data = dgr_candidates,
+  trait_cols = traits,
+  dg = desired_gains,
+  G = dgr_G, P = dgr_P,
+  lower_is_better = lower_is_better,
+  scale_traits = TRUE,
+  n_select = 20L, n_iter = 200L, n_rep = 5L, seed = 42L
+)
+round(dgsi$realised_response, 3)
+```
+
+Read the deviation from target against Stage 7:
+
+```{r stage11-deviation}
+round(dgsi$realised_response - desired_gains, 3)
+```
+
+Feasibility constrained the requested *proportion*. The optimiser is not bound
+to that proportion, so it distributes the shortfall unevenly, overshooting
+grain yield while undershooting anthesis date. Whether that trade is acceptable
+is a breeding decision, not a numerical one.
+
+Always inspect the replicate diagnostics. The search is stochastic, so
+agreement across replicates is the evidence that the answer is stable:
+
+```{r stage11-replicates}
+dgsi$replicate_diagnostics
+```
+
+And compare against the classical solution without iteration:
+
+```{r stage11-comparator}
+round(dgsi$non_iterated$realised_response, 3)
+```
+
+The anthesis-silking interval moves the *wrong way* there. Joukhadar et al.
+reported precisely this failure of the unoptimised method.
+
+## Stage 12 — Score genomic estimated breeding values
+
+`run_qgsi()` implements the quadratic genomic selection index of Cerón-Rojas et
+al. (2026):
+
+$$I_{qg,i} = \mathbf{w}^\mathsf{T}\hat{\boldsymbol{\gamma}}_i +
+\hat{\boldsymbol{\gamma}}_i^\mathsf{T}\mathbf{W}\hat{\boldsymbol{\gamma}}_i$$
+
+where $\hat{\boldsymbol{\gamma}}_i$ is the candidate's vector of genomic
+estimated breeding values, $\mathbf{w}$ the linear economic weights, and
+$\mathbf{W}$ a symmetric matrix of squared and cross-product weights. Negative
+diagonal curvature in $\mathbf{W}$ favours intermediate values; positive
+curvature favours extremes.
+
+```{r stage12}
+quadratic_weights <- diag(c(
+  GY = 0.05, PHT = -0.03, AD = -0.03, ASI = -0.04, EPP = 0.02, GLS = -0.03
+))
+dimnames(quadratic_weights) <- list(traits, traits)
+
+qgsi <- run_qgsi(
+  init_data = dgr_gebv["GenoID"], gebv_data = dgr_gebv,
+  trait_cols = traits,
+  linear_weights = economic_weights, W = quadratic_weights,
+  lower_is_better = lower_is_better,
+  scale_traits = TRUE, n_select = 20L
+)
+qgsi$expected_gain_per_trait
+```
+
+**Standardisation matters more here than anywhere else in the package**,
+because economic weights multiply the breeding values directly. Left
+unstandardised on these data, plant height carries half the linear index
+despite holding nearly the smallest weight, and the expected gain in grain
+yield comes out *negative* while the index selects for more of it.
+`run_qgsi()` warns when the trait scales make this likely.
+
+---
+
+# Phase 4: Looking ahead
+
+A single-cycle calculation cannot distinguish desired-gain directions beyond
+what the feasibility ellipsoid already tells you. Over several cycles the
+ranking can change, because truncation selection erodes the genetic variance
+that the response depends on. Phase 4 represents that.
+
+The simulation is calibrated to your own germplasm: founders are built from
+real phased marker data, never from a simulated genome.
+
+## Stage 13 — Build founders from phased marker data
+
+```{r stage13}
+founders <- founder_haplotypes(dgr_hap1, dgr_hap2, dgr_map)
+founders
+```
+
+`hap1` and `hap2` are marker-by-individual matrices coded 0 or 1, giving the
+allele on each chromosome copy. This is what a phase-preserving variant call
+format reader returns.
+
+**Dosage coded 0, 1, 2 is not accepted**, because it records how many
+alternative alleles an individual carries but not which copy carries them, and
+that co-occurrence is the linkage disequilibrium the simulation exists to
+represent.
+
+For highly inbred diploid material, dosage 0 and 2 are unambiguous, so phase
+can be derived without external phasing. Measure the heterozygosity first:
+
+```{r stage13-dosage}
+dosage <- dgr_hap1 + dgr_hap2
+diagnostics <- dosage_diagnostics(dosage)
+c(
+  heterozygosity = diagnostics$overall_heterozygosity,
+  missing = diagnostics$overall_missing
+)
+```
+
+```{r stage13-convert, eval=FALSE}
+converted <- haplotypes_from_inbred_dosage(
+  dosage, heterozygous_policy = "drop_variant"
+)
+```
+
+No threshold is imposed on residual heterozygosity, because no universally
+appropriate level exists; it is measured and reported instead, and heterozygous
+calls are never resolved silently.
+
+## Stage 14 — Calibrate the simulation
+
+Genome structure comes from your markers. Trait architecture is calibrated to
+the covariance matrix you already estimated, so the simulation reproduces both.
+
+```{r stage14, eval=FALSE}
+setup <- founder_population(
+  founders,
+  G = dgr_G,
+  h2 = stats::setNames(dgr_traits$heritability, traits),
+  n_qtl_per_chromosome = 100L,
+  seed = 42L
+)
+setup
+```
+
+```
+#> <desiredgainr_sim_setup>
+#>   Founders: 200 individuals, 3 chromosomes, 100 QTL per chromosome
+#>   Traits: GY, PHT, AD, ASI, EPP, GLS
+#>   Dominance simulated: no
+```
+
+For a **clonal** programme add `dominance_degree`, and supply the *genotypic*
+rather than the additive covariance as `G`, because the clone inherits
+dominance intact.
+
+## Stage 15 — Simulate one objective across cycles
+
+```{r stage15, eval=FALSE}
+simulation <- simulate_selection_cycles(
+  setup,
+  desired_gains = desired_gains,
+  n_cycles = 5L,
+  mating_system = "outcross",
+  n_parents = 20L, n_crosses = 50L, n_progeny_per_cross = 10L,
+  lower_is_better = lower_is_better,
+  seed = 11L
+)
+simulation
+```
+
+```
+#> <desiredgainr_simulation>
+#>   outcross system, 5 cycles, 20 parents recycled
+#>   Index re-estimated each cycle: yes
+#>   Cumulative genetic gain:
+#>       GY     PHT      AD     ASI     EPP     GLS
+#>    1.842  -8.031  -1.226  -0.244  -0.019  -0.487
+#>   Final mean relationship among parents: 0.0913
+```
+
+Output above is illustrative of the object's shape; your numbers depend on your
+founders and parameters.
+
+Three mating systems are supported, and they differ in more than naming:
+
+| System | Crops | What differs |
+|---|---|---|
+| `"self"` | Wheat, rice, bean | Advanced by selfing or doubled haploidy; recombination releases variance slowly |
+| `"outcross"` | Maize, sorghum, millet | Random mating each cycle; half the selection-induced disequilibrium decays per generation |
+| `"clonal"` | Cassava, sweetpotato, banana | Selection on *total* genetic value, because dominance is inherited intact |
+
+The per-cycle table records the genetic mean and variance for each trait, the
+mean relationship among selected parents, and the implied effective population
+size, so that gain and the loss of diversity can be read together.
+
+`reestimate_index = TRUE`, the default, rebuilds the index from each cycle's own
+data, which is what a programme actually does and which propagates estimation
+error across cycles. Setting it `FALSE` isolates the effect of the
+desired-gain direction alone. A large divergence between the two means the
+recommendation is sensitive to estimation error.
+
+## Stage 16 — Search for the best objective over cycles
+
+Because only the *direction* of $\mathbf{d}$ matters, the search space is the
+unit sphere with $p-1$ free parameters for $p$ traits — small enough to cover
+densely.
+
+```{r stage16, eval=FALSE}
+optimisation <- optimize_desired_gains(
+  setup,
+  n_cycles = 5L,
+  mode = "pareto",
+  budget = 60L,
+  n_replicates = 3L,
+  mating_system = "outcross",
+  n_parents = 20L, n_crosses = 50L, n_progeny_per_cross = 10L,
+  lower_is_better = lower_is_better,
+  checkpoint = "search.rds",
+  seed = 42L
+)
+optimisation
+```
+
+```
+#> <desiredgainr_optimisation>
+#>   Mode: pareto   Cycles: 5   Evaluations: 60 (3 replicates each)
+#>   Objectives: GY, PHT, AD, ASI, EPP, GLS, diversity
+#>   Non-dominated directions: 9 of 60
+#>   No single direction is recommended; choose a point on the frontier.
+```
+
+**The simulation is the objective function and is never replaced by a cheaper
+approximation.** A Gaussian process decides only where to spend the next
+simulation; it never filters or substitutes for one, and because the
+acquisition function keeps exploring, no region can be permanently excluded.
+
+Four ranking modes are available:
+
+| Mode | Objective | Needs |
+|---|---|---|
+| `"pareto"` | Non-dominated outcomes | nothing beyond the setup |
+| `"economic"` | Maximise $\mathbf{w}^\mathsf{T}\mathbf{R}$ | `economic_weights` |
+| `"target"` | Minimise distance to absolute targets | `target_gains` |
+| `"constrained"` | Maximise one trait subject to floors | `focal_trait`, `gain_floors` |
+
+`"pareto"` is the default because it is the only mode that does not require the
+weights breeders find hardest to state. Choosing a point on a frontier is an
+easier judgement, and it is weight elicitation by revealed preference.
+
+A realistic budget takes hours, so supply `checkpoint` to make the search
+resumable.
+
+---
+
+## Sign-off checklist
+
+Complete this before promoting any output to a breeding recommendation.
+
+| Check | Where it came from |
+|---|---|
+| Covariance matrices positive definite, conditioning inspected | Stage 3 |
+| Heritabilities consistent with $\mathbf{G}$ and $\mathbf{P}$ | Stage 4 |
+| Trait directions declared, not signed by hand | Stage 2 |
+| Objective feasible at the planned intensity, or knowingly not | Stage 7 |
+| Index family chosen and justified against a comparator | Stages 9-10 |
+| Effective weights inspected; no unintended trait dominance | Stage 10 |
+| Replicate diagnostics agree | Stage 11 |
+| Traits standardised, or the warning read and accepted | Stages 3, 12 |
+| Decision robust to plausible weight perturbation | *Objective vignette* |
+| Random seed, package version and session recorded | below |
+
+```{r session}
+packageVersion("DesiredGainR")
+sessionInfo()
+```
+
+---
+
+## Where each stage is covered in depth
+
+| Stage | Vignette |
+|---|---|
+| 1-4 | *Obtaining the genetic and phenotypic covariance matrices* |
+| 5-8 | *Defining a breeding objective* |
+| 9-10 | *Choosing an index* |
+| 11 | *Optimising desired gains* |
+| 12 | *Quadratic genomic selection* |
+| 13-16 | *Comparing objectives over several cycles* |
+
+---
+
+## References
+
+- Cerón-Rojas JJ, Montesinos-López OA, Montesinos-López A, et al. (2026).
+  Nonlinear genomic selection index accelerates multi-trait crop improvement.
+  *Nature Communications* **17**:1991.
+- Covarrubias-Pazaran G (2021). *Practical implementation of selection
+  indices.* CGIAR Excellence in Breeding.
+- Guimarães PHR et al. (2021). Index selection can improve the selection
+  efficiency in a rice recurrent selection population. *Euphytica* **217**:95.
+- Joukhadar R et al. (2024). Optimising desired gain indices to maximise
+  selection response. *Frontiers in Plant Science* **15**:1337388.
+- Rahimi M, Debnath S (2023). Estimating optimum and base selection indices.
+  *Scientific Reports* **13**:18977.

@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang xml:lang>
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Rahimi and Debnath (2023): SAS and R codes for optimum, base,
+and desired-gain indices</title>
+  <style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+</style>
+  <style type="text/css">:root {
+--text: #202124;
+--muted: #5f6368;
+--border: #dfe1e5;
+--panel: #f8f9fa;
+--accent: #1b5e5a;
+}
+html { font-size: 17px; }
+body {
+max-width: 1080px;
+margin: 0 auto;
+padding: 2.5rem 3rem 5rem;
+font-family: Georgia, "Times New Roman", serif;
+line-height: 1.62;
+color: var(--text);
+background: white;
+}
+h1, h2, h3, h4 {
+font-family: Arial, Helvetica, sans-serif;
+line-height: 1.25;
+color: #173f3d;
+margin-top: 2rem;
+}
+h1 { font-size: 2.15rem; border-bottom: 3px solid var(--accent); padding-bottom: .55rem; }
+h2 { font-size: 1.65rem; border-bottom: 1px solid var(--border); padding-bottom: .35rem; }
+h3 { font-size: 1.28rem; }
+h4 { font-size: 1.08rem; }
+a { color: #0b57d0; }
+table { border-collapse: collapse; width: 100%; margin: 1.2rem 0 1.6rem; font-size: .94rem; }
+th, td { border: 1px solid var(--border); padding: .55rem .65rem; vertical-align: top; }
+th { background: #eef5f4; font-family: Arial, Helvetica, sans-serif; text-align: left; }
+tr:nth-child(even) td { background: #fbfcfc; }
+code { background: #f1f3f4; padding: .1rem .25rem; border-radius: 3px; }
+blockquote { border-left: 4px solid var(--accent); margin-left: 0; padding: .2rem 1rem; color: var(--muted); background: var(--panel); }
+#TOC { border: 1px solid var(--border); background: var(--panel); padding: 1rem 1.5rem; margin: 1.5rem 0 2rem; }
+#TOC ul { margin-top: .25rem; }
+hr { border: 0; border-top: 1px solid var(--border); margin: 2.5rem 0; }
+.math.display { overflow-x: auto; padding: .3rem 0; }
+@media (max-width: 760px) {
+body { padding: 1.2rem; }
+table { display: block; overflow-x: auto; }
+}
+@media print {
+body { max-width: none; padding: 0; font-size: 11pt; }
+#TOC { break-after: page; }
+h2, h3 { break-after: avoid; }
+table { break-inside: avoid; }
+}
+</style>
+</head>
+<body>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#rahimi-and-debnath-2023-sas-and-r-codes-for-optimum-base-and-desired-gain-indices" id="toc-rahimi-and-debnath-2023-sas-and-r-codes-for-optimum-base-and-desired-gain-indices">Rahimi
+and Debnath (2023): SAS and R codes for optimum, base, and desired-gain
+indices</a>
+<ul>
+<li><a href="#bibliographic-information" id="toc-bibliographic-information">Bibliographic information</a></li>
+<li><a href="#objective" id="toc-objective">Objective</a></li>
+<li><a href="#index-formulations" id="toc-index-formulations">Index
+formulations</a>
+<ul>
+<li><a href="#optimum-index" id="toc-optimum-index">Optimum
+index</a></li>
+<li><a href="#base-index" id="toc-base-index">Base index</a></li>
+<li><a href="#pešek-baker-index" id="toc-pešek-baker-index">Pešek-Baker
+index</a></li>
+</ul></li>
+<li><a href="#evaluation-criteria" id="toc-evaluation-criteria">Evaluation criteria</a></li>
+<li><a href="#input-and-implementation" id="toc-input-and-implementation">Input and implementation</a></li>
+<li><a href="#worked-maize-example" id="toc-worked-maize-example">Worked
+maize example</a></li>
+<li><a href="#reported-index-equations" id="toc-reported-index-equations">Reported index equations</a></li>
+<li><a href="#main-numerical-results" id="toc-main-numerical-results">Main numerical results</a></li>
+<li><a href="#interpretation-of-relative-efficiency" id="toc-interpretation-of-relative-efficiency">Interpretation of
+relative efficiency</a></li>
+<li><a href="#strengths" id="toc-strengths">Strengths</a></li>
+<li><a href="#limitations-and-cautions" id="toc-limitations-and-cautions">Limitations and cautions</a></li>
+<li><a href="#practical-use" id="toc-practical-use">Practical
+use</a></li>
+</ul></li>
+</ul>
+</nav>
+<h1 id="rahimi-and-debnath-2023-sas-and-r-codes-for-optimum-base-and-desired-gain-indices">Rahimi
+and Debnath (2023): SAS and R codes for optimum, base, and desired-gain
+indices</h1>
+<h2 id="bibliographic-information">Bibliographic information</h2>
+<ul>
+<li><strong>Authors:</strong> Mehdi Rahimi and Sandip Debnath</li>
+<li><strong>Journal:</strong> <em>Scientific Reports</em> 13:18977</li>
+<li><strong>Year:</strong> 2023</li>
+<li><strong>DOI:</strong> 10.1038/s41598-023-46368-6</li>
+<li><strong>Document type:</strong> Methods and software application
+article</li>
+<li><strong>Source file:</strong>
+<code>Rahimi et al 2023.pdf</code></li>
+</ul>
+<h2 id="objective">Objective</h2>
+<p>The paper provides relatively simple SAS and R implementations for
+three selection-index methods:</p>
+<ol type="1">
+<li>optimum or Smith-Hazel-type index,</li>
+<li>base index, and</li>
+<li>Pešek-Baker desired-gain index.</li>
+</ol>
+<p>The codes calculate index coefficients, candidate scores, expected
+gain, and several criteria for comparing alternative indices and
+economic-weight definitions. The intended audience is plant and animal
+breeders who have trait measurements and variance-covariance matrices
+but do not use specialised selection-index software.</p>
+<h2 id="index-formulations">Index formulations</h2>
+<h3 id="optimum-index">Optimum index</h3>
+<p>The linear index is</p>
+<p>[ I=_i b_iX_i, ]</p>
+<p>with coefficients</p>
+<p>[ =^{-1}, ]</p>
+<p>where () is the phenotypic variance-covariance matrix, () is the
+genetic variance-covariance matrix, and () is the vector of economic
+values.</p>
+<p>This formulation seeks the linear combination of phenotypic criteria
+that is maximally correlated with the aggregate breeding objective
+(H=’).</p>
+<h3 id="base-index">Base index</h3>
+<p>The base index uses the economic values directly as coefficients:</p>
+<p>[ I=_i a_iX_i, =. ]</p>
+<p>It does not require estimates of () and (). The method is simpler but
+does not adjust coefficients for differences in variance, reliability,
+or correlation among traits.</p>
+<h3 id="pešek-baker-index">Pešek-Baker index</h3>
+<p>The paper implements the desired-gain form as</p>
+<p>[ =^{-1}, ]</p>
+<p>where () is a vector of desired genetic gains. In the example, () was
+set equal to the genetic standard deviation of each trait, although the
+code allows the user to enter another desired-gain vector.</p>
+<h2 id="evaluation-criteria">Evaluation criteria</h2>
+<p>The codes calculate several diagnostics:</p>
+<ul>
+<li><strong>(R_{HI}):</strong> correlation between index and aggregate
+breeding value;</li>
+<li><strong>(H):</strong> expected gain in aggregate merit;</li>
+<li>**(_j):** expected response for each trait;</li>
+<li><strong>RE:</strong> relative efficiency compared with direct
+selection for the main trait, grain yield in the example; and</li>
+<li><strong>(CV_I):</strong> phenotypic coefficient of variation of the
+index.</li>
+</ul>
+<p>The use of multiple criteria is valuable because an index may rank
+candidates consistently but still produce poor response for the primary
+trait or an undesirable correlated change.</p>
+<h2 id="input-and-implementation">Input and implementation</h2>
+<p>The software uses four main inputs:</p>
+<ul>
+<li><strong>X:</strong> phenotype matrix, candidates by traits;</li>
+<li><strong>P:</strong> phenotypic variance-covariance matrix;</li>
+<li><strong>G:</strong> genotypic variance-covariance matrix; and</li>
+<li><strong>a:</strong> economic-value vectors.</li>
+</ul>
+<p>The SAS implementation uses PROC IML, while the R version reads the
+inputs from files and writes results to multiple Excel sheets.
+Parameters such as number of genotypes, number of traits, selection
+intensity, main-trait variance, heritability, and main-trait position
+must be specified.</p>
+<p>The paper assumes a selection intensity of 10%, corresponding to a
+standardised selection differential of approximately 1.76 in the worked
+example.</p>
+<h2 id="worked-maize-example">Worked maize example</h2>
+<p>The example used 28 maize inbred lines evaluated for seven traits in
+a randomised complete block design with three replications. The traits
+were:</p>
+<ul>
+<li>plant height,</li>
+<li>number of grains,</li>
+<li>number of rows,</li>
+<li>row length,</li>
+<li>leaf length,</li>
+<li>100-grain weight, and</li>
+<li>yield.</li>
+</ul>
+<p>Three economic-weight schemes were compared for the optimum and base
+indices:</p>
+<ol type="1">
+<li>equal weights of 1;</li>
+<li>correlations of each trait with yield; and</li>
+<li>standardised coefficients from stepwise regression on yield.</li>
+</ol>
+<p>The Pešek-Baker desired gains were the square roots of the diagonal
+elements of the genetic covariance matrix.</p>
+<h2 id="reported-index-equations">Reported index equations</h2>
+<p>For equal economic weights, the paper reports:</p>
+<p>[
+I_{opt}=0.963x_1+2.150x_2+1.119x_3-3.851x_4+1.610x_5+0.976x_6-1.411x_7,
+]</p>
+<p>[ I_{base}=x_1+x_2+x_3+x_4+x_5+x_6+x_7, ]</p>
+<p>and</p>
+<p>[
+I_{PB}=0.011x_1+5.249x_2+0.552x_3-3.951x_4+3.547x_5+0.063x_6-9.757x_7.
+]</p>
+<p>These equations are dataset specific and should not be transferred to
+another population.</p>
+<h2 id="main-numerical-results">Main numerical results</h2>
+<p>Under equal weights:</p>
+<table>
+<thead>
+<tr class="header">
+<th>Index</th>
+<th style="text-align: right;">(R_{HI})</th>
+<th style="text-align: right;">(H)</th>
+<th style="text-align: right;">RE</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Optimum</td>
+<td style="text-align: right;">0.9887</td>
+<td style="text-align: right;">125.7762</td>
+<td style="text-align: right;">0.5504</td>
+</tr>
+<tr class="even">
+<td>Base</td>
+<td style="text-align: right;">0.9885</td>
+<td style="text-align: right;">128.6944</td>
+<td style="text-align: right;">0.5555</td>
+</tr>
+<tr class="odd">
+<td>Pešek-Baker</td>
+<td style="text-align: right;">0.0018</td>
+<td style="text-align: right;">9.2231</td>
+<td style="text-align: right;">0.1986</td>
+</tr>
+</tbody>
+</table>
+<p>The optimum and base indices were almost identical in candidate
+ranking. Their score correlation was 0.99979. Correlations of the
+Pešek-Baker scores with the base and optimum indices were only
+approximately 0.315 and 0.325.</p>
+<p>The top five candidates differed accordingly. The optimum index
+selected genotypes 2, 4, 19, 22, and 6, whereas the base index selected
+1, 4, 19, 22, and 6. The Pešek-Baker index selected a substantially
+different group: 3, 17, 8, 16, and 13.</p>
+<p>The base index with regression coefficients as economic weights had
+the strongest values for several comparison criteria and was identified
+by the authors as the preferred index for this dataset.</p>
+<h2 id="interpretation-of-relative-efficiency">Interpretation of
+relative efficiency</h2>
+<p>All RE values were below 1. Therefore, none of the multi-trait
+indices produced a larger expected response for grain yield alone than
+direct selection for yield. This is not a failure of an index if the
+purpose is simultaneous improvement of several traits, but it is an
+important result. A multi-trait index trades some direct yield response
+for changes in other components of aggregate merit.</p>
+<p>The article’s conclusion that the base index was preferable applies
+to the selected objective and data. It should not be interpreted as a
+general superiority of the base index over the optimum index.</p>
+<h2 id="strengths">Strengths</h2>
+<ul>
+<li>Provides transparent R and SAS code rather than a black-box
+application.</li>
+<li>Accepts any number of candidates and traits.</li>
+<li>Compares several economic-weight strategies.</li>
+<li>Produces per-trait response and aggregate diagnostics.</li>
+<li>Includes a complete worked example.</li>
+<li>Stores R outputs in structured Excel sheets.</li>
+</ul>
+<h2 id="limitations-and-cautions">Limitations and cautions</h2>
+<ul>
+<li>The empirical demonstration is limited to 28 maize lines and seven
+traits.</li>
+<li>Broad-sense genotypic variance is used in parts of the analysis,
+whereas response to selection in a recurrent breeding program is
+primarily determined by transmissible additive effects.</li>
+<li>Correlations and stepwise-regression coefficients are statistical
+weights, not necessarily economic values or product-profile
+utilities.</li>
+<li>Stepwise regression can be unstable under collinearity and small
+sample size.</li>
+<li>The near equality of base and optimum indices is specific to this
+covariance structure and weight vector.</li>
+<li>Expected gains were not validated in progeny or a subsequent
+cycle.</li>
+<li>The very low (R_{HI}) for the implemented Pešek-Baker example
+suggests that the chosen desired-gain vector was poorly aligned with the
+defined aggregate objective.</li>
+<li>Input matrices must be positive definite and consistently ordered;
+the paper gives limited discussion of numerical diagnostics when
+inversion is unstable.</li>
+</ul>
+<h2 id="practical-use">Practical use</h2>
+<p>The code is useful for teaching, prototyping, and comparing
+alternative objectives. A robust operational application should:</p>
+<ol type="1">
+<li>estimate additive genetic and residual covariance matrices with an
+appropriate mixed model;</li>
+<li>verify matrix ordering and conditioning;</li>
+<li>define economic values or desired gains from a target product
+profile;</li>
+<li>standardise traits when units differ substantially;</li>
+<li>evaluate per-trait response and aggregate response;</li>
+<li>test sensitivity to alternative weights; and</li>
+<li>validate the selected index prospectively.</li>
+</ol>
+<p>The main contribution is accessibility. The paper enables breeders to
+calculate and compare selection indices in R or SAS with familiar
+tabular inputs.</p>
+</body>
+</html>

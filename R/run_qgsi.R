@@ -40,7 +40,11 @@
 #'   favourable. Their GEBVs are multiplied by -1. `linear_weights` and `W`
 #'   must describe this favourable-direction trait space.
 #' @param center_traits Whether to centre GEBVs using reference means. The QGSI
-#'   theory assumes zero-mean GEBVs, so `TRUE` is the default.
+#'   theory assumes zero-mean GEBVs, so `TRUE` is the default. When this is
+#'   `FALSE` and `Gamma` is estimated internally, the scores use uncentred
+#'   GEBVs while the estimated `Gamma` is a centred covariance; the reported
+#'   theoretical parameters then describe a different index from the one that
+#'   produced `ranked_geno`, and a warning is issued.
 #' @param scale_traits Whether to divide GEBVs by reference standard deviations.
 #'   Supplied weights must refer to the resulting scale.
 #' @param missing_policy Explicit missing-value policy.
@@ -62,6 +66,28 @@
 #'   16 of Ceron-Rojas et al. (2026); `observed_selection_differential` instead
 #'   reports the selected candidates' GEBV shift and is not labelled realised
 #'   genetic gain.
+#'
+#' @section Changes in 0.3.1:
+#' Two reported quantities were corrected. Argument names, result element
+#' names, and column names are unchanged, and the superseded quantities are
+#' still returned under new names.
+#'
+#' \itemize{
+#'   \item `expected_gain_per_trait$Expected_Genetic_Gain` now divides
+#'     \eqn{\Gamma w} by the total index standard deviation
+#'     \eqn{\sqrt{w^\mathsf{T}\Gamma w + 2\operatorname{tr}(W\Gamma W\Gamma)}}.
+#'     Earlier releases divided by \eqn{\sqrt{w^\mathsf{T}\Gamma w}}, the
+#'     purely linear index standard deviation, which inflated every gain when
+#'     `W` was non-zero. The previous values are returned as
+#'     `Expected_Genetic_Gain_LinearSD`.
+#'   \item `theoretical_parameters$squared_index_merit_correlation` now uses
+#'     the general \eqn{\operatorname{Cov}(H, I)^2 /
+#'     (\operatorname{Var}(I)\operatorname{Var}(H))}. Earlier releases returned
+#'     \eqn{\operatorname{Var}(I)/\operatorname{Var}(H)}, which equals the
+#'     squared correlation only when the index is the MSPE-optimal predictor
+#'     of net merit. That ratio is retained as
+#'     `variance_ratio_index_to_merit`.
+#' }
 #'
 #' @references
 #' Ceron-Rojas JJ, Montesinos-Lopez OA, Montesinos-Lopez A, et al. (2026).
@@ -164,6 +190,35 @@ run_qgsi <- function(
     W, trait_cols, "W", symmetry_tolerance
   )
 
+  # Economic weights applied to unstandardised genomic estimated breeding
+  # values are multiplied by the trait scale, so a trait with a large standard
+  # deviation dominates the index whatever weight it was given. The effect is
+  # severe enough to reverse the direction of response in a smaller-variance
+  # trait, so it is reported whenever the scales differ materially.
+  if (!isTRUE(scale_traits) && length(trait_cols) > 1L) {
+    candidate_sd <- apply(X, 2L, stats::sd)
+    candidate_sd <- candidate_sd[is.finite(candidate_sd) & candidate_sd > 0]
+    if (length(candidate_sd) > 1L &&
+        max(candidate_sd) / min(candidate_sd) > 5) {
+      contribution <- abs(weights) * apply(X, 2L, stats::sd)
+      share <- contribution / sum(contribution)
+      dominant <- which.max(share)
+      warning(
+        sprintf(
+          paste(
+            "Trait standard deviations differ by a factor of %.0f and",
+            "scale_traits = FALSE, so '%s' carries %.0f%% of the linear index",
+            "despite its stated weight. Standardise the GEBVs, or express the",
+            "weights per genetic standard deviation."
+          ),
+          max(candidate_sd) / min(candidate_sd),
+          trait_cols[dominant], 100 * share[dominant]
+        ),
+        call. = FALSE
+      )
+    }
+  }
+
   transform <- diag(
     prepared$direction / prepared$scale,
     nrow = length(trait_cols)
@@ -171,6 +226,18 @@ run_qgsi <- function(
   dimnames(transform) <- list(trait_cols, trait_cols)
 
   if (is.null(Gamma)) {
+    if (!isTRUE(center_traits)) {
+      warning(
+        paste(
+          "center_traits = FALSE: candidate scores use uncentred GEBVs, but",
+          "the estimated Gamma is always a centred covariance. The reported",
+          "model index mean, variances, and expected gains therefore describe",
+          "a centred index and not the scores in ranked_geno. Supply Gamma",
+          "explicitly, or use center_traits = TRUE, to make them consistent."
+        ),
+        call. = FALSE
+      )
+    }
     gamma_fit <- .dgr_qg_estimate_gamma(
       X = Xref,
       ids = prepared$reference_ids,
@@ -313,6 +380,7 @@ run_qgsi <- function(
     ),
     theoretical_parameters = theory$parameters,
     expected_gain_per_trait = theory$expected_gain_per_trait,
+    expected_gain_basis = theory$expected_gain_basis,
     observed_selection_differential = observed_differential,
     linear_contributions = linear_contributions,
     quadratic_contributions = quadratic_contributions,
@@ -590,22 +658,40 @@ run_qgsi <- function(
   index_variance <- linear_variance + quadratic_variance
   index_mean <- .dgr_qg_trace(W %*% Gamma)
 
+  index_sd <- sqrt(index_variance)
   expected_response <- if (is.finite(selection_intensity)) {
-    selection_intensity * sqrt(index_variance)
+    selection_intensity * index_sd
   } else {
     NA_real_
   }
+
+  # Regression of breeding value on the index. Under multivariate normal
+  # gamma the third central moments vanish, so
+  #   Cov(gamma, I) = Cov(gamma, w'gamma) + Cov(gamma, gamma'W gamma)
+  #                 = Gamma %*% w + 0,
+  # and the per-trait response is i * Cov(gamma, I) / sd(I). The divisor is
+  # the TOTAL index standard deviation, which includes the quadratic
+  # variance component 2 tr(W Gamma W Gamma). Releases up to 0.3.0 divided by
+  # sqrt(w' Gamma w) alone, which is the purely linear (LGSI) index standard
+  # deviation; that inflated every gain whenever W was non-zero. The legacy
+  # quantity is still returned as Expected_Genetic_Gain_LinearSD.
   expected_gain <- rep(NA_real_, length(trait_cols))
-  if (is.finite(selection_intensity) && linear_variance > 0) {
+  legacy_expected_gain <- rep(NA_real_, length(trait_cols))
+  if (is.finite(selection_intensity) && index_variance > 0) {
     expected_gain <- as.numeric(
-      selection_intensity * Gamma %*% weights /
-        sqrt(linear_variance)
+      selection_intensity * Gamma %*% weights / index_sd
+    )
+  }
+  if (is.finite(selection_intensity) && linear_variance > 0) {
+    legacy_expected_gain <- as.numeric(
+      selection_intensity * Gamma %*% weights / sqrt(linear_variance)
     )
   }
 
   merit_variance <- NA_real_
   merit_index_covariance <- NA_real_
   accuracy_squared <- NA_real_
+  variance_ratio <- NA_real_
   mspe <- NA_real_
   accuracy_available <- !is.null(true_G)
   if (accuracy_available) {
@@ -619,10 +705,26 @@ run_qgsi <- function(
     if (abs(mspe) <= 1e-10 * max(1, merit_variance, index_variance)) {
       mspe <- 0
     }
+    # General definition: rho^2 = Cov(H, I)^2 / (Var(I) Var(H)). Releases up
+    # to 0.3.0 returned Var(I) / Var(H), which coincides with rho^2 only when
+    # I is the MSPE-optimal predictor of H (Cov(H, I) = Var(I)). run_qgsi()
+    # accepts arbitrary user weights, so that identity does not hold in
+    # general. The former quantity is retained as variance_ratio_index_to_merit
+    # and the optimality gap is reported alongside it.
     if (merit_variance > 0) {
-      accuracy_squared <- index_variance / merit_variance
+      variance_ratio <- index_variance / merit_variance
+    }
+    if (merit_variance > 0 && index_variance > 0) {
+      accuracy_squared <- merit_index_covariance^2 /
+        (index_variance * merit_variance)
     }
   }
+
+  expected_gain_basis <- paste(
+    "Ceron-Rojas et al. (2026), Supplementary Equation 16;",
+    "linear regression of breeding value on the index,",
+    "divided by the total index standard deviation."
+  )
 
   list(
     parameters = list(
@@ -636,6 +738,7 @@ run_qgsi <- function(
       true_merit_variance = merit_variance,
       merit_index_covariance = merit_index_covariance,
       squared_index_merit_correlation = accuracy_squared,
+      variance_ratio_index_to_merit = variance_ratio,
       mean_squared_prediction_error = mspe,
       accuracy_and_mspe_available = accuracy_available,
       assumptions = c(
@@ -645,8 +748,22 @@ run_qgsi <- function(
           "Normal-selection response uses the reported selection intensity;",
           "it is a model-based expectation."
         ),
+        paste(
+          "Expected per-trait gains divide Gamma %*% w by the total index",
+          "standard deviation, which includes the quadratic variance."
+        ),
+        paste(
+          "Per-trait gains are a linear-regression approximation. The index",
+          "is a quadratic form and therefore not normally distributed, so the",
+          "normal-theory selection differential is inexact and the residual",
+          "error grows with the curvature in W."
+        ),
         if (accuracy_available) {
-          "Accuracy and MSPE use the supplied true_G."
+          paste(
+            "squared_index_merit_correlation is the general",
+            "Cov(H, I)^2 / (Var(I) Var(H)); variance_ratio_index_to_merit is",
+            "Var(I) / Var(H), which equals it only for the MSPE-optimal index."
+          )
         } else {
           paste(
             "Accuracy and MSPE are not reported because true_G was not",
@@ -655,14 +772,19 @@ run_qgsi <- function(
         }
       )
     ),
-    expected_gain_per_trait = data.table::data.table(
-      Trait = trait_cols,
-      Expected_Genetic_Gain = expected_gain,
-      Basis = paste(
-        "Ceron-Rojas et al. (2026), Supplementary Equation 16;",
-        "linear regression of breeding value on the index"
+    # The basis is one sentence about the whole table, so it is carried as an
+    # attribute and as a separate element rather than repeated on every row,
+    # where it would swamp the printed output.
+    expected_gain_per_trait = local({
+      gains <- data.table::data.table(
+        Trait = trait_cols,
+        Expected_Genetic_Gain = expected_gain,
+        Expected_Genetic_Gain_LinearSD = legacy_expected_gain
       )
-    )
+      data.table::setattr(gains, "basis", expected_gain_basis)
+      gains
+    }),
+    expected_gain_basis = expected_gain_basis
   )
 }
 

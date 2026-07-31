@@ -1,0 +1,1213 @@
+                                                                                                                          TYPE Review
+                                                                                                                          PUBLISHED 10 February 2025
+                                                                                                                          DOI 10.3389/fpls.2025.1495662
+
+
+
+
+                                                    Optimizing the selection of
+OPEN ACCESS                                         quantitative traits in plant
+EDITED BY
+Valerio Hoyos-Villegas,
+McGill University, Canada
+                                                    breeding using simulation
+REVIEWED BY
+Ram Kumar Basnet,
+                                                    Rafael Augusto Vieira 1*, Ana Paula Oliveira Nogueira 2
+Rijk Zwaan, Netherlands                             and Roberto Fritsche-Neto 3
+Zitong Li,
+Commonwealth Scientiﬁc and Industrial               1
+                                                      Department of Research & Development, Crop Science - Breeding, Uberlândia, Brazil, 2 Institute of
+Research Organization (CSIRO), Australia            Biotechnology, Graduate Program in Genetics & Biochemistry and Graduate Program in Agronomy,
+                                                    Federal University of Uberlândia, Uberlândia, Brazil, 3 Department of Plant, Environmental and Soil
+*CORRESPONDENCE
+                                                    Sciences, Louisiana State University, Baton Rouge, LA, United States
+Rafael Augusto Vieira
+   rafael.vieira2@ufu.br
+
+RECEIVED 13 September 2024
+ACCEPTED 17 January 2025
+                                                    This review summarizes ﬁndings from simulation studies on quantitative traits in
+PUBLISHED 10 February 2025                          plant breeding and translates these insights into practical schemes. As agricultural
+CITATION                                            productivity faces growing challenges, plant breeding is central to addressing these
+Vieira RA, Nogueira APO and                         issues. Simulations use mathematical models to replicate biological conditions,
+Fritsche-Neto R (2025) Optimizing
+                                                    bridging theory and practice by validating hypotheses early and optimizing genetic
+the selection of quantitative traits
+in plant breeding using simulation.                 gain and resource use. While strategies can improve trait value, they reduce
+Front. Plant Sci. 16:1495662.                       genetic diversity, making a combination of approaches essential. Studies
+doi: 10.3389/fpls.2025.1495662
+                                                    emphasize the importance of aligning strategy with trait heritability and selection
+COPYRIGHT
+                                                    timing and maintaining genetic diversity while considering genotype-environment
+© 2025 Vieira, Nogueira and Fritsche-Neto.
+This is an open-access article distributed under    interactions to avoid biases in early selection. Using markers accelerates breeding
+the terms of the Creative Commons Attribution       cycles when marker placement is precise, foreground and background selection
+License (CC BY). The use, distribution or
+reproduction in other forums is permitted,          are balanced, and QTL are effectively managed. Genomic selection increases
+provided the original author(s) and the             genetic gains by shortening breeding cycles and improving parent selection,
+copyright owner(s) are credited and that the
+                                                    especially for low heritability traits and complex genetic architectures. Regular
+original publication in this journal is cited, in
+accordance with accepted academic                   updates of training sets are critical, regardless of genetic architecture. Bayesian
+practice. No use, distribution or reproduction      methods perform well with fewer genes and in early breeding cycles, while BLUP is
+is permitted which does not comply with
+these terms.
+                                                    more robust for traits with many QTL, and RR-BLUP proves ﬂexible across different
+                                                    conditions. Larger populations lead to greater gains when clear objectives and
+                                                    adequate germplasm are available. Accuracy declines over generations, inﬂuenced
+                                                    by genetic architecture and population size. For low heritability traits, multi-trait
+                                                    analysis improves accuracy, especially when correlated with high heritability traits.
+                                                    Updates including top-performing candidates, but conserving variability enhances
+                                                    gains and accuracy. Low-density genotyping and imputation offer cost-effective
+                                                    alternatives to high-density genotyping, achieving comparable results. Targeting
+                                                    populations optimizes genetic relationships, further improving accuracy and
+                                                    breeding outcomes. Evaluating genomic selection reveals a balance between
+                                                    short-term gains and long-term potential and rapid-cycling genomic programs
+                                                    excel. Diverse approaches preserve rare alleles, achieve signiﬁcant gains, and
+                                                    maintain diversity, highlighting the trade-offs in optimizing breeding success.
+
+
+
+
+                                                    KEYWORDS
+
+                                                    genetic gain, genetic diversity, simulation, genomic selection, prediction accuracy,
+                                                    selection response, breeding methods, breeding optimization
+
+
+
+
+Frontiers in Plant Science                                                01                                                                frontiersin.org
+
+Vieira et al.                                                                                                                10.3389/fpls.2025.1495662
+
+
+
+
+1 Introduction                                                                  diverse environments, breeders must test numerous candidates
+                                                                                either through multi-year, multi-location phenotypic trials or by
+     Global agriculture faces a convergence of critical challenges,             genotyping to estimate breeding values. However, many agronomic
+including food and fuel crises, climate ﬂuctuations, and a range of             traits are complex, inﬂuenced by multiple quantitative trait loci
+biotic and abiotic stresses. These factors collectively threaten crop           (QTL), and t heir expressi on is heavily imp acted by
+yields, creating signiﬁcant risks to food security and agricultural             environmental factors.
+sustainability. Addressing these challenges requires innovative                      Genomic estimated breeding values (GEBVs) and genomic
+strategies that consider the complex interactions between genetic,              selection offer new opportunities to increase breeding efﬁciency.
+environmental, and economic factors. By deepening our                           GEBVs combine genomic and phenotypic data to predict an
+understanding and management of these stresses, we can develop                  individual’s genetic merit for speciﬁc traits. In genomic selection,
+resilient agricultural systems capable of withstanding the pressures            candidates are genotyped to obtain GEBVs, bypassing the need for
+of modern crop production.                                                      phenotyping. GEBVs are derived from a prediction equation based
+     The growing population and urgent demand for food security                 on the genetic proximity of candidates to a training population,
+necessitate signiﬁcant increases in both yield potential and crop               which has been both genotyped and phenotyped.
+quality, nutritional composition of agricultural products. This                      Genomic predictions rely on accurate estimates of genomic
+challenge is compounded by shifting consumption patterns and                    relationships. Implementing genomic selection begins with creating
+climate variability that further strain agricultural productivity. The          a training population that provides phenotypic data for target traits
+need for advancements in crop productivity and resilience is                    and genome-wide DNA marker genotypes (Meuwissen et al., 2001).
+indispensable and can be met, in part, by developing crop                       The genotype and phenotype data develop a prediction equation
+varieties and hybrids that thrive in different climatic conditions              that ﬁts each marker’s effect on the trait. When markers are in
+without sacriﬁcing yield. By harnessing genetic diversity and                   sufﬁcient linkage disequilibrium with causal variations of the trait,
+employing innovative techniques, plant breeding plays an                        they capture a signiﬁcant proportion of the associated genetic
+important role in this effort.                                                  variance, allowing the prediction of GEBVs without phenotype
+     The evolution of plant breeding, from early domestication to               collection. Many breeding programs today incorporate genomic
+modern precision breeding, showcases the synergy of scientiﬁc                   data into various phases, improving selection accuracy, shortening
+inquiry, technological progress, and agricultural practice. By                  breeding cycles, and accelerating early-generation selection (Hickey
+integrating cutting-edge techniques—such as marker-assisted                     et al., 2014).
+selection, genomic selection, selection indexes, gene editing, artiﬁcial             Several strategies integrate genomic selection into breeding
+intelligence, process automation, data analytics, epigenomics,                  programs. For example, rapid-cycle recurrent genomic selection
+phenomics, enviromics, and biotechnology—plant breeding has                     promises signiﬁcant increases in genetic gains (Santantonio et al.,
+transformed into a precise science. It is now a powerful engine for             2020). Combining genomic selection with speed breeding can
+innovation, driving the development of high-performing crop varieties           further reduce breeding cycle time. Genome editing introduces
+and addressing evolving agricultural challenges.                                new variations, while marker-assisted selection and transgenic
+                                                                                methods enhance breeding efﬁciency. Nonetheless, effective plant
+                                                                                improvement requires balancing genetic gain with time and cost
+                                                                                (Hickey et al., 2014). Whether employing phenotypic, genomic, or
+2 Plant breeding strategies                                                     combined selection approaches, optimizing strategies is crucial to
+and objectives                                                                  maximizing genetic gain while managing costs and
+                                                                                operational efﬁciency.
+     Plant breeding is a continuous process focused on improving                     Improving multiple traits simultaneously is a key challenge in
+genetic traits through systematic selection and crossbreeding. A                plant breeding, as the product’s value often depends on interrelated
+modern plant breeding program typically involves: (ii) selecting                traits. Trait selection methods include tandem selection, which
+individuals with desirable traits for crossbreeding; (i) employing              sequentially improves traits across generations, and independent
+methods to achieve homozygosity, either fully or partially; and (iii)           culling, which rejects individuals failing predeﬁned standards for
+utilizing recurrent selection to recycle high-merit individuals while           any trait. A widely used approach is multi-trait selection through a
+evaluating them in ﬁeld trials. This dual strategy ensures the                  selection index. With genomic selection, multi-trait analysis
+development of new cultivars with improved yield, performance,                  enhances breeding accuracy, especially for low heritability traits
+disease resistance, and quality while continuously improving the                linked to high heritability ones (Hayashi and Iwata, 2013).
+genetic foundation of the breeding population.                                       Assuming clear breeding objectives, rigorous selection criteria, a
+     The simplest selection method is based on phenotypic values,               diverse pool of germplasm, and well-deﬁned target environments,
+but relying solely on ﬁeld trials to estimate breeding values is risky,         the efﬁcacy of a breeding program predominantly depends on the
+as they may not fully represent the target environment. In this                 efﬁcient utilization of available resources to respond to selection,
+context, since the breeding value determines an individual’s genetic            also known as genetic gain. Optimizing either genomic or
+contribution to future generations, effective selection depends on              phenotypic selection approaches within breeding pipelines is
+how well phenotype can represent breeding values. To select                     crucial. Substantial genetic progress requires considering several
+superior genotypes with high agronomic performance across                       factors, including the number of breeding cycles, population size,
+
+
+Frontiers in Plant Science                                                 02                                                            frontiersin.org
+
+Vieira et al.                                                                                                            10.3389/fpls.2025.1495662
+
+
+
+
+parent selection, genomic prediction accuracy, genetic diversity,           genotype-by-environment interactions, inheritance, and gene
+and cost management.                                                        effects. By validating hypotheses prior to real-world testing,
+                                                                            simulations streamline transitions from phenotypic to marker-
+                                                                            assisted and genomic selection.
+3 Simulations and their role in
+plant breeding
+                                                                            3.2 Limitations and advantages
+3.1 Deﬁnition and applications
+                                                                                One limitation of breeding scheme simulations is the potential
+    In plant breeding and genetics, simulations use mathematical            for random error, reﬂecting real-life processes like meiosis and
+models to replicate biological conditions and investigate speciﬁc           genotype evaluation, where simulations often introduce random
+problems (Figure 1). These models are either deterministic or               deviations from the genotypic value (Jannink et al., 2024). These
+stochastic (Covarrubias-Pazaran et al., 2022). Deterministic                simulations can also be computationally intensive. Genomic
+models rely on equations from quantitative genetics to predict              predictions require large-scale linear mixed models, which are
+selection responses using parameters like selection intensity,              time-consuming for both real and simulated data. Incorporating
+heritability, and accuracy. However, they have limitations in               training data from previous selection cycles is possible, but
+accounting for breeding processes such as crossing, generation              computing limitations may arise when dealing with large datasets
+advancement, and genetic introgression. Stochastic simulations,             (Ramasubramanian and Beavis, 2021).
+on the other hand, generate genotypic and phenotypic data for                   Simulation accuracies often exceed real-world conditions due to
+each genetic entity, making them more applicable to breeding stages         factors like error-free molecular markers, absence of epistasis, and
+like recombination, evaluation, and selection.                              limited germplasm exchange (Gaynor et al., 2017). Therefore,
+    Simulations bridge theory and practice by computationally               careful interpretation is necessary when applying simulation
+modeling breeding strategies to optimize genetic gain, minimize             results to practical breeding. Real-world breeding programs also
+genetic variance loss, and ensure resource efﬁciency. They compare          account for multiple traits—such as agronomic performance,
+strategies like phenotypic, marker-assisted, and genomic selection          disease resistance, and end-use quality—adding complexity to
+over various timeframes, incorporating early- and late-stage                simulations, which must represent multi-trait selection accurately.
+processes. Simulations also identify optimal selection factors, such            Despite these challenges, simulations offer signiﬁcant
+as intensity, parental lines, and family sizes, while considering           advantages. They allow the exploration of various scenarios,
+                                                                            genetic models, and methods, helping identify efﬁcient paths to
+                                                                            target cultivars (Li et al., 2012). This is particularly important in
+                                                                            genomic selection, where balancing resources, program size, and
+                                                                            genetic gain is critical. Simulations provide insights into factors
+                                                                            affecting genetic gain, prediction accuracy, and cost-effectiveness
+                                                                            under different conditions (Hickey et al., 2014; Gorjanc et al., 2018).
+                                                                                While ﬁeld trials are essential, they provide only a snapshot of
+                                                                            outcomes, and random effects may distort results (Li et al., 2012).
+                                                                            Simulations, with multiple replications, offer more reliable
+                                                                            probabilistic assessments and can test a range of input parameters
+                                                                            to evaluate their impact on selection efﬁciency. They also account
+                                                                            for multistage selection and inbreeding rates (Hassanpour
+                                                                            et al., 2023).
+                                                                                Modern simulation is characterized by the capacity to model
+                                                                            meiotic processes, including crossing over and crossover
+                                                                            interference, through coalescent and gene-drop methods, which
+                                                                            are employed in backward-in-time and forward-in-time
+                                                                            simulations (Hickey and Gorjanc, 2012). The coalescent method
+                                                                            generates whole-chromosome founder haplotypes with linkage
+                                                                            disequilibrium and allele frequency that align with a speciﬁed
+                                                                            population genetic model (Hickey and Gorjanc, 2012).
+                                                                            Conversely, the gene-drop method simulates the creation of new
+                                                                            haplotypes from original founder haplotypes by modeling genetic
+                                                                            recombination during meiosis. This process is guided by a genetic
+    FIGURE 1                                                                map and incorporates the gamma model, which accounts for
+    Diagram of simulation models in plant breeding, illustrating how
+    mathematical models replicate biological conditions to bridge
+                                                                            crossover interference (Hickey and Gorjanc, 2012).
+    theoretical concepts with practical breeding applications.                  Overall, simulations have become crucial in plant breeding,
+                                                                            enabling the evaluation of genetic gain and comparison of breeding
+
+
+Frontiers in Plant Science                                             03                                                            frontiersin.org
+
+Vieira et al.                                                                                                                10.3389/fpls.2025.1495662
+
+
+
+
+strategies by incorporating gene information, crossing schemes,                     Building on this, Allier et al. (2020) advanced the understanding
+population size, and selection intensity. This helps optimize                   of pre-breeding strategies by investigating the integration of new
+breeding parameters to maximize gains, while efﬁciently                         germplasm into elite lines using genomic selection and optimal
+allocating resources (Li et al., 2012; Hickey et al., 2014; Gorjanc             cross-selection in simulations. Their study introduced donors with
+et al., 2018). Simulations also aid in gene mapping, validating new             various performance levels, showing that recurrent introductions of
+methods, and assessing factors like marker density and QTL                      improved donors could maintain genetic diversity and enhance
+heritability (Li et al., 2012).Translating breeding strategies into             both mid- and long-term performance. Considering a bridging step
+digital schemes requires abstraction to represent biological and                resulted signiﬁcantly higher mid- and long-term genetic gain even
+operational processes while addressing programming limitations.                 when introducing low performing donors. Further, direct
+Breeding involves iterative cycles of selection, crossing, and                  introductions of donors with a large performance gap compared
+evaluation, which must be encoded into simulations. Challenges                  to elite germplasm did not generate gains. For donors with an
+include balancing computational efﬁciency with biological realism,              intermediate performance gap, both direct introductions and
+handling large datasets, and modeling diverse genetic architectures.            bridging steps provided increased long-term gains. Additionally, a
+Simulations often assume idealized conditions—error-free markers,               genomic selection model trained on both bridging and breeding
+no genotype-environment interactions, or perfect linkage maps—                  progeny improved prediction accuracy within introduction
+which may not align with real-world complexities. Interpreting                  families. This suggests that excessive selection for performance
+results requires critical evaluation of these assumptions. Practical            during the bridging phase might favor the elite genome, limiting
+integration involves validating insights with ﬁeld data,                        the incorporation of new favorable alleles, as noted by Gorjanc
+incorporating feedback loops, and reﬁning models to align                       et al. (2016).
+predictions with real-world outcomes. Simulated genetic gain                        Cowling et al. (2017), Villiers et al. (2024), and Platten and
+represents a theoretical maximum, often reduced by attrition                    Fritsche-Neto (2023) highlight the complex balance required
+during practical implementation.                                                between genetic diversity, selection intensity, and long-term
+                                                                                genetic gains. Cowling et al. demonstrated the advantages of
+                                                                                optimal contribution selection (OCS) over truncation selection,
+                                                                                with OCS yielding higher index values and maintaining lower
+4 Diversity, background recovery, pre-                                          coancestry across various population sizes and selection pressures.
+breeding and bridging to                                                        Villiers et al., building on the importance of genetic diversity
+elite germplasm                                                                 underscored by Cowling et al., introduced optimal haplotype
+                                                                                stacking (OHS) as a superior strategy for preserving diversity
+    A simulated study by Fu (2015) assessed how selection impacts               while achieving genetic gains. Their results, particularly in small
+genetic diversity, conﬁrming that plant breeding can reduce                     populations, revealed that even a single OHS cycle could
+diversity as expected. Although artiﬁcial selection enhanced the                outperform OCS and truncation selection in long-term outcomes,
+genetic value of targeted traits, it also decreased genetic diversity           emphasizing its potential as a complement to other methods.
+and heterozygosity. The breeding schemes studied showed similar                     Platten and Fritsche-Neto (2023) further nuanced this
+effects, either preserving or accelerating diversity loss, with half-sib        discussion by focusing on strategies to integrate new genetic
+mating proving the most effective for achieving higher genetic gains            material into breeding programs. Their ﬁndings showed that
+while minimizing reductions in diversity. The trends in trait                   while introducing fewer parents (e.g., 10 rather than 20)
+improvement and diversity loss were consistent for progeny sizes                minimized penalties and enhanced ﬁxation efﬁciency, genetic
+of 20 and 50, offering important insights for managing these factors.           diversity and background recovery remained critical factors. This
+    Gorjanc et al. (2016) investigated different strategies and genetic         aligns with Villiers et al.’s emphasis on diversity preservation and
+parameters for initiating pre-breeding programs with selected                   Cowling et al.’s observation of plateauing gains under traditional
+landrace populations for integration into elite maize breeding                  truncation selection. Notably, Platten and Fritsche-Neto’s
+programs. Their results indicated that starting pre-breeding with               recommendation to prioritize GEBV-based selection parallels the
+landraces could signiﬁcantly inﬂuence genetic merit. Higher genetic             targeted approaches of OCS and OHS, highlighting how tailored
+merit was found when the founding population had low diversity,                 strategies optimize genetic outcomes under different constraints.
+high within-landrace diversity, or substantial heritability (h² =               Together, these studies illustrate the trade-offs inherent in balancing
+0.50). Although testcross initiation provided the highest genetic               genetic diversity, selection efﬁciency, and long-term genetic
+merit, it mainly reconstructed the elite genome and did not                     progress. While Cowling et al. advocate for OCS in avoiding
+incorporate the desired traits from landraces. The authors                      diversity erosion over extended cycles, Villiers et al. demonstrate
+recommended random mating between initial landrace × elite                      how OHS can bolster diversity and gains in the short term, even
+individuals across several generations to recombine genetic                     when combined with truncation selection. Meanwhile, Platten and
+segments and break their linkage. Krenzer et al. (2024)                         Fritsche-Neto emphasize the necessity of strategic parent selection
+emphasized the importance of simulation-designed pre-breeding                   to achieve rapid ﬁxation of desirable traits. In conclusion, balancing
+crossing schemes for maintaining genetic variation and ensuring                 genetic gain and diversity remains a critical challenge in plant
+long-term success before implementing general combining ability-                breeding. Strategies like optimal contribution selection and optimal
+based selection in hybrid breeding programs.                                    haplotype stacking show potential to address this issue. Integrating
+
+
+Frontiers in Plant Science                                                 04                                                            frontiersin.org
+
+Vieira et al.                                                                                                                    10.3389/fpls.2025.1495662
+
+
+
+
+landraces or other germplasm donors with good performance can                     importance of maintaining genetic diversity and considering
+improve long-term gains, but careful planning is necessary.                       genotype-environment interactions to avoid biases in early
+Ultimately, combining strategic selection approaches is crucial for               phenotypic selection. These ﬁndings were based on simulated
+optimizing breeding outcomes while maintaining genetic                            data and predate the adoption of marker-assisted and genomic
+variability, as simplistic methods are inadequate for navigating                  selection techniques.
+this complex process.                                                                  Building on this, Wang et al. (2003) compared two prevalent
+    The ﬁndings from this section are illustrated in Figure 2.                    breeding strategies—modiﬁed pedigree selection and selected bulk
+                                                                                  selection—using genetic models that accounted for epistasis,
+                                                                                  pleiotropy, and genotype-environment interactions. Their
+5 Phenotypic selection and classical                                              simulations indicated that bulk selection achieved a 3.3% higher
+methods, including gene effects                                                   genetic gain than modiﬁed pedigree selection, required one-third
+                                                                                  less land, and produced 60% fewer families, highlighting its superior
+     Casali and Tigchelaar (1975) conducted pioneering simulations                efﬁciency. The study emphasized that selected bulk selection not
+to investigate breeding methods, focusing on single seed descent                  only resulted in marginally higher genetic gains but also offered
+(SSD) combined with pedigree and mass selection. Their research                   signiﬁcant cost-effectiveness advantages, which is crucial for
+found that SSD, whether used alone or with mass selection, better                 modern commercial breeding programs.
+preserved genetic variability for line selection in the F6 generation.                 In a subsequent study, Wang et al. (2004) examined the impact
+Pedigree and mass selection were effective for high heritability traits           of partial dominance in wheat and found that it had minimal effect
+in early generations (F2 and F3), while SSD and F6 selection                      on genetic advancement compared to pure additive models. The
+maximized genetic gain for low heritability traits. Their work                    partial dominance effects were small and difﬁcult to detect through
+demonstrated that early generations are effective for traits with                 covariance across various mating schemes, suggesting limited
+medium or high heritability, while traits with low heritability beneﬁt            applicability in inbred breeding. These observations may be
+from later selection. These ﬁndings laid the groundwork for modern                speciﬁc to wheat or reﬂect limitations in the simulations’ ability
+breeding practices.                                                               to capture such gene effects. Additionally, Wang et al. (2007)
+     Complementary, Van Oeveren and Stam (1992) examined                          compared three marker selection schemes for integrating nine
+breeding strategies for self-pollinating crops using simulations.                 genes into a single genotype and recommended a top cross
+They compared early selection, which estimates cross means and                    scheme. This approach, involving equal selection intensity at
+variances in the F3 generation and selects lines based on these                   three stages (top cross F1, top cross F2, and doubled haploid),
+estimates, with SSD, which delays selection until the F6 generation.              minimized the total number of lines needed to achieve the
+SSD performed comparably to early selection with more crosses and                 breeding objective.
+outperformed early selection at low heritability due to early                          Continuing the focus on maximizing selection response and
+prediction inaccuracies. Differences between early selection and                  genetic gain, Bernardo (2003) analyzed the impact of parental
+SSD decreased when traits were inﬂuenced by many loci. SSD was                    selection, the number of breeding populations, and population
+less effective with fewer than 100 F2 plants, and the number of                   size on optimal breeding strategies. Using computer simulations
+segregating loci had a signiﬁcant impact on selection outcomes.                   with 2,000 recombinant inbreds for a quantitative trait controlled
+     These studies underline a critical principle in plant breeding: the          by 100 additive loci with varying heritabilities, Bernardo found that
+choice of breeding strategy should be matched to trait heritability               the highest selection responses were achieved by maximizing the
+and selection timing. Early selection methods are advantageous for                number of breeding populations. The ability to identify high-
+traits with high heritability, while SSD is more effective for traits             performing breeding populations before making crosses was more
+with low heritability when selection is delayed. They highlight the               critical than balancing the number of populations and their size.
+
+
+
+
+    FIGURE 2
+    Flowchart depicting the application of simulation-derived strategies for managing genetic diversity, pre-breeding processes, and transitioning from
+    theoretical models to elite germplasm.
+
+
+
+
+Frontiers in Plant Science                                                   05                                                               frontiersin.org
+
+Vieira et al.                                                                                                              10.3389/fpls.2025.1495662
+
+
+
+
+    As emphasized by Bernardo, successful breeding depends on                 crossing and selection methods. This approach is particularly useful
+strategic parental selection before establishing breeding                     for preserving or enhancing the adaptation of recurrent parents
+populations. A widely accepted recommendation is to use                       while transferring most of the desired donor genes. However,
+genetically divergent yet superior parents to broaden the genetic             repeated backcrossing may not be necessary if molecular markers
+base and enhance target traits.                                               can identify the transferred genes, especially when donor parents
+    Covarrubias-Pazaran et al. (2022) simulated various parent                exhibit poor adaptation. The study identiﬁed three conditions
+combinations to provide practical recommendations for breeding                under which single backcrossing with bulk selection until F6 is
+programs. Their model, designed for cassava but applicable to other           highly effective: (1) when traits being transferred are controlled by
+crops, found that overlapping cohorts for recycling—using a mixed             multiple genes, (2) when donor parents have genes that can
+crossing block with parents from both preliminary and advanced                improve adaptation in recipient parents, and (3) when
+yield trials—consistently led to higher genetic gains. However, the           conventional phenotypic selection is used, or individual genotypes
+number of parents used was critical; using more than 30 parents               cannot be easily identiﬁed. These insights are valuable for
+reduced genetic gain compared to fewer. For 60 years, involving 16            introgressing elite germplasm in rapid-cycle breeding programs,
+to 32 parents proved most effective, with more crosses generally              enhancing both efﬁciency and outcomes.
+enhancing genetic gains. Within a 20-year timeframe, fewer crosses                 Continuing on this topic, backcrossing is used to introduce
+with more progeny per cross yielded higher gains, with an optimal             traits or genes into important crops, such as corn. This process
+setup being 8–16 parents, 24 crosses, and approximately 68                    includes four stages: single-event introgression, event pyramiding,
+progenies per cross annually. Over 60 years, the optimal                      trait ﬁxation, and version testing. The goal is to ensure that at least
+conﬁguration was 16–32 parents, 60 crosses, and around 30                     one version of the ﬁnal product performs as well as the original. Sun
+progeny per cross. The study recommended using 15–30 parents                  and Mumm (2015) investigated two critical aspects of this process
+recycled from both preliminary and advanced yield trials, with 40             through simulations: (i) the impact of residual donor germplasm
+crosses and 40 progenies per year, a strategy that could be adapted           (non-recurrent parent) in the converted germplasm and (ii) the
+to other crops.                                                               effect of creating multiple versions for each parental line conversion.
+    Supporting these ﬁndings, Lanzl et al. (2023) demonstrated                Their research found that a residual donor germplasm range of
+through simulations that mating designs producing large biparental            about 5-8% of the genome was associated with a high success rate in
+families from few disjoint crosses risk generating progenies with             conversion. Additionally, the success rate increased with the
+strong covariances between QTL pairs on different chromosomes.                number of versions produced, with 3-5 versions providing the
+Their research revealed that a single recombination round                     best outcomes. These ﬁndings offer practical insights for market-
+effectively disrupts both positive and negative covariances                   assisted backcrossing in other crops, emphasizing the importance of
+between QTL pairs, providing practical insight for optimizing                 managing residual donor germplasm and generating multiple
+breeding programs.                                                            versions during germplasm conversion for speciﬁc traits.
+    In summary, optimizing genetic gain in breeding programs                       The ﬁndings from this section are illustrated in Figure 3.
+involves strategic parental selection and careful management of
+breeding populations. Using overlapping cohorts for recycling,
+along with an optimal number of parents and crosses, can                      6 Marker-assisted selection methods
+signiﬁcantly enhance genetic gain. Identifying high-performing                and QTL studies
+breeding populations prior to initiating crosses is essential.
+Additionally, the optimal number of parental lines involved in                    In the early development of marker-assisted selection (MAS),
+breeding crosses varies depending on the breeding timeframe.                  simulations were primary utilized to assess its feasibility as either a
+Speciﬁcally, a larger number of parents is beneﬁcial for achieving            complement or replacement for conventional breeding methods.
+long-term genetic gains, whereas fewer parents are recommendable              The secondary goal was to optimize MAS integration into breeding
+for attaining higher short-term, immediate gains. These strategies,           strategies for both allogamous and autogamous crops.
+validated through simulations, apply to both phenotypic and                       Simulation studies by Edwards and Page (1994) and Van Berloo
+genomic approaches, improving breeding efﬁciency across                       and Stam (2001) assessed the effectiveness of MAS compared to
+various crops.                                                                phenotypic selection. They investigated various genetic structures,
+    Backcross is a common method in plant breeding for                        parental populations, and crop species with different reproductive
+transferring speciﬁc traits from one genetic entity to another                systems. At this point in history, when researchers assessed the
+while retaining desirable characteristics of the original line.               potential of applying MAS to quantitative traits, studies found that
+Another common approach in developing breeding crosses                        while MAS led to rapid initial gains, these improvements
+involves emphasizing the importance of one parent over the                    diminished signiﬁcantly after three to ﬁve cycles. MAS was
+other. In this method, the F1 generation is backcrossed with the              particularly effective in utilizing genetic diversity in more
+superior parent to enhance its desirable traits, either to recover the        heterozygous populations, outperforming phenotypic selection.
+parental genetic background or directly derive recombinant lines              However, its effectiveness was limited by linkage disequilibrium
+for the development of new cultivars.                                         between markers and QTL, being effective for traits controlled by
+    Wang et al. (2009) used computer simulations to show that                 fewer QTL, such as disease resistance and growth habits in
+single backcrossing with a selected bulk is more effective than other         autogamous plants, but not yield.
+
+
+
+Frontiers in Plant Science                                               06                                                            frontiersin.org
+
+Vieira et al.                                                                                                                    10.3389/fpls.2025.1495662
+
+
+
+
+    FIGURE 3
+    Flowchart demonstrating practical insights for phenotypic selection and traditional breeding methods, as informed by simulation studies. It outlines
+    how these methods can be optimized to balance trait selection and genetic diversity.
+
+
+
+
+     Despite these limitations, MAS at that time offered notable                  MAS and the advantages of molecular markers depend on genetic
+advantages, including the ability to perform two selection cycles per             parameters and the selection strategy used. They emphasized that
+year for faster initial improvements, with conventional methods                   large population sizes can enhance the detection of additive genetic
+potentially taking over in later stages (Edwards and Page, 1994).                 variance through marker associations, accelerating quantitative
+MAS also provided more accurate predictions of superior parental                  trait improvement.
+combinations for multiple traits compared to phenotypic selection                      Deﬁning practical population sizes is essential for cost-effective
+(Van Berloo and Stam, 2001). Thus, while MAS generally                            breeding. Ooijen (1992) investigated the use of adjacent marker
+outperformed phenotypic selection, its initial gains highlighted                  pairs to improve QTL linkage information within speciﬁc
+the value of integrating MAS with traditional breeding methods                    chromosomal segments. The study demonstrated that with 200
+to maximize genetic potential.                                                    backcross or F2 individuals, there is a high probability of identifying
+     Hospital et al. (1997) further explored MAS through                          QTL accounting for at least 5% of the total variance. Although QTL
+simulations and found that its response at low heritability levels                with larger genetic effects are mapped more precisely, challenges
+was more variable compared to phenotypic selection. Nonetheless,                  remain for traits controlled by multiple minor effect genes. Ooijen
+MAS’s efﬁciency increased with larger population sizes, even for low              concluded that QTL mapping accuracy is inﬂuenced by trait
+heritability traits. MAS was effective in ﬁxing QTL with large effects            heritability, gene number, interactions, and marker distribution.
+in early generations. However, while ﬁxing QTL alleles with small                 To enhance QTL effect estimation, he recommended increasing
+effects, the advantage was offset by a higher ﬁxation rate of                     sample sizes and testing environments.
+unfavorable background alleles or an increased likelihood of                           Bernardo and Charcosset (2006) argued that targeting QTL
+linkage drag, making MAS less efﬁcient than phenotypic selection                  with large effects is more beneﬁcial than including those with
+over time. MAS operates by targeting favorable alleles linked to                  smaller effects. Their ﬁndings indicated that marker-assisted
+speciﬁc markers, independent of a trait’s heritability (h²).                      recurrent selection programs are most effective when focusing on
+Nevertheless, heritability indirectly affects the efﬁcacy of MAS, as              traits controlled by a moderately large number of QTL,
+it reﬂects the proportion of phenotypic variation explained by                    approximately 40. For traits governed by fewer genes, having
+genetic factors. Traits with high h² facilitate more precise marker-              more genetic information correlates with a higher selection
+trait associations, enhancing the reliability of selection, whereas               response. In contrast, for traits inﬂuenced by 40 or 100 genes,
+traits with low h² may experience reduced accuracy due to a                       including all genes in the selection model results in a lower selection
+stronger inﬂuence of environment. Consequently, while MAS is                      response (Bernardo and Charcosset, 2006). Although these
+not directly contingent on h², the strength of the genetic signal                 conclusions are now considered intuitive, they were signiﬁcant in
+remains a determinant of its success.                                             shaping subsequent research and practical MAS applications in
+     Overall, these studies emphasize MAS’s substantial initial                   plant breeding.
+beneﬁts in plant breeding, particularly in capturing genetic                           Gimelfarb and Lande (1994) conﬁrmed that using genetic
+diversity and facilitating rapid gains in early selection cycles. MAS             markers can effectively utilize linkage disequilibrium between
+is especially effective in more heterozygous populations and for                  markers and QTL generated by crossing inbred lines. They
+speciﬁc traits such as disease resistance. However, the reliance on               cautioned that merely increasing the number of markers does not
+linkage disequilibrium between markers and QTL presents                           necessarily improve selection efﬁciency. Instead, the population size
+challenges, limiting MAS’s effectiveness for complex traits like yield.           under selection was identiﬁed as a more critical factor for MAS
+     In managing and optimizing marker-assisted selection (MAS),                  efﬁciency, aligning with Lande and Thompson’s ﬁndings (1990).
+Lande and Thompson (1990) highlighted that the effectiveness of                   Darvasi and Soller (1997) further reﬁned molecular marker spacing
+
+
+
+Frontiers in Plant Science                                                   07                                                                frontiersin.org
+
+Vieira et al.                                                                                                               10.3389/fpls.2025.1495662
+
+
+
+
+in backcross and F2 linkage experiments through simulations,                   combined with background selection in BC3. Speciﬁcally, a
+providing formulas for calculating the optimal number of markers               population size of 10 in BC1 and BC2, and 100 in BC3, can
+based on factors like population size, and allele substitution effects,        reduce the donor genome to below 5%, which is often desirable.
+and explained variance. Their recommendations offered practical                Peng et al. (2014) recommended a selection scheme involving ﬁve
+guidance for MAS strategy design.                                              generations of MAS for integrating up to 15 transgenic events. This
+    In autogamous crops, MAS has been shown to improve                         involves selecting for the event of interest in BC1 through BC3 with
+selection outcomes for obtaining superior genotypes compared to                a population size of 600, and for both the event and recurrent parent
+traditional methods (Van Berloo and Stam, 1998). This aligns with              germplasm in BC4 and BC5 with a population size of 400, using a
+earlier ﬁndings suggesting MAS can outperform phenotypic                       selection intensity of 1% for all generations.
+selection techniques. Van Berloo and Stam highlighted the                          These ﬁndings are summarized in Figure 4. The integration of
+advantages of MAS when dominant alleles at QTL are linked in a                 MAS has signiﬁcantly enhanced the efﬁciency of backcross breeding
+coupling phase—where loci on the same chromosome are co-                       programs, particularly for allele introgression and background
+inherited more frequently. However, the beneﬁts were moderated                 optimization. Strategic marker use can expedite breeding cycles,
+by uncertainties in QTL map positions, underscoring the need for               improving genetic gains and product delivery. Key aspects include
+precise QTL mapping. Charmet et al. (1999) further supported this              precise marker positioning, balancing foreground and background
+by ﬁnding that precise QTL location signiﬁcantly impacts selection             selection, and managing the number of QTL. Effective background
+when using inbred line parents to maximize favorable allele                    selection in early generations and controlling QTL numbers are
+accumulation. Fine-tuning QTL following initial identiﬁcation                  essential for maximizing efﬁciency. Additionally, optimizing
+remains crucial in modern crop breeding.
+    Marker-assisted selection (MAS) offers improved accuracy in
+parental selection and potentially quicker breeding cycles but tends
+to be less efﬁcient over time, particularly as the risk of ﬁxing
+unfavorable alleles increases in later generations. These
+observations suggest that MAS should complement traditional
+breeding methods to maximize genetic potential and ensure long-
+term improvement. Kuchel et al. (2005) investigated integrating
+restricted backcrossing and doubled haploid (DH) techniques in
+MAS breeding strategies. They found that applying MAS at all three
+stages of breeding was effective for achieving high frequencies of
+desired outcomes and combining favorable traits. However, they
+identiﬁed that applying MAS at two speciﬁc stages (BC1F1 and
+haploid) was optimal. This approach increased genetic gain
+compared to phenotypic selection and reduced overall costs by 40%.
+    A prevalent application of MAS is optimizing backcross phases
+in breeding programs. Early simulations were crucial in reﬁning this
+method. Viicher et al. (1996) demonstrated that genetic markers
+were effective for introgressing speciﬁc alleles and selecting the
+desired background in backcross populations derived from inbred
+lines. Their simulations showed that markers spaced 10–20 cM
+apart could shorten the breeding process by one to two generations
+compared to random or phenotypic selection methods. This time
+reduction is essential for achieving genetic gain and delivering
+products efﬁciently.
+    Hospital and Charcosset (1997) found that for generations 1 to
+3, background selection on both carrier and non-carrier
+chromosomes with equal weights is optimal. Selection for
+recipient parent marker alleles should include both carrier and
+non-carrier chromosomes. They indicated that manipulating no
+more than four QTL simultaneously is advisable, requiring
+approximately 1600 individuals to achieve a target genotype with
+99% conﬁdence, though using a pyramidal design can reduce this
+number to 580.
+    Ribaut et al. (2002) similarly demonstrated that the selection
+                                                                                  FIGURE 4
+response in BC1 is signiﬁcantly enhanced when the selectable                      Flowchart showcasing marker-assisted selection and QTL
+population size is fewer than 50, with diminishing returns above                  management strategies derived from simulation research.
+100. Efﬁcient selection is achieved by targeting loci in BC1 and BC2
+
+
+Frontiers in Plant Science                                                08                                                                frontiersin.org
+
+Vieira et al.                                                                                                                 10.3389/fpls.2025.1495662
+
+
+
+
+selectable population sizes underscores the strategic role of MAS in             sustainable genetic gains. These insights are summarized
+achieving targeted genetic outcomes.                                             in Figure 5.
+     As noted, the scarcity of marker-assisted selection (MAS)                       Two key simulation-based studies established the framework for
+methods and QTL studies in the literature over the past decade                   genomic selection before the term was widely recognized (Bernardo,
+reﬂects the substantial evolution in breeding technologies. This shift           1999; Meuwissen et al., 2001). Meuwissen et al. (2001) established the
+is largely attributed to the emergence of genomic selection (GS).                foundational principles of genomic selection. Their simulations used
+                                                                                 approximately 50,000 marker haplotypes derived from a limited
+                                                                                 number of phenotypic records within a simulated genome of 1000
+7 Genomic selection                                                              cM, with markers spaced at 1 cM intervals. They found that predicting
+                                                                                 genetic values from markers could signiﬁcantly accelerate genetic gain,
+   Emerging from the limitations of marker-assisted selection                    especially when combined with reproductive techniques to shorten
+(MAS), genomic selection has become the foundational                             generation intervals. Their research also demonstrated that genomic
+methodology in modern plant breeding. Since its introduction,                    selection could overcome the limitations of traditional MAS, such as
+computer simulations have been essential in demonstrating and                    its restricted variance capture, overestimated QTL effects, and
+optimizing genomic selection to achieve greater and more                         discrepancies between mapping and breeding populations.
+
+
+
+
+    FIGURE 5
+    Flowchart illustrating practical schemes for implementing genomic selection, based on insights from simulation studies.
+
+
+
+
+Frontiers in Plant Science                                                  09                                                            frontiersin.org
+
+Vieira et al.                                                                                                                  10.3389/fpls.2025.1495662
+
+
+
+
+7.1 Evaluating genomic selection versus                                            and genotyping capabilities. Silva et al. (2021) observed that
+phenotypic and marker-assisted selection                                           the number of families and their sizes signiﬁcantly impact
+                                                                                   genetic gains over 50 and 100 breeding cycles. More families
+     The synthesis of ﬁndings across various studies highlights the                contribute to increased long-term genetic gains, while larger
+superior performance of genomic selection compared to traditional                  population sizes are associated with enhanced short-term
+phenotypic selection and MAS. Although genomic selection                           gains. Despite these constraints, genomic selection generally
+accelerates the depletion of genetic diversity, it consistently yields             offers more advantages. Even when genomic and phenotypic
+higher genetic gains per unit of time due to reduced breeding cycle                selection yields similar genetic gains, the ability of genomic
+durations and improved accuracy in parent selection. This                          selection to bypass phenotyping costs often makes it preferable
+advantage is particularly notable under conditions of low trait                    (Lin et al., 2023).
+heritability and complex genetic architectures. Regular updates to                     However, some simulation studies suggest that phenotypic
+training sets are essential to maintain the effectiveness of genomic               selection can outperform marker-based selection strategies,
+selection, regardless of genetic architecture (Muleta et al., 2019; Lin            particularly under epistatic genetic models and reduced genotype-
+et al., 2023). The integration of doubled haploid populations and                  by-environment interaction (Ali et al., 2020; Peixoto et al., 2023).
+high-throughput phenotyping further enhances the efﬁciency and                     Muleta et al. (2019) found that in oligogenic architectures—where a
+stability of genomic selection, establishing it as a crucial tool in               few genes with large effects control the trait—the number of
+modern breeding programs. Despite its beneﬁts, genomic selection                   genomic selection cycles affected short-term genetic gains. Their
+accelerates the depletion of genetic variance compared to                          results indicated that while more cycles of genomic selection were
+phenotypic selection.                                                              beneﬁcial for maximizing genetic gain, phenotypic selection
+     Bernardo (1999) bridges the gap between MAS and genomic                       achieved higher long-term gains before the ﬁfth breeding cycle.
+selection. He assessed the predictive accuracy of breeding values                  Phenotypic selection also maintained greater genetic variance
+derived from phenotype data alone versus a combination of                          during early selection years, while prediction accuracy for traits
+phenotype and markers. His ﬁndings showed that both methods                        with oligogenic architecture declined more rapidly than for traits
+were similarly effective in predicting untested single crosses, across a           with polygenic architecture (Muleta et al., 2019).
+range of 10 to 100 QTL and trait heritabilities of 0.4 or 0.6. Bernardo                Addressing the enhancement of multiple traits simultaneously
+and Yu (2007) further demonstrated that genomic selection                          in plant breeding requires a comprehensive approach. The genomic
+provided a 6 to 43% greater response compared to marker-                           selection index—a linear combination of genomic estimated
+assisted recurrent selection, with this effect being more                          breeding values leveraging genomic markers to predict net genetic
+pronounced with a higher number of QTL and lower heritability.                     merit and select parents from a non-phenotyped population—has
+     Simulation studies consistently show that genomic selection                   proven effective in delivering greater genetic gains per unit of time
+outperforms phenotypic selection for traits with low heritability and              compared to approaches based solely on phenotypic data (Ceron-
+polygenic architecture, such as yield, regardless of population sizes              Rojas et al., 2015).
+or selection cycles (Gaynor et al., 2017; Muleta et al., 2019; Ali et al.,             Gaynor et al. (2017) utilized simulations to propose a two-part
+2020; Silva et al., 2021; Lubanga et al., 2022; Chiaravallotti et al.,             genomic selection program comprising: (i) a recycling component for
+2023; Fritsche-Neto et al., 2024). This advantage is particularly                  rapid population improvement, and (ii) a product development
+evident in early selection cycles, with genomic selection reaching a               component for generating commercial products and updating
+performance plateau after fewer cycles (Gaynor et al., 2017; Muleta                genomic models. Their study showed that this scheme more than
+et al., 2019; Ali et al., 2020; Tessema et al., 2020; Lubanga et al., 2022;        doubled genetic gain compared to conventional breeding programs
+Chiaravallotti et al., 2023; Fritsche-Neto et al., 2024).                          due to shorter breeding cycles. Similarly, Sabadin et al. (2022) and
+     As expected, genomic selection leads to a more signiﬁcant                     Fritsche-Neto et al. (2024) reported that genomic selection achieved
+reduction in genetic diversity compared to phenotypic selection                    genetic gains 0.5 to 6 times higher than phenotypic selection,
+(Gaynor et al., 2017; Muleta et al., 2019; Tessema et al., 2020; Silva             attributed to reduced breeding cycle duration and enhanced
+et al., 2021; Sabadin et al., 2022). This reduction is inﬂuenced by                selection accuracy. Tessema et al. (2020) and Li et al. (2022) reached
+factors such as population size and genetic architecture but can be                similar conclusions, emphasizing that shorter breeding cycles were key
+mitigated by retaining a larger number of individuals for future                   to the improved effectiveness of genomic selection.
+generations and incorporating new breeding materials from outside                      Breeding strategies utilizing genomic selection also
+the program. Lin et al. (2023) found that parental populations of 15               demonstrated more stable genetic gains despite genotype-by-
+exhibited the highest allele ﬁxation, particularly when combined                   environment interactions, whereas traditional programs showed
+with single-seed descent and speed breeding. Larger population                     greater variability in genetic gains (Gaynor et al., 2017; Peixoto
+sizes can enhance selection intensity while preserving genetic                     et al., 2023). This stability arises from using genomic predictions
+variance, leading to signiﬁcant genetic gains and reduced                          that incorporate multi-year historical data and markers designed to
+depletion of genetic variance (Muleta et al., 2019; Silva et al.,                  minimize genotype-by-environment interaction effects, ensuring
+2021; Fritsche-Neto et al., 2024).                                                 optimal cohort selection (Bernal-Vasquez et al., 2022).
+     In practical breeding applications, the size of breeding                      Conventional programs, in contrast, rely on phenotypic data from
+populations is often constrained by limitations in phenotyping                     a limited number of years. Bernal-Vasquez et al. (2022) showed that
+
+
+
+
+Frontiers in Plant Science                                                    10                                                           frontiersin.org
+
+Vieira et al.                                                                                                              10.3389/fpls.2025.1495662
+
+
+
+
+employing a kinship matrix to model breeding values over multiple               7.2 Evaluating different models in breeding
+years, even with single-year data, improved the outcomes in                     value estimation
+breeding programs.
+    Gaynor et al. (2017) also highlighted that applying genomic                      Best Linear Unbiased Prediction (BLUP) is fundamental in
+selection at the head-row or progeny stage enhances parent                      genomic selection, each offering unique advantages in optimizing
+selection accuracy, crucial for successful breeding. Sabadin et al.             prediction accuracy across complex genetic architectures. BLUP,
+(2022) demonstrated that applying genomic selection to F2 and                   utilized within mixed linear models, seeks to minimize bias by
+evaluating F4 families phenotypically resulted in higher genetic                accounting for both ﬁxed and random effects. On the other hand,
+gains compared to other methods, including exclusive phenotypic                 Bayesian methods integrate prior knowledge with observed data,
+selection and rapid cycling from parental selection in F2. They                 allowing for continual reﬁnement of probability estimates to
+also found that preserving a larger number of individuals (48-                  address uncertainty.
+parent scenario) helped reduce genetic variance depletion and                        Meuwissen et al. (2001) provided early insights into these
+allowed for long-term genetic gains. Lin et al. (2023) supported                methods, demonstrating that while BLUP achieved a prediction
+these ﬁndings, noting that postponing line derivation to later                  accuracy of 0.73, Bayesian approaches, particularly those
+generations is advantageous for traits with low heritability,                   incorporating marker haplotypes, improved accuracy to 0.85. This
+offering a product development perspective. Silva et al. (2021)                 early evidence underscored Bayesian methods’ potential to enhance
+suggested that parental selection at the F4 stage is often treated as           genomic selection performance.
+an early recycling generation due to limited and less reliable                       Subsequent research has shown comparable performance
+phenotypic data.                                                                between BLUP-based methods (e.g., gBLUP, RR-BLUP) and
+    In summary, these authors advocate for the strategic use of                 Bayesian methods (e.g., BayesB, LASSO), with minor differences
+genomic selection, emphasizing later-stage parental selection, for              in accuracy and genetic gains across various models (Technow et al.,
+example, F4 generation (Gaynor et al., 2017; Silva et al., 2021;                2012; Wang et al., 2015; Yao et al., 2018; Silva et al., 2021;
+Sabadin et al., 2022; Lin et al., 2023). Their research highlights the          Ferná ndez-Gonzá lez et al., 2023). Bayesian approaches,
+beneﬁts of this approach in terms of precision and long-term                    particularly BayesB and Bayesian LASSO, have demonstrated
+genetic gains while preserving a larger genetic pool. They argue                superior accuracy and genetic gains in models accounting for
+that later-stage selection provides more stable gains and maintains             dominance effects, especially when traits are inﬂuenced by fewer
+genetic diversity better than early-stage selection.                            genes (Technow et al., 2012; Wang et al., 2018). BayesB, in
+    In contrast, Li et al. (2022) found that selecting parents early in         particular, is noted for its effectiveness in capturing genetic gains
+the breeding cycle, at stages such as F1 or F2, yielded substantially           and accelerating outcomes in early breeding cycles
+higher genetic gains compared to selection at later stages. They                (Ramasubramanian and Beavis, 2021).
+emphasize that earlier-stage genomic selection can yield higher                      Certain BLUP variants, such as sBLUP (Super BLUP) and
+immediate genetic gains, despite the moderate prediction accuracy.              cBLUP (Compressed BLUP), demonstrate distinct advantages
+This result aligns with Peixoto et al. (2023) corroborated this by              depending on the heritability of the traits. When compared to
+showing that early parental recycling, whether based on genomic or              Bayesian LASSO and gBLUP in prediction accuracy, sBLUP
+phenotypic selection, produced greater and faster genetic gains                 outperformed these methods for Mendelian (simple) traits,
+compared to scenarios where parental selection occurred after test              whereas cBLUP proved more effective for traits with low
+cross-evaluation.                                                               heritability. In the cBLUP method, particularly for traits with low
+    In summary, the synthesis of simulation studies emphasizes the              heritability, grouping individuals based on kinship and maximum
+advantage of selecting parents for recycling as early as possible while         likelihood (clustering) proved advantageous for estimating breeding
+considering selective accuracy and trait-related breeding value                 values. This approach outperformed other well-known methods,
+estimates. Breeding programs equipped with high-throughput                      likely due to replacing individual kinship with group kinship, which
+phenotyping, extensive genotyping, or other advanced methods                    enhances estimation accuracy and mitigates the challenges
+can beneﬁt from rapid-cycling strategies to maximize genetic                    associated with low heritability. However, it does not offer similar
+gain. However, it is crucial to set speciﬁc accuracy or heritability            beneﬁts under conditions of high heritability. In another study, RR-
+targets for selecting parents to effectively address the complexities of        BLUP (Ridge Regression BLUP) demonstrated a slight advantage
+breeding, such as speciﬁc objectives, available genetic diversity, and          over other methods for traits inﬂuenced by numerous minor genes,
+the balance between short-term and long-term gains.                             making it a viable alternative (Wang et al., 2015).
+    For crops utilizing doubled haploids, rapid cycling within the                   Best Linear Unbiased Prediction (BLUP) is extensively applied
+population improvement component of two-stage breeding                          in the estimation of breeding values, renowned for its simplicity and
+programs is particularly advantageous for managing                              robustness in managing large populations with polygenic traits—
+heterozygosity and advancing generations efﬁciently. In crops                   characterized by the cumulative inﬂuence of numerous genes with
+where doubled haploid techniques are unavailable, it may be                     small effects. A notable strength of BLUP is its capacity to minimize
+necessary to incorporate an additional stage with phenotypic                    bias by simultaneously accounting for ﬁxed and random effects,
+assessments before yield testing to eliminate poorly segregating                thereby delivering consistent predictions across varying scenarios.
+individuals and expedite the advancement of promising ones.                     Speciﬁc adaptations, such as cBLUP, exhibit heightened efﬁciency
+
+
+
+
+Frontiers in Plant Science                                                 11                                                          frontiersin.org
+
+Vieira et al.                                                                                                             10.3389/fpls.2025.1495662
+
+
+
+
+when applied to traits with high heritability. However, BLUP is not           cycles (Ramasubramanian and Beavis, 2021). Conversely, traits with
+without limitations. The method encounters challenges in                      more complex genetic architectures, such as those involving 4,289
+accommodating complex genetic architectures, particularly those               QTL, can sustain selection responses for up to 30 to 40 cycles before
+involving signiﬁcant dominance effects, and exhibits reduced                  encountering limitations (Ramasubramanian and Beavis, 2021). In
+accuracy for traits with low heritability. In such cases, alternative         this context, the numerous QTLs frequently exhibit signiﬁcant
+approaches, such as Bayesian methods, often outperform BLUP.                  interactions with the environment, ultimately reducing the
+Furthermore, its reliance on additive genetic models restricts its            heritability of the trait.
+adaptability to scenarios involving non-additive genetic interactions              Heritability plays a critical role in determining genetic gain,
+or traits controlled by a small number of major genes.                        with higher heritability leading to greater gains across various
+    Bayesian methods offer an effective alternative for breeding              models and parental selection methods (Yao et al., 2018). Traits
+value estimation, particularly for traits inﬂuenced by a few major            with high heritability demonstrate greater prediction accuracy, as a
+genes or dominance effects, where they often outperform traditional           larger proportion of the phenotypic variation is attributed to genetic
+approaches. Their ﬂexibility allows the integration of prior                  factors, and the corresponding QTL exhibit reduced interaction
+knowledge and adaptation to diverse genetic models. Methods                   with environmental inﬂuences. In such cases, multi-trait analysis
+like BayesB and Bayesian LASSO are especially useful in early                 can improve the accuracy of breeding value predictions for traits
+breeding cycles, capturing genetic gains efﬁciently. However,                 with low heritability, particularly when these traits are correlated
+Bayesian methods are computationally intensive, which can be a                with high-heritability traits, as compared to single-trait analysis
+limitation in large-scale breeding programs, and reliance on prior            (Hayashi and Iwata, 2013). However, simulation studies
+speciﬁcations may introduce bias if not properly deﬁned. While                investigating the advantages of multi-trait analysis remain limited,
+Bayesian methods excel in speciﬁc genetic contexts, BLUP remains              partly constrained by programming capabilities. To improve the
+a reliable tool for polygenic traits with numerous small-effect genes,        accuracy of genomic selection, increasing the number of initial
+ensuring consistent performance in various breeding scenarios.                parents in the breeding cycle can be advantageous (Chiaravallotti
+    In conclusion, the choice between BLUP and Bayesian methods               et al., 2023). Modeling marker effects as population-speciﬁc is
+should be driven by the genetic architecture, population size, and            beneﬁcial under low linkage disequilibrium and enhances
+speciﬁc breeding objectives. Bayesian methods, such as BayesB, are            prediction accuracy at lower marker densities (Technow et al.,
+particularly beneﬁcial for traits with fewer genes and in early               2012). Additionally, incorporating dominance effects into models
+breeding cycles. In contrast, BLUP methods are robust for traits              can substantially improve prediction accuracy, particularly for
+with extensive QTL. RR-BLUP stands out for its ﬂexibility and                 populations with convergent parentage (Technow et al., 2012).
+consistent performance across diverse conditions. Thus, no single             The effectiveness of genomic selection in introgressing large QTL
+model excels universally, emphasizing the need for tailored                   is inﬂuenced by the trait’s genetic architecture, breeding strategy,
+approaches based on the breeding program’s speciﬁc                            and the number of initial parents, highlighting the complexity
+characteristics and goals.                                                    involved in optimizing genomic selection methods (Chiaravallotti
+                                                                              et al., 2023).
+
+7.3 Analyzing the impact of genetic
+parameters and architectures on gains                                         7.4 Analyzing the impact of different
+                                                                              training set conﬁgurations
+    Increasing the size of breeding populations typically leads to
+greater genetic gains with genomic selection, provided that breeding               The studies highlight the importance of optimizing training
+objectives are well-deﬁned and there is adequate. Extensive research          populations and marker densities in genomic selection to enhance
+has consistently indicated this trend (Lorenz, 2013; Muleta et al.,           prediction accuracy and genetic gain. In general, using lines in the
+2019; Silva et al., 2021). However, it is important to note that the          test set that are closely related to the training population improves
+accuracy of genomic recurrent selection predictions tends to decline          genomic breeding value (GEBV) accuracy by having a close
+over generations. This decline is inﬂuenced by the trait’s genetic            relationship (Hickey et al., 2014; Muleta et al., 2019;
+architecture and population size (Muleta et al., 2019). The                   Ramasubramanian and Beavis, 2021; Sabadin et al., 2022;
+population size can ﬂuctuate due to various breeding operations               Chiaravallotti et al., 2023). When closely related to the test set,
+such as truncation selection, which reduces genetic diversity and             smaller, well-structured training sets with low to mid-density
+narrows the gene pool over generations. Additionally, other                   markers effectively capture genetic information, especially with
+breeding operations, like crossing and inbreeding, may further                high linkage disequilibrium (Gorjanc et al., 2017). Regular
+impact the effective population size and the genetic variability              updates to the training population with top-performing lines
+available for selection. As these factors alter the genetic structure         further boost genetic gain and prediction accuracy.
+of the population, they can lead to reduced accuracy in genomic                    Expanding training and prediction sets with low-density
+predictions, especially when selecting for complex traits with                genotyping and imputation is a cost-effective strategy to improve
+low heritability.                                                             selection responses. Although low-density genotyping may initially
+    For traits with genetic architectures involving 40 or 400 QTL,            reduce prediction accuracy, strategic imputation and training set
+the selection response often plateaus after approximately 10 to 15            updates can counter this, achieving results comparable to high-
+
+
+Frontiers in Plant Science                                               12                                                           frontiersin.org
+
+Vieira et al.                                                                                                               10.3389/fpls.2025.1495662
+
+
+
+
+density genotyping. Targeting relevant populations enhances                    low-density markers were used, indicating diminishing returns with
+genetic relationships between training and prediction sets, leading            increased marker numbers. Imputation with about 20 segregating
+to better prediction accuracy and breeding outcomes.                           markers per chromosome still yielded satisfactory results in
+    Simulation studies indicate that for biparental populations                selection response and prediction accuracy, especially in non-
+closely related to selection candidates, using 200–500 markers and             phenotyped families, where genotyping with 50 low-density
+about 1,000 phenotypes can achieve effective breeding value                    markers achieved a minimum accuracy of 0.3. In contrast, Do
+accuracy (Hickey et al., 2014; Gorjanc et al., 2017). Increasing               Vale et al. (2022) highlighted that increasing marker numbers can
+marker density beyond 10,000 markers provides no additional                    mitigate the decay of linkage disequilibrium (LD) over cycles,
+beneﬁt (Hickey et al., 2014). Phenotyping only a subset of                     potentially improving long-term selection responses. They argued
+doubled haploid (DH) lines is usually sufﬁcient to predict the                 that while low-density marker panels offer beneﬁts such as reduced
+performance of the remaining lines. However, while studying                    multicollinearity, faster computation times, and cost-efﬁciency,
+single biparental population of doubled haploid lines, Lorenz                  high-density panels ultimately provide superior long-term gains,
+(2013) found that including all DH lines in the training set                   especially when the training set is not frequently updated. Their
+signiﬁcantly improves prediction accuracy compared to excluding                analysis suggests that the advantage of marker reduction through
+part of them, suggesting that phenotyping a subset might be less               LD-based strategies is limited to a single cycle, as the accuracy of
+effective. Budget constraints should guide these decisions.                    selection declines signiﬁcantly in subsequent cycles, emphasizing
+    Training sets with full-sibling and half-sibling families generally        the long-term value of high-density genotyping. Ultimately, the
+achieve high prediction accuracy (Melchinger et al., 2023a;                    choice of marker strategy depends on the speciﬁc breeding
+Melchinger and Frisch, 2023b). Including unrelated families is                 objectives, resource constraints, and the need for sustainable
+discouraged due to potential negative impacts on prediction                    improvements across multiple cycles.
+outcomes (Melchinger et al., 2023a; Melchinger and Frisch                          Prediction accuracy is inﬂuenced by population structure, trait
+2023b). To avoid these issues, unrelated families should be                    heritability, training set size, and the precision of genomic
+excluded, and a moderate number of genotypes per family (about                 relationships at QTL regions. Regular updates are crucial for
+50) should be maintained. Training with full-sibling families,                 maintaining effective breeding programs (Hickey et al., 2014;
+compared to half-sibling families, leads to greater selection gains            Cuyabano et al., 2024). Research indicates that prediction
+in hybrid breeding programs, particularly where speciﬁc combining              accuracy typically declines within the ﬁrst two cycles (Fritsche-
+ability (SCA) effects are crucial.                                             Neto et al., 2024) and updating training sets generally enhances
+    There are two main strategies for genotyping: high-density                 accuracy by preserving linkage disequilibrium between markers and
+genotyping, which is accurate but costly, and lower-density                    QTL (Muleta et al., 2019; Ramasubramanian and Beavis, 2021;
+genotyping combined with imputation, which is more cost-                       Sabadin et al., 2022; Chiaravallotti et al., 2023).
+effective yet retains acceptable precision. Gorjanc et al. (2017)                  Trait heritability is a signiﬁcant factor in the loss of prediction
+found that accurate imputation is a cost-effective approach by (i)             accuracy (Muleta et al., 2019; Ramasubramanian and Beavis, 2021).
+reducing genotyping costs per individual for both training and                 Ramasubramanian and Beavis (2021) found that genomic
+prediction sets and (ii) improving prediction accuracy by enlarging            prediction models performed best when updated with data from
+training sets. Using nearly 100 DHs, they reported imputation                  up to 14 selection cycles, with optimal cycles varying by QTL count:
+accuracies of 0.71 across families and 0.42 within families with               10 cycles for 40 QTLs and 30 cycles for 4289 QTLs. Results also
+high-density genotypes. Imputation led to a modest decline across              depended on QTL effect sizes and whether effects were additive or
+families (from 0.71 to 0.66) compared to within families, from 0.42            dominant. Larger training sets, incorporating diverse conditions,
+to 0.34 (Gorjanc et al., 2017), likely due to the substantial genetic          offered more effective guidance for future selection decisions. Their
+diversity represented and its connection to the training set.                  study also revealed that static training sets when using genomic
+Accuracy improved most when imputed genotypes were used for                    selection combined with a chain-rule mating design, can potentially
+both training and prediction sets (Gorjanc et al., 2017). For cross-           capture up to 62% of the greatest genetic potential, even with
+family predictions, accuracy plateaued with marker densities                   advanced methods like RR-REML and Bayesian approaches
+between 100 and 50 low-density markers, while for within-family                (Ramasubramanian and Beavis, 2021). It worth mentioning that
+predictions, the plateau occurred between 200 and 100 low-density              they considered 20 family designed with a common parent in all
+markers (Gorjanc et al., 2017).                                                crosses with 100 F5 lines of family size. Expanding both the training
+    Both modelling for cross-pollinated genomes, Gorjanc et al.                population size and the number of replications improved prediction
+(2017) and Do Vale et al. (2022) offer complementary perspectives              accuracy, with population size being particularly beneﬁcial when
+on the trade-offs between low-density genotyping, imputation, and              genotyping costs were low, or heritability was high. Consistent with
+marker density in breeding programs. Gorjanc et al. demonstrated               Lorenz (2013), phenotyping all doubled haploid (DH) lines resulted
+the effectiveness of expanding training and prediction sets through            in greater genetic gains, making this approach preferable when
+low-density genotyping and imputation, showing that the use of                 feasible. Additionally, dispersing populations across multiple
+low-density genotypes, followed by imputation with as few as ﬁve               environments improved selection outcomes (Lorenz, 2013).
+segregating markers per chromosome, could achieve prediction                       Sabadin et al. (2022) found that integrating top-performing
+accuracy and selection response comparable to high-density                     parental lines from each cycle into long-term breeding schemes—
+genotyping. They found that the response plateaued when 100                    while maintaining genetic diversity to balance allele frequencies and
+
+
+Frontiers in Plant Science                                                13                                                            frontiersin.org
+
+Vieira et al.                                                                                                              10.3389/fpls.2025.1495662
+
+
+
+
+better ﬁt the prediction model—yielded the highest genetic gains.                   Goiffon et al. (2017) found that the Optimal Population Value
+They recommended retaining data from the most recent three                     (OPV) method achieved superior genetic gains over the ﬁrst ten
+generations to optimize genetic relationships between the training             generations compared to other methods. OPV and Genotype Building
+set and the target population. This method, referred as TSGPO, was             (GB) showed better long-term responses than basic genomic selection,
+noted for its ease of implementation and consistent performance.               WGS, and OHV. However, genomic selection and WGS provided
+     Ferná ndez-Gonzá lez et al. (2023) demonstrated that integrating        rapid and signiﬁcant improvements in GEBVs before reaching a
+test set information into the training set—referred to as targeted             plateau by generation 4, proving valuable in speciﬁc contexts.
+optimization—achieved the highest accuracies, particularly for low                  OPV, GB, and OHV were more effective at preserving genetic
+heritability traits like yield. For untargeted optimization approach,          variance within breeding populations over time compared to
+they advised that minimizing the average genetic relationship                  genomic selection or WGS. OPV, which evaluates the genetic
+within the training set as a more reliable strategy than                       merit of selection candidates rather than using truncation
+maximizing the relationship between the training and test sets.                selection, is particularly useful for large, commercially signiﬁcant
+This ﬁnding is particularly noteworthy, as it challenges the widely            cohorts. OPV and OHV also excel at maintaining rare favorable
+accepted assumption that maximizing the relationship between                   alleles, which might otherwise be underrepresented in training sets
+training and test sets is essential for enhancing prediction                   due to their infrequent occurrence or unique characteristics.
+accuracy (Wallace et al., 2018). Instead, it highlights that a                      Beukelaer et al. (2017) compared Genomic Optimal
+universal approach may not be suitable in all cases.                           Contribution Selection (GOCS), which limits genomic
+                                                                               relationships among selection candidates, and Weighted Genomic
+                                                                               Selection (WGS) with basic genomic selection. They found that
+7.5 Evaluation of different genomic                                            GOCS and WGS achieved similar long-term genetic gains and
+selection strategies                                                           inbreeding rates, but WGS slightly reduced short-term genetic gain
+                                                                               compared to basic genomic selection. Alternative strategies such as
+    Evaluating genomic selection strategies reveals a complex                  IND-HE (focusing on heterozygosity) and IND-RA (focusing on
+balance between short-term gains and long-term genetic                         rare alleles) demonstrated superior long-term gains and a better
+potential. Rapid-cycling genomic selection programs, which                     balance between genetic merit and diversity than GOCS or WGS,
+initiate selection and parental recycling earlier, often surpass               remaining effective across varying trait heritabilities and initial
+traditional phenotypic selection methods. This advantage arises                training population sizes. As outlined by Beukelaer et al. (2017),
+from the reduced time required for parental recycling and the                  IND-HE aims to balance genetic gain and expected heterozygosity,
+development of new cultivars, with both the rapid-cycling process              seeking to control the inbreeding rate, deﬁned as the relative decline
+and the genomic selection components contributing signiﬁcantly to              in expected heterozygosity calculated from SNP markers.
+this efﬁciency. Advanced strategies such as Optimal Population                 Additionally, IND-RA focuses on preserving rare alleles by
+Value Selection (OPV), Genomic Optimal Contribution Selection                  incorporating them into the selection process.
+(GOCS), Optimal Haploid Value (OHV), and Weighted Genomic                           Ramasubramanian and Beavis (2021) found that WGS
+Selection (WGS) effectively preserve rare favorable alleles, achieve           produced greater responses in longer selection cycles compared to
+signiﬁcant genetic gains, and ensure long-term genetic diversity,              unweighted basic genomic selection, although it initially yielded
+highlighting the trade-offs in optimizing breeding success.                    lower response rates than phenotypic selection and basic genomic
+    Gaynor et al. (2017) proposed a two-part genomic selection                 selection. They concluded that the effectiveness of genomic
+program consisting of (i) a rapid population improvement                       selection depends on the number of simulated QTL and trait
+component through genetic gain recycling, and (ii) a product                   heritability, with RR-BLUP offering better responses early on and
+development component that creates commercial products and                     WGS excelling in later cycles. Combining strategies can leverage
+updates genomic selection models with new data. Their research                 different approaches’ strengths, mitigating costs, errors, and time
+demonstrated that genetic gains were 1.31 to 1.46 times greater than           requirements associated with phenotypic selection.
+those achieved with traditional genomic selection methods. The                      Akdemir et al. (2019); Moeinizade et al. (2019); Silva et al.
+approach involving recycling parental lines from head-rows for                 (2021); Ramasubramanian and Beavis (2021), and Sabadin et al.
+population improvement yielded superior results, although these                (2022) contribute to the growing understanding of optimized
+gains were inversely related to the depletion of genetic variability in        selection strategies in breeding programs, offering insights into
+subsequent seasons. Addressing this challenge will be critical for             the balance between short-term genetic gains, long-term
+future strategies.                                                             sustainability, and genomic advancements. Akdemir et al.
+    Gorjanc et al. (2017) tackled the challenge of balancing short-            demonstrated that multi-objective optimized parental proportion
+term and long-term genetic gains by proposing optimal cross-                   approaches, which balanced genetic variance and genomic
+selection within rapid recurrent genomic selection programs.                   estimated breeding values, yielded 20-30% higher outcomes over
+Their approach enhanced the efﬁciency of converting genetic                    extended breeding cycles, outperforming index-based
+diversity into genetic gain, reducing the loss of genetic diversity            selection methods.
+and the decline in genomic prediction accuracy that often                           Silva et al. (2021) and Ramasubramanian and Beavis (2021)
+accompanies rapid cycling.                                                     focused on selection methods within breeding cycles, highlighting
+
+
+
+
+Frontiers in Plant Science                                                14                                                           frontiersin.org
+
+Vieira et al.                                                                                                                  10.3389/fpls.2025.1495662
+
+
+
+
+the nuances of family-based selection. Silva et al. found that while                Both studies emphasize strategies that accommodate the
+across-family selection beneﬁted short-term gains, within-family                complexities of multi-trait breeding. Hayashi and Iwata’s ﬁndings
+selection proved more effective for long-term improvements, with                align with Akdemir et al.’s conclusion that methods exploiting trait
+optimal results emerging at selection intensities between 7.5% and              interdependence or optimizing multiple objectives outperform
+10%. Their work emphasized that using 100 families with 150                     traditional single-trait approaches. Moreover, the MOOB
+individuals per family maximized genetic gains over ten cycles.                 framework’s focus on genetic diversity preservation complements
+Ramasubramanian and Beavis, in a similar vein, noted that genomic               Hayashi and Iwata’s emphasis on accurate prediction, offering a
+selection through RR-BLUP combined with recombination of high-                  comprehensive approach for breeding programs targeting long-
+merit parents within a hub network design was particularly effective            term sustainability and trait improvement. Together, these
+in the ﬁrst 5 to 10 cycles, further supporting the utility of family-           approaches demonstrate the potential of advanced genomic tools
+based and genomic strategies for early-cycle improvements.                      and optimization techniques to address the multi-dimensional
+    Building on these ﬁndings, Sabadin et al. (2022) reﬁned                     challenges of modern breeding.
+genomic selection methods, demonstrating that a two-stage
+approach combining genomic selection in the F2 generation with
+phenotypic selection in the F4 produced 20% higher genetic gains                9 Inbreeding, heterosis and epistasis
+than fast-recycling methods that skipped phenotyping. Their
+research highlighted the trade-offs between increasing selection                     Studies highlight the challenge of balancing genetic gain with
+cycles and the necessity of updating training sets to maintain                  inbreeding in genomic selection, emphasizing the need for reﬁned
+selection effectiveness. This two-stage approach proved more                    approaches. Beukelaer et al. (2017) found that genomic optimal
+advantageous than rapid cycling methods that relied solely on                   contribution selection (GOCS) and genomic selection (GS) offer
+genomic selection in the early stages, reinforcing the importance               comparable long-term gains but struggle with inbreeding control.
+of a balanced approach to maximize genetic gain over time.                      GOCS fails to achieve an optimal trade-off, while Goiffon et al.
+    In hybrid crop breeding, programs using high-density markers                (2017) showed that weighted genomic selection (WGS)
+(10,000 or more) and QTL-level genotyping achieved greater                      better controls inbreeding by targeting rare favorable alleles,
+genetic gains and heterosis compared to those using low-density                 offering a better balance. However, methods like GOCS and IND-
+and SNP markers (De Jong et al., 2023). Genomic approaches for                  OC lead to higher long-term gains but incur short-term penalties
+predicting single-crosses were found to be more effective and                   on progress.
+simpliﬁed compared to rapid-cycling recurrent genomic selection                      Sabadin et al. (2022) noted that GS accelerates inbreeding in
+and cyclical tester updates (Fritsche-Neto et al., 2024), though                self-pollinated crops, depleting genetic variance more quickly
+combined applications of these methods hold potential.                          than phenotypic selection. These ﬁndings underscore the need
+                                                                                for updated training sets and strategies to preserve diversity
+                                                                                while maximizing gains. GOCS and WGS each offer beneﬁts
+8 Multi-trait selection                                                         but need continuous reﬁnement to optimize long-term
+                                                                                genetic improvement.
+     Hayashi and Iwata (2013) and Akdemir et al. (2019) explore                      Advancements in genomic prediction models for hybrid
+multi-trait genomic selection, offering complementary insights into             breeding highlight the impact of marker density. De Jong et al.
+improving prediction accuracy and genetic gains while managing                  (2023) reported that high-density SNP markers generated 1.72
+program constraints. Hayashi and Iwata demonstrated that multi-                 times more heterosis than low-density markers and 2.06 times
+trait Bayesian analysis, especially for low-heritability traits                 more than QTL genotypes. Moreover, initial germplasm grouping is
+correlated with high-heritability traits, enhances genomic                      unnecessary to achieve high heterosis (Cowling et al., 2020). Models
+breeding value predictions. Although multi-trait analysis did not               incorporating dominance effects improved heterosis by 1.44 times,
+consistently outperform single-trait analysis for uncorrelated traits,          emphasizing the value of capturing dominance interactions.
+its effectiveness in leveraging trait correlations makes it valuable for        Combining high-density markers with dominance-inclusive
+breeding programs targeting interrelated traits.                                models enhanced prediction accuracy and genetic progress.
+     Akdemir et al. (2019) advanced this by incorporating multi-                Additionally, optimizing tester selection from previous cycles
+objective optimization frameworks, such as the MOOB approach, to                advanced genetic composition, complementing heterotic patterns
+achieve sustainable gains across multiple traits. Their method                  (Melchinger and Frisch, 2023b).
+showed 20–30% higher long-term gains compared to traditional                         Epistatic genetic architectures also affect selection strategies. Ali
+approaches like tandem and index selection. While Hayashi and                   et al. (2020) showed that, under additive models, GS outperformed
+Iwata focused on trait correlations, Akdemir et al. highlighted the             phenotypic selection (PS), but PS was more effective under epistatic
+importance of maintaining genetic diversity and optimizing                      models. Wang et al. (2004) found that dominance and epistasis slow
+parental contributions to ensure breeding population viability.                 genetic progress in wheat breeding, as epistasis stabilizes variance
+The MOOB framework balances genetic variance, accuracy, and                     but hinders allele ﬁxation. This suggests breeders should balance
+gains, addressing practical challenges such as the difﬁculty of                 genomic and phenotypic approaches, integrating genetic
+assigning economic weights in index selection.                                  architecture insights to optimize long-term selection outcomes.
+
+
+
+
+Frontiers in Plant Science                                                 15                                                              frontiersin.org
+
+Vieira et al.                                                                                                               10.3389/fpls.2025.1495662
+
+
+
+
+10 Cost analysis                                                               for speciﬁc environments. In the long term, they support developing
+                                                                               resilient germplasm with stability across diverse conditions.
+    Hospital and Charcosset (1997) emphasized the beneﬁts of                   Strategies to leverage GxE include using selection indices tailored
+combining foreground and background selection in marker-                       to environments, prioritizing traits with moderate to high
+assisted backcross programs for introgressing quantitative trait               heritability, incorporating genomic predictions, and conducting
+loci (QTL). Pyramidal designs, where QTL are monitored                         multi-environment trials to align GxE insights with breeding goals.
+sequentially, optimize genomic similarity with the recipient
+parent while minimizing costs when paired with appropriate
+population sizes. Kuchel et al. (2005) demonstrated the economic               12 Software tools
+advantage of integrating marker-assisted selection (MAS) at the
+BC1F1 and haploid stages in wheat breeding, showing a 40% cost                     Simulations are crucial in breeding programs, with several R
+reduction and greater genetic gain compared to phenotypic                      packages offering comprehensive solutions for various needs.
+methods. These ﬁndings highlight the importance of aligning                    AlphaSimR is highly cited for its ﬂexibility in modeling complex
+genotyping and phenotyping for maximum efﬁciency.                              genetic architectures, selection schemes, and long-term strategies.
+    In genomic selection, Lorenz (2013) and Hickey et al. (2014)               Adam is essential for studies involving structured populations,
+focused on maximizing genetic gain through effective resource                  tracking genetic inheritance in crossing programs. Synbreed
+allocation. Lorenz’s simulations showed that increasing                        excels in genomic prediction and analysis using SNP data.
+population size and phenotyping all DH lines maximized genetic                 MoBPS is a modular and versatile tool for accurately simulating
+gain under constrained heritability and genotyping costs. Hickey               hybrid and genomic breeding programs. QU-LINE, a pioneer in
+et al. suggested that combining phenotypic data from related                   simulating quantitative traits, remains valuable for modeling
+populations improves prediction accuracy while reducing time                   additive and epistatic effects in classical genetics. PedigreeSim
+and cost penalties. Recent advancements in low-density                         specializes in simulating crosses and genetic recombination in
+genotyping and imputation, as demonstrated by Gorjanc et al.                   structured populations, often used for inheritance and lineage
+(2017), can reduce genotyping costs by up to 87% with minimal                  management studies.
+loss in prediction accuracy. Using as few as 50 segregating markers
+per genome can yield a high return on investment (5.67 times the
+baseline), making genomic selection more accessible for early-                 13 Conclusion and prospect
+generation selection.
+                                                                                   In plant breeding and genetics, simulations serve as
+                                                                               mathematical models that replicate real-world biological
+                                                                               conditions to address speciﬁc challenges and phenomena. Their
+11 Genotype-by-                                                                growing importance stems from the necessity to optimize resource
+environment interaction                                                        use in relation to program scale and genetic gains. The complexities
+                                                                               of multi-trait selection make simulations crucial and challenging, as
+     Studies by Buntaran et al. (2022) and Li et al. (2022) emphasize          breeding pipelines are dynamic, inﬂuenced by business decisions,
+the need for reﬁned selection strategies to address genotype-by-               advancements in genotyping technologies, and ﬂuctuations in
+environment (GxE) interactions in genomic selection. Buntaran                  resource allocation from year to year.
+et al. showed that adjusting selection to environmental factors like               Simulations offer signiﬁcant advantages by allowing researchers
+drought or excess rainfall is critical for maintaining genetic                 to explore diverse scenarios, genetic models, and methodologies,
+progress, especially when environmental ﬂuctuations bias                       helping them identify the most effective strategies for developing
+breeding value estimates. Li et al.’s simulations focused on                   target cultivars. These models facilitate the evaluation of genetic
+complex traits, such as grain yield and disease resistance, where              gain under various conditions, simulating entire or partial breeding
+GxE plays a signiﬁcant role.                                                   programs. This capability enables comparisons of different breeding
+     The impact of model parameters, selection intensities, and                strategies by integrating genetic data, crossing schemes, propagation
+breeding strategies on long-term outcomes is further explored by               methods, population sizes, selection intensities, and the number of
+Silva et al. (2021) and Covarrubias-Pazaran et al. (2022). Silva et al.        generations involved.
+highlighted GxE variance as a source of non-heritable variation,                   As breeding programs evolve and adopt new methodologies, the
+stressing the need for precise GS model parameterization to prevent            demand for simulations to assess their beneﬁts and explore
+genetic erosion. Covarrubias-Pazaran et al. simulated genotype-by-             alternatives remains critical. Future research in this area is likely
+year and genotype-by-location interactions, offering valuable                  to focus increasingly on genetic diversity, pre-breeding efforts, and
+insights for improving program efﬁciency. However, better                      advances in genomic selection strategies. Simulations will continue
+representation of GxE, particularly interactions across years, is              to play a pivotal role in shaping the future of plant breeding by
+still needed in simulation studies.                                            providing insights that help reﬁne breeding pipelines and maximize
+     GxE models signiﬁcantly impact genetic progress by enabling               genetic gains.
+the use of environment-speciﬁc genetic performance. In the short                   Studies highlight the need to align breeding strategies with trait
+term, they enhance trait prediction and optimize selection strategies          heritability, selection timing, and genetic diversity, while accounting
+
+
+Frontiers in Plant Science                                                16                                                            frontiersin.org
+
+Vieira et al.                                                                                                                                             10.3389/fpls.2025.1495662
+
+
+
+
+for genotype-environment interactions to minimize bias in early                                   breeding parameters such as parental number, population size,
+selection. Genomic selection enhances genetic gains by accelerating                               and selection timing in both phenotypic and genomic programs.
+breeding cycles and optimizing parent selection, particularly for                                 It is worth noting that the exploration of various genomic selection
+traits with low heritability and complex genetic structures. Regular                              strategies remains a relevant and continually evolving area of
+updates to training sets are essential, irrespective of the genetic                               research, as this approach becomes increasingly routine in
+architecture. Bayesian methods are effective in early breeding stages                             breeding programs.
+with fewer genes, while BLUP is more suitable for traits with
+multiple QTL, and RR-BLUP offers ﬂexibility across
+varying conditions.                                                                               Author contributions
+     Larger populations yield greater gains when clear objectives and
+appropriate germplasm are present. Updating with top-performing                                       RAV: Writing – original draft, Writing – review & editing,
+parentals improves accuracy and gains. Low-density genotyping,                                    Conceptualization, Investigation. APON: Supervision, Writing –
+combined with imputation, provides a cost-effective alternative to                                review & editing. RF-N: Supervision, Writing – review & editing.
+high-density genotyping with comparable results. Evaluating
+genomic selection requires balancing short-term gains with long-
+term potential. Rapid-cycling programs are particularly effective.                                Funding
+     Future research in plant breeding and genetics using
+simulations is poised to explore several promising avenues to                                         The author(s) declare that no ﬁnancial support was received for
+enhance models and their applications. One key focus area may                                     the research, authorship, and/or publication of this article.
+involve reﬁning simulations to better capture genotype-
+environment interactions, particularly in the context of
+climate challenges.                                                                               Acknowledgments
+     Another potential direction for research is the expansion of
+simulations to support multi-genomic selection frameworks. As                                        We thank CNPq — Conselho Nacional de Desenvolvimento
+omics technologies continue to advance, future studies may aim to                                 and FAPEMIG — Fundação de Amparo à Pesquisa do Estado de
+integrate multiple layers of data, such as epigenetics and                                        Minas Gerais for ﬁnancial support.
+transcriptomics, into simulations. This approach would establish
+a connection with the previously mentioned genotype-environment
+enhancement opportunity, while also contributing to a more                                        Conﬂict of interest
+comprehensive understanding of the mechanisms through which
+genetic networks inﬂuence trait expression.                                                           The authors declare that the research was conducted in the
+     There is signiﬁcant potential in combining simulation models                                 absence of any commercial or ﬁnancial relationships that could be
+with artiﬁcial intelligence and machine learning algorithms. These                                construed as a potential conﬂict of interest.
+technologies could be harnessed to optimize breeding pipelines by
+automatically identifying patterns, predicting outcomes, and
+dynamically adjusting selection criteria in real time. This                                       Publisher’s note
+approach would allow breeding programs to become increasingly
+adaptive and data-informed, facilitating faster genetic gains and                                     All claims expressed in this article are solely those of the authors
+greater breeding efﬁciency, with the primary focus on delivering                                  and do not necessarily represent those of their afﬁliated organizations,
+value to farmers and consumers.                                                                   or those of the publisher, the editors and the reviewers. Any product
+     Finally, another critical focus is expanding simulations to                                  that may be evaluated in this article, or claim that may be made by its
+support multi-trait selection frameworks, while reﬁning key                                       manufacturer, is not guaranteed or endorsed by the publisher.
+
+
+
+
+References
+  Akdemir, D., Beavis, W., Fritsche-Neto, R., Singh, A. K., and Isidro-Sá nchez, J.              and Hans−Peter. Theor. Appl. Genet. 135, 2891–2905. doi: 10.1007/s00122-022-04157-
+(2019). Multi-objective optimized genomic breeding strategies for sustainable food                1
+improvement. Hered 122, 672–683. doi: 10.1038/s41437-018-0147-1                                     Bernando, R., and Charcosset, A. (2006). Usefulness of gene information in marker-
+   Ali, M., Zhang, L., DeLacy, I., Arief, V., Dieters, M., Pfeiffer, W. H., et al. (2020).        assisted recurrent selection: a simulation appraisal. Rex Bernardo, Alain. Crop Sci. 46,
+Modeling and simulation of recurrent phenotypic and genomic selections in plant                   614–621. doi: 10.2135/cropsci2005.05-0088
+breeding under the presence of epistasis. Crop J. 8, 866–877. doi: 10.1016/                         Bernardo, R. (1999). Marker-assisted best linear unbiased prediction of single-cross
+j.cj.2020.04.002                                                                                  performance. Crop Sci. 39, 1277–1282. doi: 10.2135/cropsci1999.3951277x
+   Allier, A., Teyssèdre, S., Lehermeier, C., Moreau, L., and Charcosset, A. (2020).                Bernardo, R. (2003). Parental selection, number of breeding populations, and size of
+Optimized breeding strategies to harness genetic resources with different performance             each population in inbred development. Theor. Appl. Genet. 107, 1252–1256.
+levels. BMC Genom. 21, 349. doi: 10.1186/s12864-020-6756-0                                        doi: 10.1007/s00122-003-1375-0
+  Bernal-Vasquez, A. M., Buntaran, H., Gordillo, A., Sahr, M., Wimmer, V., and                       Bernardo, R., and Yu, J. (2007). Prospects for genome-wide selection for quantitative
+Piepho, H. (2022). Assessing the response to genomic selection by simulation Valentin             traits in maize. Crop Sci. 47, 1082–1090. doi: 10.2135/cropsci2006.11.0690
+
+
+
+
+Frontiers in Plant Science                                                                   17                                                                          frontiersin.org
+
+Vieira et al.                                                                                                                                                       10.3389/fpls.2025.1495662
+
+
+
+
+  Beukelaer, H., Badke, Y., Fack, V., and Meyer, G. (2017). Moving beyond managing                        Hickey, J. M., Dreisigacker, S., Crossa, J., Hearne, S., Babu, R., Prasanna, B. M., et al.
+realized genomic relationship in long-term genomic selection. Genetics 206, 1127–1138.                 (2014). Evaluation of genomic selection training population designs and genotyping
+doi: 10.1534/genetics.116.194449                                                                       strategies in plant breeding programs using simulation. Crop Sci. 54, 1476–1488.
+  Buntaran, H., Bernal-Vasquez, A. M., Gordillo, A., et al. (2022). Assessing the                      doi: 10.2135/cropsci2013.03.0195
+response to genomic selection by simulation. Theor. Appl. Genet. 135, 2891–2905.                         Hickey, J. M., and Gorjanc, G. (2012). Simulated data for genomic selection and
+doi: 10.1007/s00122-022-04157-1                                                                        genome-wide association studies using a combination of coalescent and gene drop
+  Casali, V. W. D., and Tigchelaar, E. C. (1975). Computer simulation studies                          methods. G3 2, 425–427. doi: 10.1534/g3.111.001297
+comparing pedigree, bulk, and single seed descent selection in self pollinated                            Hospital, F., and Charcosset, A. (1997). Marker-assisted introgression of quantitative
+populations. J. Amer. Soc Hortic. Sci. 100, 364–367. doi: 10.21273/JASHS.100.4.364                     trait loci. Genetics 147, 1469–1485. doi: 10.1093/genetics/147.3.1469
+  Ceron-Rojas, J. J., Crossa, J., Arief, V. N., Basford, K., Rutkoski, J., Jarquı́n, D., et al.          Hospital, F., Moreau, L., Lacoudre, F., Charcosset, A., and Gallais, A. (1997). More on
+(2015). A genomic selection index applied to simulated and real data. G3 5, 2155–2164.                 the efﬁciency of marker-assisted selection. Theor. Appl. Genet. 95, 1181–1189.
+doi: 10.1534/g3.115.019869                                                                             doi: 10.1007/s001220050679
+  Charmet, G., Robert, N., Perretant, M. R., Gay, G., Sourdille, P., Groos, C., et al.                   Jannink, J., Astudillo, R., and Frazier, P. (2024). Insight into a two-part plant
+(1999). Marker-assisted recurrent selection for cumulating additive and interactive                    breeding scheme through Bayesian optimization of budget allocations. Crop Sci. 65,
+QTL in recombinant inbred lines. Theor. Appl. Genet. 99, 1143–1148. doi: 10.1080/                      e21124. doi: 10.1002/csc2.21124
+13102818.2014.995920                                                                                     Krenzer, D., Frisch, M., Beckmann, K., Kox, T., Flachenecker, C., Abbadi, A., et al.
+  Chiaravallotti, I., Lin, J., Arief, V., Jahufer, Z., Osorno, J. M., McClean, P., et al.              (2024). Simulation−based establishment of base pools for a hybrid breeding program in
+(2023). Simulations of multiple breeding strategy scenarios in common bean for                         winter rapeseed. Theor. Appl. Genet. 137. doi: 10.1007/s00122-023-04519-3
+assessing genomic selection accuracy and model updating. Plant Genome 17.                                 Kuchel, H., Ye, G., Fox, R., and Jefferies, S. (2005). Genetic and economic analysis of a
+doi: 10.1002/tpg2.20388                                                                                targeted marker-assisted wheat breeding strategy. Mol. Breed. 16, 67–78. doi: 10.1007/
+   Covarrubias-Pazaran, G., Gebeyehu, Z., Gemenet, D., Werner, C., Labroo, M., Sirak,                  s11032-005-4785-7
+S., et al. (2022). Breeding schemes: what are they, how to formalize them, and how to                    Lande, R., and Thompson, R. (1990). Efﬁciency of marker-assisted selection in the
+improve them? Front. Plant Sci. 12. doi: 10.3389/fpls.2021.791859                                      improvement of quantitative traits. Genetics. 124, 743–756. doi: 10.1093/genetics/
+   Cowling, W. A., Gaynor, R. C., Antolin, R., Gorjanc, G., Edwards, S. M., Powell, O., et al.         124.3.743
+(2020). In silico simulation of future hybrid performance to evaluate heterotic pool formation           Lanzl, T., Melchinger, A. E., and Schön, C. (2023). Inﬂuence of the mating design on
+in a self-pollinating crop. Sci. Rep. 10, 4037. doi: 10.1038/s41598-020-61031-0                        the additive genetic variance. in plant breeding populations. Theor. Appl. Genet. 136.
+   Cowling, W. A., Li, L., Siddique, K. H. M., Henryon, M., Berg, P., Banks, R. G., et al.             doi: 10.1007/s00122-023-04447-2
+(2017). Improving response in genomic selection with a population-based selection                        Li, Y., Kaur, S., Pembleton, L. W., Valipour−Kahrood, H., Rosewarne, G. M., and
+strategy: optimal population value selection. J. Exp. Bot. 68, 1927–1939. doi: 10.1534/                Daetwyler, H. D. (2022). Strategies of preserving genetic diversity while maximizing
+genetics.116.197103                                                                                    genetic response from implementing genomic selection in pulse breeding programs.
+   Cuyabano, B. C. D., Boichard, D., and Gondro, C. (2024). Expected values for the                    Theor. Appl. Genet. 135, 1813–1828. doi: 10.1007/s00122-022-04071-6
+accuracy of predicted breeding values accounting for genetic differences between                         Li, X., Zhu, C., Wang, J., and Yu, J. (2012). Computer simulation in plant breeding.
+reference and target populations. Genet. Sel. Evol. 56. doi: 10.1186/s12711-024-00876-9                Adv. Agron. 116, 219–264. doi: 10.1016/B978-0-12-394277-7.00006-3
+  Darvasi, A., and Soller, M. (1997). A simple method to calculate resolving power and                   Lin, J., Arief, V., Jahufer, Z., Osorno, J., McClean, P., Jarquin, D., et al. (2023).
+conﬁdence interval of QTL map location. Behav. Genet. 27, 125–132. doi: 10.1023/                       Simulations of rate of genetic gain in dry bean breeding programs. Theor. Appl. Genet.
+A:1025685324830                                                                                        136. doi: 10.1007/s00122-023-04244-x
+   De Jong, G., Powell, O., Gorjanc, G., Hickey, J. M., and Gaynor, C. (2023).                           Lorenz, A. J. (2013). Resource allocation for maximizing prediction accuracy and
+Comparison of genomic prediction models for general combining ability in early                         genetic gain of genomic selection in plant breeding: a simulation experiment. G3 3,
+stages of hybrid breeding programs. Crop Sci. 63, 3338–13355. doi: 10.1002/csc2.21105                  481–491. doi: 10.1534/g3.112.004911
+  DoVale, J. C., Carvalho, H. F., Sabadin, F., and Fritsche-Neto, R. (2022). Genotyping                   Lubanga, N., Massawe, F., Mayes, S., Gorjanc, G., and Bančič., J. (2022). Genomic
+marker density and prediction models effects in long-term breeding schemes of cross-                   selection strategies to increase genetic gain in tea breeding programs. Plant Genome 16.
+pollinated crops. Theor. Appl. Genet. 135, 4523–4539. doi: 10.1007/s00122-022-04236-3                  doi: 10.1002/tpg2.20282
+  Edwards, M. D., and Page, N. J. (1994). Evaluation of marker-assisted selection                        Melchinger, A. E., Fernando, R., Stricker, C., Schön, C., and Auinger, H. (2023a).
+through computer simulation. Theor. Appl. Genet. 88, 376–382. doi: 10.1007/                            Genomic prediction in hybrid breeding: I. Optimizing the training set design. Theor.
+BF00223648                                                                                             Appl. Genet. 136. doi: 10.1007/s00122-023-04413-y
+  Ferná ndez-Gonzá lez, J., Akdemir, D., and Sá nchez, J. I. (2023). A comparison of                  Melchinger, A. E., and Frisch, M. (2023b). Genomic prediction in hybrid breeding: II.
+methods for training population optimization in genomic selection. Theor. Appl. Genet.                 Reciprocal recurrent genomic selection with full−sib and half−sib families. Theor. Appl.
+136. doi: 10.1007/s00122-023-04265-6                                                                   Genet. 136. doi: 10.1007/s00122-023-04446-3
+  Fritsche-Neto, R., Ali, J., De Asis, E. J., Allahgholipour, M., and Labroo, M. R. (2024).              Meuwissen, T. H. E., Hayes, B. J., and Goddard, M. E. (2001). Prediction of total
+Improving hybrid rice breeding programs via stochastic simulations: number of                          genetic value using genome-wide dense marker maps. Genetics 157, 1819–1829.
+parents, number of hybrids, tester update, and genomic prediction of hybrid                            doi: 10.1093/genetics/157.4.1819
+performance. Theor. Appl. Genet. 137. doi: 10.1007/s00122-023-04508-6
+                                                                                                          Moeinizade, S., Hu, G., Wang, L., and Schnable, P. S. (2019). Optimizing selection
+  Fu, Y. (2015). Understanding crop genetic diversity under modern plant breeding.                     and mating in genomic selection with a look-ahead approach: an operations research
+Theor. Appl. Genet. 128, 2131–2142. doi: 10.1007/s00122-023-04508-6                                    framework. G3 9, 2123–2133. doi: 10.1534/g3.118.200842
+  Gaynor, R. C., Gorjanc, G., Bentley, A. R., Ober, E. S., Howell, P., Jackson, R., et al.               Muleta, K. T., Pressoir, G., and Morris, G. P. (2019). Optimizing genomic selection
+(2017). A two-part strategy for using genomic selection to develop inbred lines. Crop                  for a sorghum breeding program in Haiti: a simulation study. G3 7, 391–401.
+Sci. 56, 2372–2386. doi: 10.2135/cropsci2016.09.0742                                                   doi: 10.1534/g3.118.200932
+  Gimelfarb, A., and Lande, R. (1994). Simulation of marker assisted selection in                        Ooijen, J. W. V. (1992). Accuracy of mapping quantitative trait loci in autogamous
+hybrid populations. Genet. Res. 63, 39–47. doi: 10.1017/s0016672300032067                              species. Theor. Appl. Genet. 84, 803–811. doi: 10.1007/BF00227388
+  Goiffon, M., Kusmec, A., Wang, L., Hu, G., and Schnable, P. S. (2017). Improving                       Peixoto, M. A., Coelho, I. F., Leach, K. A., Bhering, L. L., and Resende, M. F. R.
+response in genomic selection with a population-based selection strategy: optimal                      (2023). Simulation-based decision-making and implementation of tools in hybrid crop
+population value selection. Genetics 206, 1675–1682. doi: 10.1534/genetics.116.197103                  breeding pipelines. Crop Sci. 64, 110–125. doi: 10.1002/csc2.21139
+  Gorjanc, G., Battagin, M., Dumasy, J., Antolin, R., Gaynor, C. R., and Hickey, J. M.                   Peng, T., Sun, X., and Mumm, R. H. (2014). Optimized breeding strategies for
+(2017). Prospects for cost-effective genomic selection via accurate within-family                      multiple trait integration: I. Minimizing linkage drag in single event introgression. Mol.
+imputation. Crop Sci. 57, 216–228. doi: 10.2135/cropsci2016.06.0526                                    Breed. 33, 89–104. doi: 10.1007/s11032-013-9936-7
+  Gorjanc, G., Gaynor, C. R., and Hickey, J. M. (2018). Optimal cross selection for long                  Platten, J. D., and Fritsche-Neto, R. (2023). Optimizing quantitative trait loci introgression
+−term genetic gain in two−part programs with rapid recurrent genomic selection.                        in elite rice germplasms: Comparing methods and population sizes to develop new recipients
+Theor. Appl. Genet. 131, 1953–1966. doi: 10.1007/s00122-018-3125-3                                     via stochastic simulations. Plant Breed. 142, 439–448. doi: 10.1111/pbr.13118448
+  Gorjanc, G., Jenko, J., Hearne, S. J., and Hickey, J. M. (2016). Initiating maize pre-                  Ramasubramanian, V., and Beavis, W. D. (2021). Strategies to assure optimal trade-
+breeding programs using genomic selection to harness polygenic variation from                          offs among competing objectives for the genetic improvement of soybean. Front. Plant
+landrace populations. BMC Genom. 17. doi: 10.1186/s12864-015-2345-z                                    Sci. 12. doi: 10.3389/fgene.2021.675500
+  Hassanpour, A., Geibel, J., Simianer, H., and Pook, T. (2023). Optimization of                          Ribaut, J. M., Jiang, C., and Hoisington, D. (2002). Simulation experiments on
+breeding program design through stochastic simulation with kernel regression. Henner                   efﬁciencies of gene introgression by backcrossing. Crop Sci. 42, 557–565. doi: 10.2135/
+Torsten. G3 6. doi: 10.1093/g3journal/jkad217                                                          cropsci2002.5570
+  Hayashi, T., and Iwata, H. (2013). A Bayesian method and its variational                                Sabadin, F., DoVale, J. C., Platten, J. D., and Fritsche-Neto, R. (2022). Optimizing
+approximation for prediction of genomic breeding values in multiple traits. BMC                        self-pollinated crop breeding employing genomic selection: From schemes to updating
+Bioinform. 31. doi: 10.1186/1471-2105-14-34                                                            training sets. Front. Plant Sci. 13. doi: 10.3389/fpls.2022.935885
+
+
+
+
+Frontiers in Plant Science                                                                        18                                                                                 frontiersin.org
+
+Vieira et al.                                                                                                                                              10.3389/fpls.2025.1495662
+
+
+
+
+  Santantonio, N., Atanda, S. A., Beyene, Y., Varshney, R. K., Olsen, M., Jones, E., et al.          Villiers, K., Voss-Fels, K. P., Dinglasan, E., Jacobs, B., Hickey, L., and Hayes, B. J.
+(2020). Strategies for effective use of genomic information in crop breeding programs              (2024). Evolutionary computing to assemble standing genetic diversity and achieve
+serving Africa and South Asia. Front. Plant Sci. 11. doi: 10.3389/fpls.2020.00353                  long-term genetic gain. Plant Genome 17. doi: 10.1002/tpg2.20467
+  Silva, E. D. B., Xavier, A., and Faria, M. V. (2021). Impact of genomic prediction                 Wallace, J. G., Rodgers-Melnick, E., and Buckle, E. S. (2018). On the road to breeding
+model, selection intensity, and breeding strategy on the long-term genetic gain and                4.0: unraveling the good, the bad, and the boring of crop quantitative genomics. Annu.
+genetic erosion in soybean breeding. Front. Plant Sci. 12. doi: 10.3389/fgene.2021.637133          Rev. Genet. 23, 421–444. doi: 10.1146/annurev-genet-120116-024846
+  Sun, X., and Mumm, R. H. (2015). Optimized breeding strategies for multiple trait                  Wang, J., Chapman, S. C., Bonnett, D. G., Rebetzke, G. J., and Crouch, J. (2007).
+integration: III. Parameters for success in version testing. Mol. Breed. 35. doi: 10.1007/         Application of population genetic theory and simulation models to efﬁciently pyramid
+s11032-015-0397-z                                                                                  multiple genes via marker-assisted selection. Crop Sci. 47, 582–588. doi: 10.2135/
+  Technow, T., Riedelsheimer, C., Schrag, T. A., and Melchinger, A. E. (2012).                     cropsci2006.05.0341
+Genomic prediction of hybrid performance in maize with models incorporating                          Wang, J., Ginkel, M., Podlich, D., Ye, G., Trethowan, R., Pfeiffer, W., et al. (2003).
+dominance and population speciﬁc marker effects. Theor. Appl. Genet. 125, 1181–                    Comparison of two breeding strategies by computer simulation. Crop Sci. 43, 1764–
+1194. doi: 10.1007/s00122-012-1905-8                                                               1773. doi: 10.2135/cropsci2003.1764
+  Tessema, B. B., Liu, H., Sørensen, A. C., Andersen, J. R., and Jensen, J. (2020).                  Wang, J., Ginkel, M., Trethowan, R., Ye, G., DeLacy, I., Podlich, D., et al. (2004).
+Strategies using genomic selection to increase genetic gain in breeding programs for               Simulating the effects of dominance and epistasis on selection response in the
+wheat. Front. Plant Sci. 11. doi: 10.3389/fgene.2020.578123                                        CIMMYT wheat breeding program using QuCim. Crop Sci. 44, 2006–2018.
+  Van Oeveren, R., and Stam, P. (1992). Comparative simulation studies on the effects              doi: 10.2135/cropsci2004.2006
+of selection for quantitative traits in autogamous crops: early selection versus single               Wang, J., Singh, R. P., Braun, H., and Pfeiffer, W. H. (2009). Investigating the
+seed descent. Hered 69, 342–351. doi: 10.1038/hdy.1992.134                                         efﬁciency of the single backcrossing breeding strategy through computer simulation.
+  Van Berloo, R., and Stam, P. (1998). Marker-assisted selection in autogamous RIL                 Theor. Appl. Genet. 118, 683–694. doi: 10.1007/s00122-008-0929-6
+populations: a simulation study. Theor. Appl. Genet. 196, 147–154. doi: 10.1007/                     Wang, X., Yang, Z., and Xu, C. (2015). A comparison of genomic selection methods
+s001220050721                                                                                      for breeding value prediction. Sci. Bull. 60, 925–935. doi: 10.1007/s11434-015-0791-2
+  Van Berloo, R., and Stam, P. (2001). Simultaneous marker-assisted selection for                     Wang, J., Zhou, Z., Zhang, Z., Li, H., Liu, H., and Liu, D. (2018). Expanding the BLUP
+multiple traits in autogamous crops. Theor. Appl. Genet. 102, 1107–1112. doi: 10.1007/             alphabet for genomic prediction adaptable to the genetic architectures of complex
+s001220000518                                                                                      traits. Hered 121, 648–662. doi: 10.1038/s41437-018-0075-0
+  Viicher, P. M., Haley, C. S., and Thompson, R. (1996). Marker-assisted introgression               Yao, J., Zhao, D., Chen, X., Zhang, Y., and Wang, Z. (2018). Use of genomic selection
+in backcross breeding programs. Genetics 144, 1923–1932. doi: 10.1093/genetics/                    and breeding simulation in cross prediction for improvement of yield and quality in
+144.4.1923                                                                                         wheat (Triticum aestivum L.). Crop J. 6, 353–365. doi: 10.1016/j.cj.2018.05.003
+
+
+
+
+Frontiers in Plant Science                                                                    19                                                                           frontiersin.org
+

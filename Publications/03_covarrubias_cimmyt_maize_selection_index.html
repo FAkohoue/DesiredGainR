@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang xml:lang>
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Covarrubias-Pazaran: Bringing a selection index into the CIMMYT
+maize programs</title>
+  <style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+</style>
+  <style type="text/css">:root {
+--text: #202124;
+--muted: #5f6368;
+--border: #dfe1e5;
+--panel: #f8f9fa;
+--accent: #1b5e5a;
+}
+html { font-size: 17px; }
+body {
+max-width: 1080px;
+margin: 0 auto;
+padding: 2.5rem 3rem 5rem;
+font-family: Georgia, "Times New Roman", serif;
+line-height: 1.62;
+color: var(--text);
+background: white;
+}
+h1, h2, h3, h4 {
+font-family: Arial, Helvetica, sans-serif;
+line-height: 1.25;
+color: #173f3d;
+margin-top: 2rem;
+}
+h1 { font-size: 2.15rem; border-bottom: 3px solid var(--accent); padding-bottom: .55rem; }
+h2 { font-size: 1.65rem; border-bottom: 1px solid var(--border); padding-bottom: .35rem; }
+h3 { font-size: 1.28rem; }
+h4 { font-size: 1.08rem; }
+a { color: #0b57d0; }
+table { border-collapse: collapse; width: 100%; margin: 1.2rem 0 1.6rem; font-size: .94rem; }
+th, td { border: 1px solid var(--border); padding: .55rem .65rem; vertical-align: top; }
+th { background: #eef5f4; font-family: Arial, Helvetica, sans-serif; text-align: left; }
+tr:nth-child(even) td { background: #fbfcfc; }
+code { background: #f1f3f4; padding: .1rem .25rem; border-radius: 3px; }
+blockquote { border-left: 4px solid var(--accent); margin-left: 0; padding: .2rem 1rem; color: var(--muted); background: var(--panel); }
+#TOC { border: 1px solid var(--border); background: var(--panel); padding: 1rem 1.5rem; margin: 1.5rem 0 2rem; }
+#TOC ul { margin-top: .25rem; }
+hr { border: 0; border-top: 1px solid var(--border); margin: 2.5rem 0; }
+.math.display { overflow-x: auto; padding: .3rem 0; }
+@media (max-width: 760px) {
+body { padding: 1.2rem; }
+table { display: block; overflow-x: auto; }
+}
+@media print {
+body { max-width: none; padding: 0; font-size: 11pt; }
+#TOC { break-after: page; }
+h2, h3 { break-after: avoid; }
+table { break-inside: avoid; }
+}
+</style>
+</head>
+<body>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#covarrubias-pazaran-bringing-a-selection-index-into-the-cimmyt-maize-programs" id="toc-covarrubias-pazaran-bringing-a-selection-index-into-the-cimmyt-maize-programs">Covarrubias-Pazaran:
+Bringing a selection index into the CIMMYT maize programs</a>
+<ul>
+<li><a href="#document-information" id="toc-document-information">Document information</a></li>
+<li><a href="#purpose" id="toc-purpose">Purpose</a></li>
+<li><a href="#selection-index-versus-culling-and-tandem-selection" id="toc-selection-index-versus-culling-and-tandem-selection">Selection
+index versus culling and tandem selection</a></li>
+<li><a href="#reconstructing-the-s3-to-s4-procedure" id="toc-reconstructing-the-s3-to-s4-procedure">Reconstructing the
+S3-to-S4 procedure</a></li>
+<li><a href="#retrospective-index-weights" id="toc-retrospective-index-weights">Retrospective index
+weights</a></li>
+<li><a href="#comparison-with-the-current-procedure" id="toc-comparison-with-the-current-procedure">Comparison with the
+current procedure</a></li>
+<li><a href="#recycling-stage-index" id="toc-recycling-stage-index">Recycling-stage index</a></li>
+<li><a href="#conclusions-from-the-presentation" id="toc-conclusions-from-the-presentation">Conclusions from the
+presentation</a></li>
+<li><a href="#strengths" id="toc-strengths">Strengths</a></li>
+<li><a href="#limitations-and-implementation-cautions" id="toc-limitations-and-implementation-cautions">Limitations and
+implementation cautions</a></li>
+<li><a href="#operational-interpretation" id="toc-operational-interpretation">Operational interpretation</a></li>
+</ul></li>
+</ul>
+</nav>
+<h1 id="covarrubias-pazaran-bringing-a-selection-index-into-the-cimmyt-maize-programs">Covarrubias-Pazaran:
+Bringing a selection index into the CIMMYT maize programs</h1>
+<h2 id="document-information">Document information</h2>
+<ul>
+<li><strong>Author:</strong> Giovanny Eduardo Covarrubias-Pazaran</li>
+<li><strong>Affiliation shown:</strong> Excellence in Breeding Platform
+/ CGIAR</li>
+<li><strong>Document type:</strong> Technical presentation, 21
+pages</li>
+<li><strong>Source file:</strong>
+<code>Giovanny Selection index in Maize.pdf</code></li>
+</ul>
+<h2 id="purpose">Purpose</h2>
+<p>The presentation documents a practical process for replacing parts of
+a conventional multi-step maize selection procedure with a formal
+selection index. It does not begin with a theoretical index and search
+for a use case. Instead, it first reconstructs the breeder’s existing
+decisions, expresses them as an algorithm, derives retrospective weights
+from observed selection differentials, and compares the resulting index
+with the current procedure.</p>
+<p>The proposed workflow is:</p>
+<ol type="1">
+<li>review what is known about selection methods and genetic gain;</li>
+<li>translate the current selection procedure into explicit algorithmic
+steps;</li>
+<li>identify the steps that can be replaced by an index;</li>
+<li>construct an index;</li>
+<li>compare selections, selection differentials, and total merit;
+and</li>
+<li>refine the index.</li>
+</ol>
+<h2 id="selection-index-versus-culling-and-tandem-selection">Selection
+index versus culling and tandem selection</h2>
+<p>Pages 3 and 4 compare three strategies for two traits:</p>
+<ul>
+<li><strong>Selection index:</strong> candidates are ranked by total
+merit, (I=w_1t_1+w_2t_2).</li>
+<li><strong>Independent culling:</strong> candidates must pass a
+threshold for each trait.</li>
+<li><strong>Tandem-type selection:</strong> candidates are selected
+sequentially for different traits.</li>
+</ul>
+<p>The simulated examples illustrate that selecting extreme individuals
+for one trait can produce parents with poor performance for another
+trait. The selection index produced a more balanced increase in total
+merit. The presentation reports illustrative gains of approximately 70%
+versus 50% for Trait 1, 66% versus 38% for Trait 2, and 57% versus 53%
+for total merit, depending on the compared method.</p>
+<p>The biological message is that the best parent is not necessarily the
+most extreme genotype for any single trait. A useful parent should
+combine acceptable performance across the complete target profile.</p>
+<h2 id="reconstructing-the-s3-to-s4-procedure">Reconstructing the
+S3-to-S4 procedure</h2>
+<p>The selection step from Stage 3 to Stage 4 is represented as a
+sequence of reduction and selection operations. Each operation
+includes:</p>
+<ul>
+<li>selection unit,</li>
+<li>operation type,</li>
+<li>trait,</li>
+<li>comparison value,</li>
+<li>direction of selection, and</li>
+<li>whether the value is used as a culling rule.</li>
+</ul>
+<p>The example procedure uses performance under several environments or
+management conditions, abbreviated as OPTY, MDY, LNY, and MLNY, together
+with anthesis date and grain moisture. Some traits, such as Striga and
+MLN, were noted as ignored in the illustrated index replacement.</p>
+<p>This algorithmic representation is important because it distinguishes
+two kinds of decisions:</p>
+<ol type="1">
+<li><strong>non-compensatory constraints</strong>, for which failure
+cannot be offset by superiority in another trait; and</li>
+<li><strong>compensatory quantitative objectives</strong>, for which an
+index can rank total merit.</li>
+</ol>
+<h2 id="retrospective-index-weights">Retrospective index weights</h2>
+<p>The presentation uses retrospective weights based on the
+relationship</p>
+<p>[ =^{-1}, ]</p>
+<p>where () is the vector of realised selection differentials from the
+breeder’s historical selections and () is the phenotypic
+variance-covariance matrix of the selection criteria.</p>
+<p>For the S3-to-S4 example, the reported coefficients were
+approximately:</p>
+<table>
+<thead>
+<tr class="header">
+<th>Trait</th>
+<th style="text-align: right;">Retrospective coefficient</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Optimum-environment performance</td>
+<td style="text-align: right;">1.4254</td>
+</tr>
+<tr class="even">
+<td>Managed-drought performance</td>
+<td style="text-align: right;">0.0718</td>
+</tr>
+<tr class="odd">
+<td>Low-nitrogen performance</td>
+<td style="text-align: right;">0.1703</td>
+</tr>
+<tr class="even">
+<td>Anthesis date</td>
+<td style="text-align: right;">0.1206</td>
+</tr>
+</tbody>
+</table>
+<p>These coefficients reconstruct the implicit linear preference
+expressed by the current selections. They should not be interpreted as
+universal biological or economic values. They depend on the observed
+covariance matrix and the breeder’s past decisions.</p>
+<h2 id="comparison-with-the-current-procedure">Comparison with the
+current procedure</h2>
+<p>The presentation compares selections from the existing “Yoseph”
+approach with the index. Many selected materials were common, but each
+method also selected unique families or lines. This is expected even
+when total merit is similar because small changes in coefficients can
+alter rankings near the selection threshold.</p>
+<p>The supplementary comparison on page 21 reports the following
+selection differentials:</p>
+<table>
+<colgroup>
+<col style="width: 8%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Method</th>
+<th style="text-align: right;">Opt.</th>
+<th style="text-align: right;">MD</th>
+<th style="text-align: right;">LN</th>
+<th style="text-align: right;">AD</th>
+<th style="text-align: right;">MLN</th>
+<th style="text-align: right;">Striga</th>
+<th style="text-align: right;">Grain moisture</th>
+<th style="text-align: right;">Total merit</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Current approach</td>
+<td style="text-align: right;">1.09</td>
+<td style="text-align: right;">0.35</td>
+<td style="text-align: right;">0.48</td>
+<td style="text-align: right;">-0.39</td>
+<td style="text-align: right;">0.07</td>
+<td style="text-align: right;">0.30</td>
+<td style="text-align: right;">-0.31</td>
+<td style="text-align: right;">1.61</td>
+</tr>
+<tr class="even">
+<td>Index</td>
+<td style="text-align: right;">1.07</td>
+<td style="text-align: right;">0.41</td>
+<td style="text-align: right;">0.49</td>
+<td style="text-align: right;">0.53</td>
+<td style="text-align: right;">0.04</td>
+<td style="text-align: right;">0.23</td>
+<td style="text-align: right;">0.29</td>
+<td style="text-align: right;">1.70</td>
+</tr>
+</tbody>
+</table>
+<p>The index slightly increased total merit in this comparison. However,
+the sign and desirability of anthesis date and grain moisture must be
+aligned explicitly before deployment because the table alone does not
+indicate whether positive or negative values represent improvement.</p>
+<h2 id="recycling-stage-index">Recycling-stage index</h2>
+<p>A second application focuses on recycling parents using general
+combining ability under optimum and drought conditions. The index is
+calculated among families and then within families. Traits include grain
+yield, anthesis date, anthesis-silking interval, ear-related traits,
+lodging or breakage traits, ears per plant, and moisture under different
+conditions.</p>
+<p>The derived coefficients show strong positive emphasis on GCA for
+grain yield and substantial negative emphasis on some undesirable
+traits. The presentation reports nearly identical total merit for the
+current approach and the index, approximately 3.1327 and 3.1345,
+respectively. Nevertheless, the candidate lists differ, demonstrating
+that an index can reproduce overall selection intensity while changing
+which lines are retained.</p>
+<h2 id="conclusions-from-the-presentation">Conclusions from the
+presentation</h2>
+<p>The author concludes that:</p>
+<ul>
+<li>a traditional selection procedure can be translated into an
+index;</li>
+<li>an index provides consistency across cycles and users;</li>
+<li>initial weights can be obtained retrospectively from historical
+decisions;</li>
+<li>the index should be adopted and subsequently refined; and</li>
+<li>future indices should be defined by <strong>program, stage, and
+product profile</strong>.</li>
+</ul>
+<p>The proposed next step is to obtain data from Stage 1 and Stage 2,
+particularly for recycling, across programs such as Latin America, East
+Africa, and South Asia.</p>
+<h2 id="strengths">Strengths</h2>
+<ul>
+<li>Starts from the real breeding process rather than an abstract
+index.</li>
+<li>Makes hidden selection rules explicit and auditable.</li>
+<li>Separates hard culling constraints from compensatory traits.</li>
+<li>Uses historical selections to derive an initial index.</li>
+<li>Compares both total merit and overlap in selected candidates.</li>
+<li>Recognises the need for program-, stage-, and
+product-profile-specific indices.</li>
+</ul>
+<h2 id="limitations-and-implementation-cautions">Limitations and
+implementation cautions</h2>
+<ul>
+<li>The presentation is not a peer-reviewed study and provides limited
+information on sample size, uncertainty, and statistical
+validation.</li>
+<li>Trait abbreviations and the direction of improvement are not defined
+consistently on all pages.</li>
+<li>Some selection differentials are presented without standard errors
+or confidence intervals.</li>
+<li>Retrospective weights reproduce past behaviour; they do not
+demonstrate that the past behaviour was optimal.</li>
+<li>A linear index cannot safely replace mandatory disease, quality, or
+maturity thresholds unless those constraints are retained
+separately.</li>
+<li>The covariance matrix and trait scaling must be updated when the
+population, target environment, or stage changes.</li>
+</ul>
+<h2 id="operational-interpretation">Operational interpretation</h2>
+<p>The main value of the presentation is methodological. It shows how a
+breeder’s informal sequence of filters can be converted into a
+reproducible decision system. The recommended practice is a hybrid
+system: use explicit culling for non-negotiable requirements and use a
+selection index for traits where compensation is biologically and
+commercially acceptable.</p>
+</body>
+</html>

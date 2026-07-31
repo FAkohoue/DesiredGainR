@@ -1,0 +1,163 @@
+Guideline
+Practical implementation
+of selection indices
+This guideline provides a step-by-step approach to                                     Optimizing breeding
+implement selection indices, with the objective of providing                           schemes
+a creating a practical reference for plant breeding                                    Giovanny Covarrubias-
+professionals. More in-depth knowledge can be found in                                 Pazaran
+links throughout the text.                                                             g.covarrubias@cgiar.org
+
+                                                                                       18/06/2021
+
+
+
+As a prerequisite to implementing selection indices, it is assumed that the breeding scheme in
+question can be identified as series of stages in which a reasonably limited number of traits are
+evaluated in order to rapidly develop new varieties for a defined target market, and that the
+breeding program has access to biometrics expertise.
+
+
+1.   Create a table to record the stages at which traits are used for selection, the surrogate for
+     trait merit used and the number of environments in which selection takes place for each trait.
+
+2.   Identify the stage at which you would like to implement a selection index (Figure 1).
+
+
+                Trait 1             Trait 2           Trait 3           Trait 4           Trait 5           Trait 6
+            Surrogate   #Envs   Surrogate   #Envs Surrogate   #Envs Surrogate   #Envs Surrogate   #Envs Surrogate #Envs
+
+ Crossing
+ Block
+
+ Nursery     Visual       1                         Visual      1
+
+ STG1                             BLUP        1     Visual      1     BLUP        2
+
+ STG2                                                                 BLUP        4     BLUP        2
+
+ STG3                                                                 BLUP        6                       BLUP        2
+
+ On Farm                                                              BLUP        30
+
+
+Figure 1.   Example table of traits used for selection across different stages highlighting a selected
+            stage to implement a selection index.
+
+
+
+                                                       1
+
+3.     Identify the traits for no data is collected at the selection index stage. Adjust the breeding
+       scheme so that data is collected for all traits at the selection index stage (beyond visual
+       evaluation).
+
+4.     Once complete data is available for all traits of interest at the selection index stage, record
+       adjusted means for all individuals and traits at that stage (one mean per trait per individual)
+       (Figure 2).
+
+
+
+                      Trait 1       Trait 2       Trait 3        Trait 4        Trait 5        Trait 6
+
+ Individual 1                        100             30            1.2
+
+ Individual 2                        110             32            1.4
+
+ ...                                  ...            ...            ...
+
+ Individual n                        105             36            1.6
+
+
+Figure 2. Example table of adjusted means for traits of interest for all individuals in the stage at
+          which the selection index is applied (for the purposes of this example, STG1).
+
+
+5.     Standardize the adjusted means across all traits in the table (Figure 3).
+
+
+
+                      Trait 1       Trait 2       Trait 3        Trait 4        Trait 5        Trait 6
+
+ Individual 1                        -1.6            -1            -0.5
+
+ Individual 2                         0.6            0.1          -0.05
+
+ ...                                  ...            ...            ...
+
+ Individual n                         0.4            0.4           0.3
+
+
+Figure 3. Example table of standardized adjusted means for in the stage at which the selection
+          index is applied.
+
+
+
+
+                                                 2
+
+6.   Assign weights to the traits. With standardize traits, a desired differential (d) of 1 implies that
+     you look to select individuals that are 1 standard deviation (σ) away from the population
+     mean, if rg among traits is zero the weight will stay as 1, and with rg≠0 will be ≠ 1.
+
+     Start by assigning a differential of 1 to all traits (implying you desire 1 standard deviation (σ)
+     progress for each trait when you select).1 Ultimately, selection will be constrained by the
+     genetic correlation between traits, and the selection intensity of the breeding program.
+
+     Do not attempt to interpret the weights; they lack meaning (especially with strong genetic
+     correlations). The selection differential is the only decision of interest.
+
+
+
+
+                   .
+Figure 4. Graphical example of 4 traits with different scales and variance (covariance~0). Although
+       scaled and      non-scaled traits have the same effect on selection, desired differentials used
+       with scaled traits are interpreted as desired standard deviations (σ) of genetic gain, while
+       differentials for      non-scaled traits must be specified in their original units and resulting
+       weights are difficult to interpret. Although the weights will be different for the two
+       approaches, both will lead to the same results with the advantage of an easier interpretation
+       when scaled traits are used. Small differences in gain are due to the stochastic nature of the
+       simulations.
+
+
+
+
+1
+ Alternatively, you could obtain initial weights by performing a retrospective analysis where weights
+are obtained as b=P-S, with P being a phenotype variance-covariance matrix (Bernardo, 2005) and S
+are the selection differentials for the different traits. Take the selection differentials (S) and translate
+them into equivalent σ which will become your initial weights for the standardized traits.
+
+
+                                                     3
+
+Use programs such as DESIRE (DESIRE - Target your genetic gains [une.edu.au]) to understand if
+the progress of 1 or more σ is possible given your current trait genetic correlations (rg) and
+selection intensity, and experiment with potential gains that can be achieved with different traits.
+
+
+
+
+Figure 5. Example of the DESIRE interface to experiment with trait weights in a selection index.
+          Programs like this allow the user to see the effect of weighting one trait in the correlated
+          traits.
+When adjusting the weights using the genetic correlation through the inverse of the genetic
+covariance (Pesek and Baker, 1969) this removes interpretability of weights for scaled traits but has
+an important effect in the long-term gains so needs to be done and should not be considered to
+use directly as weights the desired progress of standard deviations. In practice G is not known and
+is enough to use across-environment adjusted means by a mixed model to scale, define the
+desired σ of progress and use the covariance of those adjusted means as a surrogate for G.
+
+7.   Apply the weights in the index (remember the relationship between the indices and models
+     used to obtain adjusted means to avoid repeating certain calculations) and select the best
+     individuals for the index.
+
+8.   Repeat steps 7) and 8) every selection season, ensuring that values are fine-tuned.
+References: 1) Bernardo, R. (2002). Breeding for quantitative traits in plants (Vol. 1, p. 369). Woodbury, MN: Stemma
+press. 2) Pešek, J., & Baker, R. J. (1969). Desired improvement in relation to selection indices. Canadian journal of plant
+science, 49(6), 803-804.
+
+
+
+                                                         4
+

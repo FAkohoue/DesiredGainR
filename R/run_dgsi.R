@@ -9,7 +9,14 @@
 #' @param cand_data Data frame containing candidate identifiers and one column
 #'   per trait.
 #' @param trait_cols Character vector naming the trait columns.
-#' @param dg Named numeric vector of desired gains in the analysis scale.
+#' @param dg Named numeric vector of desired gains, expressed in **candidate
+#'   standard-deviation units of the favourable-direction trait space**. This
+#'   is true regardless of `scale_traits`: the realised response that `dg` is
+#'   compared against is always divided by the candidate column standard
+#'   deviations, so `dg = c(yield = 0.5)` requests a half-standard-deviation
+#'   shift in the selected mean, never half a tonne per hectare. To express a
+#'   target in original trait units, divide it by that trait's candidate
+#'   standard deviation before passing it here. See Details.
 #' @param P Phenotypic or index-variable covariance matrix. If `NULL`, an
 #'   empirical working covariance matrix is estimated from `ref_data`; its
 #'   provenance is reported and it is not described as a genetic covariance.
@@ -46,10 +53,77 @@
 #' @param return_all_reps Whether to retain full replicate results.
 #' @param debug Whether to print progress messages.
 #'
+#' @details
+#' # Units of `dg` and of `realised_response`
+#'
+#' For each trait the realised response is
+#' \deqn{r_j = \frac{\bar{x}_{j,\mathrm{selected}} -
+#' \bar{x}_{j,\mathrm{all}}}{s_j},}
+#' where \eqn{s_j} is the standard deviation of trait \eqn{j} across all
+#' candidates in the favourable-direction analysis space. Both `dg` and
+#' `realised_response` are therefore in candidate standard-deviation units.
+#'
+#' # Objective function
+#'
+#' The search minimises
+#' \deqn{\sum_j v_j \left(\frac{r_j - d_j}{\max(|d_j|,\,0.25)}\right)^2,}
+#' with `objective_weights` \eqn{v_j}. The floor of `0.25` on the denominator
+#' prevents traits with a near-zero desired gain from dominating the objective
+#' through division by a vanishing scale factor. Proposal standard deviations
+#' are `sd_scale * pmax(abs(centre), 0.05)`, where the `0.05` floor keeps the
+#' search from stalling when a component of the desired-gain vector is at or
+#' near zero. Both floors are fixed constants in this release.
+#'
+#' # Optimisation and reproducibility
+#'
+#' The search is a stochastic hill climb over perturbed desired-gain vectors:
+#' each proposal is mapped to coefficients by
+#' \eqn{b = P^{-1}G(G^\mathsf{T}P^{-1}G)^{-1}d} and accepted only if it lowers
+#' the objective. The objective is a step function of \eqn{b}, because it
+#' depends on \eqn{b} only through the identity of the selected set, so a
+#' derivative-free search is used. The replicate with the lowest objective is
+#' returned; because that choice is made on the same candidates that are then
+#' selected, the reported objective is optimistically biased, and the result
+#' depends on `n_rep`. Use `validation_data` for an unbiased evaluation of the
+#' winning coefficients. `run_dgsi()` seeds the RNG from `seed` and restores
+#' the caller's RNG state before returning.
+#'
+#' Ties in the index score are broken by ascending candidate identifier, so
+#' the selected set does not depend on input row order.
+#'
 #' @return An object of class `desired_gain_index`. The `best_replicate`
 #'   component identifies the replicate selected automatically. The
 #'   `replicate_diagnostics`, `rank_correlation`, `coefficient_stability`, and
 #'   `selected_set_agreement` components describe optimisation stability.
+#'
+#' @examples
+#' set.seed(3)
+#' traits <- c("yield", "disease")
+#' candidates <- data.frame(
+#'   GenoID = paste0("G", seq_len(40)),
+#'   yield = rnorm(40),
+#'   disease = rnorm(40)
+#' )
+#' # In practice G comes from a fitted multi-trait genetic model, or from
+#' # estimate_genetic_covariance(); it is not the covariance of raw phenotypes.
+#' G <- matrix(c(1.0, -0.3, -0.3, 0.8), 2, dimnames = list(traits, traits))
+#'
+#' fit <- run_dgsi(
+#'   init_data = candidates["GenoID"],
+#'   cand_data = candidates,
+#'   trait_cols = traits,
+#'   dg = c(yield = 0.6, disease = 0.4),
+#'   G = G,
+#'   lower_is_better = "disease",
+#'   n_select = 8,
+#'   n_iter = 50,
+#'   n_rep = 3,
+#'   seed = 3
+#' )
+#' fit$coefficients
+#' fit$realised_response
+#' fit$replicate_diagnostics
+#'
 #' @export
 run_dgsi <- function(
     init_data,
@@ -120,6 +194,32 @@ run_dgsi <- function(
   X <- prep$candidate_matrix
   Xref <- prep$reference_matrix
   p <- length(trait_cols)
+
+  # Covarrubias-Pazaran (2021) standardises adjusted means before indexing, and
+  # Crosbie et al. (1980) showed that equal desired gains on unstandardised
+  # traits concentrate selection on whichever trait carries the largest
+  # variance. Warn only when the trait scales actually differ enough for this
+  # to matter, so that analyses on comparable scales stay quiet.
+  if (!isTRUE(scale_traits) && p > 1L) {
+    candidate_sd <- apply(X, 2L, stats::sd)
+    candidate_sd <- candidate_sd[is.finite(candidate_sd) & candidate_sd > 0]
+    if (length(candidate_sd) > 1L &&
+        max(candidate_sd) / min(candidate_sd) > 5) {
+      warning(
+        sprintf(
+          paste(
+            "Trait standard deviations differ by a factor of %.0f and",
+            "scale_traits = FALSE. Desired gains are interpreted in candidate",
+            "standard-deviation units regardless, so the index will be",
+            "dominated by the highest-variance trait. Consider",
+            "scale_traits = TRUE."
+          ),
+          max(candidate_sd) / min(candidate_sd)
+        ),
+        call. = FALSE
+      )
+    }
+  }
 
   dg <- .dgr_named_vector(dg, trait_cols, "dg")
   if (is.null(objective_weights)) {
@@ -202,18 +302,29 @@ run_dgsi <- function(
     }
   }
 
-  select_rows <- function(score, eligibility = eligible) {
+  # Ties are broken by candidate identifier so that the selected set does not
+  # depend on the row order of the input data.
+  candidate_key <- as.character(prep$init_data[[id_col]])
+  select_rows <- function(score, eligibility = eligible,
+                          key = candidate_key) {
     pool <- which(eligibility)
-    pool[order(score[pool], decreasing = TRUE)][
+    pool[order(-score[pool], key[pool])][
       seq_len(min(n_select, length(pool)))
     ]
   }
-  realised_response <- function(score, matrix = X, eligibility = eligible) {
-    keep <- select_rows(score, eligibility)
+  # Column means and standard deviations do not change during the search, so
+  # they are computed once per matrix instead of once per iteration.
+  .column_stats <- function(matrix) {
     base_sd <- apply(matrix, 2L, stats::sd)
     base_sd[!is.finite(base_sd) | base_sd == 0] <- 1
+    list(centre = colMeans(matrix), sd = base_sd)
+  }
+  X_stats <- .column_stats(X)
+  realised_response <- function(score, matrix = X, eligibility = eligible,
+                                key = candidate_key, stats_cache = X_stats) {
+    keep <- select_rows(score, eligibility, key)
     response <- (colMeans(matrix[keep, , drop = FALSE]) -
-                   colMeans(matrix)) / base_sd
+                   stats_cache$centre) / stats_cache$sd
     names(response) <- trait_cols
     list(response = response, keep = keep)
   }
@@ -231,6 +342,18 @@ run_dgsi <- function(
     denominator <- pmax(abs(dg), 0.25)
     sum(objective_weights * ((response - dg) / denominator)^2)
   }
+
+  # Restore the caller's random number generator state on exit. run_dgsi()
+  # seeds the RNG for reproducibility, but a package should not leave the
+  # user's stream permanently advanced or reseeded.
+  if (!exists(".Random.seed", envir = globalenv(), inherits = FALSE)) {
+    stats::runif(1L)
+  }
+  .dgr_entry_seed <- get(".Random.seed", envir = globalenv(), inherits = FALSE)
+  on.exit(
+    assign(".Random.seed", .dgr_entry_seed, envir = globalenv()),
+    add = TRUE
+  )
 
   set.seed(as.integer(seed))
   replicates <- vector("list", n_rep)
@@ -341,7 +464,9 @@ run_dgsi <- function(
     validation_eval <- realised_response(
       validation_score,
       matrix = prep$validation_matrix,
-      eligibility = rep(TRUE, nrow(prep$validation_matrix))
+      eligibility = rep(TRUE, nrow(prep$validation_matrix)),
+      key = seq_len(nrow(prep$validation_matrix)),
+      stats_cache = .column_stats(prep$validation_matrix)
     )
     validation <- list(
       score = validation_score,
@@ -373,6 +498,29 @@ run_dgsi <- function(
     coefficients = best$b,
     realised_response = best$response,
     objective = best$objective,
+    # Joukhadar et al. (2024) benchmark the iterative solution against the
+    # classical index obtained by substituting the desired gains directly.
+    # That comparator costs nothing, because it is the search starting point.
+    non_iterated = local({
+      baseline_b <- coefficient(dg)
+      baseline <- realised_response(as.numeric(X %*% baseline_b))
+      list(
+        coefficients = baseline_b,
+        realised_response = baseline$response,
+        objective = objective(baseline$response),
+        note = paste(
+          "Classical Yamada solution using the supplied desired gains without",
+          "iteration. Because d enters as a scalar direction, this is",
+          "invariant to multiplying every desired gain by a constant."
+        )
+      )
+    }),
+    # A diagnostic must never be able to break the fit, and the scale warning
+    # is issued separately and conditionally above.
+    effective_weights = tryCatch(
+      effective_weights(best$b, G, P, warn = FALSE),
+      error = function(e) NULL
+    ),
     best_replicate = best_replicate,
     replicate_diagnostics = replicate_diagnostics,
     rank_correlation = rank_correlation,

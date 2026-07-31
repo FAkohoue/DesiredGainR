@@ -8,7 +8,7 @@ estimate_genetic_covariance(
   values,
   trait_cols = NULL,
   method = c("prediction_covariance", "pev_corrected", "se_diagonal_corrected",
-    "relationship_adjusted"),
+    "relationship_adjusted", "adjusted_means_surrogate"),
   prediction_error_covariance = NULL,
   prediction_se = NULL,
   relationship_matrix = NULL,
@@ -79,6 +79,17 @@ entries remain covariances of predictions. The result is therefore a
 partial working approximation, not a complete estimate of total genetic
 covariance.
 
+\code{method = "adjusted_means_surrogate"} returns the covariance of
+across-environment adjusted means and labels it as a working surrogate for
+genetic covariance. Covarrubias-Pazaran (2021) recommends this for
+operational use when no genetic covariance matrix is available, on the
+grounds that a mixed-model adjustment removes most environmental and design
+variation. However, the adjusted means still carry estimation error, so the
+result is not an estimate of additive genetic covariance and will differ
+from the covariance governing response in the next generation. Hence it
+should be reported as a surrogate and revisited once a fitted multi-trait
+model becomes available.
+
 \code{method = "relationship_adjusted"} estimates the covariance of predictions
 after accounting for a supplied relationship matrix:
 \deqn{\widehat{G}_{pred} =
@@ -87,9 +98,16 @@ It does not undo BLUP or GEBV shrinkage. Estimating total genetic covariance
 for related candidates requires prediction-error covariance from the fitted
 multivariate model, including the relevant relationship structure.
 
-BLUEs, adjusted phenotypic means, and raw phenotypes contain residual or
-environmental covariance. Their covariance cannot identify genetic
-covariance without a genetic model, replication, or relationship
-information and should not be passed to this function as genetic
-predictions.
+Raw phenotypes contain residual and environmental covariance. Their
+covariance cannot identify genetic covariance without a genetic model,
+replication, or relationship information, and should not be passed to this
+function as genetic predictions. Best linear unbiased estimates (BLUEs) and
+adjusted means occupy an intermediate position: they are not genetic
+covariance estimates either, but \code{method = "adjusted_means_surrogate"}
+makes their use explicit and auditable rather than leaving breeders to
+substitute them silently.
+}
+\references{
+Covarrubias-Pazaran G (2021). \emph{Practical implementation of selection
+indices.} CGIAR Excellence in Breeding.
 }

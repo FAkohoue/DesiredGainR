@@ -2,7 +2,7 @@ Package: DesiredGainR
 Type: Package
 Title: Desired-Gain Selection Index and Quadratic Genomic Selection Index
     Tools for Plant Breeding
-Version: 0.3.0
+Version: 0.5.0
 Authors@R:
     person(
       given   = "Félicien",
@@ -11,8 +11,6 @@ Authors@R:
       role    = c("aut", "cre"),
       comment = c(ORCID = "0000-0002-2160-0182")
     )
-Author: Félicien Akohoue [aut, cre]
-Maintainer: Félicien Akohoue <akohoue.f@gmail.com>
 Description: Provides auditable multi-trait selection-index tools for plant
     breeding programs. The desired-gain selection index (DGSI) searches for
     coefficients whose realised response approaches breeder-defined targets
@@ -29,12 +27,17 @@ Description: Provides auditable multi-trait selection-index tools for plant
     rankings, and candidate-specific score contributions.
 License: MIT + file LICENSE
 Encoding: UTF-8
+Language: en-GB
+LazyData: true
 Roxygen: list(markdown = TRUE)
+Depends:
+    R (>= 4.1)
 Imports:
     data.table,
     stats,
     utils
 Suggests:
+    AlphaSimR (>= 1.5.0),
     knitr,
     rmarkdown,
     testthat (>= 3.0.0)

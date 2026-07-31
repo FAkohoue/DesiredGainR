@@ -5,35 +5,111 @@ on:
     branches: [main, master]
   workflow_dispatch:
 
+concurrency:
+  group: "pages-${{ github.ref }}"
+  cancel-in-progress: true
+
 permissions:
   contents: write
+  pages:    write
+  id-token: write
 
 jobs:
-  pkgdown:
+  build:
     runs-on: ubuntu-latest
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
     steps:
-      - uses: actions/checkout@v4
-
-      - uses: r-lib/actions/setup-pandoc@v2
-
-      - uses: r-lib/actions/setup-r@v2
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
+          fetch-depth: 1
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install Pandoc
+        uses: r-lib/actions/setup-pandoc@v2
+        with:
+          pandoc-version: "3.1.11"
+
+      - name: Install R
+        uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: "release"
           use-public-rspm: true
 
-      - uses: r-lib/actions/setup-r-dependencies@v2
+      - name: Install system dependencies
+        # DesiredGainR contains no compiled code, so this is the minimal set
+        # required by the documentation toolchain rather than by the package.
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends \
+            libcurl4-openssl-dev libssl-dev libxml2-dev \
+            libfontconfig1-dev libharfbuzz-dev libfribidi-dev \
+            libfreetype6-dev libpng-dev libtiff5-dev libjpeg-dev \
+            zlib1g-dev libgit2-dev
+
+      - name: Install R package dependencies
+        uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          extra-packages: any::pkgdown, any::roxygen2, local::.
+          extra-packages: any::pkgdown, any::roxygen2
+          needs: website
 
       - name: Document package
         shell: Rscript {0}
         run: roxygen2::roxygenise()
 
-      - name: Build site
-        shell: Rscript {0}
-        run: pkgdown::build_site_github_pages(new_process = FALSE, install = FALSE)
+      - name: Install DesiredGainR
+        # R CMD INSTALL is the only reliable way to place the package in the
+        # default library so that library("DesiredGainR") resolves in the
+        # subsequent pkgdown step. install.packages(".", repos = NULL) can
+        # install to a path that pkgdown does not search.
+        run: R CMD INSTALL --no-multiarch --with-keep.source .
 
-      - name: Deploy to GitHub Pages
-        uses: JamesIves/github-pages-deploy-action@v4
+      - name: Build pkgdown site
+        env:
+          PKGDOWN_DEV_MODE: release
+        shell: Rscript {0}
+        run: |
+          pkgdown::build_site_github_pages(
+            new_process = FALSE,
+            install     = FALSE
+          )
+
+      - name: Publish the Breeder's Guide alongside the pkgdown site
+        # inst/extdata/DesiredGainR_Breeder_Guide.{html,pdf} are pre-built,
+        # version-controlled artifacts generated from
+        # inst/guide/DesiredGainR_Breeder_Guide.Rmd. pkgdown does not know
+        # about them, so they are copied into docs/ under the fixed name the
+        # navbar "guide" component links to. The step warns rather than fails
+        # when the guide has not yet been generated, so that the rest of the
+        # site still publishes.
+        run: |
+          if [ -f inst/extdata/DesiredGainR_Breeder_Guide.html ]; then
+            cp inst/extdata/DesiredGainR_Breeder_Guide.html docs/breeder-guide.html
+            echo "Published breeder-guide.html"
+          else
+            echo "::warning::Breeder's Guide HTML not found; the navbar link will 404."
+          fi
+          if [ -f inst/extdata/DesiredGainR_Breeder_Guide.pdf ]; then
+            cp inst/extdata/DesiredGainR_Breeder_Guide.pdf docs/breeder-guide.pdf
+            echo "Published breeder-guide.pdf"
+          fi
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          branch: gh-pages
-          folder: docs
+          path: docs
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url:  ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id:   deployment
+        uses: actions/deploy-pages@v4

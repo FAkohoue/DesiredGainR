@@ -1,35 +1,6 @@
 # Internal utilities for DesiredGainR
-
-# nocov start
-if (getRversion() >= "2.15.1") {
-  utils::globalVariables(c(
-    "..dg_cols_present",
-    "..qgsi_cols_present",
-    "SelectionIndex",
-    "Selected",
-    "Eligible",
-    "Rank",
-    "LinearPart",
-    "QuadraticPart",
-    "QGSI",
-    "Rank_SelectionIndex",
-    "LinearDGPart",
-    "QuadraticDGPart",
-    "QGSI_DG",
-    "Rank_QGSI_DG",
-    "Rank_LinearDGPart",
-    "Rank_QuadraticDGPart",
-    "DG_SelectionIndex",
-    "DG_Rank_SelectionIndex",
-    "DG_Selected",
-    "DG_Rank",
-    "QGSI_Rank",
-    "RankDiff_DG_minus_QGSI",
-    "AbsRankDiff_DG_vs_QGSI",
-    "SignSame_DG_QGSI"
-  ))
-}
-# nocov end
+#
+# Non-standard-evaluation globals are declared once in R/globals.R.
 
 #' Internal debug message helper
 #'
@@ -43,6 +14,10 @@ if (getRversion() >= "2.15.1") {
 
 #' Internal z-score helper
 #'
+#' Not called by any exported function. Retained only so that external code
+#' calling `DesiredGainR:::.desiredgainr_z()` does not break. Scheduled for
+#' removal once no reverse dependency relies on it.
+#'
 #' @param x Numeric vector.
 #'
 #' @return Numeric vector.
@@ -54,6 +29,12 @@ if (getRversion() >= "2.15.1") {
 }
 
 #' Validate a square matrix
+#'
+#' Superseded internally by `.dgr_covariance()` and
+#' `.dgr_qg_symmetric_matrix()`, which also check names, finiteness, and
+#' symmetry. Retained only so that external code calling
+#' `DesiredGainR:::.validate_square_matrix()` does not break. Scheduled for
+#' removal once no reverse dependency relies on it.
 #'
 #' @param M Matrix.
 #' @param p Expected dimension.

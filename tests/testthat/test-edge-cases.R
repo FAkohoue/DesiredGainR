@@ -46,16 +46,24 @@ test_that("legacy desired-gain QGSI wrapper is explicit about semantics", {
   )
   W <- diag(c(t1 = 0.1, t2 = -0.1))
   dimnames(W) <- list(c("t1", "t2"), c("t1", "t2"))
+  # The wrapper raises two distinct warnings, and both are intended. The first
+  # states that desired gains are not economic weights; the second, from
+  # run_qgsi(), states that the wrapper's center_traits = FALSE default leaves
+  # the reported theoretical parameters describing a centred index while the
+  # scores are uncentred. Asserting both keeps either from being lost.
   expect_warning(
-    result <- run_qgsi_desired_gain(
-      values[, .(GenoID)],
-      values,
-      c("t1", "t2"),
-      dg = c(t1 = 1, t2 = 0.5),
-      W_d = W,
-      debug = FALSE
+    expect_warning(
+      result <- run_qgsi_desired_gain(
+        values[, .(GenoID)],
+        values,
+        c("t1", "t2"),
+        dg = c(t1 = 1, t2 = 0.5),
+        W_d = W,
+        debug = FALSE
+      ),
+      "desired gains are not"
     ),
-    "desired gains are not"
+    "centred covariance"
   )
   expect_true("QGSI_DG" %in% names(result$ranked_geno))
 })

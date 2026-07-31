@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang xml:lang>
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Covarrubias-Pazaran (2021): Practical implementation of
+selection indices</title>
+  <style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+</style>
+  <style type="text/css">:root {
+--text: #202124;
+--muted: #5f6368;
+--border: #dfe1e5;
+--panel: #f8f9fa;
+--accent: #1b5e5a;
+}
+html { font-size: 17px; }
+body {
+max-width: 1080px;
+margin: 0 auto;
+padding: 2.5rem 3rem 5rem;
+font-family: Georgia, "Times New Roman", serif;
+line-height: 1.62;
+color: var(--text);
+background: white;
+}
+h1, h2, h3, h4 {
+font-family: Arial, Helvetica, sans-serif;
+line-height: 1.25;
+color: #173f3d;
+margin-top: 2rem;
+}
+h1 { font-size: 2.15rem; border-bottom: 3px solid var(--accent); padding-bottom: .55rem; }
+h2 { font-size: 1.65rem; border-bottom: 1px solid var(--border); padding-bottom: .35rem; }
+h3 { font-size: 1.28rem; }
+h4 { font-size: 1.08rem; }
+a { color: #0b57d0; }
+table { border-collapse: collapse; width: 100%; margin: 1.2rem 0 1.6rem; font-size: .94rem; }
+th, td { border: 1px solid var(--border); padding: .55rem .65rem; vertical-align: top; }
+th { background: #eef5f4; font-family: Arial, Helvetica, sans-serif; text-align: left; }
+tr:nth-child(even) td { background: #fbfcfc; }
+code { background: #f1f3f4; padding: .1rem .25rem; border-radius: 3px; }
+blockquote { border-left: 4px solid var(--accent); margin-left: 0; padding: .2rem 1rem; color: var(--muted); background: var(--panel); }
+#TOC { border: 1px solid var(--border); background: var(--panel); padding: 1rem 1.5rem; margin: 1.5rem 0 2rem; }
+#TOC ul { margin-top: .25rem; }
+hr { border: 0; border-top: 1px solid var(--border); margin: 2.5rem 0; }
+.math.display { overflow-x: auto; padding: .3rem 0; }
+@media (max-width: 760px) {
+body { padding: 1.2rem; }
+table { display: block; overflow-x: auto; }
+}
+@media print {
+body { max-width: none; padding: 0; font-size: 11pt; }
+#TOC { break-after: page; }
+h2, h3 { break-after: avoid; }
+table { break-inside: avoid; }
+}
+</style>
+</head>
+<body>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#covarrubias-pazaran-2021-practical-implementation-of-selection-indices" id="toc-covarrubias-pazaran-2021-practical-implementation-of-selection-indices">Covarrubias-Pazaran
+(2021): Practical implementation of selection indices</a>
+<ul>
+<li><a href="#document-information" id="toc-document-information">Document information</a></li>
+<li><a href="#purpose" id="toc-purpose">Purpose</a></li>
+<li><a href="#step-1-map-traits-across-the-breeding-pipeline" id="toc-step-1-map-traits-across-the-breeding-pipeline">Step 1: Map
+traits across the breeding pipeline</a></li>
+<li><a href="#step-2-select-the-index-stage" id="toc-step-2-select-the-index-stage">Step 2: Select the index
+stage</a></li>
+<li><a href="#step-3-close-trait-information-gaps" id="toc-step-3-close-trait-information-gaps">Step 3: Close
+trait-information gaps</a></li>
+<li><a href="#step-4-assemble-adjusted-means" id="toc-step-4-assemble-adjusted-means">Step 4: Assemble adjusted
+means</a></li>
+<li><a href="#step-5-standardise-traits" id="toc-step-5-standardise-traits">Step 5: Standardise traits</a></li>
+<li><a href="#step-6-specify-desired-differentials-and-derive-weights" id="toc-step-6-specify-desired-differentials-and-derive-weights">Step 6:
+Specify desired differentials and derive weights</a></li>
+<li><a href="#feasibility-assessment" id="toc-feasibility-assessment">Feasibility assessment</a></li>
+<li><a href="#covariance-matrix-used-in-practice" id="toc-covariance-matrix-used-in-practice">Covariance matrix used in
+practice</a></li>
+<li><a href="#step-7-calculate-the-index-and-select-candidates" id="toc-step-7-calculate-the-index-and-select-candidates">Step 7:
+Calculate the index and select candidates</a></li>
+<li><a href="#step-8-recalibrate-every-selection-season" id="toc-step-8-recalibrate-every-selection-season">Step 8: Recalibrate
+every selection season</a></li>
+<li><a href="#main-principles" id="toc-main-principles">Main
+principles</a></li>
+<li><a href="#strengths" id="toc-strengths">Strengths</a></li>
+<li><a href="#limitations-and-recommended-extensions" id="toc-limitations-and-recommended-extensions">Limitations and
+recommended extensions</a></li>
+<li><a href="#practical-value" id="toc-practical-value">Practical
+value</a></li>
+</ul></li>
+</ul>
+</nav>
+<h1 id="covarrubias-pazaran-2021-practical-implementation-of-selection-indices">Covarrubias-Pazaran
+(2021): Practical implementation of selection indices</h1>
+<h2 id="document-information">Document information</h2>
+<ul>
+<li><strong>Author:</strong> Giovanny Covarrubias-Pazaran</li>
+<li><strong>Date:</strong> 18 June 2021</li>
+<li><strong>Document type:</strong> Four-page practical guideline</li>
+<li><strong>Source file:</strong>
+<code>Guideline_Practical Implementation of Selection Indices.pdf</code></li>
+</ul>
+<h2 id="purpose">Purpose</h2>
+<p>The guideline provides a concise sequence for introducing selection
+indices into an operational plant-breeding pipeline. It assumes that the
+program has:</p>
+<ul>
+<li>a clearly defined target market or product profile;</li>
+<li>a breeding scheme organised into stages;</li>
+<li>a manageable set of selection traits at each stage; and</li>
+<li>access to biometric support.</li>
+</ul>
+<p>The document focuses on implementation rather than on a full
+derivation of selection-index theory.</p>
+<h2 id="step-1-map-traits-across-the-breeding-pipeline">Step 1: Map
+traits across the breeding pipeline</h2>
+<p>The program should create a stage-by-trait table recording:</p>
+<ul>
+<li>the stage at which each trait is used;</li>
+<li>the surrogate used to represent merit, such as visual score or BLUP;
+and</li>
+<li>the number of environments supporting the estimate.</li>
+</ul>
+<p>The example spans crossing block, nursery, Stage 1, Stage 2, Stage 3,
+and on-farm testing. This map identifies where information is available
+and where the evidence supporting selection becomes more reliable.</p>
+<h2 id="step-2-select-the-index-stage">Step 2: Select the index
+stage</h2>
+<p>A specific stage should be selected for index implementation. The
+chosen stage should have enough candidates to benefit from ranking and
+enough information to estimate merit for all important traits.
+Introducing an index too early can be ineffective if key traits have not
+been measured; introducing it too late can reduce the opportunity to
+save resources.</p>
+<h2 id="step-3-close-trait-information-gaps">Step 3: Close
+trait-information gaps</h2>
+<p>All traits included in the index must have a quantitative selection
+criterion at the chosen stage. The guideline recommends modifying the
+breeding scheme when a trait is represented only by visual judgement or
+is not measured at all.</p>
+<p>This is an important operational requirement. A multi-trait index
+cannot correct for missing trait information unless a formal prediction
+model is used to supply it.</p>
+<h2 id="step-4-assemble-adjusted-means">Step 4: Assemble adjusted
+means</h2>
+<p>For each candidate and trait, the program should obtain one adjusted
+value, such as a BLUE, BLUP, or other mixed-model estimate. The data
+matrix should have candidates in rows and traits in columns.</p>
+<p>The use of adjusted means reduces confounding with field design,
+environment, and incomplete testing. However, the guideline does not
+discuss prediction-error variance. In a more advanced implementation,
+differences in reliability among candidates and traits should be
+considered.</p>
+<h2 id="step-5-standardise-traits">Step 5: Standardise traits</h2>
+<p>Adjusted values should be standardised so that traits are expressed
+in standard-deviation units. Standardisation has two main benefits:</p>
+<ul>
+<li>traits measured in different units become directly comparable;
+and</li>
+<li>desired responses can be expressed as the number of standard
+deviations from the population mean.</li>
+</ul>
+<p>For a standardised trait, a desired differential of 1 represents
+selection toward a mean one standard deviation above the population
+mean, subject to selection intensity and correlations.</p>
+<h2 id="step-6-specify-desired-differentials-and-derive-weights">Step 6:
+Specify desired differentials and derive weights</h2>
+<p>The guideline recommends beginning with a desired differential of one
+standard deviation for each trait. The desired differential is the
+breeder’s decision. The resulting index coefficients are mathematical
+quantities derived from the covariance structure and should not be
+interpreted directly.</p>
+<p>When traits are correlated, a coefficient can differ substantially
+from the desired differential and may even have a counterintuitive sign.
+This does not necessarily mean that the index opposes the trait. It can
+reflect redundancy or compensation among correlated criteria.</p>
+<p>The guideline also proposes a retrospective initialisation:</p>
+<p>[ =^{-1}, ]</p>
+<p>where () contains the historical selection differentials and () is
+the covariance matrix of the selection criteria. Historical
+differentials can be converted to standard-deviation units and used as
+the starting objective.</p>
+<h2 id="feasibility-assessment">Feasibility assessment</h2>
+<p>The guideline recommends using a tool such as DESIRE to determine
+whether the requested response is feasible given:</p>
+<ul>
+<li>genetic correlations,</li>
+<li>selection intensity, and</li>
+<li>the number of traits.</li>
+</ul>
+<p>A breeder may request one standard deviation of gain for every trait,
+but antagonistic correlations and limited selection intensity can make
+this impossible. The desired response should therefore be treated as a
+scenario to be tested rather than as a guaranteed result.</p>
+<h2 id="covariance-matrix-used-in-practice">Covariance matrix used in
+practice</h2>
+<p>The document notes that the true genetic covariance matrix is often
+unavailable. It proposes using the covariance matrix of
+across-environment adjusted means as a practical surrogate. This is
+operationally convenient, but it should be recognised as an
+approximation. The covariance of adjusted means includes estimation
+error and may differ from the additive genetic covariance relevant to
+response in the next generation.</p>
+<h2 id="step-7-calculate-the-index-and-select-candidates">Step 7:
+Calculate the index and select candidates</h2>
+<p>The derived coefficients are applied to the standardised trait
+values:</p>
+<p>[ I_i=<em>j b_j z</em>{ij}, ]</p>
+<p>where (I_i) is the index score for candidate (i), (b_j) is the
+coefficient for trait (j), and (z_{ij}) is the candidate’s standardised
+adjusted value.</p>
+<p>Candidates are ranked by the index. The relationship between the
+mixed model used to obtain adjusted means and the index should be
+checked to avoid duplicating adjustments or weighting the same
+information twice.</p>
+<h2 id="step-8-recalibrate-every-selection-season">Step 8: Recalibrate
+every selection season</h2>
+<p>The index should be recalculated and fine-tuned each season.
+Population means, variances, correlations, product profiles, and
+operational constraints change over time. A static index can therefore
+become misaligned with the current breeding objective.</p>
+<p>The original document contains a minor numbering inconsistency in the
+final instruction, referring to repeating Steps 7 and 8. The intended
+meaning is clear: apply the index, inspect the outcome, and update it in
+subsequent cycles.</p>
+<h2 id="main-principles">Main principles</h2>
+<p>The guideline establishes several important principles:</p>
+<ul>
+<li>Map the complete breeding process before calculating weights.</li>
+<li>Use quantitative, adjusted trait values at the selected stage.</li>
+<li>Standardise traits before expressing desired responses.</li>
+<li>Treat desired differentials as breeder decisions and coefficients as
+derived quantities.</li>
+<li>Evaluate feasibility under the observed covariance structure.</li>
+<li>Re-estimate the index when the population or objective changes.</li>
+</ul>
+<h2 id="strengths">Strengths</h2>
+<ul>
+<li>Short and operationally focused.</li>
+<li>Compatible with stage-gate breeding pipelines.</li>
+<li>Encourages standardisation and mixed-model adjusted means.</li>
+<li>Correctly warns against interpreting coefficients as direct
+importance weights.</li>
+<li>Includes both prospective desired response and retrospective
+reconstruction.</li>
+<li>Recognises that an index must be recalibrated.</li>
+</ul>
+<h2 id="limitations-and-recommended-extensions">Limitations and
+recommended extensions</h2>
+<p>A complete implementation should add:</p>
+<ul>
+<li>explicit trait direction and units;</li>
+<li>hard culling thresholds for non-compensatory requirements;</li>
+<li>treatment of missing values and unequal reliabilities;</li>
+<li>validation of realised selection differentials;</li>
+<li>sensitivity analysis for covariance-matrix uncertainty;</li>
+<li>constraints on inbreeding or family representation; and</li>
+<li>prospective validation in later-stage or next-cycle material.</li>
+</ul>
+<h2 id="practical-value">Practical value</h2>
+<p>The guideline is a useful minimum protocol for moving from informal
+multi-trait selection to a transparent index. Its most important message
+is that the breeder should define the desired response, not manually
+interpret or tune raw index coefficients without considering
+covariance.</p>
+</body>
+</html>

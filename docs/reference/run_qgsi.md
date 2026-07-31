@@ -112,7 +112,11 @@ run_qgsi_desired_gain(
 - center_traits:
 
   Whether to centre GEBVs using reference means. The QGSI theory assumes
-  zero-mean GEBVs, so `TRUE` is the default.
+  zero-mean GEBVs, so `TRUE` is the default. When this is `FALSE` and
+  `Gamma` is estimated internally, the scores use uncentred GEBVs while
+  the estimated `Gamma` is a centred covariance; the reported
+  theoretical parameters then describe a different index from the one
+  that produced `ranked_geno`, and a warning is issued.
 
 - scale_traits:
 
@@ -192,6 +196,27 @@ g^{-1}\hat{\gamma}^{\mathsf{T}}\Phi^{-1}\hat{\gamma}.\$\$ A
 Moore-Penrose inverse is used, and reported, when \\\Phi\\ is
 positive-semidefinite but rank deficient.
 
+## Changes in 0.3.1
+
+Two reported quantities were corrected. Argument names, result element
+names, and column names are unchanged, and the superseded quantities are
+still returned under new names.
+
+- `expected_gain_per_trait$Expected_Genetic_Gain` now divides \\\Gamma
+  w\\ by the total index standard deviation \\\sqrt{w^\mathsf{T}\Gamma
+  w + 2\operatorname{tr}(W\Gamma W\Gamma)}\\. Earlier releases divided
+  by \\\sqrt{w^\mathsf{T}\Gamma w}\\, the purely linear index standard
+  deviation, which inflated every gain when `W` was non-zero. The
+  previous values are returned as `Expected_Genetic_Gain_LinearSD`.
+
+- `theoretical_parameters$squared_index_merit_correlation` now uses the
+  general \\\operatorname{Cov}(H, I)^2 /
+  (\operatorname{Var}(I)\operatorname{Var}(H))\\. Earlier releases
+  returned \\\operatorname{Var}(I)/\operatorname{Var}(H)\\, which equals
+  the squared correlation only when the index is the MSPE-optimal
+  predictor of net merit. That ratio is retained as
+  `variance_ratio_index_to_merit`.
+
 ## References
 
 Ceron-Rojas JJ, Montesinos-Lopez OA, Montesinos-Lopez A, et al. (2026).
@@ -251,6 +276,9 @@ fit$theoretical_parameters
 #> $squared_index_merit_correlation
 #> [1] NA
 #> 
+#> $variance_ratio_index_to_merit
+#> [1] NA
+#> 
 #> $mean_squared_prediction_error
 #> [1] NA
 #> 
@@ -258,20 +286,18 @@ fit$theoretical_parameters
 #> [1] FALSE
 #> 
 #> $assumptions
-#> [1] "GEBVs represent the stated transformed trait space."                                                                    
-#> [2] "Gamma is the genomic covariance of those GEBVs."                                                                        
-#> [3] "Normal-selection response uses the reported selection intensity; it is a model-based expectation."                      
-#> [4] "Accuracy and MSPE are not reported because true_G was not supplied; Gamma is not relabelled as true genetic covariance."
+#> [1] "GEBVs represent the stated transformed trait space."                                                                                                                                                                                      
+#> [2] "Gamma is the genomic covariance of those GEBVs."                                                                                                                                                                                          
+#> [3] "Normal-selection response uses the reported selection intensity; it is a model-based expectation."                                                                                                                                        
+#> [4] "Expected per-trait gains divide Gamma %*% w by the total index standard deviation, which includes the quadratic variance."                                                                                                                
+#> [5] "Per-trait gains are a linear-regression approximation. The index is a quadratic form and therefore not normally distributed, so the normal-theory selection differential is inexact and the residual error grows with the curvature in W."
+#> [6] "Accuracy and MSPE are not reported because true_G was not supplied; Gamma is not relabelled as true genetic covariance."                                                                                                                  
 #> 
 fit$expected_gain_per_trait
-#>     Trait Expected_Genetic_Gain
-#>    <char>                 <num>
-#> 1:  yield              1.028197
-#> 2: height             -0.451330
-#>                                                                                                     Basis
-#>                                                                                                    <char>
-#> 1: Ceron-Rojas et al. (2026), Supplementary Equation 16; linear regression of breeding value on the index
-#> 2: Ceron-Rojas et al. (2026), Supplementary Equation 16; linear regression of breeding value on the index
+#>     Trait Expected_Genetic_Gain Expected_Genetic_Gain_LinearSD
+#>    <char>                 <num>                          <num>
+#> 1:  yield             1.0187456                       1.028197
+#> 2: height            -0.4471813                      -0.451330
 fit$observed_selection_differential
 #>     Trait      Mean_all Mean_selected Observed_GEBV_differential
 #>    <char>         <num>         <num>                      <num>

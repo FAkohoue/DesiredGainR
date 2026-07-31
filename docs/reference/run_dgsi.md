@@ -55,7 +55,15 @@ run_dgsi(
 
 - dg:
 
-  Named numeric vector of desired gains in the analysis scale.
+  Named numeric vector of desired gains, expressed in **candidate
+  standard-deviation units of the favourable-direction trait space**.
+  This is true regardless of `scale_traits`: the realised response that
+  `dg` is compared against is always divided by the candidate column
+  standard deviations, so `dg = c(yield = 0.5)` requests a
+  half-standard-deviation shift in the selected mean, never half a tonne
+  per hectare. To express a target in original trait units, divide it by
+  that trait's candidate standard deviation before passing it here. See
+  Details.
 
 - P:
 
@@ -164,3 +172,85 @@ An object of class `desired_gain_index`. The `best_replicate` component
 identifies the replicate selected automatically. The
 `replicate_diagnostics`, `rank_correlation`, `coefficient_stability`,
 and `selected_set_agreement` components describe optimisation stability.
+
+## Units of `dg` and of `realised_response`
+
+For each trait the realised response is \$\$r_j =
+\frac{\bar{x}\_{j,\mathrm{selected}} -
+\bar{x}\_{j,\mathrm{all}}}{s_j},\$\$ where \\s_j\\ is the standard
+deviation of trait \\j\\ across all candidates in the
+favourable-direction analysis space. Both `dg` and `realised_response`
+are therefore in candidate standard-deviation units.
+
+## Objective function
+
+The search minimises \$\$\sum_j v_j \left(\frac{r_j -
+d_j}{\max(\|d_j\|,\\0.25)}\right)^2,\$\$ with `objective_weights`
+\\v_j\\. The floor of `0.25` on the denominator prevents traits with a
+near-zero desired gain from dominating the objective through division by
+a vanishing scale factor. Proposal standard deviations are
+`sd_scale * pmax(abs(centre), 0.05)`, where the `0.05` floor keeps the
+search from stalling when a component of the desired-gain vector is at
+or near zero. Both floors are fixed constants in this release.
+
+## Optimisation and reproducibility
+
+The search is a stochastic hill climb over perturbed desired-gain
+vectors: each proposal is mapped to coefficients by \\b =
+P^{-1}G(G^\mathsf{T}P^{-1}G)^{-1}d\\ and accepted only if it lowers the
+objective. The objective is a step function of \\b\\, because it depends
+on \\b\\ only through the identity of the selected set, so a
+derivative-free search is used. The replicate with the lowest objective
+is returned; because that choice is made on the same candidates that are
+then selected, the reported objective is optimistically biased, and the
+result depends on `n_rep`. Use `validation_data` for an unbiased
+evaluation of the winning coefficients. `run_dgsi()` seeds the RNG from
+`seed` and restores the caller's RNG state before returning.
+
+Ties in the index score are broken by ascending candidate identifier, so
+the selected set does not depend on input row order.
+
+## Examples
+
+``` r
+set.seed(3)
+traits <- c("yield", "disease")
+candidates <- data.frame(
+  GenoID = paste0("G", seq_len(40)),
+  yield = rnorm(40),
+  disease = rnorm(40)
+)
+# In practice G comes from a fitted multi-trait genetic model, or from
+# estimate_genetic_covariance(); it is not the covariance of raw phenotypes.
+G <- matrix(c(1.0, -0.3, -0.3, 0.8), 2, dimnames = list(traits, traits))
+
+fit <- run_dgsi(
+  init_data = candidates["GenoID"],
+  cand_data = candidates,
+  trait_cols = traits,
+  dg = c(yield = 0.6, disease = 0.4),
+  G = G,
+  lower_is_better = "disease",
+  n_select = 8,
+  n_iter = 50,
+  n_rep = 3,
+  seed = 3
+)
+fit$coefficients
+#>     yield   disease 
+#> 1.3963647 0.5127025 
+fit$realised_response
+#>     yield   disease 
+#> 1.1080826 0.4999344 
+fit$replicate_diagnostics
+#>    Replicate Objective Iteration_of_best Selected Plateau
+#>        <int>     <num>             <int>    <int>  <lgcl>
+#> 1:         1 0.7794956                14        8   FALSE
+#> 2:         2 0.7794956                 2        8   FALSE
+#> 3:         3 0.7794956                15        8   FALSE
+#>    Final_window_relative_improvement Chosen
+#>                                <num> <lgcl>
+#> 1:                         0.7859594   TRUE
+#> 2:                         0.7859594  FALSE
+#> 3:                         0.7859594  FALSE
+```

@@ -79,7 +79,11 @@ favourable. Their GEBVs are multiplied by -1. \code{linear_weights} and \code{W}
 must describe this favourable-direction trait space.}
 
 \item{center_traits}{Whether to centre GEBVs using reference means. The QGSI
-theory assumes zero-mean GEBVs, so \code{TRUE} is the default.}
+theory assumes zero-mean GEBVs, so \code{TRUE} is the default. When this is
+\code{FALSE} and \code{Gamma} is estimated internally, the scores use uncentred
+GEBVs while the estimated \code{Gamma} is a centred covariance; the reported
+theoretical parameters then describe a different index from the one that
+produced \code{ranked_geno}, and a warning is issued.}
 
 \item{scale_traits}{Whether to divide GEBVs by reference standard deviations.
 Supplied weights must refer to the resulting scale.}
@@ -142,6 +146,30 @@ g^{-1}\hat{\gamma}^{\mathsf{T}}\Phi^{-1}\hat{\gamma}.}
 A Moore-Penrose inverse is used, and reported, when \eqn{\Phi} is
 positive-semidefinite but rank deficient.
 }
+\section{Changes in 0.3.1}{
+
+Two reported quantities were corrected. Argument names, result element
+names, and column names are unchanged, and the superseded quantities are
+still returned under new names.
+
+\itemize{
+\item \code{expected_gain_per_trait$Expected_Genetic_Gain} now divides
+\eqn{\Gamma w} by the total index standard deviation
+\eqn{\sqrt{w^\mathsf{T}\Gamma w + 2\operatorname{tr}(W\Gamma W\Gamma)}}.
+Earlier releases divided by \eqn{\sqrt{w^\mathsf{T}\Gamma w}}, the
+purely linear index standard deviation, which inflated every gain when
+\code{W} was non-zero. The previous values are returned as
+\code{Expected_Genetic_Gain_LinearSD}.
+\item \code{theoretical_parameters$squared_index_merit_correlation} now uses
+the general \eqn{\operatorname{Cov}(H, I)^2 /
+    (\operatorname{Var}(I)\operatorname{Var}(H))}. Earlier releases returned
+\eqn{\operatorname{Var}(I)/\operatorname{Var}(H)}, which equals the
+squared correlation only when the index is the MSPE-optimal predictor
+of net merit. That ratio is retained as
+\code{variance_ratio_index_to_merit}.
+}
+}
+
 \examples{
 traits <- c("yield", "height")
 gebv <- data.frame(

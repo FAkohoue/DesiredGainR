@@ -1,0 +1,348 @@
+Bringing a selection index into
+the CIMMYT-Maize programs
+Giovanny Eduardo Covarrubias-Pazaran
+Breeding scheme optimization lead
+
+                    Approach
+
+1. What we know about the selection method in
+   genetic gain
+2. Understand the selection procedure in an algorithm
+   fashion.
+3. Identify which parts of the selection procedure can
+   be replaced with an index.
+4. Build an index.
+5. Compare to current approach using selection
+   differentials and total gain.
+6. Refine an index.
+
+   What we know about the effect of the
+   selection method in the genetic gain?
+• Do simulations show that picking transgressive individuals is a
+  good method to increase genetic gains?
+   – T1: use an index to pick the best for total merit (10%)
+   – T2: pick the best for yield and then best for zinc (31% > 31% = 10%)
+   – T3: pick the best individuals for each trait (top 5% in each = 10%)
+                                                                                    t1 > x                                    t1 > x
+
+
+
+
+     Trait.2 performance                         Trait.2 performance                         Trait.2 performance
+                             y=(t1*w1)+(t2*w2)
+                                                                                    t2 > z                                    t2 > z
+
+
+
+
+                           Trait.1 performance                         Trait.1 performance                         Trait.1 performance
+
+
+                            Selection                                    Independent                                Tandem-type
+                            index                                        culling                                    selection
+
+                                                                                           t1 > x                                           t1 > x
+
+
+
+
+            Trait.2 performance                         Trait.2 performance                               Trait.2 performance
+                                    y=(t1*w1)+(t2*w2)
+                                                                                           t2 > z                                           t2 > z
+
+
+
+
+                                  Trait.1 performance                         Trait.1 performance                               Trait.1 performance
+        Selection index                                 Independent culling                                 Tandem-type selection
+
+
+    The best parents are not the extreme value
+individuals with lack of performance in other traits
+
+  Trait 1                                               Trait 2                                                                   Total merit
+                                                                                                                                                            57%
+                                             70%                                                    66%
+                                                                                                                                                      53%
+                                       50%                                                38%
+
+Selection step S3 to S4 using an
+    index vs current method
+
+          1. Understand the selection procedure in
+                an algorithm fashion S3 to S4
+          • We identified that the process can be mapped back to a
+            set of reduction and selection steps, each consisting in
+            trait conditions (value and directionality):
+
+                                                       As many traits as needed involved in each step
+
+step      selectionUnit stepType trait       value     directionality
+                                                                 trait    value     directionality
+                                                                                              trait     value     directionality
+                                                                                                                            trait   value     directionality
+                                                                                                                                                        valueUsed
+    1          line       select    OPTY     bestCheck     >         MDY  bestCheck     >         LNY   bestCheck     >        MLNY bestCheck     >       culling
+                                                                             17-20
+                                                                           check+LS
+    2            line    select   anthesis     2 LSD      .+/-   moisture      D                                                                        culling
+                                                                             17-20
+                                                                           check+LS
+    3            line   reduceOPTY-MDY-LNY
+                                        bestCheck         >=     moisture      D        =                                                               culling
+
+Striga ignored
+MLN ignored
+
+Looking at the relation of some of the
+           important traits
+
+          3. Build and refine an index:
+         retrospective weights 𝒃 = 𝑷! 𝒔
+
+• If the selection differentials represent the breeder’s goal, then
+  the weights determines the merit of individuals selected.
+• Weights can be back calculated
+
+
+                                                             _
+                                                                       [,1]
+             weight(b)               [,1] [,2] [,3] [,4]
+                                                                 [1,] 1.09
+                               [1,] 0.74 0.23 0.30 -0.52
+ Opt.          1.4254025       [2,] 0.23 0.69 0.33 -1.13         [2,] 0.35
+ MD            0.0717673 =     [3,] 0.30 0.33 0.42 -0.71
+                               [4,] -0.52 -1.13 -0.71 7.87
+                                                                 [3,] 0.48
+                                                                 [4,] -0.39
+ LN            0.1703238
+ Anthesis.Date 0.1205678
+
+Current selection differentials with Yoseph’s
+        patented approach vs index
+
+A comparison of selections
+ shows some differences
+     Var1                                Freq.Yoseph
+                                                 Freq.Index
+   1 (CML322/CML543)//CKLMARS1C3S50113         1       1
+   2 (CML322/CML543)//CKLTI0368                1       1
+   3 (CML444/CML536)//CKDHL0186                1       1
+   4 (CML444/CML536)//CKDHL150512              1       1
+   5 (CML444/CML536)//CKLMARS1C3S50113         1 NA
+   6 (CML543/CML566)//CKLMARS1C3S50140         1       1
+   7 (CML543/CML566)//CKLTI0344                1       1
+   8 (CML566/CKDHL0333)//CKDHL120423           1       1
+   9 (CML566/CKDHL0333)//CKLTI0344             1       1
+  10 (CML566/CML395)//CKLMARS1C3S50113         1 NA
+  11 (CML566/CML569)//CKDHL120423              2       1
+  12 (CML566/CML569)//CKLMARS1C3S50113         1       1
+  13 (CML543/CML566)//CML567             NA            1
+  14 (CML566/CML569)//CML567             NA            1
+
+Recycling step using an
+index vs current method
+
+r=0.11   r=0.09
+
+
+
+
+r=0.7
+         r=0.82
+
+                    3. Build and refine an index:
+                   retrospective weights 𝒃 = 𝑷! 𝒔
+    •   If the selection differentials represent the breeder’s goal, then the
+        weights determines the merit of individuals selected.
+    •   Weights can be back calculated
+    •   The index is calculated among family and then within family
+
+               weight (b)
+GCA_GY.opt       3.15843983
+GCA_AD.opt      -0.09933895                                                                      _
+GCA_ASI.opt     -0.36068438 [1,] 0.15 0.08 -0.02 -0.02 -0.15 -0.06 0.00 0.02 0.02 0.07 -0.01 [,1]
+                                   [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11]
+                                                                                                    [1,] 0.53
+
+GCA_EAR.ASP.opt -0.53326231 [3,] -0.02 0.02 0.19 0.00 -0.45 -0.01 0.00 0.06 -0.04 0.01 0.21 [2,]
+                             [2,] 0.08 1.47 0.02 -0.06 -1.71 -0.05 0.00 0.26 -0.09 1.16 0.21              0.04
+                                                                                                    [3,] -0.27
+                                                                                                    [4,] -0.10
+GCA_BHC.opt      0.01720044 [4,]  -0.02 -0.06 0.00 0.04 0.28 0.03 0.00 -0.02 0.00 -0.04 -0.01
+
+                         =
+                             [5,] -0.15 -1.71 -0.45 0.28 36.28 0.43 0.01 -0.58 -0.07 -1.22 -0.81    [5,] -0.10
+
+GCA_ER.opt       0.04462010 [7,] 0.00 0.00 0.00 0.00 0.01 0.00 0.00 0.00 0.00 0.00 0.00 [6,]
+                             [6,] -0.06 -0.05 -0.01 0.03 0.43 0.72 0.00 -0.06 -0.02 -0.05 0.01           -0.21
+                                                                                                    [7,] 0.01
+                                                                                                    [8,] 0.11
+GCA_EPP.opt     -2.46773028 [8,]   0.02 0.26 0.06 -0.02 -0.58 -0.06 0.00 0.31 0.00 0.19 0.09
+                             [9,] 0.02 -0.09 -0.04 0.00 -0.07 -0.02 0.00 0.00 0.13 -0.11 -0.10      [9,] 0.44
+                            [10,] 0.07 1.16 0.01 -0.04 -1.22 -0.05 0.00 0.19 -0.11 1.34 0.11       [10,] 0.00
+GCA_MOI.opt      0.21539794 [11,] -0.01 0.21 0.21 -0.01 -0.81 0.01 0.00 0.09 -0.10 0.11 0.60 [11,] -0.44
+GCA_GY.drt       2.90237762
+GCA_AD.drt       0.12240989
+GCA_ASI.drt     -0.08495067
+
+Current selection differentials with Yoseph’s
+        patented approach vs index
+
+
+
+
+                                        merit
+                                Yoseph 3.132666
+                                Index 3.134538
+
+            A comparison of selections shows some
+                         differences
+   Material                                          Yoseph    Index        Material                                                    Yoseph     Index
+ 1 ((CKDHL0221/CKDHL120312).%DHH3D030045)-B             1        1       26 (PB80/CML536/CML539.%DHH2D02.0177)-B                           1         1
+ 2 ((CKDHL0228/CKDHL120312).%DHH3D030028)-B             1        1       27 (PHG39/CML539/CML539.%DHH2D02.0025)-B                          1        NA
+ 3 ((CKDHL0228/CKDHL120312).%DHH3D030089)-B             1        1       28 (PHW52/[MSRXG9]C1F2-205-1(OSU23i)-5-3-X-X-1-BBB-1-B*7/CML539.%DHH2D02.0108)-
+                                                                                                                                           1         1
+ 4 ((CKDHL0228/CKDHL120312).%DHH3D030139)-B             1        1       29 (PHW52/[MSRXG9]C1F2-205-1(OSU23i)-5-3-X-X-1-BBB-1-B*7/CML539.%DHH2D02.0190)-
+                                                                                                                                           1         1
+ 5 ((CKDHL120143/CKDHL120312).%DHH3D030045)-B           1        1       30 (RS_CML395/CKSBL10002:@.%DHH3D030012)-B                        1         1
+ 6 ((CKDHL120184/CKDHL120312).%DHH3D030034)-B           1       NA       31 (RS_CML444/CKSPL10073:@.%DHH3D030011)-B                        1         1
+ 7 ((CKDHL120312/CKDHL0214).%DHH3D030015)-B             1        1       32 (TZMI711/CML539.%DHH2D02.0677)-B                               1         1
+ 8 ((CKDHL121167/CML464).%DHH3D030110)-B                1       NA       33 (TZMI711/CML539.%DHH2D02.0726)-B                               1        NA
+ 9 ((CML202/CKL05003).%DHH3D030095)-B                   1        1       34 (ZEWAc2F2-152-1-BBB-B-B-B-B/CML540.%DHH2D02.0100)-B            1         1
+10 ((CML463/CML536).%DHH3D030051)-B                     1       NA       35 (ZEWAc2F2-152-1-BBB-B-B-B-B/CML540.%DHH2D02.0196)-B            1        NA
+11 ((CML536/CKDHL120312).%DHH3D030081)-B                1        1       36 (ZEWAc2F2-152-1-BBB-B-B-B-B/CML540.%DHH2D02.0315)-B            1         1
+12 ((CML536/CKDHL120312).%DHH3D030094)-B                1        1       37 (ZEWAc2F2-183-2-BBB-B-B/00SADVEA-#-28-1-2-1-1-1-2-3-B.%DHH2D02.0086)-B
+                                                                                                                                           1         1
+13 ((CML536/CKDHL120312).%DHH3D030131)-B                1        1       38 ((CKDHL120143/CKDHL120312).%DHH3D030049)-B                    NA         1
+14 ((CML536/CKDHL120312).%DHH3D030229)-B                1        1       39 ((CKDHL120312/CML464).%DHH3D030050)-B                         NA         1
+15 ((CML536/CKDHL120312).%DHH3D030272)-B                1        1       40 ((CML536/CKDHL120312).%DHH3D030127)-B                         NA         1
+16 ([(CML395/CML444)-B-4-1-3-1-B/CML395//DTPWC8F31-1-1-2-2]-5-1-2-2-BB-B-B-B/CML546.%DHH2D02.0032)-B
+                                                        1       NA       41 ((CML536/CKDHL120312).%DHH3D030262)-B                         NA         1
+17 ([(CML395/CML444)-B-4-1-3-1-B/CML395//DTPWC8F31-1-1-2-2]-5-1-2-2-BB-B-B-B/CML546.%DHH2D02.0099)-B
+                                                        1       NA       42 (PB80/CML536/CML539.%DHH2D02.0091)-B                          NA         1
+18 ([SC/CML204//FR812]-X-30-2-3-2-1-B*6/[CML445/ZM621B]-2-1-2-3-1-B*9-B.%DHH2D02.0029)-B
+                                                        1       NA       43 (PB80/CML536/CML539.%DHH2D02.0151)-B                          NA         1
+19 (2369/CML536/CML539.%DHH2D02.0121)-B                 1       NA       44 (PHW52/[MSRXG9]C1F2-205-1(OSU23i)-5-3-X-X-1-BBB-1-B*7/CML539.%DHH2D02.0028)-
+                                                                                                                                          NA         1
+20 (2369/CML536/CML539.%DHH2D02.0224)-B                 1       NA       45 (PHW52/[MSRXG9]C1F2-205-1(OSU23i)-5-3-X-X-1-BBB-1-B*7/CML539.%DHH2D02.0157)-
+                                                                                                                                          NA         1
+21 (CML511/CML546.%DHH2D02.0097)-B                      1        1       46 (RS_CML395/CKSBL10002:@.%DHH3D030009)-B                       NA         1
+22 (CML511/CML546.%DHH2D02.0155)-B                      1       NA       47 (RS_CML444/CKSPL10073:@.%DHH3D030020)-B                       NA         1
+23 (La Posta Seq C7-F71-1-2-1-2-B-B-B/CML312SR = MAS[MSR/312]-117-2-2-1-2-B*4-B-B-B-B/CML312SR)
+                                                        1        1       48 (RS_CML444/CKSPL10073:@.%DHH3D030022)-B
+                                                                                                DH-3-B                                    NA         1
+24 (PB80/CML536/CML539.%DHH2D02.0047)-B                 1        1       49 (ZEWAc2F2-152-1-BBB-B-B-B-B/CML540.%DHH2D02.0044)-B           NA         1
+25 (PB80/CML536/CML539.%DHH2D02.0088)-B                 1        1
+
+  Conclusions and recommendations
+
+• A traditional selection method can be translated in
+  an index.
+• An index gives the advantage of keeping selection
+  consistent.
+• Move to use an index and later refine it.
+
+      How to define indices moving
+               forward?
+• Program => Stage => Product profile
+
+• Programs: LATAM, EA, SA
+• Stage: Stage 1 and Stage 2 (focus on recycling)
+• Product profiles: Based on programs
+
+• Action item: Share data from this stages and
+  programs.
+
+   ExcellenceinBreeding.org
+
+Excellence-in-breeding@cgiar.org
+
+       Current selection differentials with
+         Yoseph’s patented approach
+  Opt.
+                                                                 15%
+                                   7.2
+                                                1.08
+
+  MD
+                                                                       17.3%
+                                   2         0.35
+
+
+  LN
+                                                              12.2%
+                                   3.9   0.47
+
+STRIGA
+                                                       7.2%
+                                   4.2 0.3
+
+  MLN
+                                                       8.2%
+                                   1.2   0.07
+
+Anthesis
+  date              -0.5%
+                            -0.4 73.4
+
+ Grain
+moisture            -1.6%
+                            0.30
+                               18.8
+
+       Current selection differentials with
+         Yoseph’s patented approach
+                                               1.07
+                                                                 14.8%
+  Opt.
+                                                                  15%
+                                   7.2
+                                                 1.08
+                                                    0.4
+                                                                           20.1%
+  MD
+                                                                         17.3%
+                                    2            0.35
+
+                                              0.48             12.6%
+  LN
+                                                               12.2%
+                                   3.9        0.47
+                                        0.2
+STRIGA                                               5.4%
+                                                        7.2%
+                                   4.2 0.3
+                                   0.03         4.2%
+  MLN
+                                                        8.2%
+                                   1.2      0.07
+                                         0.5
+Anthesis                                       0.7%
+                                                                                   restricted
+  date              -0.5%
+                            -0.4 73.4
+                                        0.30 1.6%
+ Grain
+moisture            -1.6%
+                            0.30
+                               18.8
+
+  4. Compare to current approach using
+         selection differentials
+
+         Opt.   MD      LN        AD MLN STRIG GM Merit
+Yoseph   1.09   0.35   0.48     -0.39 0.07 0.30 -0.31 1.61
+ Index   1.07   0.41   0.49      0.53 0.04 0.23 0.29 1.70
+
+
+                       Selection differentials
+                                     weight
+                              Opt.   1.4254
+                              MD     0.0718
+                              LN     0.1703
+                              AD     0.1206
+                              MLN         0
+                              STRIGA      0
+                              GM          0
+

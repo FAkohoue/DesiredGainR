@@ -1,0 +1,689 @@
+                                                                                                                           TYPE Original Research
+                                                                                                                           PUBLISHED 24 June 2024
+                                                                                                                           DOI 10.3389/fpls.2024.1337388
+
+
+
+
+                                                   Optimising desired gain indices
+OPEN ACCESS                                        to maximise selection response
+EDITED BY
+Salvatore Ceccarelli,                              Reem Joukhadar 1*†, Yongjun Li 1, Rebecca Thistlethwaite 2,
+Bioversity International, Italy
+
+REVIEWED BY
+                                                   Kerrie L. Forrest 1, Josquin F. Tibbits 1, Richard Trethowan 2,3
+Marta Malinowska,                                  and Matthew J. Hayden 1,4
+Aarhus University, Denmark
+Ram Kumar Basnet,                                  1
+                                                     Agriculture Victoria, Centre for AgriBioscience, AgriBio, Bundoora, VIC, Australia, 2 School of Life and
+Rijk Zwaan, Netherlands                            Environmental Sciences, Plant Breeding Institute, Sydney Institute of Agriculture, The University of
+                                                   Sydney, Narrabri, NSW, Australia, 3 School of Life and Environmental Sciences, Plant Breeding Institute,
+*CORRESPONDENCE
+                                                   Sydney Institute of Agriculture, The University of Sydney, Cobbitty, NSW, Australia, 4 School of Applied
+Reem Joukhadar                                     Systems Biology, La Trobe University, Bundoora, VIC, Australia
+   r.joukhadar@sustatability.com
+†
+    PRESENT ADDRESS
+Reem Joukhadar,
+                                                   Introduction: In plant breeding, we often aim to improve multiple traits at once.
+SuSTATability Statistical Solutions, Melbourne,
+VIC, Australia                                     However, without knowing the economic value of each trait, it is hard to decide
+RECEIVED 13 November 2023
+                                                   which traits to focus on. This is where “desired gain selection indices” come in
+ACCEPTED 23 May 2024                               handy, which can yield optimal gains in each trait based on the breeder’s
+PUBLISHED 24 June 2024                             prioritisation of desired improvements when economic weights are not
+CITATION                                           available. However, they lack the ability to maximise the selection response
+Joukhadar R, Li Y, Thistlethwaite R, Forrest KL,   and determine the correlation between the index and net genetic merit.
+Tibbits JF, Trethowan R and Hayden MJ
+(2024) Optimising desired gain indices to
+maximise selection response.                       Methods: Here, we report the development of an iterative desired gain selection
+Front. Plant Sci. 15:1337388.                      index method that optimises the sampling of the desired gain values to achieve a
+doi: 10.3389/fpls.2024.1337388
+                                                   targeted or a user-speciﬁed selection response for multiple traits. This targeted
+COPYRIGHT
+© 2024 Joukhadar, Li, Thistlethwaite, Forrest,
+                                                   selection response can be constrained or unconstrained for either a subset or all
+Tibbits, Trethowan and Hayden. This is an          the studied traits.
+open-access article distributed under the terms
+of the Creative Commons Attribution License
+(CC BY). The use, distribution or reproduction
+                                                   Results: We tested the method using genomic estimated breeding values
+in other forums is permitted, provided the         (GEBVs) for seven traits in a bread wheat (Triticum aestivum) reference
+original author(s) and the copyright owner(s)      breeding population comprising 3,331 lines and achieved prediction accuracies
+are credited and that the original publication
+in this journal is cited, in accordance with       ranging between 0.29 and 0.47 across the seven traits. The indices were validated
+accepted academic practice. No use,                using 3,005 double haploid lines that were derived from crosses between parents
+distribution or reproduction is permitted
+                                                   selected from the reference population. We tested three user-speciﬁed response
+which does not comply with these terms.
+                                                   scenarios: a constrained equal weight (INDEX1), a constrained yield dominant
+                                                   weight (INDEX2), and an unconstrained weight (INDEX3). Our method achieved
+                                                   an equivalent response to the user-speciﬁed selection response when
+                                                   constraining a set of traits, and this response was much better than the
+                                                   response of the traditional desired gain selection indices method without
+                                                   iteration. Interestingly, when using unconstrained weight, our iterative method
+                                                   maximised the selection response and shifted the average GEBVs of the selection
+                                                   candidates towards the desired direction.
+
+
+
+
+Frontiers in Plant Science                                                01                                                                  frontiersin.org
+
+Joukhadar et al.                                                                                                                 10.3389/fpls.2024.1337388
+
+
+
+
+                                                         Discussion: Our results show that the method is an optimal choice not only when
+                                                         economic weights are unavailable, but also when constraining the selection
+                                                         response is an unfavourable option.
+
+
+
+
+                                                         KEYWORDS
+
+                                                         desired gain indices, genomic prediction, genomic estimated breeding values, selection
+                                                         indices, genomic selection
+
+
+
+
+Introduction                                                                         important advantage of these methods is that they do not require
+                                                                                     economic weights to be estimated. Desired genetic gain can be
+     Plant and animal breeding programmes aim to improve                             determined from a breeder’s knowledge of the genetic merit of their
+multiple commercially valuable traits. Traditional selection                         materials and traits, although this may not be possible for all
+methods often overlook the correlation and varying heritabilities                    breeding programmes or traits (Cé ron-Rojas and Crossa, 2018).
+among traits, leading to suboptimal selection response. Selecting for                Alternatively, breeders can sample arbitrary values for the desired
+traits with conﬂicting inﬂuences can be tricky, as progress in one                   gain and choose a sample that shifts all traits towards the desired
+might harm another (Smith, 1936; Hazel, 1943). Direct selection for                  direction (Li et al., 2017). However, the main problem associated
+traits with antagonistic correlations can lead to unfavourable                       with desired gain selection index methods is that they neither
+responses for some of the correlated traits, while synergistic                       maximise the correlation between the net genetic merit of the
+correlations between two or more traits can bias the selection                       individual and the selection index, nor maximise the selection
+against the remaining traits. Hence, selection indices that account                  response for different traits (Itoh and Yamada, 1986, 1988).
+for the architecture and the relationships among different traits are                     Here, we report the development of a new iterative method that
+used to simultaneously select for several traits weighted by their                   optimises the choice of the input desired gain (Yamada et al., 1975)
+importance to the objectives of the breeding programme to avoid                      to achieve a user-speciﬁed selection response for different traits. We
+unfavourable biases towards or against speciﬁc traits (Cé ron-Rojas                 demonstrate our method using a large bread wheat population
+and Crossa, 2018).                                                                   composed of 6,336 lines, of which 3,331 lines were used to develop
+     Selection indices are expected to achieve higher genetic gain                   the selection indices while the remaining 3,005 lines were used as
+compared to independent culling or sequential selection, especially                  independent selection candidates. Selection indices were developed
+when the targeted traits have variable heritabilities, phenotypic and                using the GEBVs for seven traits, namely, grain yield, thousand
+genotypic correlations, and economic values (Hazel et al., 1994).                    kernel weight, protein content, screening percentage, and stem rust,
+Selection indices can be applied to phenotypic records, genomic                      leaf rust, and stripe rust disease resistance.
+estimated breeding values (GEBVs), or phenotypes and genomic
+variants (Ceró n-Rojas and Crossa, 2020). Despite their utility,
+selecting the most appropriate indices remains a challenge,                          Materials and methods
+requiring a deep understanding of trait genetics and pairwise
+correlation among the traits (Dekkers et al., 2021). Additionally,                   Plant materials and phenotyping
+the correlation structure among the traits, whether it is due to
+genetic correlation or environmental correlation, also plays a crucial                    A total of 3,331 wheat lines were used including 36 Australian
+role (Fernandes et al., 2021). It is important to use a selection index              checks and 2,824 lines developed at the Plant Breeding Institute,
+that considers these complexities to mitigate their effects on the                   Cobbitty, NSW, Australia from different bread wheat germplasm
+selection response (Richardson et al., 2021).                                        pools and diverse exotic resources including emmer wheat,
+     Breeders usually calculate selection indices using the economic                 synthetic wheat, and landraces. More information can be found
+values for their traits or through setting a desired gain threshold for              in Joukhadar et al. (2021a). The population was planted in 30
+each trait (Pesek and Baker, 1969). However, these values may not                    irrigated ﬁeld trials between 2014 and 2020 at Narrabri in New
+always be available. Desired gain index methods describe the extent                  South Wales, Cadoux, Merredin, and Geraldton in Western
+of genetic improvement a breeder intends to achieve for different                    Australia and Horsham in Victoria with population sizes ranging
+traits in their germplasm (Pesek and Baker, 1969). The most                          between 195 and 1,956 lines. A subset of approximately 180 lines
+                                                                                     were selected based on their GEBVs for yield and genetic diversity
+Abbreviations: GEBVs, genomic estimated breeding values; Lr, leaf rust; Prot,        (Joukhadar et al., 2021b) and replicated across all trials, and
+protein content; Screen, percentage screenings; Sr, stem rust; TKW, thousand         different trials shared different numbers of individuals. Materials
+kernel weight; TOS, time of sowing; YLD, grain yield; Yr, stripe rust.               were sown at two times of sowing (TOS) in randomised complete
+
+
+Frontiers in Plant Science                                                      02                                                           frontiersin.org
+
+Joukhadar et al.                                                                                                                                    10.3389/fpls.2024.1337388
+
+
+
+
+block designs of two replicates (each replicate as one block) in                                       validation was larger than 0.99 (Joukhadar et al., 2020). The
+adjacent blocks. The only exception was Horsham in 2017, where                                         validation population of 3,005 individuals was genotyped with
+three TOS were used. Details of the 30 trials can be found in                                          40K wheat and barley Inﬁnium SNP array (Keeble-Gagnère et al.,
+Supplementary Table 1. Another set of 3,005 double haploid lines                                       2021). For all materials, a single plant was genotyped given that all
+were used to validate the selection indices results. These lines were                                  individuals were even double haploid or ﬁxed lines. Both the
+developed from crosses between various parents selected from the                                       reference population genotyped with 90K and the validation
+reference population of 3,331 individuals.                                                             population genotyped with 40K Inﬁnium SNP arrays were
+    Seven traits were evaluated, namely, grain yield (YLD),                                            imputed to exome capture level (He et al., 2019). The imputation
+percentage screenings (Screen), protein content (Prot), thousand                                       from low density to high density was previously reported to have an
+kernel weight (TKW), and stem rust (Sr), leaf rust (Lr), and stripe                                    accuracy of 92.4% (Joukhadar et al., 2021a). A total of 218,092 were
+rust (Yr) disease resistance. Plots were harvested, and harvested grain                                common across the reference and the validation imputed SNP sets,
+weight was subsequently converted to kg/ha as a measure for YLD.                                       which were used for subsequent analyses (Joukhadar and
+Prot was determined using an Infratec TM 1241 Grain Analyser. A                                        Daetwyler, 2022).
+total of 400 g of seeds from each plot was screened after 40 machine
+movements through a screen of 2 mm. The remaining material above
+the screen was weighed to calculate the screening percentage. One                                      Genetic correlation and genomic estimated
+hundred visibly viable seeds (excluding cracked, broken, or diseased                                   breeding values
+seeds) were counted and weighed to determine the 1,000 kernel
+weight. The three rust diseases were scored for their resistance in a                                      Trait variances and narrow-sense heritability (SNP based
+scale from 1 (complete resistance) to 9 (complete susceptibility). The                                 heritability) was calculated using the univariate restricted
+number of trials ranged from 5 for the three rust diseases to 30 for                                   maximum likelihood (REML) analysis implemented in MTG2
+YLD, while the total phenotypic records ranged from 4,566 for Lr and                                   software (Lee and Van der Werf, 2016) by ﬁtting the phenotypic
+Yr to 11,053 for YLD (Table 1). Best linear unbiased estimation                                        records as well as the genomic relatedness matrix. The genetic
+(BLUE) values were calculated for each trial independently by ﬁtting                                   covariances and genetic correlations between each pair of traits
+a spatial linear mixed model considering the ﬁeld layout (row and                                      were calculated using bivariate REML analysis implemented in the
+column) and the replications as random effects using ASReml-R                                          same software. For both analyses, the trials were ﬁtted as a covariate.
+(Gilmour et al., 2009). More details can be found in Joukhadar et al.                                  The genetic correlation analysis was performed with two aims: (1)
+(2021a). BLUE values were used to calculate GEBVs that were used to                                    to calculate the genetic correlation between the two times of sowing
+develop the selection indices.                                                                         (TOS1 and TOS2) to assess the level of genotype by environment
+    The reference population of 3,331 individuals was genotyped                                        interaction between both TOSs; and (2) to calculate the genetic
+with the 90K Inﬁnium SNP array (Wang et al., 2014). SNPs were                                          covariances among traits, which is required to develop the
+ﬁltered to keep only the one with call rate > 60% and minor allele                                     selection indices.
+frequency (MAF) > 5%. Missing genotypes within the 90K SNPs                                                GEBVs were calculated using the BayesR software, previously
+were imputed using LinkImpute software (Money et al., 2015) and                                        described in Breen et al. (2022). BayesR models SNP effects from a
+the previous studies showed that the accuracy of the in silico cross-                                  mixture of four normal distributions (Erbe et al., 2012). The aim is
+                                                                                                       to simultaneously assign the SNPs with large, medium, small, and
+TABLE 1 Number of trials, total number of phenotypic records, genetic                                  no effect. Marker effects were sampled from one of the following
+correlation between TOS1 and TOS2 for the studied traits, and
+                                                                                                       four normal distributions: N(0, 0 sg2 ) zero effect, N(0, 0.0001 sg2 )
+prediction accuracy using BayesR.
+                                                                                                       small effect, N(0, 0.001 sg2 ) medium effect, and N(0, 0.01 sg2 ) large
+ Trait           Number            Number             Genetic              Prediction                  effect, where sg2 is the additive genetic variance. The genomic
+                 of trials            of             correlation           accuracy                    relatedness matrix was calculated following VanRaden (2008).
+                                   records                                                             The prior proportions of loci attributed to each marker effect
+ YLD                  30              11,053                0.89             0.29 (± 0.03)             distribution were 0.94, 0.049, 0.01, and 0.001, respectively. A total
+                                                                                                       of 50,000 iterations for the BayesR analysis were used, of which the
+ TKW                  21               9,872                0.91             0.39 (± 0.04)
+                                                                                                       ﬁrst half was considered as burn in. For cross-validation, half of the
+ Prot                 17               7,491                0.98             0.32 (± 0.03)             phenotypic records for each trait were randomly selected as a
+ Screen               23               8,557                0.92             0.30 (± 0.03)             reference to predict the other half, which was considered the
+                                                                                                       validation set. Prediction accuracy was calculated as the
+ Sr                    5               4,633                  .              0.40 (± 0.04)
+                                                                                                       correlation coefﬁcient between the GEBVs and the actual
+ Yr                    5               4,566                  .              0.47 (± 0.05)             phenotypes in the validation set. The cross-validation strategy was
+ Lr                    5               4,566                  .              0.42 (± 0.04)             repeated 100 times, wherein the population was randomly
+Prediction accuracy columns show the average of the 100 cross-validation replicates and the
+                                                                                                       partitioned into reference and validation sets in each replicate.
+value between the brackets represent the standard deviation of the average accuracies. Lr, leaf        Prediction accuracies for each trait were averaged across the 100
+rust; Sr, stem rust; Yr, yellow rust; Prot, protein content; Screen, screening percentage; TKW,
+thousand kernel weight; and YLD, grain yield. Genetic correlation was not calculated for the
+                                                                                                       replicates, and the standard deviation of the average accuracies was
+rust diseases because they were only scored in TOS1.                                                   subsequently calculated.
+
+
+
+
+Frontiers in Plant Science                                                                        03                                                            frontiersin.org
+
+Joukhadar et al.                                                                                                           10.3389/fpls.2024.1337388
+
+
+
+
+Desired gain index                                                            iteration is updated from the most recently accepted sampled
+                                                                              weights. The analysis was run for 1,000 iterations.
+                                                                                   We used the GEBVs for the phenotyped reference population of
+    Selection indices were calculated for the following traits: grain
+                                                                              3,331 lines to develop genotypic and phenotypic covariance matrices.
+yield, thousand kernel weight, screening percentage, protein
+                                                                              The calculated covariance matrices calculated on the reference
+content, and leaf, stem, and yellow rust disease resistance. We
+                                                                              population were then applied to the GEBVs of the 3,005 double
+used the desired trait gain index method described in Yamada et al.
+                                                                              haploid selection candidates. From the selection index ranked lines, a
+(1975). The method uses the following equation:
+                                                                              total of 100 lines were selected. Selection response for the selected
+                             b = P−1 G(GP−1 G)−1 d                (1)         lines was expressed as the number of standard deviations their
+                                                                              average differed from the average of the whole population for each
+     where b is the ﬁnal desired gain-based index; P is the
+                                                                              trait. Three different indices were calculated. The user-speciﬁed
+phenotypic variance–covariance matrix (in our case, the
+                                                                              selection response was ﬁrst set to +0.5 standard deviations for
+correlation between GEBVs); G is the genetic variance–covariance
+                                                                              yield, TKW, and protein, and −0.5 standard deviations for
+matrix; and d is a vector of the desired gains. Variances in G were
+                                                                              screening the three rust diseases (INDEX1) to ensure equal weights
+calculated using the previous univariate REML analysis for each
+                                                                              for all traits. Another yield dominant user-speciﬁed selection
+trait, while the covariances were calculated by applying the bivariate
+                                                                              response was used with +2 standard deviations for yield, +0.5
+REML model to analyse each pair of traits.
+                                                                              standard deviation for TKW and protein, and −0.5 standard
+     Yamada et al. (1975) suggested choosing arbitrarily values for d
+                                                                              deviation for the three rust diseases (INDEX2). A third index was
+until the averages for all traits in the selected lines were shifted
+                                                                              calculated with high user-speciﬁed selection responses at +4 standard
+towards the desired direction (e.g., increasing yield and reducing
+                                                                              deviations for yield, TKW, and protein, and −4 standard deviations
+screening percentage). Instead of choosing arbitrary values for d, we
+                                                                              for screening the three rust diseases (INDEX3) to maximise the
+developed a new strategy that optimises the choice of d to calculate
+                                                                              potential selection response for all traits. Each index was run for 20
+an optimal index (b) that can achieve a user-speciﬁc level of
+                                                                              replicates and the correlations among replicates were averaged to
+improvement (selection response) for each trait. The user-
+                                                                              ensure that the different replicates produced comparable solutions.
+speciﬁed selection response (dg) is deﬁned as the number of
+standard deviations (positive or negative) the average phenotypes
+of the selected lines can be shifted from the average of the whole            Results
+population for each trait. The method samples values for d within
+an iterative process and selects the sample that develops an index                 The analysis revealed high genetic correlations among all traits,
+that best matches the desired selection response. For each iteration,         indicating limited genotype by environment interactions for TOS1
+the method calculates b and use it to calculate the genetic gain g of         and TOS2. Notably, the smallest correlation observed was 0.89 for
+the sampled d. Then, g is used to calculate the goodness of ﬁt for the        grain yield while the largest correlation was equal to 0.98 for protein
+sampled d for each trait with the following equation:                         percentage (Table 1). This analysis was not possible for the three
+                                                                              rust diseases given that the disease resistances were scored only in
+                                                  2
+                                     logbase ( base
+                                                jgj )
+                                                                              optimal sowing time (TOS1). Additionally, the BayesR model
+                             gof =        base2
+                                                                  (2)         demonstrated varying levels of prediction accuracy for the studied
+                                           jgj
+                                                                              traits, ranging from medium to low, with values between 0.29 for
+    where “base” is the base of the logarithm that can be calculated          YLD and 0.47 for Yr (Table 1). Particularly noteworthy were the
+                                       pﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃ
+with the following equation: base = je  dg j, in which e is the              higher prediction accuracies observed for resistances to the three
+Euler’s number. Speciﬁcally, the base determines the scaling of the           rust diseases, averaging at 0.43, compared to an average of 0.33 for
+logarithmic transformation applied to the ratio of g to dg.                   the remaining four traits.
+Therefore, under the proposed equation, gof gets maximised                         The narrow-sense heritability and genetic correlations among
+(gofMAX) when g=dg, which means that we achieved the desired                  the studied traits were summarised in Table 2. Narrow-sense
+selection response in the selection candidates. The penalty of the            heritability values varied across the traits, ranging from 0.21 for YLD
+sampled d for all traits (q) is given by the following equation:              to 0.59 for Yr. Additionally, the examination of genetic correlations
+                                                                              revealed generally low values among the seven traits, spanning from
+                                     gofMAXi − gof i
+                        q = oni                                   (3)         −0.21 to 0.28, underscoring the relative independence of these traits in
+                                        gofMAXi
+                                                                              terms of their genetic basis. However, a striking exception to this
+    where n is the number of traits. Q serves as a measure of                 pattern was observed in the strong negative correlation of −0.61
+deviation between the observed and desired selection responses                between TKW and screening percentage, which is expected given
+across traits, guiding the iterative optimisation process. A lower            that small, low weight seeds are the ones that pass through the screen.
+value of q indicates better alignment between g and dg. The value of          Overall, these ﬁndings contribute to a deeper understanding of the
+q from each iteration is compared to the sample of the previous               genetic relationships and heritability of the studied traits, providing
+iteration and is accepted if the selection response improves, i.e.,           valuable insights for future breeding efforts aimed at improving crop
+getting a smaller q. The sampling mean for each trait in each                 performance and resilience.
+
+
+
+
+Frontiers in Plant Science                                               04                                                             frontiersin.org
+
+Joukhadar et al.                                                                                                                                               10.3389/fpls.2024.1337388
+
+
+
+
+TABLE 2 Narrow-sense heritability (diagonal) and genetic correlations (off diagonal) between the studied traits.
+
+
+                          YLD                     TKW                     Prot                       Screen                 SR                     YR                      LR
+ YLD                              0.21 (± 0.01)        −0.21 (± 0.07)          −0.03 (± 0.09)            0.10 (± 0.09)            0.16 (± 0.09)          0.12 (± 0.08)           0.16 (± 0.09)
+
+ TKW                          −0.21 (± 0.07)            0.50 (± 0.01)          −0.01 (± 0.07)          −0.61 (± 0.05)            −0.05 (± 0.07)          0.14 (± 0.06)           0.28 (± 0.07)
+
+ Prot                         −0.03 (± 0.09)           −0.01 (± 0.07)           0.30 (± 0.02)            0.15 (± 0.08)           −0.10 (± 0.07)         −0.15 (± 0.07)           0.13 (± 0.08)
+
+ Screen                           0.10 (± 0.09)        −0.61 (± 0.05)           0.15 (± 0.08)            0.49 (± 0.01)           −0.06 (± 0.08)         −0.14 (± 0.07)          −0.18 (± 0.08)
+
+ SR                               0.16 (± 0.09)        −0.05 (± 0.07)          −0.10 (± 0.07)          −0.06 (± 0.08)             0.35 (± 0.02)         −0.07 (± 0.06)           0.11 (± 0.08)
+
+ YR                               0.12 (± 0.08)         0.14 (± 0.06)          −0.15 (± 0.07)          −0.14 (± 0.07)            −0.07 (± 0.06)          0.59 (± 0.01)           0.28 (± 0.07)
+
+ LR                               0.16 (± 0.09)         0.28 (± 0.07)           0.13 (± 0.08)          −0.18 (± 0.08)             0.11 (± 0.08)          0.28 (± 0.07)           0.34 (± 0.02)
+
+Values between brackets represent the standard errors of the estimations. Lr, leaf rust; Sr, stem rust; Yr, yellow rust; Prot, protein content; Screen, screening percentage; TKW, thousand kernel
+weight; and YLD, grain yield.
+
+
+    Iterative index analysis (Equations 2, 3), run using the                                         that only 100 lines were selected from a population of 3,005
+parameters of the three tested indices, identiﬁed a subset of                                        individuals (~3.3%). This index was designed to maximise the
+samples with average GEBVs that were all shifted towards the                                         genetic gain for all traits in the selected materials as, theoretically,
+desired direction of increased yield, TKW, and protein; reduced                                      only 0.05% of the whole population could be above or below 4
+screenings; and low rust disease resistance scores (Tables 3–5). The                                 standard deviations for a single trait. The average GEBVs of the
+iterative method showed better performance compared to the                                           selected materials had an absolute average of 1.04 standard
+standard desired genetic gain method (Yamada et al., 1975) with                                      deviations from the average of the whole population across the
+no iterations. For INDEX1 (equal weight for all traits), the absolute                                seven traits, which ranged from 0.64 for TKW to 1.24 for screenings
+standard deviation of the response ranged between 0.46 and 1.02                                      percentage (Table 5). Calculating this index without iterations
+with an average of 0.68, which was very close to the targeted user-                                  resulted in the same answer as INDEX1 given that they both have
+speciﬁed response of 0.5 for all traits. On the other hand, without                                  equal weights across the traits and d is a scaler in Equation 1.
+iteration, the absolute standard deviation of the response ranged                                    Therefore, the ranking of individuals will be the same for both
+between 0.12 and 1.69. The iterative method also successfully                                        INDEX1 and INDEX3. Figure 1 shows the distribution of YLD for
+developed an index when the targeted response was biased                                             the selection candidate whole population as well as the selected lines
+towards a subset of trait(s). INDEX2 (the yield dominant index)                                      using the three indices (INDEX1, INDEX2, and INDEX3).
+had a higher weight for yield and selected lines with the iterative                                      The method was validated using 3,005 double haploid lines,
+method had, on average, standard deviations 1.71 higher than the                                     which were independent from the reference set that was used to
+whole population. The average of the remaining traits was higher at                                  calculate the phenotypic and genotypic covariance matrices. The
+approximately 0.5 standard deviations, which equalled the user-                                      selection response for the independent validation set was very
+speciﬁed targeted response (Table 4). However, protein content was                                   similar but slightly higher than that calculated on the reference
+negatively selected when the index was used without iterations,                                      population (Tables 3–5). In other words, the average phenotypes for
+indicating the superiority of the new method.                                                        the selection candidates in both the reference and the validation sets
+    The last index, INDEX3, had a targeted response of 4 standard                                    had an equivalent number of standard deviations above (for YLD,
+deviations across all traits, which was impossible to achieve given                                  TKW, and protein) or below (for screening and the three rust
+
+
+TABLE 3 Selection response from INDEX1.
+
+
+                Sampled desired                                                Targeted                          Response                         Response                 Response
+ Trait                                              Index (b)
+                   gain (d)                                                  response (dg)                      NoIteration                        SD Ref                  SD Cand
+ YLD                       1.06                         16.39                         0.5                                0.50                        0.67                        0.83
+
+ TKW                       3.37                          1.34                         0.5                                1.69                        0.57                        1.02
+
+ Prot                      0.72                          1.26                         0.5                                0.48                        0.87                        0.66
+
+ Screen                   −1.22                          0.15                         −0.5                             −0.12                        −0.43                       −0.46
+
+ SR                       −0.55                         −2.91                         −0.5                             −0.31                        −0.55                       −0.56
+
+ LR                        0.03                         −1.67                         −0.5                             −0.95                        −0.58                       −0.61
+
+ YR                       −0.60                         −1.14                         −0.5                             −0.29                        −0.53                       −0.62
+
+The sampled desired gain (d), ﬁnal index (b), user-speciﬁed targeted selection response (dg), and number of standard deviations for the genetic gain of the selected lines [NoIteration, using the
+standard desired gain index method of Yamada et al. (1975), our method with the reference, Ref, and candidate, Cand, populations] using INDEX1 (equal weights for all traits). Lr, leaf rust; Sr,
+stem rust; Yr, yellow rust; Prot, protein content; Screen, screening percentage; TKW, thousand kernel weight; and YLD, grain yield; SD Ref, standard deviation reference population; and SD
+Cand, standard deviation selection candidates.
+
+
+
+
+Frontiers in Plant Science                                                                      05                                                                              frontiersin.org
+
+Joukhadar et al.                                                                                                                                               10.3389/fpls.2024.1337388
+
+
+
+
+TABLE 4 Selection response from INDEX2.
+
+
+                Sampled desired                      Index                Targeted                            Response                       Response                     Response
+ Trait
+                   gain (d)                            (b)              response (dg)                        NoIteration                      SD Ref                      SD Cand
+ YLD                        1.61                      19.70                       2                                 2.01                           1.33                         1.71
+
+ TKW                       −0.28                       0.58                      0.5                                0.74                           0.33                         0.46
+
+ Prot                       0.48                       1.27                      0.5                               −0.35                           0.44                         0.51
+
+ Screen                     0.01                       0.04                      −0.5                              −0.08                          −0.45                        −0.50
+
+ SR                         0.70                       1.40                      −0.5                              −0.21                          −0.46                        −0.54
+
+ LR                         0.53                      −0.01                      −0.5                               0.13                          −0.44                        −0.54
+
+ YR                         0.65                      −0.61                      −0.5                              −0.45                          −0.42                        −0.54
+
+The sampled desired gain (d), ﬁnal index (b), user-speciﬁed targeted selection response (dg), and number of standard deviations for the genetic gain of the selected lines [NoIteration, using the
+standard desired gain index method of Yamada et al. (1975), our method with the reference, Ref, and candidate, Cand, populations] using INDEX2 (yield dominant). Lr, leaf rust; Sr, stem rust; Yr,
+yellow rust; Prot, protein content; Screen, screening percentage; TKW, thousand kernel weight; and YLD, grain yield; SD Ref, standard deviation reference population; and SD Cand, standard
+deviation selection candidates.
+
+
+diseases) the average of the whole reference or validation                                          interaction between the optimal and the late sowing trials by
+populations, respectively. Running 20 replicates for each analysis                                  calculating their genetic correlation. The high genetic correlation
+showed that the iterative method produced indices with high                                         observed implied that the ranking of the lines had minimal change
+repeatability. The average correlation coefﬁcients over all                                         between the two sowing times for all traits. This is essential to
+replicates for the three indices were 0.95, indicating robust                                       decide whether a trait will need a single weight regardless of heat
+divergence after 1,000 iterations as well as consistently highly                                    treatment or if two different weights will be needed, one for each
+optimised weights for different traits.                                                             treatment. All traits showed high correlations between both TOSs of
+                                                                                                    which protein content had almost no genotype by environment
+                                                                                                    interaction with a genetic correlation between TOS1 and TOS2 of
+Discussion                                                                                          0.98 (Table 1). This was not unexpected given that protein content
+                                                                                                    is affected more by nitrogen availability in the soil than weather
+    We utilised a large population of Australian bread wheat                                        (McDonald, 1992) and TOS1 and TOS2 were planted in adjacent
+cultivars and breeding lines that were phenotyped in diverse                                        ﬁelds in each environment and subjected to the same management
+environments across the Australian wheatbelt, stretching from                                       practises. These results indicated that TOS1 and TOS2 did not need
+Narrabri in New South Wales to Geraldton in Western Australia.                                      different weights when developing the selection indices and could
+The materials were planted at both optimal (TOS1) and late (TOS2)                                   be considered as a single trait.
+times of sowing and irrigated to avoid drought stress so that heat                                       The prediction accuracy for resistance to the three rust diseases
+tolerance during anthesis and grain ﬁlling periods could be assessed                                was comparable to accuracies reported in previous studies that
+(Thistlethwaite et al., 2020).                                                                      investigated diverse wheat germplasms (Daetwyler et al., 2014;
+    To develop robust selection indices for different traits, it is                                 Juliana et al., 2017). He et al. (2019) used a subset of the data
+important to quantify the level of genotype by environment                                          used in the present study that included 10 trials conducted at
+
+
+
+TABLE 5 Selection response from INDEX3.
+
+
+                Sampled desired                                                Targeted                          Response                      Response                    Response
+ Trait                                              Index (b)
+                   gain (d)                                                  response (dg)                      NoIteration                     SD Ref                     SD Cand
+ YLD                       0.24                          5.47                           4                              0.50                          0.78                        1.05
+
+ TKW                       1.35                          0.28                           4                              1.69                          0.53                        0.64
+
+ Prot                      0.57                          1.33                           4                              0.48                          0.73                        1.10
+
+ Screen                   −3.05                         −0.40                           −4                             −0.12                        −0.49                       −1.24
+
+ SR                       −0.62                         −2.53                           −4                             −0.31                        −0.50                       −1.09
+
+ LR                       −0.75                         −2.35                           −4                             −0.95                        −0.65                       −1.06
+
+ YR                       −0.78                         −0.74                           −4                             −0.29                        −0.60                       −1.11
+
+The sampled desired gain (d), ﬁnal index (b), user-speciﬁed targeted selection response (dg), and number of standard deviations for the genetic gain of the selected lines [NoIteration, using the
+standard desired gain index method of Yamada et al. (1975), our method with the reference, Ref, and candidate, Cand, populations] using INDEX3 (maximum gain). Lr, leaf rust; Sr, stem rust; Yr,
+yellow rust; Prot, protein content; Screen, screening percentage; TKW, thousand kernel weight; and YLD, grain yield; SD Ref, standard deviation reference population; and SD Cand, standard
+deviation selection candidates.
+
+
+
+
+Frontiers in Plant Science                                                                     06                                                                               frontiersin.org
+
+Joukhadar et al.                                                                                                                 10.3389/fpls.2024.1337388
+
+
+
+
+   FIGURE 1
+   Boxplots showing the distribution of the GEBV values (y-axis) for the seven selected traits. GEBVs: the whole selection candidates’ population; Equal:
+   INDEX1 that has equal weight for all traits; Yield: for INDEX2 that has higher weight for grain yield; and Max: for INDEX3 that maximises the response
+   for all traits. For YLD, TKW, and Prot, the aim is to increase the trait while the aim for Screen, SR, LR, and YR is to reduce the trait.
+
+
+
+
+Narrabri, New South Wales between 2013 and 2017. They reported                   which is often highly inﬂuenced by environmental variability
+comparable prediction accuracies to our results for grain yield and              (Babar et al., 2007; Heffner et al., 2011; He et al., 2019; Watson
+screening percentage for models that did not ﬁt genotype by                      et al., 2019). The genetic correlations among different traits were
+environment interactions. However, their accuracies for protein                  generally low and in most cases the value was smaller or equivalent
+content and TKW were much higher compared to our results. The                    to two standard errors, except for the negative correlation between
+latter could be a result of the inclusion of ﬁeld trials with more               TKW and screening percentage of −0.61 (Table 3). A negative
+diverse climates and soil types in the reference population used in              correlation is expected given that a higher screening percentage
+our study. He et al. (2019) also showed that prediction accuracy was             implies smaller seeds. The remaining traits showed low genetic
+further improved for protein content and grain yield when ﬁtting                 correlations between −0.21 and 0.28, indicating that selection
+the genotype by environment interaction in the model. However,                   applied to a given trait will not signiﬁcantly affect another trait.
+our research focussed on improving the development of indices to                     Previously developed unconstrained linear phenotypic or
+maximise the selection response regardless of the statistical model              genomic selection indices do not have control over the direction
+applied for genomic prediction.                                                  of the selection response; i.e., whether genetic gain is increased or
+     The seven studied traits showed low to medium narrow-sense                  decreased (Smith, 1936; Dekkers, 2007; Togashi et al., 2011; Ceró n-
+heritability (Table 2). Daetwyler et al. (2014) reported comparable              Rojas and Crossa, 2019). For this reason, attempts have been made
+heritability values to our estimates for resistance to the three rust            to constrain the genetic gain for a subset of traits. Kempthorne and
+diseases. Various studies have reported comparable heritability                  Nordskog (1959) developed a method to prevent changing of the
+values for the remaining traits, especially low heritability for YLD             genetic gain for a subset of traits (in other words, the gain is equal to
+
+
+
+
+Frontiers in Plant Science                                                  07                                                                frontiersin.org
+
+Joukhadar et al.                                                                                                            10.3389/fpls.2024.1337388
+
+
+
+
+zero), while others generalised this method to allow the setting of a           to modern breeding objectives, ultimately facilitating the
+predetermined level of genetic gain for a subset of traits (Mallard,            development of improved varieties with enhanced yield potential,
+1972; Harville, 1975; Tallis, 1985). These methods improved the                 stress resilience, and end-use quality.
+choice of selection candidates with better shifts in genetic gain in the
+desired direction. However, all these methods required an economic
+weight for each trait to be predeﬁned, information that may not be              Conclusion
+always available for all traits or breeding programmes.
+     While the advantage of the desired gain indices is that economic               We developed a new method that extends the application of
+weights are not required, their main disadvantage is inability to               desired trait gain selection indices to maximise the selection
+maximise the selection response (Itoh and Yamada, 1986, 1988).                  response for multiple constrained or unconstrained traits. We
+This results because of the subjective choice of the desired gain values        showed that our method shifts the selection response in non-
+that are usually approximated using the breeder’s knowledge of the              reference individuals in the targeted direction to increase or
+traits or arbitrarily sampled to achieve a proper selection response            decrease the trait average in the selection candidates. We
+(Cé ron-Rojas and Crossa, 2018). Ceró n-Rojas and Crossa (2020)               demonstrated that our method has the power to maximise the
+argued that the constrained linear phenotypic selection index is                genetic gain when using unconstrained weights and to achieve the
+similar in principle to the desired gain indices with the advantage of          targeted selection response set by the breeder for different traits in
+maximising the selection response as well as the correlation between            the appropriate direction. However, more empirical testing is
+the selection index and the net genetic merit of each individual. Our           required using multi-breeding cycle data to ensure that the
+iterative method optimises the choice of the desired gain to achieve a          calculated indices are sufﬁciently powerful to maximise the
+user-speciﬁed selection response for the targeted traits. Our results           correlation between the index and the net genetic merit.
+show that our method can efﬁciently move the genetic gain in the
+desired direction regardless of whether the breeding objective
+requires some traits to be constrained (INDEX1 and INDEX2) or                   Data availability statement
+unconstrained (INDEX3). Our method optimises the selection
+response not only when the economic weights are unavailable, but                   The raw data supporting the conclusions of this article will be
+also when constraining a subset of traits is not the ideal option.              made available by the authors, without undue reservation.
+     While our method succeeded in maximising the selection
+response for all traits in the desired direction, it is still not
+possible to determine if the method maximises the correlation                   Author contributions
+between the selection index and net genetic merit. This is because
+the covariance between both is undeﬁned given that it depends on                    RJ: Writing – original draft, Visualization, Validation, Software,
+the estimation of the economic weight (Ceró n-Rojas and Crossa,                Resources, Project administration, Methodology, Investigation,
+2020); thus, this parameter cannot be theoretically assessed using              Funding acquisition, Formal analysis, Data curation,
+our method. However, as our validation population of 3,005 lines                Conceptualization. YL: Writing – review & editing, Software,
+was developed from crosses between a selected subset of parents                 Resources, Methodology, Investigation, Formal analysis,
+from the reference population of 3,331 individuals, the former                  Conceptualization. RTh: Writing – review & editing, Resources,
+materials can be considered as the next generation in a                         Funding acquisition, Data curation. KF: Writing – review & editing,
+continuous breeding programme that was not included in the                      Resources, Data curation. JT: Writing – review & editing, Resources,
+reference population. Hence, this population can empirically help               Project administration, Data curation. RTr: Writing – review &
+assess the unobserved genetic merit. Similar results were previously            editing, Supervision, Resources, Project administration, Funding
+obtained using unconstrained and constrained linear phenotypic or               acquisition, Data curation, Conceptualization. MH: Writing –
+genomic selection indices using real data with two breeding cycles              review & editing, Supervision, Resources, Project administration,
+or simulated data with six cycles derived from the reference                    Funding acquisition, Conceptualization.
+population (Ceró n-Rojas and Crossa, 2019, 2020).
+     Our new approach holds signiﬁcant practical implications for
+enhancing breeding efﬁciency and accelerating genetic gain in                   Funding
+improving breeding programmes. Our method aids breeders in
+the selection of superior cultivars with broad adaptability                         The author(s) declare ﬁnancial support was received for the
+simultaneously for multiple traits without biasing the selection                research, authorship, and/or publication of this article. The authors
+towards or against a speciﬁc trait. Additionally, our iterative                 acknowledge the ﬁnancial support of the University of Sydney, and
+method for optimising selection responses, particularly in                      Agriculture Victoria. The authors acknowledge the ﬁnancial
+scenarios where economic weights are unavailable or when                        support of the Grains Research and Development Corporation.
+constrained selection is not ideal, offers a ﬂexible and efﬁcient               The funder was not involved in the study design, collection,
+approach to breeding programme management. Overall, our                         analysis, interpretation of data, the writing of this article or the
+study contributes to advancing breeding methodologies tailored                  decision to submit it for publication.
+
+
+
+
+Frontiers in Plant Science                                                 08                                                           frontiersin.org
+
+Joukhadar et al.                                                                                                                                             10.3389/fpls.2024.1337388
+
+
+
+
+Conﬂict of interest                                                                                 organizations, or those of the publisher, the editors and the
+                                                                                                    reviewers. Any product that may be evaluated in this article, or
+    The authors declare that the research was conducted in the                                      claim that may be made by its manufacturer, is not guaranteed or
+absence of any commercial or ﬁnancial relationships that could be                                   endorsed by the publisher.
+construed as a potential conﬂict of interest.
+    The authors declare that this study received funding from Grains
+                                                                                                    Supplementary material
+Research and Development Corporation. The funder was not involved
+in the study design, collection, analysis, interpretation of data, the
+                                                                                                        The Supplementary Material for this article can be found online
+writing of this article or the decision to submit it for publication.
+                                                                                                    at: https://www.frontiersin.org/articles/10.3389/fpls.2024.1337388/
+                                                                                                    full#supplementary-material
+
+Publisher’s note                                                                                    SUPPLEMENTARY TABLE 1
+                                                                                                    Summary of the ﬁeld trials, number of phenotyped individuals, and traits. Trail
+                                                                                                    names were recorded as (Location_year_TimeOfSowing). NoGeno: Number
+    All claims expressed in this article are solely those of the                                    of Genotypes; Prot, protein%; Screen, screening%; TKW, thousand kernel
+authors and do not necessarily represent those of their afﬁliated                                   weight (g); YLD, yield (t/ha); Lr, leaf rust; Sr, stem rust; Yr, stripe rust.
+
+
+
+
+References
+  Babar, M. A., Van Ginkel, M., Reynolds, M. P., Prasad, B., and Klatt, A. R. (2007).                 Joukhadar, R., and Daetwyler, H. D. (2022). Data integration, imputation
+Heritability, correlated response, and indirect selection involving spectral reﬂectance             imputation, and meta-analysis meta-analysis for genome-wide association studies in
+indices and grain yield in wheat. Aust. J. Agric. Res. 58, 432–442. doi: 10.1071/AR06270            Genome-wide association studies (Springer US, New York, NY), 173–183.
+   Breen, E. J., MacLeod, I. M., Ho, P. N., Haile-Mariam, M., Pryce, J. E., Thomas, C. D.,            Joukhadar, R., Thistlethwaite, R., Trethowan, R. M., Hayden, M. J., Stangoulis, J.,
+et al (2022). BayesR3 enables fast MCMC blocked processing for largescale multi-trait               Cu, S., et al. (2021b). Genomic selection can accelerate the biofortiﬁcation of spring
+genomic prediction and QTN mapping analysis. Commun. Biol. 5, 661.                                  wheat. Theor. Appl. Genet. 134, 3339–3350. doi: 10.1007/s00122-021-03900-4
+   Cé ron-Rojas, J. J., and Crossa, J. (2018). "Constrained linear phenotypic selection              Joukhadar, R., Thistlethwaite, R., Trethowan, R., Keeble-Gagnère, G., Hayden, M. J.,
+indices in Linear selection indices," in modern plant breeding, eds. J. J. Cé ron-Rojas and        Ullah, S., et al. (2021a). Meta-analysis of genome-wide association studies reveal
+J. Crossa (Cham, Switzerland: Springer), 43–69. doi: 10.1007/978-3-319-91223-3_3                    common loci controlling agronomic and quality traits in a wide range of normal and
+   Ceró n-Rojas, J. J., and Crossa, J. (2019). Efﬁciency of a constrained linear genomic           heat stressed environments. Theor. Appl. Genet. 134, 2113–2127. doi: 10.1007/s00122-
+selection index to predict the net genetic merit in plants. G3: Genes Genomes Genet. 9,             021-03809-y
+3981–3994. doi: 10.1534/g3.119.400677                                                                 Joukhadar, R., Hollaway, G., Shi, F., Kant, S., Forrest, K., Wong, D., et al (2020).
+  Ceró n-Rojas, J. J., and Crossa, J. (2020). Expectation and variance of the estimator of         Genome-wide association reveals a complex architecture for rust resistance in 2300
+the maximized selection response of linear selection indices with normal distribution.              worldwide bread wheat accessions screened under various Australian conditions.
+Theor. Appl. Genet. 133, 2743–2758. doi: 10.1007/s00122-020-03629-6                                 Theor. Appl. Genet. 133, 2695–2717.
+
+  Daetwyler, H. D., Bansal, U. K., Bariana, H. S., Hayden, M. J., and Hayes, B. J. (2014).             Juliana, P., Singh, R. P., Singh, P. K., Crossa, J., Huerta-Espino, J., Lan, C.,
+Genomic prediction for rust resistance in diverse wheat landraces. Theor. Appl. Genet.              et al. (2017). Genomic and pedigree-based prediction for leaf, stem, and stripe rust
+127, 1795–1803. doi: 10.1007/s00122-014-2341-8                                                      resistance in wheat. Theor. Appl. Genet. 130, 1415–1430. doi: 10.1007/s00122-017-
+                                                                                                    2897-1
+   Dekkers, J. C. M. (2007). Prediction of response to marker-assisted and genomic
+selection using selection index theory. J. Anim. Breed Genet. 124, 331–341. doi: 10.1111/              Keeble-Gagnère, G., Pasam, R., Forrest, K. L., Wong, D., Robinson, H., Godoy, J.,
+j.1439-0388.2007.00701.x                                                                            et al. (2021). Novel design of imputation-enabled snp arrays for breeding and research
+                                                                                                    applications supporting multi-species hybridization. Front. Plant Sci. 12, 756877.
+  Dekkers, J. C., Su, H., and Cheng, J. (2021). Predicting the accuracy of genomic                  doi: 10.3389/fpls.2021.756877
+predictions. Genet. Selection Evol. 53, 55. doi: 10.1186/s12711-021-00647-w
+                                                                                                      Kempthorne, O., and Nordskog, A. W. (1959). Restricted selection indices.
+   Erbe, M., Hayes, B. J., Matukumalli, L. K., Goswami, S., Bowman, P. J., Reich, C. M.,            Biometrics 15, 10–19. doi: 10.2307/2527598
+et al. (2012). Improving accuracy of genomic predictions within and between dairy
+cattle breeds with imputed high-density single nucleotide polymorphism panels. J.                     Lee, S. H., and Van der Werf, J. H. (2016). MTG2: an efﬁcient algorithm for
+Dairy Sci. 95, 4114–4129. Return. doi: 10.3168/jds.2011-5019                                        multivariate linear mixed model analysis based on genomic information.
+                                                                                                    Bioinformatics 32, 1420–1422. doi: 10.1093/bioinformatics/btw012
+  Fernandes, G. M., Savegnago, R. P., Freitas, L. A., El Faro, L., Roso, V. M., and De
+Paz, C. C. P. (2021). Multi-trait selection index and cluster analyses in Angus cattle. J.             Li, Y., Dungey, H., Yanchuk, A., and Apiolaza, L. A. (2017). Improvement of non-key
+Agric. Sci. 159, 455–462. doi: 10.1017/S0021859621000575                                            traits in radiata pine breeding programme when long-term economic importance is
+                                                                                                    uncertain. PloS One 12, e0177806. doi: 10.1371/journal.pone.0177806
+   Gilmour, A., Gogel, B., Cullis, B., and Thompson, R. (2009). ASReml user guide
+release 3.0 (Hemel Hempstead, HP1 1ES, United Kingdom: VSN International Ltd).                        Mallard, J. (1972). The theory and computation of selection indices with constraints:
+                                                                                                    a critical synthesis. Biometrics 28, 713–735. doi: 10.2307/2528758
+  Harville, D. A. (1975). Index selection with proportionality constraints. Biometrics
+31, 223–225. doi: 10.2307/2529722                                                                     McDonald, G. K. (1992). Effects of nitrogenous fertilizer on the growth, grain yield
+                                                                                                    and grain protein concentration of wheat. Aust. J. Agric. Res. 43, 949–967. doi: 10.1071/
+  Hazel, L. N. (1943). The genetic basis for constructing selection indexes. Genetics 8,            AR9920949
+476–490. doi: 10.1093/genetics/28.6.476
+                                                                                                      Money, D., Gardner, K., Migicovsky, Z., Schwaninge, H., Zhong, G. Y., and Myles, S.
+  Hazel, L. N., Dickerson, G. E., and Freeman, A. E. (1994). The selection index—Then,              (2015). LinkImpute: fast and accurate genotype imputation for nonmodel organisms.
+now, and for the future. J. dairy Sci. 77, 3236–3251. doi: 10.3168/jds.S0022-0302(94)               G3: Genes, Genomes, Genetics 5, 2383–2390.
+77265-9
+                                                                                                      Pesek, J., and Baker, R. J. (1969). Desired improvement in relation to selection
+  He, S., Thistlethwaite, R., Forrest, K., Shi, F., Hayden, M. J., Trethowan, R., et al.            indices. Can. J. Plant Sci. 49, 803–804. doi: 10.4141/cjps69-137
+(2019). Extension of a haplotype-based genomic prediction model to manage multi-
+environment wheat data using environmental covariates. Theor. Appl. Genet. 132,                       Richardson, C. M., Sunduimijid, B., Amer, P., van den Berg, I., and Pryce, J. E. (2021).
+3143–3154. doi: 10.1007/s00122-019-03413-1                                                          A method for implementing methane breeding values in Australian dairy cattle. Anim.
+                                                                                                    Product. Sci. 61, 1781–1787. doi: 10.1071/AN21055
+  Heffner, E. L., Jannink, J. L., and Sorrells, M. E. (2011). Genomic selection accuracy
+using multifamily prediction models in a wheat breeding program. Plant Genome 4,                      Smith, H. F. (1936). A discriminant function for plant selection. Ann. Eugen 7, 240–
+65–75. doi: 10.3835/plantgenome.2010.12.0029                                                        250. doi: 10.1111/j.1469-1809.1936.tb02143.x
+  Itoh, Y., and Yamada, Y. (1986). Re-examination of selection index for desired gains.                Tallis, G. M. (1985). Constrained selection. Jpn. J. Genet. 60, 151–155. doi: 10.1266/
+Genet. Sel Evol. 18, 499–504. doi: 10.1186/1297-9686-18-4-499                                       jjg.60.151
+
+
+
+
+Frontiers in Plant Science                                                                     09                                                                           frontiersin.org
+
+Joukhadar et al.                                                                                                                                             10.3389/fpls.2024.1337388
+
+
+
+
+  Thistlethwaite, R. J., Tan, D. K., Bokshi, A. I., Ullah, S., and Trethowan, R. M. (2020).          Watson, A., Hickey, L. T., Christopher, J., Rutkoski, J., Poland, J., and Hayes, B. J.
+A phenotyping strategy for evaluating the high-temperature tolerance of wheat. Field               (2019). Multivariate genomic selection and potential of rapid indirect selection with speed
+Crops Res. 255, 107905. doi: 10.1016/j.fcr.2020.107905                                             breeding in spring wheat. Crop Sci. 59, 1945–1959. doi: 10.2135/cropsci2018.12.0757
+  Togashi, K., Lin, C. Y., and Yamazaki, T. (2011). The efﬁciency of genome wide                      Wang, S., Wong, D., Forrest, K., Allen, A., Chao, A., Huang, B. E., et al (2014).
+selection for genetic improvement of net merit. J. Anim. Sci. 89, 2972–2980.                       Characterization of polyploid wheat genomic diversity using a high‐density 90 000
+doi: 10.2527/jas.2009-2606                                                                         single nucleotide polymorphism array. Plant Biotechnol. J. 12, 787–796.
+  VanRaden, P. M. (2008). Efﬁcient methods to compute genomic predictions. J. Dairy                  Yamada, Y., Yokouchi, K., and Nishida, A. (1975). Selection index when genetic gains of
+Sci. 91, 4414–4423. doi: 10.3168/jds.2007-0980                                                     individual traits are of primary concern. Jpn J. Genet. 50, 33–41. doi: 10.1266/jjg.50.33
+
+
+
+
+Frontiers in Plant Science                                                                    10                                                                            frontiersin.org
+

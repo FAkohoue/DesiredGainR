@@ -1,50 +1,283 @@
 url: https://FAkohoue.github.io/DesiredGainR/
 
+# -----------------------------------------------------------------------------
+# Vignettes are added to the navbar menu and to the articles index as each one
+# is written. Entries commented out below are planned but not yet present;
+# pkgdown fails the build when the articles index names a missing file, so
+# uncomment each pair when its .Rmd lands in vignettes/.
+# -----------------------------------------------------------------------------
+
 template:
   bootstrap: 5
-  bslib:
-    primary: "#0C4C80"
-    secondary: "#3AA0FF"
-    success: "#7ED957"
-    base_font: {google: "Inter"}
-    heading_font: {google: "Inter"}
-    code_font: {google: "Fira Code"}
+  bootswatch: flatly
+  # Renders LaTeX written as $inline$ and $$display$$ on every page of the
+  # site, including the home page generated from README.md. GitHub renders the
+  # same delimiters natively, so one notation serves both.
+  math-rendering: mathjax
+  includes:
+    in_header: |
+      <link rel="preconnect" href="https://fonts.googleapis.com">
+      <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet">
+      <link rel="icon" href="favicon.ico">
+
+      <style>
+        .desiredgainr-navbar-logo-link {
+          display: inline-flex;
+          align-items: center;
+          flex-shrink: 0;
+          margin-right: 0.45rem;
+          text-decoration: none;
+        }
+
+        .desiredgainr-navbar-logo {
+          display: block;
+          width: 38px;
+          height: 38px;
+          object-fit: contain;
+        }
+
+        @media (max-width: 575.98px) {
+          .desiredgainr-navbar-logo {
+            width: 32px;
+            height: 32px;
+          }
+        }
+      </style>
+
+    before_title: |
+      <a class="desiredgainr-navbar-logo-link"
+         href="https://FAkohoue.github.io/DesiredGainR/"
+         aria-label="DesiredGainR home">
+        <img class="desiredgainr-navbar-logo"
+             src="https://FAkohoue.github.io/DesiredGainR/logo.png"
+             alt="DesiredGainR logo">
+      </a>
 
 authors:
   Félicien Akohoue:
     href: https://github.com/FAkohoue
 
-home:
-  title: DesiredGainR
-  description: Auditable desired-gain and quadratic genomic selection indices.
-
 navbar:
-  bg: primary
   structure:
-    left: [home, reference, articles]
-    right: [github]
+    left:  [reference, tutorial, articles, guide, news]
+    right: [search, github]
   components:
+    tutorial:
+      text: Tutorial
+      href: articles/DesiredGainR-introduction.html
+    articles:
+      text: Vignettes
+      menu:
+        - text: Full pipeline walkthrough
+          href: articles/DesiredGainR-pipeline.html
+        - text: The complete workflow
+          href: articles/DesiredGainR-workflow.html
+        - text: -------
+        - text: "Deciding what to select for"
+        - text: Defining a breeding objective
+          href: articles/DesiredGainR-objective.html
+        - text: -------
+        - text: "Looking ahead"
+        - text: Comparing objectives over several cycles
+          href: articles/DesiredGainR-simulation.html
+        # - text: Obtaining the genetic and phenotypic covariance matrices
+        #   href: articles/DesiredGainR-covariance.html
+        # - text: -------
+        # - text: "Index methods"
+        # - text: Choosing an index
+        #   href: articles/DesiredGainR-index-families.html
+        # - text: Optimising desired gains
+        #   href: articles/DesiredGainR-dgsi.html
+        # - text: Quadratic genomic selection
+        #   href: articles/DesiredGainR-qgsi.html
+        # - text: -------
+        # - text: "Looking ahead"
+        # - text: Comparing objectives over several cycles
+        #   href: articles/DesiredGainR-simulation.html
+        # - text: Working with other breeding software
+        #   href: articles/DesiredGainR-interoperation.html
+    guide:
+      text: Breeder guide
+      href: breeder-guide.html
     github:
-      icon: fa-github
+      icon: fab fa-github fa-lg
       href: https://github.com/FAkohoue/DesiredGainR
-      aria-label: GitHub repository
+      aria-label: GitHub
 
-reference:
-  - title: Core workflows
-    contents:
-      - run_dgsi
-      - estimate_genetic_covariance
-      - run_qgsi
-      - run_qgsi_desired_gain
-      - run_dgsi_qgsi_pipeline
-  - title: Supporting tools
-    contents:
-      - compare_dg_and_qgsi
-  - title: Package
-    contents:
-      - DesiredGainR-package
+home:
+  title: "DesiredGainR -- Deciding What to Select For"
+  description: >
+    Multi-trait selection index tools organised around the breeding objective
+    rather than around the index. Computing an index is arithmetic; deciding
+    what it should select for is the difficult part, and the literature
+    identifies the specification of economic weights as the principal obstacle
+    to routine index use. DesiredGainR translates exactly between economic
+    weights and desired gains, tests whether a stated objective is attainable
+    at the planned selection intensity, recovers the objective a programme has
+    been applying implicitly from its historical selection differentials, and
+    reports how far a decision depends on weights that are themselves
+    uncertain. It provides the classical index families through one interface
+    (Smith-Hazel, base, Pesek-Baker, Yamada, Mulamba-Mock rank-sum, independent
+    culling and tandem selection), the iterative desired-gain index of
+    Joukhadar et al. (2024), and the quadratic genomic selection index of
+    Ceron-Rojas et al. (2026), each reported with the standard evaluation
+    criteria. A multi-cycle simulation layer compares desired-gain directions
+    over successive breeding cycles, with founders built from the breeder's own
+    phased marker data rather than from a simulated genome.
+  links:
+    - text: Browse source code
+      href: https://github.com/FAkohoue/DesiredGainR
+    - text: Report a bug
+      href: https://github.com/FAkohoue/DesiredGainR/issues
 
 articles:
-  - title: Get started
+  - title: "Getting started"
+    navbar: ~
     contents:
       - DesiredGainR-introduction
+      - DesiredGainR-pipeline
+      - DesiredGainR-workflow
+  - title: "Deciding what to select for"
+    navbar: "Deciding what to select for"
+    contents:
+      - DesiredGainR-objective
+  - title: "Looking ahead"
+    navbar: "Looking ahead"
+    contents:
+      - DesiredGainR-simulation
+  # - title: "Index methods"
+  #   navbar: "Index methods"
+  #   contents:
+  #     - DesiredGainR-covariance
+  #     - DesiredGainR-index-families
+  #     - DesiredGainR-dgsi
+  #     - DesiredGainR-qgsi
+  # - title: "Interoperation"
+  #   navbar: "Interoperation"
+  #   contents:
+  #     - DesiredGainR-interoperation
+
+reference:
+
+# ------------------------------------------------------------
+# Package overview
+# ------------------------------------------------------------
+
+  - title: "Package overview"
+    desc: >
+      Main documentation entry point for DesiredGainR, and the standalone
+      Breeder's Guide covering the objective-setting decision and the choice
+      among index families in narrative form, for readers who approve a
+      selection decision without running R themselves.
+    contents:
+      - DesiredGainR-package
+      - open_desiredgain_guide
+
+
+# ------------------------------------------------------------
+# Defining the objective
+# ------------------------------------------------------------
+
+  - title: "Defining the breeding objective"
+    desc: >
+      The distinctive layer of the package. Economic weights and desired gains
+      are two parameterisations of one linear index, so each implies the other
+      exactly; those translations, a feasibility test derived from the
+      achievable-response ellipsoid, recovery of the objective implicit in past
+      selection decisions, and a sensitivity analysis reporting whether the
+      decision depends on the stated weights at all.
+    contents:
+      - implied_economic_weights
+      - implied_desired_gains
+      - gain_feasibility
+      - retrospective_weights
+      - weight_sensitivity
+      - effective_weights
+
+
+# ------------------------------------------------------------
+# Obtaining covariance matrices
+# ------------------------------------------------------------
+
+  - title: "Obtaining covariance matrices"
+    desc: >
+      Labelled approximations to the genetic covariance matrix for programmes
+      without a fitted multi-trait model, including the covariance of
+      across-environment adjusted means recommended for operational use by the
+      CGIAR implementation guideline. Each method records its estimand,
+      provenance and assumptions rather than relabelling a covariance of
+      predictions as a genetic covariance.
+    contents:
+      - estimate_genetic_covariance
+      - matrix_diagnostics
+
+
+# ------------------------------------------------------------
+# Building an index
+# ------------------------------------------------------------
+
+  - title: "Building a selection index"
+    desc: >
+      The classical index families through one interface, so that alternative
+      objectives and alternative families can be compared on identical data,
+      together with the iterative desired-gain index and the quadratic genomic
+      selection index.
+    contents:
+      - selection_index
+      - run_dgsi
+      - run_qgsi
+      - run_dgsi_qgsi_pipeline
+      - run_qgsi_desired_gain
+
+
+# ------------------------------------------------------------
+# Evaluating an index
+# ------------------------------------------------------------
+
+  - title: "Evaluating and comparing indices"
+    desc: >
+      The four criteria used by Rahimi and Debnath (2023) and by the
+      established selection-index software: the correlation between the index
+      and net merit, the expected gain in aggregate merit, efficiency relative
+      to direct selection on a main trait, and the coefficient of variation of
+      the index, alongside the expected response for every trait.
+    contents:
+      - evaluate_index
+      - compare_dg_and_qgsi
+
+
+# ------------------------------------------------------------
+# Multi-cycle simulation
+# ------------------------------------------------------------
+
+  - title: "Multi-cycle simulation"
+    desc: >
+      Comparing desired-gain directions over several breeding cycles, because a
+      direction that maximises response in the first cycle can exhaust the
+      genetic variation that response depends on within a few more. Founders
+      are built from the breeder's own phased marker data, so the linkage
+      disequilibrium and allele-frequency structure of the simulation are those
+      of the target programme. The search treats the simulation as the
+      objective function and never substitutes a cheaper approximation for it.
+    contents:
+      - founder_haplotypes
+      - haplotypes_from_inbred_dosage
+      - dosage_diagnostics
+      - founder_population
+      - simulate_selection_cycles
+      - optimize_desired_gains
+
+
+# ------------------------------------------------------------
+# Example datasets
+# ------------------------------------------------------------
+
+  - title: "Example datasets"
+    desc: >
+      One simulated tropical maize programme with six traits, carrying the
+      antagonistic genetic correlations, the two-order-of-magnitude spread of
+      trait scales, and the internal consistency between markers and trait
+      values that a multi-trait selection index needs in order to demonstrate
+      anything.
+    contents:
+      - DesiredGainR-data

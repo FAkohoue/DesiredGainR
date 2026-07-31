@@ -13,4 +13,14 @@
 ^\.gitattributes$
 ^\.gitignore$
 ^CITATION\.cff$
-^data$
+^CONTRIBUTING\.md$
+^CODE_OF_CONDUCT\.md$
+^SECURITY\.md$
+^SUPPORT\.md$
+^data-raw$
+^AUDIT-.*$
+^DESIGN-.*$
+^LITERATURE-CROSSCHECK\..*$
+^query-.*$
+^my-writing-style-SKILL\..*$
+^Publications$

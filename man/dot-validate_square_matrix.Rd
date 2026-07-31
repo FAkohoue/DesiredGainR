@@ -14,6 +14,10 @@
 \item{nm}{Object name for messages.}
 }
 \description{
-Validate a square matrix
+Superseded internally by \code{.dgr_covariance()} and
+\code{.dgr_qg_symmetric_matrix()}, which also check names, finiteness, and
+symmetry. Retained only so that external code calling
+\code{DesiredGainR:::.validate_square_matrix()} does not break. Scheduled for
+removal once no reverse dependency relies on it.
 }
 \keyword{internal}

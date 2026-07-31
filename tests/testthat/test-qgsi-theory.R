@@ -10,11 +10,14 @@ test_that("QGSI scores and contributions reproduce the matrix equation", {
     c(0.10, 0.04, 0.04, -0.06), 2,
     dimnames = list(traits, traits)
   )
-  result <- run_qgsi(
+  # center_traits = FALSE with an internally estimated Gamma warns that the
+  # theoretical block describes a centred index; the scores themselves, which
+  # are what this test checks, are unaffected.
+  result <- suppressWarnings(run_qgsi(
     values[, .(GenoID)], values, traits,
     linear_weights = w, W = W,
     center_traits = FALSE
-  )
+  ))
   X <- as.matrix(values[, ..traits])
   expected_linear <- as.numeric(X %*% w)
   expected_quadratic <- rowSums((X %*% W) * X)
@@ -72,14 +75,109 @@ test_that("Gamma and theoretical parameters reproduce published equations", {
   expect_equal(
     parameters$quadratic_index_variance, expected_quadratic_variance
   )
+  # With true_G == Gamma the index is its own optimal predictor, so
+  # Cov(H, I) == Var(I) and both the general squared correlation and the
+  # variance ratio equal 1.
   expect_equal(parameters$squared_index_merit_correlation, 1)
+  expect_equal(parameters$variance_ratio_index_to_merit, 1)
   expect_equal(parameters$mean_squared_prediction_error, 0)
+
+  # Expected per-trait gain divides by the TOTAL index standard deviation.
+  expected_total_variance <- expected_linear_variance +
+    expected_quadratic_variance
   expect_equal(
     result$expected_gain_per_trait$Expected_Genetic_Gain,
     as.numeric(
       parameters$selection_intensity * Gamma %*% w /
+        sqrt(expected_total_variance)
+    )
+  )
+  # The superseded linear-only quantity is still reported for continuity.
+  expect_equal(
+    result$expected_gain_per_trait$Expected_Genetic_Gain_LinearSD,
+    as.numeric(
+      parameters$selection_intensity * Gamma %*% w /
         sqrt(expected_linear_variance)
     )
+  )
+  expect_true(all(
+    abs(result$expected_gain_per_trait$Expected_Genetic_Gain) <
+      abs(result$expected_gain_per_trait$Expected_Genetic_Gain_LinearSD)
+  ))
+})
+
+test_that("squared correlation uses Cov(H, I)^2 when the index is not optimal", {
+  traits <- c("t1", "t2")
+  values <- data.table::data.table(
+    GenoID = paste0("G", 1:5),
+    t1 = c(-2, -1, 0, 1, 2),
+    t2 = c(-1, 1, 0, -1, 1)
+  )
+  w <- c(t1 = 1.2, t2 = 0.4)
+  W <- matrix(
+    c(0.10, -0.03, -0.03, 0.05), 2,
+    dimnames = list(traits, traits)
+  )
+  Gamma <- matrix(
+    c(1.5, 0.25, 0.25, 0.8), 2,
+    dimnames = list(traits, traits)
+  )
+  # true_G deliberately differs from Gamma, so Cov(H, I) != Var(I).
+  true_G <- matrix(
+    c(2.2, 0.40, 0.40, 1.3), 2,
+    dimnames = list(traits, traits)
+  )
+  result <- run_qgsi(
+    values[, .(GenoID)], values, traits,
+    linear_weights = w, W = W, Gamma = Gamma,
+    true_G = true_G, center_traits = FALSE,
+    selection_proportion = 0.4
+  )
+  tr <- function(M) sum(diag(M))
+  parameters <- result$theoretical_parameters
+
+  var_i <- as.numeric(crossprod(w, Gamma %*% w)) +
+    2 * tr(W %*% Gamma %*% W %*% Gamma)
+  var_h <- as.numeric(crossprod(w, true_G %*% w)) +
+    2 * tr(W %*% true_G %*% W %*% true_G)
+  cov_hi <- as.numeric(crossprod(w, Gamma %*% w)) +
+    2 * tr(W %*% Gamma %*% W %*% true_G)
+
+  expect_equal(parameters$true_merit_variance, var_h)
+  expect_equal(parameters$merit_index_covariance, cov_hi)
+  expect_equal(
+    parameters$squared_index_merit_correlation,
+    cov_hi^2 / (var_i * var_h)
+  )
+  expect_equal(parameters$variance_ratio_index_to_merit, var_i / var_h)
+  # The two differ once the index is not the optimal predictor, which is the
+  # whole reason the general formula is required.
+  expect_false(isTRUE(all.equal(
+    parameters$squared_index_merit_correlation,
+    parameters$variance_ratio_index_to_merit
+  )))
+  # A squared correlation must lie in [0, 1]; the variance ratio need not.
+  expect_gte(parameters$squared_index_merit_correlation, 0)
+  expect_lte(parameters$squared_index_merit_correlation, 1)
+})
+
+test_that("estimated Gamma with uncentred scores warns about inconsistency", {
+  traits <- c("t1", "t2")
+  values <- data.table::data.table(
+    GenoID = paste0("G", 1:6),
+    t1 = c(10, 11, 12, 13, 14, 15),
+    t2 = c(4, 5, 4, 6, 5, 7)
+  )
+  W <- diag(c(t1 = 0.1, t2 = -0.1))
+  dimnames(W) <- list(traits, traits)
+  expect_warning(
+    run_qgsi(
+      values[, .(GenoID)], values, traits,
+      linear_weights = c(t1 = 1, t2 = 0.5),
+      W = W,
+      center_traits = FALSE
+    ),
+    "centred covariance"
   )
 })
 
