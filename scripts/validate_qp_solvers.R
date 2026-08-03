@@ -6,12 +6,19 @@
 #   DESIREDGAINR_QP_REPORT     Output CSV path
 
 if (!requireNamespace("jsonlite", quietly = TRUE)) {
-  stop("Package 'jsonlite' is required for solver validation.", call. = FALSE)
+  stop(
+    "Package 'jsonlite' is required for solver validation.",
+    call. = FALSE
+  )
 }
+
 if (!requireNamespace("devtools", quietly = TRUE)) {
-  stop("Package 'devtools' is required for solver validation.", call. = FALSE)
+  stop(
+    "Package 'devtools' is required for solver validation.",
+    call. = FALSE
+  )
 }
-devtools::load_all(".", quiet = TRUE)
+
 
 encode_bound <- function(x) {
   vapply(x, function(value) {
@@ -209,9 +216,8 @@ if (!nzchar(python)) {
   )
 }
 
-# Preserve the exact executable path supplied by setup-python.
-# Do not use normalizePath(), because it dereferences the action-managed
-# Python launcher/symlink.
+# Preserve the exact executable path supplied by the workflow. In particular,
+# do not use normalizePath(), because it may dereference a managed launcher.
 python <- path.expand(python)
 
 if (!file.exists(python)) {
@@ -241,11 +247,13 @@ pythonpath <- Sys.getenv(
   unset = ""
 )
 
-# Prevent an unrelated PYTHONHOME from changing this interpreter's prefix.
-Sys.unsetenv("PYTHONHOME")
+python_env <- "PYTHONNOUSERSITE=1"
 
 if (nzchar(pythonpath)) {
-  Sys.setenv(PYTHONPATH = pythonpath)
+  python_env <- c(
+    python_env,
+    paste0("PYTHONPATH=", pythonpath)
+  )
 }
 
 message("QP oracle Python: ", python)
@@ -273,14 +281,17 @@ probe_code <- paste(
   sep = "; "
 )
 
-probe <- system2(
-  command = python,
-  args = c(
-    "-c",
-    shQuote(probe_code)
-  ),
-  stdout = TRUE,
-  stderr = TRUE
+probe <- suppressWarnings(
+  system2(
+    command = python,
+    args = c(
+      "-c",
+      shQuote(probe_code)
+    ),
+    stdout = TRUE,
+    stderr = TRUE,
+    env = python_env
+  )
 )
 
 probe_status <- attr(probe, "status")
@@ -290,7 +301,10 @@ if (is.null(probe_status)) {
 }
 
 if (!identical(as.integer(probe_status), 0L)) {
-  cat(probe, sep = "\n")
+  if (length(probe)) {
+    cat(probe, sep = "\n")
+    cat("\n")
+  }
   
   stop(
     paste0(
@@ -302,24 +316,44 @@ if (!identical(as.integer(probe_status), 0L)) {
   )
 }
 
-message(
-  "QP oracle dependencies confirmed using: ",
-  probe[[length(probe)]]
-)
+if (length(probe)) {
+  message(
+    "QP oracle dependencies confirmed using: ",
+    probe[[length(probe)]]
+  )
+} else {
+  message("QP oracle dependencies confirmed.")
+}
 
-status <- system2(
-  command = python,
-  args = c(
-    shQuote(oracle),
-    shQuote(input),
-    shQuote(output)
+oracle_log <- suppressWarnings(
+  system2(
+    command = python,
+    args = c(
+      shQuote(oracle),
+      shQuote(input),
+      shQuote(output)
+    ),
+    stdout = TRUE,
+    stderr = TRUE,
+    env = python_env
   )
 )
 
-if (!identical(as.integer(status), 0L)) {
+oracle_status <- attr(oracle_log, "status")
+
+if (is.null(oracle_status)) {
+  oracle_status <- 0L
+}
+
+if (!identical(as.integer(oracle_status), 0L)) {
+  if (length(oracle_log)) {
+    cat(oracle_log, sep = "\n")
+    cat("\n")
+  }
+  
   stop(
     "The Python solver oracle failed with exit status ",
-    status,
+    oracle_status,
     ". Interpreter: ",
     python,
     call. = FALSE
@@ -333,12 +367,32 @@ if (!file.exists(output)) {
   )
 }
 
+oracle_payload <- jsonlite::read_json(
+  output,
+  simplifyVector = FALSE
+)
 
-
-oracle_payload <- jsonlite::read_json(output, simplifyVector = FALSE)
 versions <- oracle_payload$versions
 external <- oracle_payload$results
-names(external) <- vapply(external, `[[`, character(1L), "problem_id")
+
+names(external) <- vapply(
+  external,
+  `[[`,
+  character(1L),
+  "problem_id"
+)
+
+# Load DesiredGainR only after the independent Python oracle has completed.
+# This prevents the package or its dependency stack from modifying the
+# environment used to locate the external solver modules.
+devtools::load_all(".", quiet = TRUE)
+
+desiredgainr_version <- unname(
+  read.dcf(
+    "DESCRIPTION",
+    fields = "Version"
+  )[1L, 1L]
+)
 
 rows <- lapply(problems, function(problem) {
   H <- as.matrix(problem$H)
@@ -430,9 +484,9 @@ rows <- lapply(problems, function(problem) {
   osqp_kkt_tolerance <- if (condition_number >= 1e6) 2e-6 else 1e-6
   active_tolerance <- max(1e-8, x_tolerance)
   active_lower <- sum(is.finite(lower) &
-    abs(internal$solution - lower) <= active_tolerance)
+                        abs(internal$solution - lower) <= active_tolerance)
   active_upper <- sum(is.finite(upper) &
-    abs(internal$solution - upper) <= active_tolerance)
+                        abs(internal$solution - upper) <= active_tolerance)
   fixed_bounds <- sum(is.finite(lower) & is.finite(upper) & lower == upper)
   fixed <- is.finite(lower) & is.finite(upper) & lower == upper
   internal_gradient <- as.numeric(H %*% internal$solution + f)
@@ -461,18 +515,18 @@ rows <- lapply(problems, function(problem) {
     osqp_polished$kkt <= osqp_kkt_tolerance &&
     objective_difference <= objective_tolerance * objective_scale &&
     osqp_unpolished_objective_difference <=
-      objective_tolerance * objective_scale &&
+    objective_tolerance * objective_scale &&
     osqp_polished_objective_difference <=
-      objective_tolerance * objective_scale &&
+    objective_tolerance * objective_scale &&
     (!require_solution || solution_difference <= x_tolerance * max(x_scale)) &&
     (!require_solution || osqp_polished_solution_difference <=
-      x_tolerance * max(x_scale)) &&
+       x_tolerance * max(x_scale)) &&
     max(abs(clarabel$x - clarabel_reordered$x)) <=
-      x_tolerance * max(x_scale) &&
+    x_tolerance * max(x_scale) &&
     (is.na(analytical_difference) || analytical_difference <= x_tolerance)
   data.frame(
     problem_id = problem$problem_id, class = problem$class,
-    desiredgainr_version = as.character(utils::packageVersion("DesiredGainR")),
+    desiredgainr_version = desiredgainr_version,
     clarabel_version = versions$clarabel, osqp_version = versions$osqp,
     numpy_version = versions$numpy, scipy_version = versions$scipy,
     random_seed = problem$seed, dimension = length(f),
@@ -532,6 +586,6 @@ cat("Report:", normalizePath(report_path, mustWork = FALSE), "\n")
 if (!all(report$pass)) {
   print(report[!report$pass, ])
   stop(sum(!report$pass), " independent solver validation problem(s) failed.",
-    call. = FALSE
+       call. = FALSE
   )
 }

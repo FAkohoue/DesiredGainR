@@ -118,18 +118,26 @@ jobs:
         run: |
           set -euo pipefail
 
-          python -m pip install --disable-pip-version-check \
+          QP_VENV="$RUNNER_TEMP/desiredgainr-qp-venv"
+
+          python -m venv "$QP_VENV"
+
+          QP_PYTHON="$QP_VENV/bin/python"
+
+          "$QP_PYTHON" -m pip install \
+            --disable-pip-version-check \
+            --upgrade pip
+
+          "$QP_PYTHON" -m pip install \
             clarabel==0.11.1 \
             osqp==1.1.3 \
             numpy==2.5.1 \
             scipy==1.18.0
 
-          PYTHON_EXECUTABLE="$(command -v python)"
-
-          "$PYTHON_EXECUTABLE" -c \
+          "$QP_PYTHON" -c \
             "import sys, clarabel, osqp, numpy, scipy; print(sys.executable)"
 
-          echo "DESIREDGAINR_PYTHON=$PYTHON_EXECUTABLE" >> "$GITHUB_ENV"
+          echo "DESIREDGAINR_PYTHON=$QP_PYTHON" >> "$GITHUB_ENV"
 
       - name: Validate the internal QP solver independently
         shell: bash
@@ -138,6 +146,11 @@ jobs:
         run: |
           set -euo pipefail
 
+          unset PYTHONHOME
+          unset PYTHONPATH
+          unset PYTHONUSERBASE
+          unset PYTHONNOUSERSITE
+
           echo "DESIREDGAINR_PYTHON=$DESIREDGAINR_PYTHON"
 
           "$DESIREDGAINR_PYTHON" --version
@@ -145,11 +158,28 @@ jobs:
           "$DESIREDGAINR_PYTHON" -c \
             "import sys, clarabel, osqp, numpy, scipy; print(sys.executable)"
 
-          Rscript -e \
-            'cat("R sees DESIREDGAINR_PYTHON=", Sys.getenv("DESIREDGAINR_PYTHON"), "\n", sep = "")'
+          Rscript -e '
+            python <- Sys.getenv("DESIREDGAINR_PYTHON")
+            cat("R sees DESIREDGAINR_PYTHON=", python, "\n", sep = "")
+            status <- system2(
+              python,
+              c(
+                "-c",
+                shQuote(
+                  paste(
+                    "import sys, clarabel, osqp, numpy, scipy;",
+                    "print(sys.executable)"
+                  )
+                )
+              )
+            )
+            if (!identical(status, 0L)) {
+              stop("Python preflight failed inside R.", call. = FALSE)
+            }
+          '
 
           Rscript scripts/validate_qp_solvers.R
-
+          
       - name: Render the Breeder Guide
         run: Rscript data-raw/build_breeder_guide.R
 
