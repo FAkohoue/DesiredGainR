@@ -55,9 +55,10 @@ artifacts:
   scope of inference.
 
 The suite includes CNA6 rice, a tropical maize haploid-inducer population,
-CIMMYT rapid-cycle wheat genomic selection, the INIA Uruguay historical rice
-programme, Genomes-to-Fields maize, and Zhang et al.'s CIMMYT maize RCGS
-programme. The RCGS analysis adds raw cycle-gain reproduction, complete
+International Maize and Wheat Improvement Center (CIMMYT) rapid-cycle wheat
+genomic selection, the Instituto Nacional de Investigación Agropecuaria (INIA)
+Uruguay historical rice programme, Genomes-to-Fields maize, and CIMMYT maize
+rapid-cycle genomic selection (RCGS). The RCGS analysis adds raw cycle-gain reproduction, complete
 phenotype-to-genotype key checks, repeated family-level genomic prediction with
 a permutation control, and nested leave-one-environment-out desired-gain
 direction testing.
@@ -68,3 +69,8 @@ fold. These safeguards make the evidence directly useful for evaluating
 DesiredGainR rather than merely describing the source datasets. A prospective
 comparison of competing vectors is recorded as a future evidence opportunity
 for estimating incremental field response among strategies.
+
+The complete author lists and persistent identifiers for all six sources are
+given in `empirical-validation-report.md` and in the empirical-validation
+vignette. They are retained in full so that the people who created and curated
+the validation data receive explicit attribution.

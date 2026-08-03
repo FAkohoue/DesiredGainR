@@ -1,10 +1,15 @@
 <urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
 <url><loc>https://FAkohoue.github.io/DesiredGainR/404.html</loc></url>
+<url><loc>https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-covariance.html</loc></url>
 <url><loc>https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-desired-gain-intervals.html</loc></url>
+<url><loc>https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-dgsi.html</loc></url>
 <url><loc>https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-empirical-validation.html</loc></url>
+<url><loc>https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-index-families.html</loc></url>
+<url><loc>https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-interoperation.html</loc></url>
 <url><loc>https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-introduction.html</loc></url>
 <url><loc>https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-objective.html</loc></url>
 <url><loc>https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-pipeline.html</loc></url>
+<url><loc>https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-qgsi.html</loc></url>
 <url><loc>https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-reproduction.html</loc></url>
 <url><loc>https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-simulation.html</loc></url>
 <url><loc>https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-workflow.html</loc></url>

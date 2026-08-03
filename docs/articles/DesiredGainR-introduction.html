@@ -80,9 +80,21 @@
     <li><a class="dropdown-item" href="../articles/DesiredGainR-objective.html">Defining a breeding objective</a></li>
     <li><a class="dropdown-item" href="../articles/DesiredGainR-desired-gain-intervals.html">Defining desired gains and acceptable intervals</a></li>
     <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Evidence</h6></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-covariance.html">Obtaining G and P</a></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-reproduction.html">Reproducing published methods</a></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-empirical-validation.html">Empirical validation with real breeding programmes</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Index methods</h6></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-index-families.html">Choosing an index</a></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-dgsi.html">Optimising desired gains</a></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-qgsi.html">Quadratic genomic selection</a></li>
+    <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Looking ahead</h6></li>
     <li><a class="dropdown-item" href="../articles/DesiredGainR-simulation.html">Comparing objectives over several cycles</a></li>
-    <li><a class="dropdown-item" href="../articles/DesiredGainR-empirical-validation.html">Empirical validation with real breeding programmes</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Interoperation</h6></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-interoperation.html">Working with other breeding software</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="../breeder-guide.html">Breeder guide</a></li>
@@ -135,8 +147,8 @@ around the index. It provides the classical index families, but its
 distinctive content is the layer that helps a breeder state an
 objective, test whether it can be attained, and discover how much the
 resulting decision depends on it.</p>
-<p>This vignette orients the reader. The other seven cover each layer in
-depth, and Section 6 below says which to read next.</p>
+<p>This vignette orients the reader. The other articles cover each layer
+in depth, and Section 6 provides a direct link to each one.</p>
 <hr>
 </div>
 <div class="section level2">
@@ -185,8 +197,8 @@ provides labelled approximations that record what they actually are.</p>
 </table>
 <p>The last exclusion matters for anyone using both of the author’s
 packages. Parent, cross and mating decisions belong to a dedicated
-mating-design tool; see the <em>Working with other packages</em>
-vignette.</p>
+mating-design tool; see <a href="DesiredGainR-interoperation.html">Working with other
+packages</a>.</p>
 <hr>
 </div>
 <div class="section level2">
@@ -220,11 +232,22 @@ genomic index of Cerón-Rojas et al. (2026).</p>
 <div class="section level3">
 <h3 id="evaluating-an-index">3.3 Evaluating an index<a class="anchor" aria-label="anchor" href="#evaluating-an-index"></a>
 </h3>
-<p><code><a href="../reference/evaluate_index.html">evaluate_index()</a></code> reports the four criteria used by
-Rahimi and Debnath (2023) and by the established selection-index
-software: the correlation between index and net merit, the aggregate
-gain, the efficiency relative to direct selection, and the coefficient
-of variation of the index.</p>
+<p><code><a href="../reference/evaluate_index.html">evaluate_index()</a></code> reports: (i) the correlation between
+the index and one fixed definition of aggregate genetic merit, <span class="math inline">\(R_{HI}\)</span>; (ii) expected change in that
+merit, <span class="math inline">\(\Delta H\)</span>; (iii) expected
+response for every trait, <span class="math inline">\(\Delta_j\)</span>;
+(iv) relative efficiency (RE) for one declared main trait; (v) index
+heritability; and (vi) the coefficient of variation of index scores,
+<span class="math inline">\(CV_I\)</span>, when the score has a
+meaningful non-zero mean.</p>
+<p>These quantities are not interchangeable measures of index quality.
+In particular, <span class="math inline">\(R_{HI}\)</span> and <span class="math inline">\(\Delta H\)</span> require the same aggregate-merit
+definition for every index, RE describes only the main trait, and <span class="math inline">\(CV_I\)</span> is undefined for a centred index.
+Therefore, DesiredGainR also directs the breeder to per-trait
+attainment, response-direction alignment, selected-set stability,
+covariance uncertainty and, for repeated cycles, diversity. The detailed
+interpretation is given in <a href="DesiredGainR-index-families.html">Choosing an index</a> and the
+breeder guide.</p>
 </div>
 <div class="section level3">
 <h3 id="looking-ahead">3.4 Looking ahead<a class="anchor" aria-label="anchor" href="#looking-ahead"></a>
@@ -381,35 +404,50 @@ refinement of the index.</p>
 <tbody>
 <tr class="odd">
 <td>Follow one programme end to end</td>
-<td><em>The complete workflow</em></td>
+<td><a href="DesiredGainR-workflow.html">The complete workflow</a></td>
 </tr>
 <tr class="even">
 <td>Decide what to select for</td>
-<td><em>Defining a breeding objective</em></td>
+<td><a href="DesiredGainR-objective.html">Defining a breeding
+objective</a></td>
 </tr>
 <tr class="odd">
+<td>Define ranges when exact gains are uncertain</td>
+<td><a href="DesiredGainR-desired-gain-intervals.html">Defining desired
+gains and acceptable intervals</a></td>
+</tr>
+<tr class="even">
 <td>Obtain or judge a covariance matrix</td>
-<td><em>Obtaining G and P</em></td>
+<td><a href="DesiredGainR-covariance.html">Obtaining G and P</a></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Choose among index families</td>
-<td><em>Choosing an index</em></td>
-</tr>
-<tr class="odd">
-<td>Understand the iterative desired-gain method</td>
-<td><em>Optimising desired gains</em></td>
+<td><a href="DesiredGainR-index-families.html">Choosing an
+index</a></td>
 </tr>
 <tr class="even">
-<td>Use the quadratic genomic index</td>
-<td><em>Quadratic genomic selection</em></td>
+<td>Understand the iterative desired-gain method</td>
+<td><a href="DesiredGainR-dgsi.html">Optimising desired gains</a></td>
 </tr>
 <tr class="odd">
+<td>Use the quadratic genomic index</td>
+<td><a href="DesiredGainR-qgsi.html">Quadratic genomic
+selection</a></td>
+</tr>
+<tr class="even">
 <td>Compare objectives over several cycles</td>
-<td><em>Multi-cycle simulation</em></td>
+<td><a href="DesiredGainR-simulation.html">Multi-cycle
+simulation</a></td>
+</tr>
+<tr class="odd">
+<td>Inspect validation with real programmes</td>
+<td><a href="DesiredGainR-empirical-validation.html">Empirical
+validation</a></td>
 </tr>
 <tr class="even">
 <td>Combine this with other breeding software</td>
-<td><em>Working with other packages</em></td>
+<td><a href="DesiredGainR-interoperation.html">Working with other
+packages</a></td>
 </tr>
 </tbody>
 </table>

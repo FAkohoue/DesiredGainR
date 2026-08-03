@@ -54,7 +54,8 @@ form of the observation by Crosbie et al. (1980) that equal weights on
 unstandardised traits concentrate selection on whichever trait carries
 the largest variance, and it is why the package standardises by default.
 
-*See: Obtaining the genetic and phenotypic covariance matrices.*
+See [Obtaining G and
+P](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-covariance.md).
 
 ------------------------------------------------------------------------
 
@@ -107,10 +108,12 @@ round(implied, 2)
 ```
 
 Two of those weights are negative for traits the objective asks to
-improve, which is correct rather than an error, and the magnitudes are
-not comparable across traits. Both points are explained in the objective
-vignette; the short version is that rescaling by the genetic standard
-deviation changes which trait looks important:
+improve, which is correct rather than an error. In addition, the target
+values are already genetic-standard-deviation gains, whereas the
+returned weights are per original trait unit because `dgr_G` and `dgr_P`
+are in original units. The following multiplication expresses each
+weight per genetic standard deviation; it does not standardise the
+target again:
 
 ``` r
 genetic_sd <- stats::setNames(dgr_traits$genetic_sd, dgr_traits$trait)
@@ -119,14 +122,22 @@ round(sort(implied * genetic_sd[names(implied)], decreasing = TRUE), 2)
 #> 10.89  5.81  0.58  0.36 -1.51 -7.93
 ```
 
-*See: Defining a breeding objective.*
+If the covariance matrices had already been transformed to
+genetic-standard- deviation units, this multiplication would be
+incorrect because the weights would already be on that scale.
+
+See [Defining a breeding
+objective](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-objective.md).
 
 ------------------------------------------------------------------------
 
 ## 5. Stage 4 — Test whether the objective is attainable
 
-This stage exists because an optimisation cannot tell you that its
-target was impossible; it can only return the closest thing it found.
+This stage exists because an optimisation can return a numerical answer
+even when the stated one-cycle target is outside the achievable-response
+ellipsoid.
+[`gain_feasibility()`](https://FAkohoue.github.io/DesiredGainR/reference/gain_feasibility.md)
+tests the exact desired-gain ray before any shortfall is interpreted.
 
 ``` r
 feasibility <- gain_feasibility(
@@ -144,16 +155,29 @@ feasibility
 #>   Attainable fraction of the requested gain: 54.7%
 ```
 
-The request is unremarkable in isolation — between 0.4 and 1.0 genetic
-standard deviations across six traits — and requires selecting fewer
-than one candidate from two hundred. About fifty-five per cent of it is
-available at the planned intensity.
+The required intensity is 3.2082, equivalent under normal truncation to
+the best 0.1773%. Among 200 candidates, that proportion represents 0.355
+candidate. It cannot be rounded to one because selecting one retains
+0.5% and gives a lower intensity. Therefore, the exact vector is not
+attainable in this finite candidate set.
+
+The planned selection of 20 candidates has intensity 1.7550. Its ratio
+to the required intensity is 0.547, so 54.7% of every target component
+is available while the requested trait proportions are preserved.
 
 ``` r
 round(feasibility$attainable_response_input_units, 3)
 #>    GY   PHT    AD   ASI   EPP   GLS 
 #> 0.547 0.219 0.328 0.274 0.219 0.328
 ```
+
+These values are in the same genetic-standard-deviation units as the
+input. They describe the point on the requested ray, not independent
+upper limits for the six traits. If the entries are minimum floors
+rather than a fixed ratio, use population-driven or interval
+optimisation and inspect worst-trait and joint attainment. The
+conclusion remains conditional on the linear model, normal truncation
+selection and the estimated covariance matrices.
 
 Carry this number forward to Stage 8, where the optimiser will be seen
 to distribute the shortfall unevenly rather than uniformly.
@@ -240,7 +264,8 @@ A high correlation paired with a nearly empty intersection would
 indicate a fault rather than a finding. That check found a genuine
 row-alignment bug during development.
 
-*See: Choosing an index.*
+See [Choosing an
+index](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-index-families.md).
 
 ------------------------------------------------------------------------
 
@@ -301,7 +326,8 @@ The anthesis-silking interval moves in the wrong direction there.
 Joukhadar et al. reported exactly this failure of the unoptimised
 method, and it reproduces here on independent data.
 
-*See: Optimising desired gains.*
+See [Optimising desired
+gains](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-dgsi.md).
 
 ------------------------------------------------------------------------
 
@@ -338,7 +364,8 @@ turns *negative* while the index selects for more of it.
 [`run_qgsi()`](https://FAkohoue.github.io/DesiredGainR/reference/run_qgsi.md)
 warns when the trait scales make that likely.
 
-*See: Quadratic genomic selection.*
+See [Quadratic genomic
+selection](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-qgsi.md).
 
 ------------------------------------------------------------------------
 
@@ -375,13 +402,14 @@ Two questions lie beyond a single cycle and beyond this package.
 selection erodes the genetic variance that response depends on, so a
 direction that maximises first-cycle response can exhaust itself. The
 simulation layer compares directions over successive cycles, with
-founders built from the breeder’s own phased marker data. *See:
-Comparing objectives over several cycles.*
+founders built from the breeder’s own phased marker data. See [Comparing
+objectives over several
+cycles](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-simulation.md).
 
 **Which candidates should actually be crossed?** Parent, cross and
 mating allocation, coancestry control and operational feasibility are
-outside this package’s scope by design. *See: Working with other
-breeding software.*
+outside this package’s scope by design. See [Working with other breeding
+software](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-interoperation.md).
 
 ------------------------------------------------------------------------
 
@@ -389,13 +417,13 @@ breeding software.*
 
 | Stage | Vignette |
 |----|----|
-| 1-2 | Obtaining the genetic and phenotypic covariance matrices |
-| 3-5 | Defining a breeding objective |
-| 6-7 | Choosing an index |
-| 8 | Optimising desired gains |
-| 9 | Quadratic genomic selection |
-| 10 | Defining a breeding objective |
-| Beyond | Comparing objectives over several cycles; Working with other breeding software |
+| 1-2 | [Obtaining G and P](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-covariance.md) |
+| 3-5 | [Defining a breeding objective](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-objective.md) |
+| 6-7 | [Choosing an index](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-index-families.md) |
+| 8 | [Optimising desired gains](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-dgsi.md) |
+| 9 | [Quadratic genomic selection](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-qgsi.md) |
+| 10 | [Defining a breeding objective](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-objective.md) |
+| Beyond | [Comparing objectives over several cycles](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-simulation.md); [Working with other breeding software](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-interoperation.md) |
 
 ``` r
 sessionInfo()

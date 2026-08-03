@@ -1,10 +1,8 @@
 url: https://FAkohoue.github.io/DesiredGainR/
 
 # -----------------------------------------------------------------------------
-# Vignettes are added to the navbar menu and to the articles index as each one
-# is written. Entries commented out below are planned but not yet present;
-# pkgdown fails the build when the articles index names a missing file, so
-# uncomment each pair when its .Rmd lands in vignettes/.
+# Every breeder-facing vignette is listed in both the navigation menu and the
+# articles index. Keep those two lists synchronised when an article is added.
 # -----------------------------------------------------------------------------
 
 template:
@@ -79,27 +77,29 @@ navbar:
         - text: Defining desired gains and acceptable intervals
           href: articles/DesiredGainR-desired-gain-intervals.html
         - text: -------
+        - text: "Evidence"
+        - text: Obtaining G and P
+          href: articles/DesiredGainR-covariance.html
+        - text: Reproducing published methods
+          href: articles/DesiredGainR-reproduction.html
+        - text: Empirical validation with real breeding programmes
+          href: articles/DesiredGainR-empirical-validation.html
+        - text: -------
+        - text: "Index methods"
+        - text: Choosing an index
+          href: articles/DesiredGainR-index-families.html
+        - text: Optimising desired gains
+          href: articles/DesiredGainR-dgsi.html
+        - text: Quadratic genomic selection
+          href: articles/DesiredGainR-qgsi.html
+        - text: -------
         - text: "Looking ahead"
         - text: Comparing objectives over several cycles
           href: articles/DesiredGainR-simulation.html
-        - text: Empirical validation with real breeding programmes
-          href: articles/DesiredGainR-empirical-validation.html
-        # - text: Obtaining the genetic and phenotypic covariance matrices
-        #   href: articles/DesiredGainR-covariance.html
-        # - text: -------
-        # - text: "Index methods"
-        # - text: Choosing an index
-        #   href: articles/DesiredGainR-index-families.html
-        # - text: Optimising desired gains
-        #   href: articles/DesiredGainR-dgsi.html
-        # - text: Quadratic genomic selection
-        #   href: articles/DesiredGainR-qgsi.html
-        # - text: -------
-        # - text: "Looking ahead"
-        # - text: Comparing objectives over several cycles
-        #   href: articles/DesiredGainR-simulation.html
-        # - text: Working with other breeding software
-        #   href: articles/DesiredGainR-interoperation.html
+        - text: -------
+        - text: "Interoperation"
+        - text: Working with other breeding software
+          href: articles/DesiredGainR-interoperation.html
     guide:
       text: Breeder guide
       href: breeder-guide.html
@@ -146,26 +146,26 @@ articles:
     contents:
       - DesiredGainR-objective
       - DesiredGainR-desired-gain-intervals
+  - title: "Evidence"
+    navbar: "Evidence"
+    contents:
+      - DesiredGainR-covariance
+      - DesiredGainR-reproduction
+      - DesiredGainR-empirical-validation
+  - title: "Index methods"
+    navbar: "Index methods"
+    contents:
+      - DesiredGainR-index-families
+      - DesiredGainR-dgsi
+      - DesiredGainR-qgsi
   - title: "Looking ahead"
     navbar: "Looking ahead"
     contents:
       - DesiredGainR-simulation
-  - title: "Evidence"
-    navbar: "Evidence"
+  - title: "Interoperation"
+    navbar: "Interoperation"
     contents:
-      - DesiredGainR-reproduction
-      - DesiredGainR-empirical-validation
-  # - title: "Index methods"
-  #   navbar: "Index methods"
-  #   contents:
-  #     - DesiredGainR-covariance
-  #     - DesiredGainR-index-families
-  #     - DesiredGainR-dgsi
-  #     - DesiredGainR-qgsi
-  # - title: "Interoperation"
-  #   navbar: "Interoperation"
-  #   contents:
-  #     - DesiredGainR-interoperation
+      - DesiredGainR-interoperation
 
 reference:
 

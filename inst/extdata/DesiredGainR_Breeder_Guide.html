@@ -11,7 +11,7 @@
 
 <meta name="author" content="Félicien Akohoue · PhD" />
 
-<meta name="date" content="2026-08-02" />
+<meta name="date" content="2026-08-03" />
 
 <title>The DesiredGainR Breeder’s Guide</title>
 
@@ -2837,7 +2837,7 @@ font-size: 0.95em;
 <h3 class="subtitle">Turning breeder intent into a defensible selection
 decision — Edition 1</h3>
 <h4 class="author">Félicien Akohoue · PhD</h4>
-<h4 class="date">02 August 2026</h4>
+<h4 class="date">03 August 2026</h4>
 
 </div>
 
@@ -2848,12 +2848,10 @@ MATHEMATICS NOTATION, AND WHY IT IS RESTRAINED
 This document renders to HTML through MathJax and to PDF through XeLaTeX, and
 the two disagree about bold symbols.
 
-  * \bm is a LaTeX package command. MathJax does not know it.
-  * \boldsymbol is understood by MathJax, but pandoc's XeLaTeX template loads
-    unicode-math, which redefines Greek letters to Unicode math characters:
-    \Delta becomes \mitDelta. \boldsymbol cannot take a character argument, so
-    \boldsymbol{\Delta} raises "Improper alphabetic constant" and the build
-    fails.
+  * \bm is a LaTeX package command and is not available in the website's
+    MathJax configuration.
+  * \boldsymbol is not loaded by the website's MathJax configuration. It also
+    fails for Greek Unicode-math characters in the XeLaTeX route used here.
 
 The intersection that renders correctly in both is:
 
@@ -3157,8 +3155,9 @@ rank and positive definiteness.</p>
 <div id="repairing-an-inadmissible-matrix" class="section level2" number="2.4">
 <h2><span class="header-section-number">2.4</span> Repairing an
 inadmissible matrix</h2>
-<p>Multi-trait REML routinely returns a <span class="math inline">\(\mathbf{G}\)</span> that is not positive definite.
-<code>bend_covariance()</code> repairs it through
+<p>Multi-trait restricted maximum likelihood (REML) routinely returns a
+<span class="math inline">\(\mathbf{G}\)</span> that is not positive
+definite. <code>bend_covariance()</code> repairs it through
 <code>ASRgenomics::G.tuneup()</code>, which is a wrapper around Higham’s
 alternating-projections algorithm.</p>
 <p>Two of that function’s fixed choices matter and are surfaced in the
@@ -3247,12 +3246,28 @@ weight on a trait you asked to improve means the index obtains more of
 that trait by selecting against it directly, because of how strongly it
 correlates with something else in the objective. That may be correct,
 but it should be a decision rather than an accident.</p>
+<p>If the desired gains are stated in genetic standard deviations while
+<span class="math inline">\(\mathbf{G}\)</span> and <span class="math inline">\(\mathbf{P}\)</span> remain in original trait
+units, the returned weights are per original unit. Hence, compare
+<code>weight * genetic_sd</code>, not the raw coefficients. This
+multiplication converts the weights to a common
+per-genetic-standard-deviation scale; it does not standardise the
+desired gains again. If the covariance matrices have already been
+standardised, do not apply the multiplication a second time.</p>
 </div>
 <div id="is-the-objective-attainable" class="section level2" number="3.3">
 <h2><span class="header-section-number">3.3</span> Is the objective
 attainable?</h2>
-<p>Desired gains have a direction and a magnitude. The direction is
-almost always achievable; the magnitude usually is not.</p>
+<p>Desired gains have a direction and a magnitude. Neither should be
+assumed attainable before the covariance structure and planned selection
+intensity are examined.</p>
+<p>Let <span class="math inline">\(\mathbf{b}\)</span> denote the index
+coefficients, <span class="math inline">\(\mathbf{G}\)</span> the
+additive genetic covariance matrix, <span class="math inline">\(\mathbf{P}\)</span> the phenotypic covariance
+matrix, and <span class="math inline">\(i\)</span> the standardised
+selection intensity. The expected one-cycle response is</p>
+<p><span class="math display">\[\mathbf{R}=i\,\frac{\mathbf{G}\mathbf{b}}
+{\sqrt{\mathbf{b}^{\mathsf T}\mathbf{P}\mathbf{b}}}.\]</span></p>
 <p>The set of responses attainable at selection intensity <span class="math inline">\(i\)</span> is the ellipsoid</p>
 <p><span class="math display">\[\mathbf{R}^{\mathsf
 T}\mathbf{G}^{-1}\mathbf{P}\mathbf{G}^{-1}\mathbf{R} \;=\;
@@ -3261,14 +3276,29 @@ i^{2},\]</span></p>
 <p><span class="math display">\[i_{\text{required}} \;=\;
 \sqrt{\mathbf{d}^{\mathsf
 T}\mathbf{G}^{-1}\mathbf{P}\mathbf{G}^{-1}\mathbf{d}}.\]</span></p>
-<p><code>gain_feasibility()</code> returns this and the selected
-fraction it implies. An intensity of 4.2 corresponds to selecting
-roughly one candidate in ten thousand: that is not a plan.</p>
-<p><strong>The remedy is to scale the whole vector down</strong> until
-the required intensity matches what the programme runs. The direction is
-preserved; only the ambition changes. This is the single most useful
-thing the package does before any index is fitted, and it costs
-nothing.</p>
+<p><code>gain_feasibility()</code> reports: (i) the required intensity,
+(ii) the continuous selected proportion associated with that intensity,
+(iii) whether the planned selection proportion is sufficient, (iv)
+whether even selecting one candidate from the finite population is
+sufficient, and (v) the response available at the planned intensity in
+the same units as the input.</p>
+<p>For example, a required proportion of 0.1773% among 200 candidates
+represents 0.355 candidate. It is not rounded to one, because selecting
+one candidate retains 0.5% and gives a lower intensity. A reported
+attainable fraction of 54.7% means that 54.7% of <strong>every
+component</strong> is available when the exact trait ratio is
+preserved.</p>
+<p>This exact-ray test must not be confused with a minimum-floor
+objective. If a breeder accepts gains larger than the stated minimums,
+another response vector may meet all floors without preserving their
+ratio. Therefore: (i) scale the whole vector when its ratio is binding,
+or (ii) use population-driven or interval optimisation when the entries
+are trait-specific minimums, and assess the worst-trait and
+joint-attainment results.</p>
+<p>The conclusion is conditional on a linear index, one-cycle truncation
+selection, approximate normality, and the supplied covariance matrices.
+Check covariance uncertainty and selected-set stability before issuing a
+recommendation.</p>
 </div>
 <div id="how-much-does-the-answer-depend-on-the-numbers" class="section level2" number="3.4">
 <h2><span class="header-section-number">3.4</span> How much does the
@@ -3483,6 +3513,15 @@ desired-gain index</h2>
 <p>Searches stochastically for the desired-gain vector whose realised
 response best matches the target, then reports the resulting
 coefficients.</p>
+<p>DGSI is <strong>not</strong> a method hidden inside
+<code>selection_index()</code>. The call
+<code>selection_index(method = &quot;yamada&quot;)</code> fits the closed-form,
+non-iterated desired-gain index. <code>run_dgsi()</code> starts from
+that coefficient direction, searches alternative directions and stores
+the original comparator in <code>non_iterated</code>. The dedicated
+<em>Optimising desired gains</em> vignette demonstrates the requested
+direction, feasibility, both responses, candidate ranking, full-sample
+comparison, holdout choice and stability diagnostics.</p>
 <table>
 <colgroup>
 <col width="33%" />
@@ -3587,8 +3626,13 @@ predicts.</p>
 <div id="evaluating-and-comparing-indices" class="section level1" number="5">
 <h1><span class="header-section-number">5</span> Evaluating and
 comparing indices</h1>
-<div id="the-criteria" class="section level2" number="5.1">
-<h2><span class="header-section-number">5.1</span> The criteria</h2>
+<div id="the-classical-criteria" class="section level2" number="5.1">
+<h2><span class="header-section-number">5.1</span> The classical
+criteria</h2>
+<p>Let <span class="math inline">\(I=\mathbf{b}^{\mathsf
+T}\mathbf{x}\)</span> denote the index score and <span class="math inline">\(H=\mathbf{a}^{\mathsf T}\mathbf{g}\)</span> one
+fixed definition of aggregate genetic merit. The abbreviations below are
+not interchangeable measures of quality.</p>
 <table>
 <colgroup>
 <col width="33%" />
@@ -3599,7 +3643,7 @@ comparing indices</h1>
 <tr class="header">
 <th align="left">Criterion</th>
 <th align="left">Definition</th>
-<th align="left">Reading</th>
+<th align="left">Interpretation and limitation</th>
 </tr>
 </thead>
 <tbody>
@@ -3609,39 +3653,59 @@ comparing indices</h1>
 T}\mathbf{G}\mathbf{a}}{\sqrt{\mathbf{b}^{\mathsf
 T}\mathbf{P}\mathbf{b}}\sqrt{\mathbf{a}^{\mathsf
 T}\mathbf{G}\mathbf{a}}}\)</span></td>
-<td align="left">Correlation between the index and net merit. Maximising
-it maximises response in aggregate merit</td>
+<td align="left">Correlation between index score (<span class="math inline">\(I\)</span>) and aggregate genetic merit (<span class="math inline">\(H\)</span>), bounded from -1 to 1. A negative
+value selects against the stated merit, zero indicates no linear
+association, and a value nearer 1 indicates closer ranking agreement. It
+is comparable only when every method uses the same <span class="math inline">\(\mathbf{a}\)</span>.</td>
 </tr>
 <tr class="even">
 <td align="left"><span class="math inline">\(\Delta H\)</span></td>
 <td align="left"><span class="math inline">\(i\,R_{HI}\sqrt{\mathbf{a}^{\mathsf
 T}\mathbf{G}\mathbf{a}}\)</span></td>
-<td align="left">Expected gain in aggregate merit</td>
+<td align="left">Expected change in aggregate genetic merit, in the
+units defined by <span class="math inline">\(H\)</span>. The software
+names it <code>delta_H</code> and abbreviates it as <code>dH</code> in
+compact print output. Positive values improve the stated merit. Compare
+magnitudes only under the same merit definition, population and
+intensity.</td>
 </tr>
 <tr class="odd">
 <td align="left"><span class="math inline">\(\Delta_j\)</span></td>
 <td align="left"><span class="math inline">\(i\,(\mathbf{G}\mathbf{b})_j
 / \sqrt{\mathbf{b}^{\mathsf T}\mathbf{P}\mathbf{b}}\)</span></td>
-<td align="left">Expected response for trait <span class="math inline">\(j\)</span></td>
+<td align="left">Expected genetic response of trait <span class="math inline">\(j\)</span>, in trait units or standard-deviation
+units according to the fitted space. Check every sign, magnitude and
+unit; this is the primary biological output.</td>
 </tr>
 <tr class="even">
-<td align="left">RE</td>
+<td align="left">Relative efficiency (RE)</td>
 <td align="left"><span class="math inline">\(\Delta_m /
 (i\,\mathbf{G}_{mm}/\sqrt{\mathbf{P}_{mm}})\)</span></td>
-<td align="left">Efficiency relative to direct selection on the main
-trait</td>
+<td align="left">Response in the declared main trait divided by its
+response under direct selection at the same intensity. RE = 1 matches
+direct response, RE = 0.80 retains 80%, RE &gt; 1 exceeds it through
+correlated information, and RE &lt; 0 moves the main trait in the
+unfavourable direction. It says nothing about attainment in the other
+traits.</td>
 </tr>
 <tr class="odd">
 <td align="left"><span class="math inline">\(h^2_I\)</span></td>
 <td align="left"><span class="math inline">\(\mathbf{b}^{\mathsf
 T}\mathbf{G}\mathbf{b} / \mathbf{b}^{\mathsf
 T}\mathbf{P}\mathbf{b}\)</span></td>
-<td align="left">Heritability of the index treated as a trait</td>
+<td align="left">Heritability of the index score treated as a composite
+trait, bounded from 0 to 1 when <span class="math inline">\(\mathbf{P}-\mathbf{G}\)</span> is valid. Its
+square root is the accuracy with which the score predicts its own
+additive genetic component; it is not agreement with the desired-gain
+objective.</td>
 </tr>
 <tr class="even">
-<td align="left"><span class="math inline">\(CV_I\)</span></td>
+<td align="left">Coefficient of variation of the index (<span class="math inline">\(CV_I\)</span>)</td>
 <td align="left"><span class="math inline">\(100\,s_I/\lvert\bar{I}\rvert\)</span></td>
-<td align="left">Coefficient of variation of the index scores</td>
+<td align="left">Standard deviation of the index scores as a percentage
+of their absolute mean. It changes when a constant is added to every
+score and is undefined when the index is centred. It is a descriptive
+legacy statistic, not a robust basis for ranking indices.</td>
 </tr>
 </tbody>
 </table>
@@ -3666,13 +3730,30 @@ for cross-method comparison.</p>
 the index is centred.</strong> Standardising or centring the traits puts
 the index mean at zero and the ratio diverges. The package withholds it
 and says so rather than reporting an enormous number.</p>
-<p><strong><span class="math inline">\(h^2_I\)</span> is the only
-accuracy available before economic weights are supplied</strong>, which
-makes it the right criterion for comparing desired-gain indices with
-each other.</p>
+<p><strong><span class="math inline">\(h^2_I\)</span> does not require
+economic weights</strong>, but it measures prediction of the index’s own
+genetic component. Two indices can have the same <span class="math inline">\(h_I^2\)</span> and point in different biological
+directions. Hence, it cannot replace assessment of trait responses and
+objective attainment.</p>
 </div>
-<div id="reusing-a-fitted-index" class="section level2" number="5.3">
-<h2><span class="header-section-number">5.3</span> Reusing a fitted
+<div id="a-stronger-decision-panel-for-desired-gain-indices" class="section level2" number="5.3">
+<h2><span class="header-section-number">5.3</span> A stronger decision
+panel for desired-gain indices</h2>
+<p>No classical scalar is sufficiently robust for a recommendation. Use:
+(i) the expected response <span class="math inline">\(\Delta_j\)</span>
+for every trait; (ii) exact-ray feasibility or, for minimum floors,
+worst-trait and joint-attainment probabilities; (iii) the cosine
+alignment between achieved and desired response from
+<code>index_uncertainty()</code>; (iv) rank correlation and selected-set
+overlap under objective and covariance perturbation; and (v) diversity
+or coancestry when the index will be applied over repeated cycles.</p>
+<p>This panel separates biological attainment from statistical
+stability. A spectacular gain in one trait cannot conceal failure of
+another minimum, and a stable point estimate cannot conceal sensitivity
+to the estimated covariance matrices.</p>
+</div>
+<div id="reusing-a-fitted-index" class="section level2" number="5.4">
+<h2><span class="header-section-number">5.4</span> Reusing a fitted
 index</h2>
 <p><code>predict()</code> applies a fitted index to a new candidate set,
 reusing the centring and scaling constants <strong>from fitting</strong>

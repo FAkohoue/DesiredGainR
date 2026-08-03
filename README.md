@@ -1,6 +1,11 @@
 # DesiredGainR
 
 <!-- badges: start -->
+
+[![R-CMD-check](https://github.com/FAkohoue/DesiredGainR/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/FAkohoue/DesiredGainR/actions/workflows/R-CMD-check.yaml)
+[![pkgdown](https://github.com/FAkohoue/DesiredGainR/actions/workflows/pkgdown.yaml/badge.svg)](https://github.com/FAkohoue/DesiredGainR/actions/workflows/pkgdown.yaml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 <!-- badges: end -->
 
 **Computing a selection index is arithmetic. Deciding what it should select for
@@ -27,6 +32,10 @@ data.
 DesiredGainR begins **after** the genetic evaluation. It does not analyse field
 trials, fit mixed models, or estimate breeding values, and it does not design
 crossing plans.
+
+<p align="center">
+  <img src="man/figures/DesiredGainR_schematic.png" alt="DesiredGainR architecture: Desired-gain selection indices, feasibility assessment, genomic ranking and breeding-cycle optimisation" width="100%">
+</p>
 
 ## Why DesiredGainR is valuable
 
@@ -100,9 +109,14 @@ Full documentation is at
 | [Complete workflow](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-workflow.html) | The same path condensed, with cross-references |
 | [Defining a breeding objective](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-objective.html) | How to state, test and defend an objective |
 | [Defining desired gains and intervals](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-desired-gain-intervals.html) | Trait-specific minima, interval elicitation and population-driven suggestions when one exact vector is not defensible |
+| [Obtaining G and P](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-covariance.html) | Covariance estimands, import, working alternatives, diagnostics and reporting |
+| [Choosing an index](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-index-families.html) | Matching the index family to the breeding objective and comparing decisions |
+| [Optimising desired gains](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-dgsi.html) | Iterative DGSI fitting, transmitted response and optimisation stability |
+| [Quadratic genomic selection](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-qgsi.html) | Complete QGSI demonstration, weight interpretation, contributions and linear comparison |
 | [Multi-cycle simulation](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-simulation.html) | Comparing objectives over several breeding cycles |
 | [Published-result reproduction](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-reproduction.html) | Independent checks against published selection-index results |
 | [Empirical validation](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-empirical-validation.html) | Six real-programme validations of cycle gain, genomic signal, index transport and multi-environment recommendation behaviour |
+| [Working with other breeding software](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-interoperation.html) | Safe hand-offs from genetic evaluation through selection to downstream mating tools |
 
 The [function reference](https://FAkohoue.github.io/DesiredGainR/reference/)
 documents every exported function. `open_desiredgain_guide()` opens a

@@ -23,8 +23,8 @@ distinctive content is the layer that helps a breeder state an
 objective, test whether it can be attained, and discover how much the
 resulting decision depends on it.
 
-This vignette orients the reader. The other seven cover each layer in
-depth, and Section 6 below says which to read next.
+This vignette orients the reader. The other articles cover each layer in
+depth, and Section 6 provides a direct link to each one.
 
 ------------------------------------------------------------------------
 
@@ -51,7 +51,8 @@ provides labelled approximations that record what they actually are.
 
 The last exclusion matters for anyone using both of the author’s
 packages. Parent, cross and mating decisions belong to a dedicated
-mating-design tool; see the *Working with other packages* vignette.
+mating-design tool; see [Working with other
+packages](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-interoperation.md).
 
 ------------------------------------------------------------------------
 
@@ -86,10 +87,23 @@ the quadratic genomic index of Cerón-Rojas et al. (2026).
 ### 3.3 Evaluating an index
 
 [`evaluate_index()`](https://FAkohoue.github.io/DesiredGainR/reference/evaluate_index.md)
-reports the four criteria used by Rahimi and Debnath (2023) and by the
-established selection-index software: the correlation between index and
-net merit, the aggregate gain, the efficiency relative to direct
-selection, and the coefficient of variation of the index.
+reports: (i) the correlation between the index and one fixed definition
+of aggregate genetic merit, \\R\_{HI}\\; (ii) expected change in that
+merit, \\\Delta H\\; (iii) expected response for every trait,
+\\\Delta_j\\; (iv) relative efficiency (RE) for one declared main trait;
+(v) index heritability; and (vi) the coefficient of variation of index
+scores, \\CV_I\\, when the score has a meaningful non-zero mean.
+
+These quantities are not interchangeable measures of index quality. In
+particular, \\R\_{HI}\\ and \\\Delta H\\ require the same
+aggregate-merit definition for every index, RE describes only the main
+trait, and \\CV_I\\ is undefined for a centred index. Therefore,
+DesiredGainR also directs the breeder to per-trait attainment,
+response-direction alignment, selected-set stability, covariance
+uncertainty and, for repeated cycles, diversity. The detailed
+interpretation is given in [Choosing an
+index](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-index-families.md)
+and the breeder guide.
 
 ### 3.4 Looking ahead
 
@@ -259,14 +273,16 @@ selection_index(
 
 | If you want to | Read |
 |----|----|
-| Follow one programme end to end | *The complete workflow* |
-| Decide what to select for | *Defining a breeding objective* |
-| Obtain or judge a covariance matrix | *Obtaining G and P* |
-| Choose among index families | *Choosing an index* |
-| Understand the iterative desired-gain method | *Optimising desired gains* |
-| Use the quadratic genomic index | *Quadratic genomic selection* |
-| Compare objectives over several cycles | *Multi-cycle simulation* |
-| Combine this with other breeding software | *Working with other packages* |
+| Follow one programme end to end | [The complete workflow](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-workflow.md) |
+| Decide what to select for | [Defining a breeding objective](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-objective.md) |
+| Define ranges when exact gains are uncertain | [Defining desired gains and acceptable intervals](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-desired-gain-intervals.md) |
+| Obtain or judge a covariance matrix | [Obtaining G and P](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-covariance.md) |
+| Choose among index families | [Choosing an index](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-index-families.md) |
+| Understand the iterative desired-gain method | [Optimising desired gains](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-dgsi.md) |
+| Use the quadratic genomic index | [Quadratic genomic selection](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-qgsi.md) |
+| Compare objectives over several cycles | [Multi-cycle simulation](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-simulation.md) |
+| Inspect validation with real programmes | [Empirical validation](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-empirical-validation.md) |
+| Combine this with other breeding software | [Working with other packages](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-interoperation.md) |
 
 A plain-language companion for readers who will approve a selection
 decision but do not run R is available through

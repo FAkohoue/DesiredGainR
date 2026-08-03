@@ -66,9 +66,21 @@ vector, and implied_desired_gains() performs the reverse translation."><meta pro
     <li><a class="dropdown-item" href="../articles/DesiredGainR-objective.html">Defining a breeding objective</a></li>
     <li><a class="dropdown-item" href="../articles/DesiredGainR-desired-gain-intervals.html">Defining desired gains and acceptable intervals</a></li>
     <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Evidence</h6></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-covariance.html">Obtaining G and P</a></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-reproduction.html">Reproducing published methods</a></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-empirical-validation.html">Empirical validation with real breeding programmes</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Index methods</h6></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-index-families.html">Choosing an index</a></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-dgsi.html">Optimising desired gains</a></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-qgsi.html">Quadratic genomic selection</a></li>
+    <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Looking ahead</h6></li>
     <li><a class="dropdown-item" href="../articles/DesiredGainR-simulation.html">Comparing objectives over several cycles</a></li>
-    <li><a class="dropdown-item" href="../articles/DesiredGainR-empirical-validation.html">Empirical validation with real breeding programmes</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Interoperation</h6></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-interoperation.html">Working with other breeding software</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../breeder-guide.html">Breeder guide</a></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -169,17 +181,22 @@ A negative weight therefore never means that a trait should decrease; the
 direction has already been applied.</p>
     </div>
     <div class="section level2">
-    <h2 id="weight-magnitudes-are-not-comparable-across-traits">Weight magnitudes are not comparable across traits<a class="anchor" aria-label="anchor" href="#weight-magnitudes-are-not-comparable-across-traits"></a></h2>
+    <h2 id="the-desired-gains-may-be-standardised-while-the-weights-are-not">The desired gains may be standardised while the weights are not<a class="anchor" aria-label="anchor" href="#the-desired-gains-may-be-standardised-while-the-weights-are-not"></a></h2>
 
 
-<p>An economic weight carries inverse trait units, so a trait measured on a
-small scale receives a numerically large weight for the same breeding
-emphasis. Comparing the raw values across traits therefore misleads: the
-largest number in the vector can correspond to one of the smallest effects.</p>
-<p>Multiply each weight by that trait's genetic standard deviation before
-comparing them, which expresses every trait per unit of the genetic
-variation actually available. <code><a href="effective_weights.html">effective_weights()</a></code> performs the equivalent
-calculation for index coefficients.</p>
+<p><code>gain_units = "genetic_sd"</code> means that <code>desired_gains</code> is already expressed
+in genetic standard deviations. However, when <code>G</code> and <code>P</code> are supplied in
+original trait units, this function converts the target to those units and
+returns a weight per original unit. A coefficient per tonne cannot be
+compared numerically with a coefficient per day or centimetre.</p>
+<p>Multiply each returned weight by that trait's genetic standard deviation to
+express the effect associated with one genetic standard deviation. This
+places the weights on a common scale; it does not standardise the desired
+gains a second time. If <code>G</code> and <code>P</code> have already been transformed to genetic
+standard-deviation units, the returned weights are already per genetic
+standard deviation and must not be multiplied by the original standard
+deviations. <code><a href="effective_weights.html">effective_weights()</a></code> performs the corresponding calculation
+for index coefficients.</p>
 <p>Consequently these coefficients should not be read as statements of
 biological or economic importance. Covarrubias-Pazaran (2021) puts the point
 plainly: the weights lack meaning, especially under strong genetic

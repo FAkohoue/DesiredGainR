@@ -104,9 +104,17 @@ A negative weight never means the trait should decrease.
 `lower_is_better` has already applied direction, so larger is better
 throughout.
 
-**Magnitudes are not comparable across traits.** A weight carries
-inverse trait units, so a trait on a small scale receives a large number
-for the same emphasis. Rescale before comparing:
+**The desired gains are standardised, but the returned weights are
+expressed per original trait unit.** The call specifies
+`gain_units = "genetic_sd"`, so the six target values are
+genetic-standard-deviation gains. However, `dgr_G` and `dgr_P` remain in
+the original units. The function converts the target to those units
+before solving and returns coefficients per tonne, day, centimetre,
+disease-score unit, or other original unit. Their raw numerical
+magnitudes are therefore not comparable.
+
+Multiplying by the corresponding genetic standard deviation expresses
+the effect associated with one genetic standard deviation of each trait:
 
 ``` r
 genetic_sd <- stats::setNames(dgr_traits$genetic_sd, dgr_traits$trait)
@@ -115,42 +123,51 @@ round(sort(implied * genetic_sd[names(implied)], decreasing = TRUE), 2)
 #> 10.89  5.81  0.58  0.36 -1.51 -7.93
 ```
 
-Ears per plant carried the largest raw number in the vector and is one
-of the smaller effects. Reading the unscaled vector would send a breeder
-to argue about the wrong trait.
+Ears per plant carried the largest raw coefficient but one of the
+smaller per-genetic-standard-deviation effects. Reading the raw
+coefficient as a measure of trait importance would therefore be
+incorrect.
+
+This conversion must be applied once. If candidate values and both
+covariance matrices have already been transformed to
+genetic-standard-deviation units, the weights are already per genetic
+standard deviation; multiplying them by the original standard deviations
+would standardise them twice.
 
 ------------------------------------------------------------------------
 
 ## 3. Feasibility: can the objective be attained at all?
 
-### 3.1 The achievable-response ellipsoid
+### 3.1 What is being tested
 
-For any linear index the response vector is `R = i·Gb/√(bᵀPb)`. Writing
-`u = b/√(bᵀPb)` so that `uᵀPu = 1`, the attainable responses are
-`{i·Gu}`, which is the ellipsoid
+Let \\\mathbf{b}\\ be the linear-index coefficients, \\\mathbf{G}\\ the
+additive genetic covariance matrix, \\\mathbf{P}\\ the phenotypic
+covariance matrix and \\i\\ the standardised selection intensity. The
+expected one-cycle response is
 
-\\R^\mathsf{T}G^{-1}PG^{-1}R = i^{2}.\\
+\\\mathbf{R}=i\\\frac{\mathbf{G}\mathbf{b}}
+{\sqrt{\mathbf{b}^\mathsf{T}\mathbf{P}\mathbf{b}}}.\\
 
-A stated target `d` therefore requires exactly
+Writing \\\mathbf{u}=\mathbf{b}/
+\sqrt{\mathbf{b}^\mathsf{T}\mathbf{P}\mathbf{b}}\\ gives
+\\\mathbf{u}^\mathsf{T}\mathbf{P}\mathbf{u}=1\\. Hence, the responses
+available at intensity \\i\\ form the ellipsoid
 
-\\i\_{\mathrm{required}} = \sqrt{d^\mathsf{T}G^{-1}PG^{-1}d},\\
+\\\mathbf{R}^\mathsf{T}\mathbf{G}^{-1}\mathbf{P}
+\mathbf{G}^{-1}\mathbf{R}=i^2.\\
+
+A specified target \\\mathbf{d}\\ therefore requires exactly
+
+\\i\_{\mathrm{required}} =
+\sqrt{\mathbf{d}^\mathsf{T}\mathbf{G}^{-1}\mathbf{P}
+\mathbf{G}^{-1}\mathbf{d}},\\
 
 and the selected proportion delivering that intensity follows from the
-normal-truncation relationship.
+normal-truncation relationship. This is an exact result under the
+linear-index model; its application remains conditional on the estimated
+covariance matrices and the truncation-selection assumptions.
 
-### 3.2 Two consequences
-
-**The classical desired-gain index honours only the direction of `d`.**
-Multiplying every desired gain by a constant leaves the index unchanged,
-because the attainable magnitude is fixed by selection intensity.
-Joukhadar et al. (2024) note this in passing when their INDEX1 and
-INDEX3, targeting 0.5 and 4.0 standard deviations respectively, produced
-identical rankings without iteration. Breeders who set absolute targets
-and then read back a realised gain are being misled unless the point is
-made explicit.
-
-**An antagonistic correlation structure can make a modest-looking target
-unreachable.** This is not a marginal effect.
+### 3.2 Read the feasibility output without ambiguity
 
 ``` r
 feasibility <- gain_feasibility(
@@ -168,9 +185,12 @@ feasibility
 #>   Attainable fraction of the requested gain: 54.7%
 ```
 
-The request looks unremarkable — between 0.4 and 1.0 genetic standard
-deviations across six traits — and requires selecting fewer than one
-candidate from two hundred.
+The six requested gains range from 0.4 to 1.0 genetic standard
+deviations. Nevertheless, their joint ratio requires an intensity of
+3.2082. Under normal truncation selection, this is the best 0.1773%, or
+0.355 candidate among 200. The request is therefore impossible in this
+finite candidate set. Selecting the single best candidate would retain
+0.5% and would still provide less intensity than required.
 
 ``` r
 round(feasibility$attainable_response_input_units, 3)
@@ -178,10 +198,57 @@ round(feasibility$attainable_response_input_units, 3)
 #> 0.547 0.219 0.328 0.274 0.219 0.328
 ```
 
-Fifty-five per cent of the request, in the requested proportion, is what
-the planned intensity delivers.
+The planned selection retains 20 of 200 candidates, giving an intensity
+of 1.7550. The attainable fraction is therefore \\1.7550/3.2082=0.547\\.
+The output above reports the corresponding exact-ray response in the
+same genetic-standard-deviation units as the input.
 
-### 3.3 Where this check belongs
+This is a precise but narrow statement: at the planned intensity, the
+model can deliver 54.7% of every component while preserving the ratio
+\\1.0:0.4:0.6:0.5:0.4:0.6\\. It does not state that 0.547 is an upper
+bound for grain yield when the remaining ratios are allowed to change.
+
+### 3.3 Exact ratios and minimum floors are different objectives
+
+[`gain_feasibility()`](https://FAkohoue.github.io/DesiredGainR/reference/gain_feasibility.md)
+treats \\\mathbf{d}\\ as an exact response ray. In contrast, a breeder
+may mean that each value is a minimum: yield must gain at least 1.0
+genetic standard deviation, while a larger gain in another trait is
+acceptable. Those are inequality constraints, not a fixed ratio. A
+response vector may meet all minimums without lying on the requested
+ray.
+
+Therefore, interpret the two cases separately:
+
+1.  If the trait ratio is part of the objective, use
+    [`gain_feasibility()`](https://FAkohoue.github.io/DesiredGainR/reference/gain_feasibility.md)
+    and scale the whole vector to the planned intensity when necessary.
+2.  If the values are trait-specific minimums, use
+    [`suggest_desired_gains()`](https://FAkohoue.github.io/DesiredGainR/reference/suggest_desired_gains.md)
+    or interval optimisation. Read the worst-trait attainment and the
+    lower confidence bound for joint attainment; a large response in one
+    trait must not compensate for failure of another minimum.
+
+The classical desired-gain index honours only the direction of
+\\\mathbf{d}\\. Multiplying every desired gain by the same positive
+constant leaves its ranking unchanged because selection intensity fixes
+the attainable magnitude. Joukhadar et al. (2024) illustrate this
+property: their non-iterated indices targeting 0.5 and 4.0 standard
+deviations gave identical rankings.
+
+### 3.4 Conditions that must accompany the conclusion
+
+The calculation assumes: (i) a linear index, (ii) one cycle of
+truncation selection, (iii) approximate multivariate normality, and (iv)
+fixed, correctly estimated \\\mathbf{G}\\ and \\\mathbf{P}\\. Hence, a
+recommendation is not robust until
+[`index_uncertainty()`](https://FAkohoue.github.io/DesiredGainR/reference/index_uncertainty.md)
+and
+[`weight_sensitivity()`](https://FAkohoue.github.io/DesiredGainR/reference/weight_sensitivity.md)
+show that covariance and objective perturbations do not materially
+change the response direction or the selected set.
+
+### 3.5 Where this check belongs
 
 The CGIAR guideline directs breeders to separate software to determine
 whether “the progress of 1 or more σ is possible given your current

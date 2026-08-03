@@ -58,12 +58,10 @@ MATHEMATICS NOTATION, AND WHY IT IS RESTRAINED
 This document renders to HTML through MathJax and to PDF through XeLaTeX, and
 the two disagree about bold symbols.
 
-  * \bm is a LaTeX package command. MathJax does not know it.
-  * \boldsymbol is understood by MathJax, but pandoc's XeLaTeX template loads
-    unicode-math, which redefines Greek letters to Unicode math characters:
-    \Delta becomes \mitDelta. \boldsymbol cannot take a character argument, so
-    \boldsymbol{\Delta} raises "Improper alphabetic constant" and the build
-    fails.
+  * \bm is a LaTeX package command and is not available in the website's
+    MathJax configuration.
+  * \boldsymbol is not loaded by the website's MathJax configuration. It also
+    fails for Greek Unicode-math characters in the XeLaTeX route used here.
 
 The intersection that renders correctly in both is:
 
@@ -273,7 +271,8 @@ $\kappa$, the eigenvalues, the numerical rank and positive definiteness.
 
 ## Repairing an inadmissible matrix
 
-Multi-trait REML routinely returns a $\mathbf{G}$ that is not positive definite.
+Multi-trait restricted maximum likelihood (REML) routinely returns a
+$\mathbf{G}$ that is not positive definite.
 `bend_covariance()` repairs it through `ASRgenomics::G.tuneup()`, which is a
 wrapper around Higham's alternating-projections algorithm.
 
@@ -337,10 +336,26 @@ that trait by selecting against it directly, because of how strongly it
 correlates with something else in the objective. That may be correct, but it
 should be a decision rather than an accident.
 
+If the desired gains are stated in genetic standard deviations while
+$\mathbf{G}$ and $\mathbf{P}$ remain in original trait units, the returned
+weights are per original unit. Hence, compare `weight * genetic_sd`, not the raw
+coefficients. This multiplication converts the weights to a common
+per-genetic-standard-deviation scale; it does not standardise the desired gains
+again. If the covariance matrices have already been standardised, do not apply
+the multiplication a second time.
+
 ## Is the objective attainable?
 
-Desired gains have a direction and a magnitude. The direction is almost always
-achievable; the magnitude usually is not.
+Desired gains have a direction and a magnitude. Neither should be assumed
+attainable before the covariance structure and planned selection intensity are
+examined.
+
+Let $\mathbf{b}$ denote the index coefficients, $\mathbf{G}$ the additive
+genetic covariance matrix, $\mathbf{P}$ the phenotypic covariance matrix, and
+$i$ the standardised selection intensity. The expected one-cycle response is
+
+$$\mathbf{R}=i\,\frac{\mathbf{G}\mathbf{b}}
+{\sqrt{\mathbf{b}^{\mathsf T}\mathbf{P}\mathbf{b}}}.$$
 
 The set of responses attainable at selection intensity $i$ is the ellipsoid
 
@@ -350,14 +365,29 @@ so the intensity required to attain a stated $\mathbf{d}$ is
 
 $$i_{\text{required}} \;=\; \sqrt{\mathbf{d}^{\mathsf T}\mathbf{G}^{-1}\mathbf{P}\mathbf{G}^{-1}\mathbf{d}}.$$
 
-`gain_feasibility()` returns this and the selected fraction it implies. An
-intensity of 4.2 corresponds to selecting roughly one candidate in ten
-thousand: that is not a plan.
+`gain_feasibility()` reports: (i) the required intensity, (ii) the continuous
+selected proportion associated with that intensity, (iii) whether the planned
+selection proportion is sufficient, (iv) whether even selecting one candidate
+from the finite population is sufficient, and (v) the response available at
+the planned intensity in the same units as the input.
 
-**The remedy is to scale the whole vector down** until the required intensity
-matches what the programme runs. The direction is preserved; only the ambition
-changes. This is the single most useful thing the package does before any index
-is fitted, and it costs nothing.
+For example, a required proportion of 0.1773% among 200 candidates represents
+0.355 candidate. It is not rounded to one, because selecting one candidate
+retains 0.5% and gives a lower intensity. A reported attainable fraction of
+54.7% means that 54.7% of **every component** is available when the exact trait
+ratio is preserved.
+
+This exact-ray test must not be confused with a minimum-floor objective. If a
+breeder accepts gains larger than the stated minimums, another response vector
+may meet all floors without preserving their ratio. Therefore: (i) scale the
+whole vector when its ratio is binding, or (ii) use population-driven or
+interval optimisation when the entries are trait-specific minimums, and assess
+the worst-trait and joint-attainment results.
+
+The conclusion is conditional on a linear index, one-cycle truncation
+selection, approximate normality, and the supplied covariance matrices. Check
+covariance uncertainty and selected-set stability before issuing a
+recommendation.
 
 ## How much does the answer depend on the numbers?
 
@@ -500,6 +530,14 @@ indices to price it.
 Searches stochastically for the desired-gain vector whose realised response
 best matches the target, then reports the resulting coefficients.
 
+DGSI is **not** a method hidden inside `selection_index()`. The call
+`selection_index(method = "yamada")` fits the closed-form, non-iterated
+desired-gain index. `run_dgsi()` starts from that coefficient direction,
+searches alternative directions and stores the original comparator in
+`non_iterated`. The dedicated *Optimising desired gains* vignette demonstrates
+the requested direction, feasibility, both responses, candidate ranking,
+full-sample comparison, holdout choice and stability diagnostics.
+
 | Variant | Argument | Use |
 | :--- | :--- | :--- |
 | Selection rule | `select_mode = "top_n"` | Rank on the index alone |
@@ -541,16 +579,20 @@ prediction cannot vary more than what it predicts.
 
 # Evaluating and comparing indices
 
-## The criteria
+## The classical criteria
 
-| Criterion | Definition | Reading |
+Let $I=\mathbf{b}^{\mathsf T}\mathbf{x}$ denote the index score and
+$H=\mathbf{a}^{\mathsf T}\mathbf{g}$ one fixed definition of aggregate genetic
+merit. The abbreviations below are not interchangeable measures of quality.
+
+| Criterion | Definition | Interpretation and limitation |
 | :--- | :--- | :--- |
-| $R_{HI}$ | $\dfrac{\mathbf{b}^{\mathsf T}\mathbf{G}\mathbf{a}}{\sqrt{\mathbf{b}^{\mathsf T}\mathbf{P}\mathbf{b}}\sqrt{\mathbf{a}^{\mathsf T}\mathbf{G}\mathbf{a}}}$ | Correlation between the index and net merit. Maximising it maximises response in aggregate merit |
-| $\Delta H$ | $i\,R_{HI}\sqrt{\mathbf{a}^{\mathsf T}\mathbf{G}\mathbf{a}}$ | Expected gain in aggregate merit |
-| $\Delta_j$ | $i\,(\mathbf{G}\mathbf{b})_j / \sqrt{\mathbf{b}^{\mathsf T}\mathbf{P}\mathbf{b}}$ | Expected response for trait $j$ |
-| RE | $\Delta_m / (i\,\mathbf{G}_{mm}/\sqrt{\mathbf{P}_{mm}})$ | Efficiency relative to direct selection on the main trait |
-| $h^2_I$ | $\mathbf{b}^{\mathsf T}\mathbf{G}\mathbf{b} / \mathbf{b}^{\mathsf T}\mathbf{P}\mathbf{b}$ | Heritability of the index treated as a trait |
-| $CV_I$ | $100\,s_I/\lvert\bar{I}\rvert$ | Coefficient of variation of the index scores |
+| $R_{HI}$ | $\dfrac{\mathbf{b}^{\mathsf T}\mathbf{G}\mathbf{a}}{\sqrt{\mathbf{b}^{\mathsf T}\mathbf{P}\mathbf{b}}\sqrt{\mathbf{a}^{\mathsf T}\mathbf{G}\mathbf{a}}}$ | Correlation between index score ($I$) and aggregate genetic merit ($H$), bounded from -1 to 1. A negative value selects against the stated merit, zero indicates no linear association, and a value nearer 1 indicates closer ranking agreement. It is comparable only when every method uses the same $\mathbf{a}$. |
+| $\Delta H$ | $i\,R_{HI}\sqrt{\mathbf{a}^{\mathsf T}\mathbf{G}\mathbf{a}}$ | Expected change in aggregate genetic merit, in the units defined by $H$. The software names it `delta_H` and abbreviates it as `dH` in compact print output. Positive values improve the stated merit. Compare magnitudes only under the same merit definition, population and intensity. |
+| $\Delta_j$ | $i\,(\mathbf{G}\mathbf{b})_j / \sqrt{\mathbf{b}^{\mathsf T}\mathbf{P}\mathbf{b}}$ | Expected genetic response of trait $j$, in trait units or standard-deviation units according to the fitted space. Check every sign, magnitude and unit; this is the primary biological output. |
+| Relative efficiency (RE) | $\Delta_m / (i\,\mathbf{G}_{mm}/\sqrt{\mathbf{P}_{mm}})$ | Response in the declared main trait divided by its response under direct selection at the same intensity. RE = 1 matches direct response, RE = 0.80 retains 80%, RE > 1 exceeds it through correlated information, and RE < 0 moves the main trait in the unfavourable direction. It says nothing about attainment in the other traits. |
+| $h^2_I$ | $\mathbf{b}^{\mathsf T}\mathbf{G}\mathbf{b} / \mathbf{b}^{\mathsf T}\mathbf{P}\mathbf{b}$ | Heritability of the index score treated as a composite trait, bounded from 0 to 1 when $\mathbf{P}-\mathbf{G}$ is valid. Its square root is the accuracy with which the score predicts its own additive genetic component; it is not agreement with the desired-gain objective. |
+| Coefficient of variation of the index ($CV_I$) | $100\,s_I/\lvert\bar{I}\rvert$ | Standard deviation of the index scores as a percentage of their absolute mean. It changes when a constant is added to every score and is undefined when the index is centred. It is a descriptive legacy statistic, not a robust basis for ranking indices. |
 
 ## How each fails
 
@@ -570,9 +612,25 @@ objective for cross-method comparison.
 the traits puts the index mean at zero and the ratio diverges. The package
 withholds it and says so rather than reporting an enormous number.
 
-**$h^2_I$ is the only accuracy available before economic weights are
-supplied**, which makes it the right criterion for comparing desired-gain
-indices with each other.
+**$h^2_I$ does not require economic weights**, but it measures prediction of
+the index's own genetic component. Two indices can have the same $h_I^2$ and
+point in different biological directions. Hence, it cannot replace assessment
+of trait responses and objective attainment.
+
+## A stronger decision panel for desired-gain indices
+
+No classical scalar is sufficiently robust for a recommendation. Use: (i) the
+expected response $\Delta_j$ for every trait; (ii) exact-ray feasibility or,
+for minimum floors, worst-trait and joint-attainment probabilities; (iii) the
+cosine alignment between achieved and desired response from
+`index_uncertainty()`; (iv) rank correlation and selected-set overlap under
+objective and covariance perturbation; and (v) diversity or coancestry when the
+index will be applied over repeated cycles.
+
+This panel separates biological attainment from statistical stability. A
+spectacular gain in one trait cannot conceal failure of another minimum, and a
+stable point estimate cannot conceal sensitivity to the estimated covariance
+matrices.
 
 ## Reusing a fitted index
 

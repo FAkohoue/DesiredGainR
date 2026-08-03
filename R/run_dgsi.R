@@ -765,6 +765,7 @@ run_dgsi <- function(
   result <- list(
     method = "DGSI",
     call = match.call(),
+    trait_cols = trait_cols,
     desired_gain = dg,
     P = P,
     G = G,

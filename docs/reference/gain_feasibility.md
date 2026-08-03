@@ -69,8 +69,8 @@ gain_feasibility(
 An object of class `desiredgainr_feasibility` reporting: (i) the
 required selection intensity and the proportion that delivers it, (ii)
 whether the target is attainable in a population of `n_candidates`,
-(iii) the attainable response in the requested direction at the planned
-intensity, and (iv) the per-trait shortfall.
+(iii) the attainable response on the exact requested ray at the planned
+intensity, and (iv) the per-trait shortfall on that ray.
 
 The attainable response and the shortfall are returned twice:
 `attainable_response` and `shortfall` are in original trait units,
@@ -81,12 +81,27 @@ units is an easy way to misread the result.
 
 ## Details
 
-Two consequences deserve emphasis. First, the classical Pesek-Baker
-index honours only the *direction* of the desired-gain vector; scaling
-every element by a constant leaves the index unchanged, because the
-attainable magnitude is fixed by selection intensity. Second, an
-antagonistic correlation structure can make a modest-looking target
-unreachable at any practical intensity.
+This is an exact-ray test. The target \\d\\ specifies both a direction
+and fixed ratios among traits. The returned attainable response is the
+point on that ray delivered by the planned intensity. It does not test
+the different question of whether another response vector can meet a set
+of trait-specific minimum gains while exceeding some components and
+changing their ratios. Use
+[`suggest_desired_gains()`](https://FAkohoue.github.io/DesiredGainR/reference/suggest_desired_gains.md)
+or interval optimisation for minimum-floor objectives.
+
+Four consequences deserve emphasis. First, the classical Pesek-Baker
+index honours only the direction of the desired-gain vector; scaling
+every element by one positive constant leaves the ranking unchanged
+because selection intensity fixes the attainable magnitude. Second, a
+required continuous selected proportion that represents fewer than one
+candidate is not rounded up: selecting one candidate gives a lower
+intensity and does not attain the target. Third,
+`feasible_at_planned_intensity = FALSE` means that the full vector
+cannot be reached in one cycle at the planned proportion; it does not
+mean that the index cannot rank candidates. Fourth, the conclusion is
+conditional on a linear index, one-cycle truncation selection,
+approximate normality, and the supplied covariance matrices.
 
 This function replaces the external feasibility check that
 Covarrubias-Pazaran (2021) recommends performing in separate software,

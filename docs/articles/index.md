@@ -16,14 +16,30 @@
 - [Defining desired gains when one exact value is not
   known](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-desired-gain-intervals.md):
 
+### Evidence
+
+- [Obtaining G and
+  P](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-covariance.md):
+- [Reproducing published
+  results](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-reproduction.md):
+- [Empirical validation with real breeding-programme
+  data](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-empirical-validation.md):
+
+### Index methods
+
+- [Choosing an
+  index](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-index-families.md):
+- [Optimising desired
+  gains](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-dgsi.md):
+- [Quadratic genomic
+  selection](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-qgsi.md):
+
 ### Looking ahead
 
 - [Comparing objectives over several
   cycles](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-simulation.md):
 
-### Evidence
+### Interoperation
 
-- [Reproducing published
-  results](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-reproduction.md):
-- [Empirical validation with real breeding-programme
-  data](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-empirical-validation.md):
+- [Working with other breeding
+  software](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-interoperation.md):

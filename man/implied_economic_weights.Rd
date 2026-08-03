@@ -66,17 +66,22 @@ A negative weight therefore never means that a trait should decrease; the
 direction has already been applied.
 }
 
-\section{Weight magnitudes are not comparable across traits}{
+\section{The desired gains may be standardised while the weights are not}{
 
-An economic weight carries inverse trait units, so a trait measured on a
-small scale receives a numerically large weight for the same breeding
-emphasis. Comparing the raw values across traits therefore misleads: the
-largest number in the vector can correspond to one of the smallest effects.
+\code{gain_units = "genetic_sd"} means that \code{desired_gains} is already expressed
+in genetic standard deviations. However, when \code{G} and \code{P} are supplied in
+original trait units, this function converts the target to those units and
+returns a weight per original unit. A coefficient per tonne cannot be
+compared numerically with a coefficient per day or centimetre.
 
-Multiply each weight by that trait's genetic standard deviation before
-comparing them, which expresses every trait per unit of the genetic
-variation actually available. \code{\link[=effective_weights]{effective_weights()}} performs the equivalent
-calculation for index coefficients.
+Multiply each returned weight by that trait's genetic standard deviation to
+express the effect associated with one genetic standard deviation. This
+places the weights on a common scale; it does not standardise the desired
+gains a second time. If \code{G} and \code{P} have already been transformed to genetic
+standard-deviation units, the returned weights are already per genetic
+standard deviation and must not be multiplied by the original standard
+deviations. \code{\link[=effective_weights]{effective_weights()}} performs the corresponding calculation
+for index coefficients.
 
 Consequently these coefficients should not be read as statements of
 biological or economic importance. Covarrubias-Pazaran (2021) puts the point

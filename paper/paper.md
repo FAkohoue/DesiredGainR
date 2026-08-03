@@ -114,18 +114,25 @@ published by Rahimi and Debnath [@rahimi2023], computed independently in SAS.
 
 # Empirical evidence
 
-`vignette("DesiredGainR-empirical-validation")` adds evidence from five real
+`vignette("DesiredGainR-empirical-validation")` adds evidence from six real
 breeding-programme sources rather than treating simulation as its own external
 validation. CNA6 rice and a tropical maize haploid-inducer population provide
 observed recurrent-cycle trends [@bartholome2023; @fritscheneto2023]. The INIA
 Uruguay rice database provides 23 years of stage-forward validation
 [@rebollo2023]. A desired-gain index fitted through 2008 and frozen before
-scoring 2009--2016 E1 cohorts had an advancement AUC of 0.773, compared with
+scoring 2009--2016 first-stage (E1) cohorts had an area under the receiver
+operating characteristic curve (AUC) of 0.773, compared with
 0.756 for yield alone; a hierarchical year-and-candidate bootstrap placed the
 difference above zero. Genomes-to-Fields maize provides a non-overlapping
 year-window transport check [@lopezcruz2023], and the CIMMYT rapid-cycle wheat
-experiment provides a published predicted-versus-realized response anchor
+experiment provides a published predicted-versus-realised response anchor
 [@dreisigacker2023].
+The CIMMYT tropical maize rapid-cycle analysis uses the phenotype, marker and
+sample-linkage deposit associated with Zhang, Pérez-Rodríguez, Burgueño, Olsen,
+Jannink, Buckler, Atlin, Boddupalli, Vargas, San Vicente and Crossa
+[@zhang2017data]. The associated article was authored by Zhang,
+Pérez-Rodríguez, Burgueño, Olsen, Buckler, Atlin, Boddupalli, Vargas, San
+Vicente and Crossa [@zhang2017].
 
 The evidence boundary is part of the result, not only the discussion. These
 datasets test observed cycle response, temporal transport and agreement with

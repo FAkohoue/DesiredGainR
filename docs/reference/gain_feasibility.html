@@ -68,9 +68,21 @@ normal-truncation relationship."><meta property="og:image" content="https://FAko
     <li><a class="dropdown-item" href="../articles/DesiredGainR-objective.html">Defining a breeding objective</a></li>
     <li><a class="dropdown-item" href="../articles/DesiredGainR-desired-gain-intervals.html">Defining desired gains and acceptable intervals</a></li>
     <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Evidence</h6></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-covariance.html">Obtaining G and P</a></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-reproduction.html">Reproducing published methods</a></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-empirical-validation.html">Empirical validation with real breeding programmes</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Index methods</h6></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-index-families.html">Choosing an index</a></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-dgsi.html">Optimising desired gains</a></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-qgsi.html">Quadratic genomic selection</a></li>
+    <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Looking ahead</h6></li>
     <li><a class="dropdown-item" href="../articles/DesiredGainR-simulation.html">Comparing objectives over several cycles</a></li>
-    <li><a class="dropdown-item" href="../articles/DesiredGainR-empirical-validation.html">Empirical validation with real breeding programmes</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Interoperation</h6></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-interoperation.html">Working with other breeding software</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../breeder-guide.html">Breeder guide</a></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -161,8 +173,8 @@ favourable. See <code><a href="implied_economic_weights.html">implied_economic_w
     <p>An object of class <code>desiredgainr_feasibility</code> reporting: (i) the
 required selection intensity and the proportion that delivers it, (ii)
 whether the target is attainable in a population of <code>n_candidates</code>, (iii)
-the attainable response in the requested direction at the planned
-intensity, and (iv) the per-trait shortfall.</p>
+the attainable response on the exact requested ray at the planned
+intensity, and (iv) the per-trait shortfall on that ray.</p>
 <p>The attainable response and the shortfall are returned twice:
 <code>attainable_response</code> and <code>shortfall</code> are in original trait units, whereas
 <code>attainable_response_input_units</code> and <code>shortfall_input_units</code> are in
@@ -172,12 +184,24 @@ way to misread the result.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>Two consequences deserve emphasis. First, the classical Pesek-Baker index
-honours only the <em>direction</em> of the desired-gain vector; scaling every
-element by a constant leaves the index unchanged, because the attainable
-magnitude is fixed by selection intensity. Second, an antagonistic
-correlation structure can make a modest-looking target unreachable at any
-practical intensity.</p>
+    <p>This is an exact-ray test. The target \(d\) specifies both a direction and
+fixed ratios among traits. The returned attainable response is the point on
+that ray delivered by the planned intensity. It does not test the different
+question of whether another response vector can meet a set of trait-specific
+minimum gains while exceeding some components and changing their ratios.
+Use <code><a href="suggest_desired_gains.html">suggest_desired_gains()</a></code> or interval optimisation for minimum-floor
+objectives.</p>
+<p>Four consequences deserve emphasis. First, the classical Pesek-Baker index
+honours only the direction of the desired-gain vector; scaling every element
+by one positive constant leaves the ranking unchanged because selection
+intensity fixes the attainable magnitude. Second, a required continuous
+selected proportion that represents fewer than one candidate is not rounded
+up: selecting one candidate gives a lower intensity and does not attain the
+target. Third, <code>feasible_at_planned_intensity = FALSE</code> means that the full
+vector cannot be reached in one cycle at the planned proportion; it does not
+mean that the index cannot rank candidates. Fourth, the conclusion is
+conditional on a linear index, one-cycle truncation selection, approximate
+normality, and the supplied covariance matrices.</p>
 <p>This function replaces the external feasibility check that
 Covarrubias-Pazaran (2021) recommends performing in separate software, and
 should be run before an optimisation is attempted rather than after it

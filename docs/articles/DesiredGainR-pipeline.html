@@ -80,9 +80,21 @@
     <li><a class="dropdown-item" href="../articles/DesiredGainR-objective.html">Defining a breeding objective</a></li>
     <li><a class="dropdown-item" href="../articles/DesiredGainR-desired-gain-intervals.html">Defining desired gains and acceptable intervals</a></li>
     <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Evidence</h6></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-covariance.html">Obtaining G and P</a></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-reproduction.html">Reproducing published methods</a></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-empirical-validation.html">Empirical validation with real breeding programmes</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Index methods</h6></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-index-families.html">Choosing an index</a></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-dgsi.html">Optimising desired gains</a></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-qgsi.html">Quadratic genomic selection</a></li>
+    <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Looking ahead</h6></li>
     <li><a class="dropdown-item" href="../articles/DesiredGainR-simulation.html">Comparing objectives over several cycles</a></li>
-    <li><a class="dropdown-item" href="../articles/DesiredGainR-empirical-validation.html">Empirical validation with real breeding programmes</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Interoperation</h6></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-interoperation.html">Working with other breeding software</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="../breeder-guide.html">Breeder guide</a></li>
@@ -185,7 +197,8 @@ estimate breeding values. You must arrive with four things.</p>
 <tbody>
 <tr class="odd">
 <td>Trait values</td>
-<td>One adjusted mean, BLUP or GEBV per candidate per trait</td>
+<td>One adjusted mean, best linear unbiased prediction (BLUP) or genomic
+estimated breeding value (GEBV) per candidate per trait</td>
 <td>Your multi-trait genetic evaluation</td>
 </tr>
 <tr class="even">
@@ -382,15 +395,31 @@ plant, so selecting hard for yield would carry both <em>past</em> the
 smaller gains you requested. To deliver the ratio you asked for, the
 index must hold them back. A negative weight never means the trait
 should get worse.</p>
-<p><strong>The magnitudes are not comparable.</strong> A weight carries
-inverse trait units, so a trait on a small scale gets a big number for
-the same emphasis. Always rescale before comparing:</p>
+<p><strong>The desired gains are already standardised; the returned
+weights are not.</strong> Here <code>desired_gains</code> is expressed
+in genetic standard deviations, but <code>dgr_G</code> and
+<code>dgr_P</code> are supplied in the original trait units. Therefore,
+<code><a href="../reference/implied_economic_weights.html">implied_economic_weights()</a></code> first converts the target to
+those original units and returns a weight per original unit of each
+trait. A coefficient per tonne, day or disease-score unit cannot be
+compared directly with a coefficient per centimetre.</p>
+<p>The multiplication below does not standardise
+<code>desired_gains</code> a second time. It converts each returned
+raw-unit weight into the contribution associated with one genetic
+standard deviation of its trait. These products are on a common
+genetic-standard-deviation scale and may be compared as a
+diagnostic:</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="va">implied</span> <span class="op">*</span> <span class="va">genetic_sd</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">implied</span><span class="op">)</span><span class="op">]</span>, decreasing <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, <span class="fl">2</span><span class="op">)</span></span>
 <span><span class="co">#&gt;    GY    AD   GLS   PHT   EPP   ASI </span></span>
 <span><span class="co">#&gt; 10.89  5.81  0.58  0.36 -1.51 -7.93</span></span></code></pre></div>
-<p>Ears per plant had the largest raw number and is one of the smaller
-effects.</p>
+<p>Ears per plant had the largest raw coefficient but one of the smaller
+per-genetic-standard-deviation effects. If <code>G</code> and
+<code>P</code> had already been standardised to
+genetic-standard-deviation units, the returned weights would already be
+per genetic standard deviation and this multiplication would be wrong.
+Standardise either the covariance space or the returned weights, not
+both.</p>
 <p>Confirm the translation inverts, which costs one line and catches
 unit errors:</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
@@ -411,10 +440,21 @@ unit errors:</p>
 </h3>
 <p><strong>This is the stage most often skipped, and the one that most
 often changes the answer.</strong></p>
-<p>For any linear index the response is <span class="math inline">\(\mathbf{R} =
-i\,\mathbf{G}\mathbf{b}/\sqrt{\mathbf{b}^\mathsf{T}\mathbf{P}\mathbf{b}}\)</span>,
-so the attainable responses lie on an ellipsoid and a stated target
-requires exactly</p>
+<p>Let <span class="math inline">\(\mathbf{b}\)</span> denote the
+linear-index coefficients, <span class="math inline">\(\mathbf{G}\)</span> the additive genetic
+covariance matrix, <span class="math inline">\(\mathbf{P}\)</span> the
+phenotypic covariance matrix, and <span class="math inline">\(i\)</span>
+the standardised selection intensity. The expected one-cycle response
+is</p>
+<p><span class="math display">\[\mathbf{R} =
+i\,\frac{\mathbf{G}\mathbf{b}}
+{\sqrt{\mathbf{b}^\mathsf{T}\mathbf{P}\mathbf{b}}}.\]</span></p>
+<p>Consequently, every response available at intensity <span class="math inline">\(i\)</span> lies on the achievable-response
+ellipsoid</p>
+<p><span class="math display">\[\mathbf{R}^\mathsf{T}\mathbf{G}^{-1}\mathbf{P}
+\mathbf{G}^{-1}\mathbf{R}=i^2.\]</span></p>
+<p>A specified vector <span class="math inline">\(\mathbf{d}\)</span>
+lies on an ellipsoid whose intensity is</p>
 <p><span class="math display">\[i_{\text{required}} =
 \sqrt{\mathbf{d}^\mathsf{T}\mathbf{G}^{-1}\mathbf{P}\mathbf{G}^{-1}\mathbf{d}}.\]</span></p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
@@ -431,20 +471,57 @@ requires exactly</p>
 <span><span class="co">#&gt;   Feasible at planned intensity: no</span></span>
 <span><span class="co">#&gt;   Feasible anywhere in this population: no</span></span>
 <span><span class="co">#&gt;   Attainable fraction of the requested gain: 54.7%</span></span></code></pre></div>
-<p>The request looked unremarkable and requires selecting fewer than one
-candidate from two hundred. About fifty-five per cent of it is available
-at the intensity actually planned:</p>
+<p>Read the output line by line. The required intensity of 3.2082
+corresponds, under normal truncation selection, to retaining the best
+0.1773% of an effectively continuous population. In a population of 200
+candidates, this is 0.355 candidate. A breeder cannot select a fraction
+of a candidate. Even selecting the single best candidate retains 0.5%,
+which gives a lower intensity than 3.2082. Therefore, the exact vector
+is unattainable in this candidate set.</p>
+<p>The planned decision retains 20 of 200 candidates, or 10%. Its
+intensity is 1.7550. The ratio <span class="math inline">\(1.7550/3.2082=0.547\)</span> means that 54.7% of
+the requested vector can be delivered while preserving its exact trait
+proportions:</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">feasibility</span><span class="op">$</span><span class="va">attainable_response_input_units</span>, <span class="fl">3</span><span class="op">)</span></span>
 <span><span class="co">#&gt;    GY   PHT    AD   ASI   EPP   GLS </span></span>
 <span><span class="co">#&gt; 0.547 0.219 0.328 0.274 0.219 0.328</span></span></code></pre></div>
-<p><strong>Two consequences worth understanding now.</strong> First, the
-classical desired-gain index honours only the <em>direction</em> of
-<span class="math inline">\(\mathbf{d}\)</span>; multiplying every
-element by a constant changes nothing, because the magnitude is fixed by
-selection intensity. Second, an antagonistic correlation structure can
-make a modest-looking target unreachable, and no amount of optimisation
-will fix that.</p>
+<p>The returned values are in the same genetic-standard-deviation units
+as the input. Thus, the planned exact-ray response is 0.547 standard
+deviations for grain yield, 0.219 for plant height, 0.328 for anthesis
+date, 0.274 for the anthesis-silking interval, 0.219 for ears per plant,
+and 0.328 for grey leaf spot resistance. They are not observed gains and
+they are not six independent upper limits. They are the model-based
+response at the planned intensity when the requested <strong>ratio among
+traits is held exactly</strong>.</p>
+<p>This interpretation has four consequences.</p>
+<ol style="list-style-type: decimal">
+<li>The classical desired-gain index honours the direction, or ratio, of
+<span class="math inline">\(\mathbf{d}\)</span>. Multiplying all
+elements by the same positive constant leaves the ranking unchanged; it
+changes only the intensity required to attain the stated magnitude.</li>
+<li>
+<code>feasible_at_planned_intensity = no</code> does not mean that
+the index is unable to rank candidates. It means that the complete
+stated vector cannot be reached in one cycle at the planned 10%
+selection proportion under the supplied <span class="math inline">\(\mathbf{G}\)</span> and <span class="math inline">\(\mathbf{P}\)</span>.</li>
+<li>An exact desired-gain vector is not the same objective as a set of
+minimum gains. For example, another attainable response may exceed the
+grain-yield target and still meet every minimum without preserving the
+ratio <span class="math inline">\(1.0:0.4:0.6:0.5:0.4:0.6\)</span>.
+<code><a href="../reference/gain_feasibility.html">gain_feasibility()</a></code> tests the exact ray. Population-driven
+and interval searches assess trait-specific floors and must be
+interpreted through their worst-trait and joint-attainment results.</li>
+<li>The result is conditional on a linear index, one-cycle truncation
+selection, approximate normality, and the supplied covariance matrices.
+Therefore, covariance uncertainty and selected-set stability must be
+checked before a recommendation is treated as robust.</li>
+</ol>
+<p>If the ratio itself is biologically required, scale the whole vector
+by 0.547 or relax the selection proportion. If each entry is a minimum
+rather than a fixed ratio, use <code><a href="../reference/suggest_desired_gains.html">suggest_desired_gains()</a></code> or
+interval optimisation and require the lower confidence bound for joint
+attainment to support the recommendation.</p>
 </div>
 <div class="section level3">
 <h3 id="stage-8-recover-what-the-programme-already-selects-for-then-adjust">Stage 8 — Recover what the programme already selects for, then
@@ -474,10 +551,12 @@ differences between the selected group and the whole population.</p>
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">recovered</span><span class="op">$</span><span class="va">selection_differential_sd</span>, <span class="fl">2</span><span class="op">)</span></span>
 <span><span class="co">#&gt;    GY   PHT    AD   ASI   EPP   GLS </span></span>
 <span><span class="co">#&gt;  1.11 -0.27 -0.42 -0.83  0.52 -0.42</span></span></code></pre></div>
-<p>This is how an index was introduced at both CIMMYT and IRRI. Treat it
-as a starting point: it reproduces past decisions including any bias in
-them, and must be adjusted deliberately against the product profile
-before it becomes a forward-looking objective.</p>
+<p>This is how an index was introduced at both the International Maize
+and Wheat Improvement Center (CIMMYT) and the International Rice
+Research Institute (IRRI). Treat it as a starting point: it reproduces
+past decisions including any bias in them, and must be adjusted
+deliberately against the product profile before it becomes a
+forward-looking objective.</p>
 <hr>
 </div>
 </div>
@@ -581,35 +660,92 @@ through one interface.</p>
 <div class="section level3">
 <h3 id="stage-10-evaluate-and-compare">Stage 10 — Evaluate and compare<a class="anchor" aria-label="anchor" href="#stage-10-evaluate-and-compare"></a>
 </h3>
-<p>The four criteria reported are those of Rahimi and Debnath (2023),
-which the established selection-index software also reports.</p>
+<p><code><a href="../reference/evaluate_index.html">evaluate_index()</a></code> reports the classical criteria used by
+Rahimi and Debnath (2023), together with the response of every trait.
+Each quantity answers a different question.</p>
 <table class="table">
+<colgroup>
+<col width="33%">
+<col width="33%">
+<col width="33%">
+</colgroup>
 <thead><tr class="header">
 <th>Criterion</th>
-<th>Meaning</th>
+<th>Full definition</th>
+<th>Valid interpretation</th>
 </tr></thead>
 <tbody>
 <tr class="odd">
 <td><span class="math inline">\(R_{HI}\)</span></td>
-<td>Correlation between index and net merit</td>
+<td>Correlation between the selection index <span class="math inline">\(I\)</span> and aggregate genetic merit <span class="math inline">\(H\)</span>
+</td>
+<td>It ranges from -1 to 1. Negative values select against the stated
+merit, zero means no linear association, and values nearer 1 indicate
+closer agreement. It exists only when the same aggregate-weight vector
+defines <span class="math inline">\(H\)</span> for every index
+compared.</td>
 </tr>
 <tr class="even">
 <td><span class="math inline">\(\Delta H\)</span></td>
-<td>Expected gain in aggregate merit</td>
+<td>Expected change in aggregate genetic merit</td>
+<td>This is <span class="math inline">\(iR_{HI}\sigma_H\)</span>, where
+<span class="math inline">\(\sigma_H\)</span> is the genetic standard
+deviation of aggregate merit. Positive values improve the stated merit.
+Compare magnitudes only when all indices use the same merit definition,
+population and selection intensity.</td>
 </tr>
 <tr class="odd">
+<td><span class="math inline">\(\Delta_j\)</span></td>
+<td>Expected genetic response of trait <span class="math inline">\(j\)</span>
+</td>
+<td>This is the primary biological result. Check its sign, magnitude and
+units for every trait; an aggregate statistic can conceal an
+unfavourable response.</td>
+</tr>
+<tr class="even">
 <td>RE</td>
-<td>Efficiency relative to direct selection on the main trait</td>
+<td>Relative efficiency for the declared main trait</td>
+<td>RE = 1 matches direct response, 0.80 retains 80%, a value above 1
+exceeds direct response through correlated information, and a negative
+value moves the main trait unfavourably. It says nothing about the other
+traits.</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(h_I^2\)</span></td>
+<td>Heritability of the index score treated as a composite trait</td>
+<td>It ranges from 0 to 1 for compatible covariance matrices. Its square
+root is the accuracy with which the observed index predicts its own
+additive genetic component. It does not measure agreement with the
+breeding objective.</td>
 </tr>
 <tr class="even">
 <td><span class="math inline">\(CV_I\)</span></td>
-<td>Coefficient of variation of the index</td>
+<td>Coefficient of variation of index scores</td>
+<td>This is <span class="math inline">\(100s_I/|\bar I|\)</span>. It
+depends on the arbitrary zero of the score and is undefined for a
+centred index. It must not be used to rank centred indices.</td>
 </tr>
 </tbody>
 </table>
+<p>The software output name <code>delta_H</code> and the abbreviated
+print label <code>dH</code> both mean <span class="math inline">\(\Delta
+H\)</span>, the expected change in aggregate genetic merit. They do not
+mean the response of an individual trait.</p>
+<p>No classical scalar is sufficiently robust on its own. For a
+desired-gain recommendation, use the following decision panel: (i) <span class="math inline">\(\Delta_j\)</span> for every trait; (ii) exact-ray
+feasibility or, for minimum floors, the worst-trait and joint-attainment
+probabilities; (iii) cosine alignment between the achieved response and
+the desired direction from <code><a href="../reference/index_uncertainty.html">index_uncertainty()</a></code>; (iv) rank
+correlation and selected-set overlap under perturbation; and (v)
+diversity or coancestry diagnostics when repeated-cycle use is intended.
+The first two test biological attainment, the next two test statistical
+stability, and the fifth guards against obtaining short-term gain by
+exhausting usable variation.</p>
 <p><strong>Relative efficiency below 1 is not a failure.</strong> It is
 the intended trade of response in the main trait for response elsewhere.
-Every value reported by Rahimi and Debnath was below 1.</p>
+Every value reported by Rahimi and Debnath was below 1. Conversely, a
+high relative efficiency is not proof that the desired multi-trait
+objective was attained.</p>
 <p>Compare families by rank correlation <em>and</em> by overlap of the
 selected sets, because the two must be consistent with each other:</p>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
@@ -701,11 +837,12 @@ method.</p>
 </h3>
 <p><code><a href="../reference/run_qgsi.html">run_qgsi()</a></code> implements the quadratic genomic selection
 index of Cerón-Rojas et al. (2026):</p>
-<p><span class="math display">\[I_{qg,i} =
-\mathbf{w}^\mathsf{T}\hat{\boldsymbol{\gamma}}_i +
-\hat{\boldsymbol{\gamma}}_i^\mathsf{T}\mathbf{W}\hat{\boldsymbol{\gamma}}_i\]</span></p>
-<p>where <span class="math inline">\(\hat{\boldsymbol{\gamma}}_i\)</span> is the
-candidate’s vector of genomic estimated breeding values, <span class="math inline">\(\mathbf{w}\)</span> the linear economic weights,
+<p><span class="math display">\[I_{qg,i} = \mathbf{w}^{\mathsf
+T}\widehat{\mathbf{g}}_i +
+\widehat{\mathbf{g}}_i^{\mathsf
+T}\mathbf{W}\widehat{\mathbf{g}}_i\]</span></p>
+<p>where <span class="math inline">\(\widehat{\mathbf{g}}_i\)</span> is
+the candidate’s vector of genomic estimated breeding values, <span class="math inline">\(\mathbf{w}\)</span> the linear economic weights,
 and <span class="math inline">\(\mathbf{W}\)</span> a symmetric matrix
 of squared and cross-product weights. Negative diagonal curvature in
 <span class="math inline">\(\mathbf{W}\)</span> favours intermediate
@@ -795,7 +932,8 @@ instead, and heterozygous calls are never resolved silently.</p>
 </h3>
 <p>Genome structure comes from your markers. Trait architecture is
 calibrated to the covariance matrix you already estimated, so the
-simulation reproduces both.</p>
+simulation reproduces both. Quantitative trait loci (QTL) are sampled on
+that structure for the simulation model.</p>
 <div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">setup</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/founder_population.html">founder_population</a></span><span class="op">(</span></span>
 <span>  <span class="va">founders</span>,</span>
@@ -1059,6 +1197,10 @@ recommendation.</p>
 <h3 id="where-each-stage-is-covered-in-depth">Where each stage is covered in depth<a class="anchor" aria-label="anchor" href="#where-each-stage-is-covered-in-depth"></a>
 </h3>
 <table class="table">
+<colgroup>
+<col width="50%">
+<col width="50%">
+</colgroup>
 <thead><tr class="header">
 <th>Stage</th>
 <th>Vignette</th>
@@ -1066,28 +1208,31 @@ recommendation.</p>
 <tbody>
 <tr class="odd">
 <td>1-4</td>
-<td><em>Obtaining the genetic and phenotypic covariance
-matrices</em></td>
+<td><a href="DesiredGainR-covariance.html">Obtaining G and P</a></td>
 </tr>
 <tr class="even">
 <td>5-8</td>
-<td><em>Defining a breeding objective</em></td>
+<td><a href="DesiredGainR-objective.html">Defining a breeding
+objective</a></td>
 </tr>
 <tr class="odd">
 <td>9-10</td>
-<td><em>Choosing an index</em></td>
+<td><a href="DesiredGainR-index-families.html">Choosing an
+index</a></td>
 </tr>
 <tr class="even">
 <td>11</td>
-<td><em>Optimising desired gains</em></td>
+<td><a href="DesiredGainR-dgsi.html">Optimising desired gains</a></td>
 </tr>
 <tr class="odd">
 <td>12</td>
-<td><em>Quadratic genomic selection</em></td>
+<td><a href="DesiredGainR-qgsi.html">Quadratic genomic
+selection</a></td>
 </tr>
 <tr class="even">
 <td>13-16</td>
-<td><em>Comparing objectives over several cycles</em></td>
+<td><a href="DesiredGainR-simulation.html">Comparing objectives over
+several cycles</a></td>
 </tr>
 </tbody>
 </table>

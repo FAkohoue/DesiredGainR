@@ -711,7 +711,7 @@ report <- c(
   "",
   "1. observed population means changed across real recurrent-selection cycles;",
   "2. a frozen desired-gain index transported to later candidates, years or stages; and",
-  "3. published predicted response agreed in direction with published realized response.",
+  "3. published predicted response agreed in direction with published realised response.",
   "",
   "Together these results validate the package's cycle-gain reproduction, genomic signal,",
   "frozen-index transport and multi-environment recommendation workflow.",
@@ -750,12 +750,12 @@ report <- c(
   "",
   "## Primary sources",
   "",
-  "- Bartholomé et al. (2023), Dryad DOI 10.5061/dryad.1g1jwsv28.",
-  "- Fritsche-Neto et al. (2023), Crop Science DOI 10.1002/csc2.21081; Dryad DOI 10.5061/dryad.9p8cz8wns.",
-  "- Dreisigacker et al. (2023), G3 DOI 10.1093/g3journal/jkad025.",
-  "- Rebollo et al. (2023), Crop Science DOI 10.1002/csc2.20955; Dryad DOI 10.5061/dryad.x69p8czn8.",
-  "- Lopez-Cruz et al. (2023), Figshare DOI 10.6084/m9.figshare.22776806.v1.",
-  "- Zhang et al. (2017), Plant Genome DOI 10.3835/plantgenome2016.10.0100."
+  "- Jérôme Bartholomé, Adriano Castro, Flavio Breseghello, Isabela Furtini, Marley Utumi, José Almeida and Tuong-Vi Cao (2023), Dryad DOI 10.5061/dryad.1g1jwsv28.",
+  "- Roberto Fritsche-Neto, Felipe Sabadin, Júlio César do Vale, Karina Borges, Pedro de Souza, José Crossa and Deoclécio Garbuglio (2023), Crop Science DOI 10.1002/csc2.21081; Dryad DOI 10.5061/dryad.9p8cz8wns.",
+  "- Susanne Dreisigacker, Paulino Pérez-Rodríguez, Leonardo Crespo-Herrera, Alison R. Bentley and José Crossa (2023), G3 DOI 10.1093/g3journal/jkad025.",
+  "- Inés Rebollo, Sheila Scheffel, Pedro Blanco, Federico Molina, Sebastián Martínez, Gonzalo Carracelas, Ignacio Aguilar, Fernando Pérez de Vida and Juan E. Rosas (2023), Crop Science DOI 10.1002/csc2.20955; Dryad DOI 10.5061/dryad.x69p8czn8.",
+  "- Marco Lopez-Cruz, Fernando M. Aguate, Jacob D. Washburn, Natalia de Leon, Shawn M. Kaeppler, Dayane Cristina Lima, Ruijuan Tan, Addie Thompson, Laurence Willard De La Bretonne and Gustavo de los Campos (2023), Nature Communications DOI 10.1038/s41467-023-42687-4; Figshare DOI 10.6084/m9.figshare.22776806.v1.",
+  "- Dataset: Xuecai Zhang, Paulino Pérez-Rodríguez, Juan Burgueño, Michael Olsen, Jean-Luc Jannink, Edward Buckler, Gary Atlin, M. Prasanna Boddupalli, Mateo Vargas, Félix San Vicente and José Crossa (2017), CIMMYT Handle 11529/10927. Associated article: Xuecai Zhang, Paulino Pérez-Rodríguez, Juan Burgueño, Michael Olsen, Edward Buckler, Gary Atlin, Boddupalli M. Prasanna, Mateo Vargas, Félix San Vicente and José Crossa (2017), G3 DOI 10.1534/g3.117.043141."
 )
 writeLines(report, file.path(out_dir, "empirical-validation-report.md"), useBytes = TRUE)
 

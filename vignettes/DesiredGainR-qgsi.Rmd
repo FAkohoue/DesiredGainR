@@ -1,0 +1,336 @@
+---
+title: "Quadratic genomic selection"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Quadratic genomic selection}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  message = FALSE,
+  warning = FALSE
+)
+library(DesiredGainR)
+data(dgr_traits, package = "DesiredGainR")
+data(dgr_G, package = "DesiredGainR")
+data(dgr_gebv, package = "DesiredGainR")
+traits <- dgr_traits$trait
+lower_is_better <- dgr_traits$trait[dgr_traits$direction == "decrease"]
+```
+
+## 1. The decision that QGSI represents
+
+The quadratic genomic selection index (QGSI) is useful when the value of a
+trait combination cannot be represented adequately by a straight line. Three
+examples are an intermediate optimum, diminishing benefit beyond a useful
+level, and complementarity between two traits. If every additional unit has
+the same value, a linear index is clearer and should be preferred.
+
+For candidate $i$, DesiredGainR calculates
+
+$$
+I_{qg,i}=\mathbf{w}^{\mathsf T}\widehat{\mathbf{g}}_i+
+\widehat{\mathbf{g}}_i^{\mathsf T}\mathbf{W}
+\widehat{\mathbf{g}}_i,
+$$
+
+where $\widehat{\mathbf{g}}_i$ contains genomic estimated breeding values
+(GEBVs), $\mathbf{w}$ contains linear economic weights, and $\mathbf{W}$ is a
+symmetric matrix of squared and cross-product economic weights. The package
+ranks larger QGSI scores first.
+
+**Desired gains are not QGSI weights.** A desired gain states the response a
+breeder wants. A QGSI weight states the value assigned to a candidate's linear,
+squared or cross-product genetic merit. DesiredGainR never substitutes one for
+the other.
+
+---
+
+## 2. Translate the biology into weights
+
+For one standardised, favourable-direction trait $x_j$, its contribution is
+
+$$u_j(x_j)=w_jx_j+W_{jj}x_j^2.$$
+
+The signs have precise meanings.
+
+| Specification | Interpretation |
+|---|---|
+| $W_{jj}=0$ | The trait has a linear value. |
+| $W_{jj}<0$ | The value is concave: improvement has diminishing benefit and eventually reaches an optimum. |
+| $W_{jj}>0$ | Extreme values in either direction receive increasing value. Use this only when both extremes are genuinely valuable. |
+| $W_{jk}>0$ | Same-sign deviations are rewarded and opposite-sign deviations are penalised. This includes both the jointly favourable and jointly unfavourable quadrants. |
+| $W_{jk}<0$ | Opposite-sign deviations are rewarded and same-sign deviations are penalised. |
+
+When $W_{jj}<0$ and $w_j>0$, the single-trait optimum is
+$-w_j/(2W_{jj})$ standard deviations above the reference mean. This identity
+provides a defensible way to set curvature. For example, $w_j=0.40$ and
+$W_{jj}=-0.10$ place the optimum at two standard deviations.
+
+For an off-diagonal entry, the coefficient of $x_jx_k$ in the score is
+$2W_{jk}$ because a symmetric quadratic form contains both $W_{jk}$ and
+$W_{kj}$. Enter half of the intended cross-product coefficient in each of the
+two symmetric cells.
+
+---
+
+## 3. Prepare the GEBVs
+
+The example contains 200 candidates and six traits. Grain yield and ears per
+plant improve by increasing. Plant height, flowering time, anthesis-silking
+interval and grey leaf spot severity improve by decreasing.
+
+```{r inspect-data}
+dgr_traits[, c("trait", "description", "direction", "unit")]
+head(dgr_gebv[, c("GenoID", traits)])
+```
+
+`lower_is_better` declares the unfavourable measurement directions. The
+function then changes their signs internally, so all weights below are stated
+in a favourable-direction space. A positive weight for grey leaf spot
+therefore rewards greater resistance, not greater disease severity.
+
+We use `scale_traits = TRUE`. Consequently, both $\mathbf{w}$ and
+$\mathbf{W}$ refer to GEBVs measured in standard-deviation units. Without
+scaling, their units would depend on the original measurement scale: $w_j$ has
+inverse trait units, $W_{jj}$ has inverse squared units, and $W_{jk}$ has
+inverse cross-trait units.
+
+---
+
+## 4. Define one explicit quadratic objective
+
+The following objective rewards improvement in all six traits, introduces
+diminishing returns, and adds complementarity between grain yield and disease
+resistance. These numbers demonstrate the mechanics; they are not universal
+recommendations.
+
+```{r define-objective}
+linear_weights <- c(
+  GY = 1.00, PHT = 0.15, AD = 0.10,
+  ASI = 0.20, EPP = 0.40, GLS = 0.40
+)
+
+W <- diag(c(
+  GY = -0.08, PHT = -0.04, AD = -0.04,
+  ASI = -0.06, EPP = -0.08, GLS = -0.08
+))
+dimnames(W) <- list(traits, traits)
+
+# The complete cross-product coefficient is 2 * 0.03 = 0.06.
+W["GY", "GLS"] <- W["GLS", "GY"] <- 0.03
+W
+```
+
+The diagonal entries make the objective concave along each trait axis. The
+positive `GY` by `GLS` term gives additional value to candidates that are above
+the reference mean for both yield and resistance. It also raises the score of
+candidates below the mean for both traits, because the product of two negative
+deviations is positive. The linear terms and negative diagonal curvature are
+expected to oppose that second effect here, but this must be verified from the
+candidate-specific contributions. Before using a cross-product term, the
+breeding programme should state why the interaction has value beyond the sum
+of the separate effects and inspect all four sign combinations.
+
+---
+
+## 5. Fit the index and select candidates
+
+```{r fit-qgsi}
+qgsi <- run_qgsi(
+  init_data = dgr_gebv["GenoID"],
+  gebv_data = dgr_gebv,
+  trait_cols = traits,
+  linear_weights = linear_weights,
+  W = W,
+  Gamma = dgr_G,
+  lower_is_better = lower_is_better,
+  center_traits = TRUE,
+  scale_traits = TRUE,
+  n_select = 20L
+)
+qgsi
+```
+
+`Gamma = dgr_G` supplies the genomic covariance used by the theoretical
+calculations. When `Gamma` is absent, `run_qgsi()` estimates the covariance of
+the supplied GEBVs and records that estimand. It does not relabel a covariance
+of predictions as the total additive genetic covariance.
+
+Inspect the ranking together with its linear and quadratic parts.
+
+```{r ranking}
+head(qgsi$ranked_geno[, c(
+  "GenoID", "LinearPart", "QuadraticPart", "QGSI", "Rank", "Selected"
+)])
+```
+
+The `LinearPart` and `QuadraticPart` are components of the same score. Their
+signs do not say that a candidate is biologically good or bad by themselves;
+the selection decision follows their sum, `QGSI`.
+
+---
+
+## 6. Interpret the predicted response
+
+```{r expected-gain}
+qgsi$expected_gain_per_trait
+qgsi$observed_selection_differential
+```
+
+These two tables answer different questions.
+
+- `expected_gain_per_trait` is the model-based expected genetic response. It
+  uses the genomic covariance and divides by the standard deviation of the
+  complete index, including its quadratic variance.
+- `observed_selection_differential` is the difference between the selected
+  candidates' mean GEBV and the full candidate mean. It describes the selected
+  group; it is not automatically the response transmitted to progeny.
+
+The expected-gain calculation is a linear-regression approximation. A
+quadratic score is not normally distributed, so the normal-theory selection
+differential becomes less accurate as curvature becomes stronger. Report the
+assumptions stored with the result rather than presenting the approximation as
+an observed outcome.
+
+Under the centred multivariate-normal model,
+$\operatorname{Cov}(\widehat{\mathbf{g}},
+\widehat{\mathbf{g}}^{\mathsf T}\mathbf{W}
+\widehat{\mathbf{g}})=0$ because the relevant third central moments are
+zero. Therefore, the numerator of the linear-regression gain is
+$\mathbf{\Gamma}\mathbf{w}$; $\mathbf{W}$ enters through the total index
+variance. This is a property of that model, not proof that curvature has no
+biological effect. When curvature materially changes the selected set, inspect
+the observed GEBV differential and use simulation or later-cohort validation
+to assess the non-linear decision.
+
+```{r theory}
+qgsi$theoretical_parameters[c(
+  "linear_index_variance",
+  "quadratic_index_variance",
+  "total_index_variance",
+  "index_standard_deviation",
+  "selection_intensity"
+)]
+```
+
+Accuracy and mean squared prediction error require a true genetic covariance,
+which is normally available only in simulation. They are deliberately left
+unavailable in empirical applications rather than being estimated by treating
+the GEBV covariance as truth.
+
+---
+
+## 7. Identify what changed each candidate's score
+
+Candidate-specific contributions make the non-linearity auditable.
+
+```{r contributions}
+head(qgsi$linear_contributions)
+head(qgsi$quadratic_contributions[, seq_len(
+  min(8L, ncol(qgsi$quadratic_contributions))
+)])
+```
+
+Use these tables to answer concrete questions: was a candidate selected because
+of yield, because it approached an intermediate plant-height optimum, or
+because it combined yield and resistance? A large contribution should be
+checked against the biological justification for the corresponding weight.
+
+---
+
+## 8. Determine whether the quadratic term matters
+
+Fit the linear special case by setting $\mathbf{W}=0$, then compare rankings
+and selected sets. If the decision barely changes, the quadratic complexity is
+not buying a materially different decision.
+
+```{r linear-comparator}
+linear_only <- run_qgsi(
+  init_data = dgr_gebv["GenoID"],
+  gebv_data = dgr_gebv,
+  trait_cols = traits,
+  linear_weights = linear_weights,
+  W = matrix(0, length(traits), length(traits),
+    dimnames = list(traits, traits)
+  ),
+  Gamma = dgr_G,
+  lower_is_better = lower_is_better,
+  center_traits = TRUE,
+  scale_traits = TRUE,
+  n_select = 20L
+)
+
+rank_comparison <- merge(
+  as.data.frame(qgsi$ranked_geno[, c("GenoID", "Rank", "Selected")]),
+  as.data.frame(linear_only$ranked_geno[, c("GenoID", "Rank", "Selected")]),
+  by = "GenoID", suffixes = c("_quadratic", "_linear")
+)
+
+c(
+  spearman_rank_correlation = stats::cor(
+    rank_comparison$Rank_quadratic,
+    rank_comparison$Rank_linear,
+    method = "spearman"
+  ),
+  selected_in_both = sum(
+    rank_comparison$Selected_quadratic & rank_comparison$Selected_linear
+  )
+)
+```
+
+This comparison is more informative than asking whether the quadratic term is
+statistically non-zero. The breeder's question is whether it changes which
+candidates are retained, whether that change is stable, and whether the
+non-linear value judgement is defensible.
+
+---
+
+## 9. Minimum evidence before operational use
+
+Do not adopt a QGSI because it is more flexible than a linear index. Adopt it
+only when the programme can defend the curvature.
+
+1. State the biological or economic reason for every non-zero element of
+   $\mathbf{W}$.
+2. Record whether GEBVs were centred and scaled, and define the reference
+   population used for both operations.
+3. Confirm that $\mathbf{W}$ is symmetric and that trait names and directions
+   match the GEBV columns.
+4. Compare the quadratic ranking and selected set with the linear special case.
+5. Inspect candidate-specific contributions for implausible dominance by one
+   trait or interaction.
+6. Examine the response for every trait, not only the total QGSI score.
+7. Test rank and selected-set stability under plausible weight and covariance
+   perturbations.
+8. Validate the decision in later cohorts before assigning realised breeding
+   value to the selected set.
+
+The practical output is not “QGSI is better”. It is a documented statement
+that an explicit non-linear objective changed the decision in a useful, stable
+and biologically defensible way.
+
+---
+
+## 10. Related documentation
+
+- [Choosing an index](DesiredGainR-index-families.html) places QGSI beside the
+  linear and desired-gain families.
+- [Optimising desired gains](DesiredGainR-dgsi.html) explains the iterative
+  desired-gain selection index, which solves a different breeding problem.
+- [`run_qgsi()`](../reference/run_qgsi.html) gives the complete argument and
+  return-value contract.
+- [`compare_dg_and_qgsi()`](../reference/compare_dg_and_qgsi.html) compares
+  rankings descriptively without implying that DGSI and QGSI optimise the same
+  objective.
+
+## References
+
+Ceron-Rojas JJ, Montesinos-Lopez OA, Montesinos-Lopez A, et al. (2026).
+Nonlinear genomic selection index accelerates multi-trait crop improvement.
+*Nature Communications*, 17, 1991.
+https://doi.org/10.1038/s41467-026-69890-3

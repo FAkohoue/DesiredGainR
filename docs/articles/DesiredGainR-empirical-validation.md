@@ -3,14 +3,17 @@
 ## What the evidence establishes
 
 DesiredGainR ships a reproducible real-data validation suite covering
-six breeding-programme sources. Together, these analyses demonstrate
-that the package reproduces realized genetic-gain trajectories, recovers
-meaningful genomic prediction, transports frozen multi-trait indices to
-later data, and evaluates desired-gain directions in environments
-excluded from fitting. The raw public data are too large for the package
-tarball, so the package ships the compact results, evidence labels and
-interpretation guidance. The complete rerun is
-`scripts/validate_empirical_programmes.R` in the source repository.
+six breeding-programme sources. The International Maize and Wheat
+Improvement Center (CIMMYT) and Instituto Nacional de Investigación
+Agropecuaria (INIA) are named in full at first use below. Together,
+these analyses demonstrate that the package reproduces realised
+genetic-gain trajectories, recovers meaningful genomic prediction,
+transports frozen multi-trait indices to later data, and evaluates
+desired-gain directions in environments excluded from fitting. The raw
+public data are too large for the package tarball, so the package ships
+the compact results, evidence labels and interpretation guidance. The
+complete rerun is `scripts/validate_empirical_programmes.R` in the
+source repository.
 
 The suite keeps three questions separate:
 
@@ -18,7 +21,7 @@ The suite keeps three questions separate:
 2.  Did an index frozen in an earlier period transport to later
     candidates, years or stages?
 3.  Did published predicted response agree in direction and scale with
-    published realized response?
+    published realised response?
 
 These complementary questions validate different layers of DesiredGainR.
 They support its mathematical implementation, genomic-prediction
@@ -55,13 +58,15 @@ environment-dependent, as expected in a design where cycle and calendar
 year coincide.
 
 In the haploid-inducer maize population, the connected model used
-genotype means and adjusted explicitly for calendar year. Real induction
-frequency increased by about 0.56 percentage points per cycle. The
-deposited data do not identify the selected parents, so this validates
-the observed cycle trend, not the historical index rule.
+genotype means and adjusted explicitly for calendar year. Real haploid
+induction frequency (HIF) increased increased by about 0.56 percentage
+points per cycle. The deposited data do not identify the selected
+parents, so this validates the observed cycle trend, not the historical
+index rule.
 
 The CIMMYT wheat data are an external aggregate anchor. The predicted
-yield trend from the local P+RKHS-KA supplementary table was 0.158 t/ha
+yield trend from the published pedigree plus reproducing-kernel
+Hilbert-spaces with kernel averaging model (P + RKHS-KA) was 0.158 t/ha
 per cycle; the trend recomputed from the published two-year cycle means
 was 0.265 t/ha per cycle. The raw yield plots and marker matrix are not
 in the local supplement, so this is deliberately labelled a published
@@ -69,20 +74,21 @@ aggregate rather than an independent reanalysis.
 
 ## Out-of-time index validation
 
-The INIA rice analysis used only first-year E1 records, standardized
-within trial. A three-trait desired-gain index for grain yield, milling
-yield and head rice recovery was fitted using cohorts available through
-2008, frozen, and then applied to 2009–2016 cohorts. Advancement within
-four years was known for every E1 line.
+The INIA rice analysis used only records from the first evaluation stage
+(E1), standardised within trial. A three-trait desired-gain index for
+grain yield, milling yield and head rice recovery was fitted using
+cohorts available through 2008, frozen, and then applied to 2009–2016
+cohorts. Advancement within four years was known for every E1 line.
 
-The frozen multi-trait score had an advancement AUC of about 0.773.
-Yield alone had an AUC of about 0.756. A hierarchical bootstrap that
-resampled years and candidates placed the AUC improvement near 0.017,
-with its 95% interval above zero. The top 20% by the frozen index were
-about 1.77 times as likely to advance as the full cohort. These are
-evidence of agreement with historical programme decisions. They are not
-evidence that those decisions, or this particular three-trait objective,
-were optimal.
+The frozen multi-trait score had an area under the receiver operating
+characteristic curve (AUC) of about 0.773 for advancement. Yield alone
+had an AUC of about 0.756. A hierarchical bootstrap that resampled years
+and candidates placed the AUC improvement near 0.017, with its 95%
+interval above zero. The top 20% by the frozen index were about 1.77
+times as likely to advance as the full cohort. These are evidence of
+agreement with historical programme decisions. They are not evidence
+that those decisions, or this particular three-trait objective, were
+optimal.
 
 Later-stage trait correlations are reported only among historically
 advanced lines. Rejected lines have no later-stage phenotype, so
@@ -100,11 +106,13 @@ evidence that complements the recurrent-cycle datasets.
 
 ## CIMMYT rapid-cycle genomic selection
 
-The Zhang et al. (2017) deposit provides a particularly useful
-combination: 1,000 C0 training families evaluated in four environments,
-raw cycle-gain trials for C0–C4, 955,690 marker records, explicit
-phenotype-to-sample keys, and published genomic-prediction and diversity
-results.
+The rapid-cycle genomic selection (RCGS) deposit of Zhang,
+Pérez-Rodríguez, Burgueño, Olsen, Jannink, Buckler, Atlin, Boddupalli,
+Vargas, San Vicente and Crossa (2017) provides a particularly useful
+combination: 1,000 base-cycle (C0) training families evaluated in four
+environments, raw cycle-gain trials from C0 through the fourth selection
+cycle (C4), 955,690 marker records, explicit phenotype-to-sample keys,
+and published genomic-prediction and diversity results.
 
 The two-location raw-data model reproduced the published yield
 trajectory. It estimated 0.175 t/ha per cycle from C0 to C4, compared
@@ -115,15 +123,16 @@ the paper reports 43; retaining 43 rather than all 44 changed the
 adjusted mean by only about 0.001 t/ha, but the unidentified entry
 discrepancy remains recorded.
 
-The slower raw-genomic script streams the 1.9 GB C0 HapMap, samples
-marker rows deterministically across the genome, applies call-rate and
-minor-allele-frequency filters, and constructs a VanRaden relationship
-matrix. Repeated five-fold family prediction gave mean correlation 0.484
-using 1,058 filtered sampled markers. This is directionally and
-quantitatively concordant with the published full-marker correlation of
-0.55. A permuted-outcome negative control was 0.057. This
-computationally bounded reproduction complements the paper’s full
-331,740-marker phenotype pipeline with an independently executable
+The slower raw-genomic script streams the 1.9 gigabyte C0 haplotype-map
+(HapMap) file, samples marker rows deterministically across the genome,
+applies call-rate and minor-allele-frequency filters, and constructs a
+VanRaden relationship matrix. Repeated five-fold family prediction gave
+mean correlation 0.484 using 1,058 filtered sampled markers. This is
+directionally and quantitatively concordant with the published
+full-marker correlation of 0.55. The model was genomic best linear
+unbiased prediction (GBLUP). A permuted-outcome negative control was
+0.057. This computationally bounded reproduction complements the paper’s
+full 331,740-marker phenotype pipeline with an independently executable
 check.
 
 For desired-gain direction validation, each outer fold withheld one
@@ -131,18 +140,71 @@ complete environment. Direction search occurred only within the other
 three environments, using inner environment holdouts and a worst-trait
 criterion; the chosen vector was then frozen. Across four outer folds,
 its average worst-trait improvement over an equal-gain direction was
-0.005 environment SD, with fold results from -0.041 to 0.085. This is
-correctly labelled mixed. The joint high-gain event occurred in one of
-four outer environments and its Brier score was 0.30. Four outcomes make
-this a useful first external probability check rather than a standalone
-calibration study. DesiredGainR therefore reports the probability with
-its evidence level instead of overstating its precision.
+0.005 environmental standard deviations, with fold results from -0.041
+to 0.085. This is correctly labelled mixed. The joint high-gain event
+occurred in one of four outer environments and its Brier score was 0.30.
+Four outcomes make this a useful first external probability check rather
+than a standalone calibration study. DesiredGainR therefore reports the
+probability with its evidence level instead of overstating its
+precision.
 
 The integrity audit found complete C0–C3 pedigree linkage and complete
 linkage for all four training workbooks. Seventeen of 18 original-parent
 samples also resolved through the supplied key. The one unresolved
 parent and the byte-identical C3/C4 selected files are retained in the
 audit, consistent with the paper’s statement that C4 was not genotyped.
+
+## Dataset attribution
+
+The validation datasets are research outputs in their own right.
+Therefore, the following citations name every author rather than
+replacing contributors with *et al.*:
+
+1.  **CNA6 rice.** Jérôme Bartholomé, Adriano Castro, Flavio
+    Breseghello, Isabela Furtini, Marley Utumi, José Almeida and
+    Tuong-Vi Cao (2023). *Rice phenotypic data – CNA6 population and
+    advanced lines*. Dryad. <https://doi.org/10.5061/dryad.1g1jwsv28>
+2.  **Tropical maize haploid-inducer population.** Roberto
+    Fritsche-Neto, Felipe Sabadin, Júlio César do Vale, Karina Borges,
+    Pedro de Souza, José Crossa and Deoclécio Garbuglio (2023).
+    *Realized genetic gains via recurrent selection in a tropical maize
+    haploid inducer population and optimizing simultaneous selection for
+    the next cycles*. *Crop Science* **63**:2865–2876.
+    <https://doi.org/10.1002/csc2.21081>; data:
+    <https://doi.org/10.5061/dryad.9p8cz8wns>
+3.  **CIMMYT spring wheat.** Susanne Dreisigacker, Paulino
+    Pérez-Rodríguez, Leonardo Crespo-Herrera, Alison R. Bentley and José
+    Crossa (2023). *Results from rapid-cycle recurrent genomic selection
+    in spring bread wheat*. *G3: Genes\|Genomes\|Genetics*
+    **13**:jkad025. <https://doi.org/10.1093/g3journal/jkad025>
+4.  **Instituto Nacional de Investigación Agropecuaria (INIA) rice.**
+    Inés Rebollo, Sheila Scheffel, Pedro Blanco, Federico Molina,
+    Sebastián Martínez, Gonzalo Carracelas, Ignacio Aguilar, Fernando
+    Pérez de Vida and Juan E. Rosas (2023). *Consolidating 23 years of
+    historical data from an irrigated subtropical rice breeding program
+    in Uruguay*. *Crop Science* **63**:1300–1315.
+    <https://doi.org/10.1002/csc2.20955>; data:
+    <https://doi.org/10.5061/dryad.x69p8czn8>
+5.  **Genomes-to-Fields maize.** Marco Lopez-Cruz, Fernando M. Aguate,
+    Jacob D. Washburn, Natalia de Leon, Shawn M. Kaeppler, Dayane
+    Cristina Lima, Ruijuan Tan, Addie Thompson, Laurence Willard De La
+    Bretonne and Gustavo de los Campos (2023). *Leveraging data from the
+    Genomes-to-Fields Initiative to investigate genotype-by-environment
+    interactions in maize in North America*. *Nature Communications*
+    **14**:6904. <https://doi.org/10.1038/s41467-023-42687-4>; data:
+    <https://doi.org/10.6084/m9.figshare.22776806.v1>
+6.  **CIMMYT tropical maize rapid-cycle genomic selection.** Xuecai
+    Zhang, Paulino Pérez-Rodríguez, Juan Burgueño, Michael Olsen,
+    Jean-Luc Jannink, Edward Buckler, Gary Atlin, M. Prasanna
+    Boddupalli, Mateo Vargas, Félix San Vicente and José Crossa (2017).
+    *Rapid cycling genomic selection in a multi-parental tropical maize
+    population*. CIMMYT Research Data & Software Repository Network,
+    version 2. <https://hdl.handle.net/11529/10927>. The associated
+    article is by Xuecai Zhang, Paulino Pérez-Rodríguez, Juan Burgueño,
+    Michael Olsen, Edward Buckler, Gary Atlin, Boddupalli M. Prasanna,
+    Mateo Vargas, Félix San Vicente and José Crossa (2017). *G3:
+    Genes\|Genomes\|Genetics* **7**:2315–2326.
+    <https://doi.org/10.1534/g3.117.043141>
 
 ## Why the results are trustworthy
 
@@ -155,8 +217,9 @@ audit, consistent with the paper’s statement that C4 was not genotyped.
   the validation script rather than selected after seeing the result.
 - Every result row carries an evidence tier, interpretation and
   appropriate scope of use.
-- HapMap and VCF-style headers are handled explicitly despite sharing
-  the same `.hmp.txt` suffix in the RCGS deposit.
+- Haplotype-map and variant-call-format (VCF)-style headers are handled
+  explicitly despite sharing the same `.hmp.txt` suffix in the RCGS
+  deposit.
 - Unphased bulk-family calls are not converted into fictitious phased
   inbred founders for AlphaSimR.
 - The result table contains mixed and non-identifiable endpoints rather

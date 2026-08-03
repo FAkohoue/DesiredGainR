@@ -2,15 +2,20 @@ pandoc: '3.4'
 pkgdown: 2.2.0
 pkgdown_sha: ~
 articles:
+  DesiredGainR-covariance: DesiredGainR-covariance.html
   DesiredGainR-desired-gain-intervals: DesiredGainR-desired-gain-intervals.html
+  DesiredGainR-dgsi: DesiredGainR-dgsi.html
   DesiredGainR-empirical-validation: DesiredGainR-empirical-validation.html
+  DesiredGainR-index-families: DesiredGainR-index-families.html
+  DesiredGainR-interoperation: DesiredGainR-interoperation.html
   DesiredGainR-introduction: DesiredGainR-introduction.html
   DesiredGainR-objective: DesiredGainR-objective.html
   DesiredGainR-pipeline: DesiredGainR-pipeline.html
+  DesiredGainR-qgsi: DesiredGainR-qgsi.html
   DesiredGainR-reproduction: DesiredGainR-reproduction.html
   DesiredGainR-simulation: DesiredGainR-simulation.html
   DesiredGainR-workflow: DesiredGainR-workflow.html
-last_built: 2026-08-03T02:07Z
+last_built: 2026-08-03T18:43Z
 urls:
   reference: https://FAkohoue.github.io/DesiredGainR/reference
   article: https://FAkohoue.github.io/DesiredGainR/articles

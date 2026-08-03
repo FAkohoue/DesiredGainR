@@ -44,8 +44,8 @@ index. It provides the classical index families, but its distinctive content is
 the layer that helps a breeder state an objective, test whether it can be
 attained, and discover how much the resulting decision depends on it.
 
-This vignette orients the reader. The other seven cover each layer in depth,
-and Section 6 below says which to read next.
+This vignette orients the reader. The other articles cover each layer in
+depth, and Section 6 provides a direct link to each one.
 
 ---
 
@@ -72,7 +72,7 @@ provides labelled approximations that record what they actually are.
 
 The last exclusion matters for anyone using both of the author's packages.
 Parent, cross and mating decisions belong to a dedicated mating-design tool;
-see the *Working with other packages* vignette.
+see [Working with other packages](DesiredGainR-interoperation.html).
 
 ---
 
@@ -102,10 +102,21 @@ genomic index of Cerón-Rojas et al. (2026).
 
 ### 3.3 Evaluating an index
 
-`evaluate_index()` reports the four criteria used by Rahimi and Debnath (2023)
-and by the established selection-index software: the correlation between index
-and net merit, the aggregate gain, the efficiency relative to direct selection,
-and the coefficient of variation of the index.
+`evaluate_index()` reports: (i) the correlation between the index and one fixed
+definition of aggregate genetic merit, $R_{HI}$; (ii) expected change in that
+merit, $\Delta H$; (iii) expected response for every trait, $\Delta_j$; (iv)
+relative efficiency (RE) for one declared main trait; (v) index heritability;
+and (vi) the coefficient of variation of index scores, $CV_I$, when the score
+has a meaningful non-zero mean.
+
+These quantities are not interchangeable measures of index quality. In
+particular, $R_{HI}$ and $\Delta H$ require the same aggregate-merit definition
+for every index, RE describes only the main trait, and $CV_I$ is undefined for
+a centred index. Therefore, DesiredGainR also directs the breeder to per-trait
+attainment, response-direction alignment, selected-set stability, covariance
+uncertainty and, for repeated cycles, diversity. The detailed interpretation is
+given in [Choosing an index](DesiredGainR-index-families.html) and the breeder
+guide.
 
 ### 3.4 Looking ahead
 
@@ -228,14 +239,16 @@ selection_index(
 
 | If you want to | Read |
 |---|---|
-| Follow one programme end to end | *The complete workflow* |
-| Decide what to select for | *Defining a breeding objective* |
-| Obtain or judge a covariance matrix | *Obtaining G and P* |
-| Choose among index families | *Choosing an index* |
-| Understand the iterative desired-gain method | *Optimising desired gains* |
-| Use the quadratic genomic index | *Quadratic genomic selection* |
-| Compare objectives over several cycles | *Multi-cycle simulation* |
-| Combine this with other breeding software | *Working with other packages* |
+| Follow one programme end to end | [The complete workflow](DesiredGainR-workflow.html) |
+| Decide what to select for | [Defining a breeding objective](DesiredGainR-objective.html) |
+| Define ranges when exact gains are uncertain | [Defining desired gains and acceptable intervals](DesiredGainR-desired-gain-intervals.html) |
+| Obtain or judge a covariance matrix | [Obtaining G and P](DesiredGainR-covariance.html) |
+| Choose among index families | [Choosing an index](DesiredGainR-index-families.html) |
+| Understand the iterative desired-gain method | [Optimising desired gains](DesiredGainR-dgsi.html) |
+| Use the quadratic genomic index | [Quadratic genomic selection](DesiredGainR-qgsi.html) |
+| Compare objectives over several cycles | [Multi-cycle simulation](DesiredGainR-simulation.html) |
+| Inspect validation with real programmes | [Empirical validation](DesiredGainR-empirical-validation.html) |
+| Combine this with other breeding software | [Working with other packages](DesiredGainR-interoperation.html) |
 
 A plain-language companion for readers who will approve a selection decision
 but do not run R is available through `open_desiredgain_guide()`.

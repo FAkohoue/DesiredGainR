@@ -32,7 +32,7 @@ values. You must arrive with four things.
 
 | Input | What it is | Where it comes from |
 |----|----|----|
-| Trait values | One adjusted mean, BLUP or GEBV per candidate per trait | Your multi-trait genetic evaluation |
+| Trait values | One adjusted mean, best linear unbiased prediction (BLUP) or genomic estimated breeding value (GEBV) per candidate per trait | Your multi-trait genetic evaluation |
 | \\\mathbf{G}\\ | Genetic variance-covariance matrix | The same fitted model |
 | \\\mathbf{P}\\ | Phenotypic variance-covariance matrix | The same fitted model |
 | Trait directions | Which traits improve by rising, which by falling | The product profile |
@@ -235,9 +235,21 @@ selecting hard for yield would carry both *past* the smaller gains you
 requested. To deliver the ratio you asked for, the index must hold them
 back. A negative weight never means the trait should get worse.
 
-**The magnitudes are not comparable.** A weight carries inverse trait
-units, so a trait on a small scale gets a big number for the same
-emphasis. Always rescale before comparing:
+**The desired gains are already standardised; the returned weights are
+not.** Here `desired_gains` is expressed in genetic standard deviations,
+but `dgr_G` and `dgr_P` are supplied in the original trait units.
+Therefore,
+[`implied_economic_weights()`](https://FAkohoue.github.io/DesiredGainR/reference/implied_economic_weights.md)
+first converts the target to those original units and returns a weight
+per original unit of each trait. A coefficient per tonne, day or
+disease-score unit cannot be compared directly with a coefficient per
+centimetre.
+
+The multiplication below does not standardise `desired_gains` a second
+time. It converts each returned raw-unit weight into the contribution
+associated with one genetic standard deviation of its trait. These
+products are on a common genetic-standard-deviation scale and may be
+compared as a diagnostic:
 
 ``` r
 round(sort(implied * genetic_sd[names(implied)], decreasing = TRUE), 2)
@@ -245,8 +257,12 @@ round(sort(implied * genetic_sd[names(implied)], decreasing = TRUE), 2)
 #> 10.89  5.81  0.58  0.36 -1.51 -7.93
 ```
 
-Ears per plant had the largest raw number and is one of the smaller
-effects.
+Ears per plant had the largest raw coefficient but one of the smaller
+per-genetic-standard-deviation effects. If `G` and `P` had already been
+standardised to genetic-standard-deviation units, the returned weights
+would already be per genetic standard deviation and this multiplication
+would be wrong. Standardise either the covariance space or the returned
+weights, not both.
 
 Confirm the translation inverts, which costs one line and catches unit
 errors:
@@ -270,10 +286,22 @@ round(
 **This is the stage most often skipped, and the one that most often
 changes the answer.**
 
-For any linear index the response is \\\mathbf{R} =
-i\\\mathbf{G}\mathbf{b}/\sqrt{\mathbf{b}^\mathsf{T}\mathbf{P}\mathbf{b}}\\,
-so the attainable responses lie on an ellipsoid and a stated target
-requires exactly
+Let \\\mathbf{b}\\ denote the linear-index coefficients, \\\mathbf{G}\\
+the additive genetic covariance matrix, \\\mathbf{P}\\ the phenotypic
+covariance matrix, and \\i\\ the standardised selection intensity. The
+expected one-cycle response is
+
+\\\mathbf{R} = i\\\frac{\mathbf{G}\mathbf{b}}
+{\sqrt{\mathbf{b}^\mathsf{T}\mathbf{P}\mathbf{b}}}.\\
+
+Consequently, every response available at intensity \\i\\ lies on the
+achievable-response ellipsoid
+
+\\\mathbf{R}^\mathsf{T}\mathbf{G}^{-1}\mathbf{P}
+\mathbf{G}^{-1}\mathbf{R}=i^2.\\
+
+A specified vector \\\mathbf{d}\\ lies on an ellipsoid whose intensity
+is
 
 \\i\_{\text{required}} =
 \sqrt{\mathbf{d}^\mathsf{T}\mathbf{G}^{-1}\mathbf{P}\mathbf{G}^{-1}\mathbf{d}}.\\
@@ -294,9 +322,18 @@ feasibility
 #>   Attainable fraction of the requested gain: 54.7%
 ```
 
-The request looked unremarkable and requires selecting fewer than one
-candidate from two hundred. About fifty-five per cent of it is available
-at the intensity actually planned:
+Read the output line by line. The required intensity of 3.2082
+corresponds, under normal truncation selection, to retaining the best
+0.1773% of an effectively continuous population. In a population of 200
+candidates, this is 0.355 candidate. A breeder cannot select a fraction
+of a candidate. Even selecting the single best candidate retains 0.5%,
+which gives a lower intensity than 3.2082. Therefore, the exact vector
+is unattainable in this candidate set.
+
+The planned decision retains 20 of 200 candidates, or 10%. Its intensity
+is 1.7550. The ratio \\1.7550/3.2082=0.547\\ means that 54.7% of the
+requested vector can be delivered while preserving its exact trait
+proportions:
 
 ``` r
 round(feasibility$attainable_response_input_units, 3)
@@ -304,12 +341,45 @@ round(feasibility$attainable_response_input_units, 3)
 #> 0.547 0.219 0.328 0.274 0.219 0.328
 ```
 
-**Two consequences worth understanding now.** First, the classical
-desired-gain index honours only the *direction* of \\\mathbf{d}\\;
-multiplying every element by a constant changes nothing, because the
-magnitude is fixed by selection intensity. Second, an antagonistic
-correlation structure can make a modest-looking target unreachable, and
-no amount of optimisation will fix that.
+The returned values are in the same genetic-standard-deviation units as
+the input. Thus, the planned exact-ray response is 0.547 standard
+deviations for grain yield, 0.219 for plant height, 0.328 for anthesis
+date, 0.274 for the anthesis-silking interval, 0.219 for ears per plant,
+and 0.328 for grey leaf spot resistance. They are not observed gains and
+they are not six independent upper limits. They are the model-based
+response at the planned intensity when the requested **ratio among
+traits is held exactly**.
+
+This interpretation has four consequences.
+
+1.  The classical desired-gain index honours the direction, or ratio, of
+    \\\mathbf{d}\\. Multiplying all elements by the same positive
+    constant leaves the ranking unchanged; it changes only the intensity
+    required to attain the stated magnitude.
+2.  `feasible_at_planned_intensity = no` does not mean that the index is
+    unable to rank candidates. It means that the complete stated vector
+    cannot be reached in one cycle at the planned 10% selection
+    proportion under the supplied \\\mathbf{G}\\ and \\\mathbf{P}\\.
+3.  An exact desired-gain vector is not the same objective as a set of
+    minimum gains. For example, another attainable response may exceed
+    the grain-yield target and still meet every minimum without
+    preserving the ratio \\1.0:0.4:0.6:0.5:0.4:0.6\\.
+    [`gain_feasibility()`](https://FAkohoue.github.io/DesiredGainR/reference/gain_feasibility.md)
+    tests the exact ray. Population-driven and interval searches assess
+    trait-specific floors and must be interpreted through their
+    worst-trait and joint-attainment results.
+4.  The result is conditional on a linear index, one-cycle truncation
+    selection, approximate normality, and the supplied covariance
+    matrices. Therefore, covariance uncertainty and selected-set
+    stability must be checked before a recommendation is treated as
+    robust.
+
+If the ratio itself is biologically required, scale the whole vector by
+0.547 or relax the selection proportion. If each entry is a minimum
+rather than a fixed ratio, use
+[`suggest_desired_gains()`](https://FAkohoue.github.io/DesiredGainR/reference/suggest_desired_gains.md)
+or interval optimisation and require the lower confidence bound for
+joint attainment to support the recommendation.
 
 ### Stage 8 — Recover what the programme already selects for, then adjust
 
@@ -343,10 +413,12 @@ round(recovered$selection_differential_sd, 2)
 #>  1.11 -0.27 -0.42 -0.83  0.52 -0.42
 ```
 
-This is how an index was introduced at both CIMMYT and IRRI. Treat it as
-a starting point: it reproduces past decisions including any bias in
-them, and must be adjusted deliberately against the product profile
-before it becomes a forward-looking objective.
+This is how an index was introduced at both the International Maize and
+Wheat Improvement Center (CIMMYT) and the International Rice Research
+Institute (IRRI). Treat it as a starting point: it reproduces past
+decisions including any bias in them, and must be adjusted deliberately
+against the product profile before it becomes a forward-looking
+objective.
 
 ------------------------------------------------------------------------
 
@@ -399,19 +471,41 @@ smith_hazel
 
 ### Stage 10 — Evaluate and compare
 
-The four criteria reported are those of Rahimi and Debnath (2023), which
-the established selection-index software also reports.
+[`evaluate_index()`](https://FAkohoue.github.io/DesiredGainR/reference/evaluate_index.md)
+reports the classical criteria used by Rahimi and Debnath (2023),
+together with the response of every trait. Each quantity answers a
+different question.
 
-| Criterion    | Meaning                                                   |
-|--------------|-----------------------------------------------------------|
-| \\R\_{HI}\\  | Correlation between index and net merit                   |
-| \\\Delta H\\ | Expected gain in aggregate merit                          |
-| RE           | Efficiency relative to direct selection on the main trait |
-| \\CV_I\\     | Coefficient of variation of the index                     |
+| Criterion | Full definition | Valid interpretation |
+|----|----|----|
+| \\R\_{HI}\\ | Correlation between the selection index \\I\\ and aggregate genetic merit \\H\\ | It ranges from -1 to 1. Negative values select against the stated merit, zero means no linear association, and values nearer 1 indicate closer agreement. It exists only when the same aggregate-weight vector defines \\H\\ for every index compared. |
+| \\\Delta H\\ | Expected change in aggregate genetic merit | This is \\iR\_{HI}\sigma_H\\, where \\\sigma_H\\ is the genetic standard deviation of aggregate merit. Positive values improve the stated merit. Compare magnitudes only when all indices use the same merit definition, population and selection intensity. |
+| \\\Delta_j\\ | Expected genetic response of trait \\j\\ | This is the primary biological result. Check its sign, magnitude and units for every trait; an aggregate statistic can conceal an unfavourable response. |
+| RE | Relative efficiency for the declared main trait | RE = 1 matches direct response, 0.80 retains 80%, a value above 1 exceeds direct response through correlated information, and a negative value moves the main trait unfavourably. It says nothing about the other traits. |
+| \\h_I^2\\ | Heritability of the index score treated as a composite trait | It ranges from 0 to 1 for compatible covariance matrices. Its square root is the accuracy with which the observed index predicts its own additive genetic component. It does not measure agreement with the breeding objective. |
+| \\CV_I\\ | Coefficient of variation of index scores | This is \\100s_I/\|\bar I\|\\. It depends on the arbitrary zero of the score and is undefined for a centred index. It must not be used to rank centred indices. |
+
+The software output name `delta_H` and the abbreviated print label `dH`
+both mean \\\Delta H\\, the expected change in aggregate genetic merit.
+They do not mean the response of an individual trait.
+
+No classical scalar is sufficiently robust on its own. For a
+desired-gain recommendation, use the following decision panel: (i)
+\\\Delta_j\\ for every trait; (ii) exact-ray feasibility or, for minimum
+floors, the worst-trait and joint-attainment probabilities; (iii) cosine
+alignment between the achieved response and the desired direction from
+[`index_uncertainty()`](https://FAkohoue.github.io/DesiredGainR/reference/index_uncertainty.md);
+(iv) rank correlation and selected-set overlap under perturbation; and
+(v) diversity or coancestry diagnostics when repeated-cycle use is
+intended. The first two test biological attainment, the next two test
+statistical stability, and the fifth guards against obtaining short-term
+gain by exhausting usable variation.
 
 **Relative efficiency below 1 is not a failure.** It is the intended
 trade of response in the main trait for response elsewhere. Every value
-reported by Rahimi and Debnath was below 1.
+reported by Rahimi and Debnath was below 1. Conversely, a high relative
+efficiency is not proof that the desired multi-trait objective was
+attained.
 
 Compare families by rank correlation *and* by overlap of the selected
 sets, because the two must be consistent with each other:
@@ -521,14 +615,14 @@ al. reported precisely this failure of the unoptimised method.
 implements the quadratic genomic selection index of Cerón-Rojas et
 al. (2026):
 
-\\I\_{qg,i} = \mathbf{w}^\mathsf{T}\hat{\boldsymbol{\gamma}}\_i +
-\hat{\boldsymbol{\gamma}}\_i^\mathsf{T}\mathbf{W}\hat{\boldsymbol{\gamma}}\_i\\
+\\I\_{qg,i} = \mathbf{w}^{\mathsf T}\widehat{\mathbf{g}}\_i +
+\widehat{\mathbf{g}}\_i^{\mathsf T}\mathbf{W}\widehat{\mathbf{g}}\_i\\
 
-where \\\hat{\boldsymbol{\gamma}}\_i\\ is the candidate’s vector of
-genomic estimated breeding values, \\\mathbf{w}\\ the linear economic
-weights, and \\\mathbf{W}\\ a symmetric matrix of squared and
-cross-product weights. Negative diagonal curvature in \\\mathbf{W}\\
-favours intermediate values; positive curvature favours extremes.
+where \\\widehat{\mathbf{g}}\_i\\ is the candidate’s vector of genomic
+estimated breeding values, \\\mathbf{w}\\ the linear economic weights,
+and \\\mathbf{W}\\ a symmetric matrix of squared and cross-product
+weights. Negative diagonal curvature in \\\mathbf{W}\\ favours
+intermediate values; positive curvature favours extremes.
 
 ``` r
 quadratic_weights <- diag(c(
@@ -624,7 +718,8 @@ instead, and heterozygous calls are never resolved silently.
 
 Genome structure comes from your markers. Trait architecture is
 calibrated to the covariance matrix you already estimated, so the
-simulation reproduces both.
+simulation reproduces both. Quantitative trait loci (QTL) are sampled on
+that structure for the simulation model.
 
 ``` r
 setup <- founder_population(
@@ -804,14 +899,14 @@ sessionInfo()
 
 ### Where each stage is covered in depth
 
-| Stage | Vignette                                                   |
-|-------|------------------------------------------------------------|
-| 1-4   | *Obtaining the genetic and phenotypic covariance matrices* |
-| 5-8   | *Defining a breeding objective*                            |
-| 9-10  | *Choosing an index*                                        |
-| 11    | *Optimising desired gains*                                 |
-| 12    | *Quadratic genomic selection*                              |
-| 13-16 | *Comparing objectives over several cycles*                 |
+| Stage | Vignette |
+|----|----|
+| 1-4 | [Obtaining G and P](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-covariance.md) |
+| 5-8 | [Defining a breeding objective](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-objective.md) |
+| 9-10 | [Choosing an index](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-index-families.md) |
+| 11 | [Optimising desired gains](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-dgsi.md) |
+| 12 | [Quadratic genomic selection](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-qgsi.md) |
+| 13-16 | [Comparing objectives over several cycles](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-simulation.md) |
 
 ------------------------------------------------------------------------
 

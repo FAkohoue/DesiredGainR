@@ -1,0 +1,105 @@
+---
+title: "Working with other breeding software"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Working with other breeding software}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>", message = FALSE)
+library(DesiredGainR)
+data(dgr_traits, package = "DesiredGainR")
+data(dgr_G, package = "DesiredGainR")
+data(dgr_P, package = "DesiredGainR")
+data(dgr_gebv, package = "DesiredGainR")
+traits <- dgr_traits$trait
+```
+
+## 1. Where DesiredGainR enters the analysis
+
+DesiredGainR begins after genetic evaluation. Mixed-model or genomic-prediction
+software supplies candidate breeding values and, ideally, the fitted
+multi-trait covariance matrices. DesiredGainR then defines and tests the
+objective, builds selection indices, ranks candidates and reports uncertainty.
+
+It does not analyse field designs, estimate marker effects, allocate crosses or
+optimise matings. Keep those responsibilities in the specialised software that
+produced or consumes the corresponding objects.
+
+---
+
+## 2. Minimum hand-off contract
+
+Transfer the following objects explicitly:
+
+1. one stable candidate identifier used by every table and matrix;
+2. one GEBV or breeding-value column per trait;
+3. trait names, units and favourable directions;
+4. additive genetic covariance $\mathbf{G}$;
+5. phenotypic or index-variable covariance $\mathbf{P}$;
+6. prediction-error covariance or uncertainty draws when available; and
+7. population, environment and model provenance.
+
+Never match candidates or traits by position alone.
+
+```{r identifiers}
+stopifnot(!anyDuplicated(dgr_gebv$GenoID))
+stopifnot(all(traits %in% names(dgr_gebv)))
+stopifnot(identical(rownames(dgr_G), traits))
+stopifnot(identical(colnames(dgr_G), traits))
+```
+
+---
+
+## 3. Import covariance from upstream software
+
+`import_covariance()` accepts matrices extracted from ASReml-R, `sommer`,
+`breedR`, BGLR or a stage-wise workflow. The caller extracts the scientifically
+correct model term; DesiredGainR validates its structure, orders the traits and
+records its origin.
+
+```{r import}
+imported_G <- import_covariance(
+  dgr_G[rev(traits), rev(traits)],
+  trait_cols = traits,
+  source = "matrix",
+  estimand = "additive genetic covariance",
+  P = dgr_P
+)
+imported_G
+```
+
+Because upstream interfaces change, passing the extracted covariance is more
+stable than asking DesiredGainR to interpret an entire fitted model object.
+The extraction script should remain with the analysis so the chosen random
+term and covariance structure can be audited.
+
+---
+
+## 4. Pass phased genomes to the simulation layer
+
+`haplotypes_from_inbred_dosage()` accepts inbred dosage data, while
+`founder_haplotypes()` accepts phased homologues and a genetic map. Its input
+shape is compatible with phased data returned by HapBlockR, but DesiredGainR
+does not import HapBlockR and does not duplicate its haplotype analysis.
+
+The resulting founder object can be passed to AlphaSimR through
+`founder_population()`. Read
+[Multi-cycle simulation](DesiredGainR-simulation.html) before interpreting a
+simulated difference between objectives.
+
+---
+
+## 5. Hand selected candidates downstream
+
+Export identifiers, ranks, scores, per-trait GEBVs and the exact objective used.
+Do not send only a sorted list: mating-design software needs enough information
+to apply diversity, relationship and crossing constraints that are outside the
+selection index.
+
+Also retain package versions, seeds, covariance provenance and the selected-set
+stability analysis. A reproducible hand-off allows the next breeding stage to
+distinguish a biological decision from a software default.
+

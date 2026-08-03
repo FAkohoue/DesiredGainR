@@ -80,9 +80,21 @@
     <li><a class="dropdown-item" href="../articles/DesiredGainR-objective.html">Defining a breeding objective</a></li>
     <li><a class="dropdown-item" href="../articles/DesiredGainR-desired-gain-intervals.html">Defining desired gains and acceptable intervals</a></li>
     <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Evidence</h6></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-covariance.html">Obtaining G and P</a></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-reproduction.html">Reproducing published methods</a></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-empirical-validation.html">Empirical validation with real breeding programmes</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Index methods</h6></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-index-families.html">Choosing an index</a></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-dgsi.html">Optimising desired gains</a></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-qgsi.html">Quadratic genomic selection</a></li>
+    <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Looking ahead</h6></li>
     <li><a class="dropdown-item" href="../articles/DesiredGainR-simulation.html">Comparing objectives over several cycles</a></li>
-    <li><a class="dropdown-item" href="../articles/DesiredGainR-empirical-validation.html">Empirical validation with real breeding programmes</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Interoperation</h6></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-interoperation.html">Working with other breeding software</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="../breeder-guide.html">Breeder guide</a></li>
@@ -183,8 +195,7 @@ practical form of the observation by Crosbie et al. (1980) that equal
 weights on unstandardised traits concentrate selection on whichever
 trait carries the largest variance, and it is why the package
 standardises by default.</p>
-<p><em>See: Obtaining the genetic and phenotypic covariance
-matrices.</em></p>
+<p>See <a href="DesiredGainR-covariance.html">Obtaining G and P</a>.</p>
 <hr>
 </div>
 <div class="section level2">
@@ -232,24 +243,31 @@ signing by hand.</p>
 <span><span class="co">#&gt; attr(,"provenance")</span></span>
 <span><span class="co">#&gt; [1] "Implied by the supplied desired gains through w = G^-1 P G^-1 d; not an independently estimated economic value. Expressed in the favourable-direction space, so a positive weight always means the trait matters."</span></span></code></pre></div>
 <p>Two of those weights are negative for traits the objective asks to
-improve, which is correct rather than an error, and the magnitudes are
-not comparable across traits. Both points are explained in the objective
-vignette; the short version is that rescaling by the genetic standard
-deviation changes which trait looks important:</p>
+improve, which is correct rather than an error. In addition, the target
+values are already genetic-standard-deviation gains, whereas the
+returned weights are per original trait unit because <code>dgr_G</code>
+and <code>dgr_P</code> are in original units. The following
+multiplication expresses each weight per genetic standard deviation; it
+does not standardise the target again:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">genetic_sd</span> <span class="op">&lt;-</span> <span class="fu">stats</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/stats/setNames.html" class="external-link">setNames</a></span><span class="op">(</span><span class="va">dgr_traits</span><span class="op">$</span><span class="va">genetic_sd</span>, <span class="va">dgr_traits</span><span class="op">$</span><span class="va">trait</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="va">implied</span> <span class="op">*</span> <span class="va">genetic_sd</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">implied</span><span class="op">)</span><span class="op">]</span>, decreasing <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, <span class="fl">2</span><span class="op">)</span></span>
 <span><span class="co">#&gt;    GY    AD   GLS   PHT   EPP   ASI </span></span>
 <span><span class="co">#&gt; 10.89  5.81  0.58  0.36 -1.51 -7.93</span></span></code></pre></div>
-<p><em>See: Defining a breeding objective.</em></p>
+<p>If the covariance matrices had already been transformed to
+genetic-standard- deviation units, this multiplication would be
+incorrect because the weights would already be on that scale.</p>
+<p>See <a href="DesiredGainR-objective.html">Defining a breeding
+objective</a>.</p>
 <hr>
 </div>
 <div class="section level2">
 <h2 id="stage-4-test-whether-the-objective-is-attainable">5. Stage 4 — Test whether the objective is attainable<a class="anchor" aria-label="anchor" href="#stage-4-test-whether-the-objective-is-attainable"></a>
 </h2>
-<p>This stage exists because an optimisation cannot tell you that its
-target was impossible; it can only return the closest thing it
-found.</p>
+<p>This stage exists because an optimisation can return a numerical
+answer even when the stated one-cycle target is outside the
+achievable-response ellipsoid. <code><a href="../reference/gain_feasibility.html">gain_feasibility()</a></code> tests the
+exact desired-gain ray before any shortfall is interpreted.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">feasibility</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gain_feasibility.html">gain_feasibility</a></span><span class="op">(</span></span>
 <span>  <span class="va">desired_gains</span>, <span class="va">dgr_G</span>, <span class="va">dgr_P</span>,</span>
@@ -264,14 +282,26 @@ found.</p>
 <span><span class="co">#&gt;   Feasible at planned intensity: no</span></span>
 <span><span class="co">#&gt;   Feasible anywhere in this population: no</span></span>
 <span><span class="co">#&gt;   Attainable fraction of the requested gain: 54.7%</span></span></code></pre></div>
-<p>The request is unremarkable in isolation — between 0.4 and 1.0
-genetic standard deviations across six traits — and requires selecting
-fewer than one candidate from two hundred. About fifty-five per cent of
-it is available at the planned intensity.</p>
+<p>The required intensity is 3.2082, equivalent under normal truncation
+to the best 0.1773%. Among 200 candidates, that proportion represents
+0.355 candidate. It cannot be rounded to one because selecting one
+retains 0.5% and gives a lower intensity. Therefore, the exact vector is
+not attainable in this finite candidate set.</p>
+<p>The planned selection of 20 candidates has intensity 1.7550. Its
+ratio to the required intensity is 0.547, so 54.7% of every target
+component is available while the requested trait proportions are
+preserved.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">feasibility</span><span class="op">$</span><span class="va">attainable_response_input_units</span>, <span class="fl">3</span><span class="op">)</span></span>
 <span><span class="co">#&gt;    GY   PHT    AD   ASI   EPP   GLS </span></span>
 <span><span class="co">#&gt; 0.547 0.219 0.328 0.274 0.219 0.328</span></span></code></pre></div>
+<p>These values are in the same genetic-standard-deviation units as the
+input. They describe the point on the requested ray, not independent
+upper limits for the six traits. If the entries are minimum floors
+rather than a fixed ratio, use population-driven or interval
+optimisation and inspect worst-trait and joint attainment. The
+conclusion remains conditional on the linear model, normal truncation
+selection and the estimated covariance matrices.</p>
 <p>Carry this number forward to Stage 8, where the optimiser will be
 seen to distribute the shortfall unevenly rather than uniformly.</p>
 <hr>
@@ -347,7 +377,8 @@ the two must be consistent:</p>
 <p>A high correlation paired with a nearly empty intersection would
 indicate a fault rather than a finding. That check found a genuine
 row-alignment bug during development.</p>
-<p><em>See: Choosing an index.</em></p>
+<p>See <a href="DesiredGainR-index-families.html">Choosing an
+index</a>.</p>
 <hr>
 </div>
 <div class="section level2">
@@ -399,7 +430,8 @@ comparator:</p>
 <p>The anthesis-silking interval moves in the wrong direction there.
 Joukhadar et al. reported exactly this failure of the unoptimised
 method, and it reproduces here on independent data.</p>
-<p><em>See: Optimising desired gains.</em></p>
+<p>See <a href="DesiredGainR-dgsi.html">Optimising desired
+gains</a>.</p>
 <hr>
 </div>
 <div class="section level2">
@@ -433,7 +465,8 @@ despite holding nearly the smallest weight, and the expected gain in
 grain yield turns <em>negative</em> while the index selects for more of
 it. <code><a href="../reference/run_qgsi.html">run_qgsi()</a></code> warns when the trait scales make that
 likely.</p>
-<p><em>See: Quadratic genomic selection.</em></p>
+<p>See <a href="DesiredGainR-qgsi.html">Quadratic genomic
+selection</a>.</p>
 <hr>
 </div>
 <div class="section level2">
@@ -467,12 +500,12 @@ them together is the point.</p>
 Truncation selection erodes the genetic variance that response depends
 on, so a direction that maximises first-cycle response can exhaust
 itself. The simulation layer compares directions over successive cycles,
-with founders built from the breeder’s own phased marker data. <em>See:
-Comparing objectives over several cycles.</em></p>
+with founders built from the breeder’s own phased marker data. See <a href="DesiredGainR-simulation.html">Comparing objectives over several
+cycles</a>.</p>
 <p><strong>Which candidates should actually be crossed?</strong> Parent,
 cross and mating allocation, coancestry control and operational
-feasibility are outside this package’s scope by design. <em>See: Working
-with other breeding software.</em></p>
+feasibility are outside this package’s scope by design. See <a href="DesiredGainR-interoperation.html">Working with other breeding
+software</a>.</p>
 <hr>
 </div>
 <div class="section level2">
@@ -490,32 +523,39 @@ with other breeding software.</em></p>
 <tbody>
 <tr class="odd">
 <td>1-2</td>
-<td>Obtaining the genetic and phenotypic covariance matrices</td>
+<td><a href="DesiredGainR-covariance.html">Obtaining G and P</a></td>
 </tr>
 <tr class="even">
 <td>3-5</td>
-<td>Defining a breeding objective</td>
+<td><a href="DesiredGainR-objective.html">Defining a breeding
+objective</a></td>
 </tr>
 <tr class="odd">
 <td>6-7</td>
-<td>Choosing an index</td>
+<td><a href="DesiredGainR-index-families.html">Choosing an
+index</a></td>
 </tr>
 <tr class="even">
 <td>8</td>
-<td>Optimising desired gains</td>
+<td><a href="DesiredGainR-dgsi.html">Optimising desired gains</a></td>
 </tr>
 <tr class="odd">
 <td>9</td>
-<td>Quadratic genomic selection</td>
+<td><a href="DesiredGainR-qgsi.html">Quadratic genomic
+selection</a></td>
 </tr>
 <tr class="even">
 <td>10</td>
-<td>Defining a breeding objective</td>
+<td><a href="DesiredGainR-objective.html">Defining a breeding
+objective</a></td>
 </tr>
 <tr class="odd">
 <td>Beyond</td>
-<td>Comparing objectives over several cycles; Working with other
-breeding software</td>
+<td>
+<a href="DesiredGainR-simulation.html">Comparing objectives over
+several cycles</a>; <a href="DesiredGainR-interoperation.html">Working
+with other breeding software</a>
+</td>
 </tr>
 </tbody>
 </table>

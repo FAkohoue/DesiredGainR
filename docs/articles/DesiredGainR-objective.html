@@ -80,9 +80,21 @@
     <li><a class="dropdown-item" href="../articles/DesiredGainR-objective.html">Defining a breeding objective</a></li>
     <li><a class="dropdown-item" href="../articles/DesiredGainR-desired-gain-intervals.html">Defining desired gains and acceptable intervals</a></li>
     <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Evidence</h6></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-covariance.html">Obtaining G and P</a></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-reproduction.html">Reproducing published methods</a></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-empirical-validation.html">Empirical validation with real breeding programmes</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Index methods</h6></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-index-families.html">Choosing an index</a></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-dgsi.html">Optimising desired gains</a></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-qgsi.html">Quadratic genomic selection</a></li>
+    <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Looking ahead</h6></li>
     <li><a class="dropdown-item" href="../articles/DesiredGainR-simulation.html">Comparing objectives over several cycles</a></li>
-    <li><a class="dropdown-item" href="../articles/DesiredGainR-empirical-validation.html">Empirical validation with real breeding programmes</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Interoperation</h6></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-interoperation.html">Working with other breeding software</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="../breeder-guide.html">Breeder guide</a></li>
@@ -210,17 +222,31 @@ stated ratio therefore requires the index to hold them back.</p>
 <p>A negative weight never means the trait should decrease.
 <code>lower_is_better</code> has already applied direction, so larger is
 better throughout.</p>
-<p><strong>Magnitudes are not comparable across traits.</strong> A
-weight carries inverse trait units, so a trait on a small scale receives
-a large number for the same emphasis. Rescale before comparing:</p>
+<p><strong>The desired gains are standardised, but the returned weights
+are expressed per original trait unit.</strong> The call specifies
+<code>gain_units = "genetic_sd"</code>, so the six target values are
+genetic-standard-deviation gains. However, <code>dgr_G</code> and
+<code>dgr_P</code> remain in the original units. The function converts
+the target to those units before solving and returns coefficients per
+tonne, day, centimetre, disease-score unit, or other original unit.
+Their raw numerical magnitudes are therefore not comparable.</p>
+<p>Multiplying by the corresponding genetic standard deviation expresses
+the effect associated with one genetic standard deviation of each
+trait:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">genetic_sd</span> <span class="op">&lt;-</span> <span class="fu">stats</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/stats/setNames.html" class="external-link">setNames</a></span><span class="op">(</span><span class="va">dgr_traits</span><span class="op">$</span><span class="va">genetic_sd</span>, <span class="va">dgr_traits</span><span class="op">$</span><span class="va">trait</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="va">implied</span> <span class="op">*</span> <span class="va">genetic_sd</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">implied</span><span class="op">)</span><span class="op">]</span>, decreasing <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, <span class="fl">2</span><span class="op">)</span></span>
 <span><span class="co">#&gt;    GY    AD   GLS   PHT   EPP   ASI </span></span>
 <span><span class="co">#&gt; 10.89  5.81  0.58  0.36 -1.51 -7.93</span></span></code></pre></div>
-<p>Ears per plant carried the largest raw number in the vector and is
-one of the smaller effects. Reading the unscaled vector would send a
-breeder to argue about the wrong trait.</p>
+<p>Ears per plant carried the largest raw coefficient but one of the
+smaller per-genetic-standard-deviation effects. Reading the raw
+coefficient as a measure of trait importance would therefore be
+incorrect.</p>
+<p>This conversion must be applied once. If candidate values and both
+covariance matrices have already been transformed to
+genetic-standard-deviation units, the weights are already per genetic
+standard deviation; multiplying them by the original standard deviations
+would standardise them twice.</p>
 <hr>
 </div>
 </div>
@@ -228,34 +254,34 @@ breeder to argue about the wrong trait.</p>
 <h2 id="feasibility-can-the-objective-be-attained-at-all">3. Feasibility: can the objective be attained at all?<a class="anchor" aria-label="anchor" href="#feasibility-can-the-objective-be-attained-at-all"></a>
 </h2>
 <div class="section level3">
-<h3 id="the-achievable-response-ellipsoid">3.1 The achievable-response ellipsoid<a class="anchor" aria-label="anchor" href="#the-achievable-response-ellipsoid"></a>
+<h3 id="what-is-being-tested">3.1 What is being tested<a class="anchor" aria-label="anchor" href="#what-is-being-tested"></a>
 </h3>
-<p>For any linear index the response vector is
-<code>R = i·Gb/√(bᵀPb)</code>. Writing <code>u = b/√(bᵀPb)</code> so
-that <code>uᵀPu = 1</code>, the attainable responses are
-<code>{i·Gu}</code>, which is the ellipsoid</p>
-<p><span class="math display">\[R^\mathsf{T}G^{-1}PG^{-1}R =
-i^{2}.\]</span></p>
-<p>A stated target <code>d</code> therefore requires exactly</p>
+<p>Let <span class="math inline">\(\mathbf{b}\)</span> be the
+linear-index coefficients, <span class="math inline">\(\mathbf{G}\)</span> the additive genetic
+covariance matrix, <span class="math inline">\(\mathbf{P}\)</span> the
+phenotypic covariance matrix and <span class="math inline">\(i\)</span>
+the standardised selection intensity. The expected one-cycle response
+is</p>
+<p><span class="math display">\[\mathbf{R}=i\,\frac{\mathbf{G}\mathbf{b}}
+{\sqrt{\mathbf{b}^\mathsf{T}\mathbf{P}\mathbf{b}}}.\]</span></p>
+<p>Writing <span class="math inline">\(\mathbf{u}=\mathbf{b}/
+\sqrt{\mathbf{b}^\mathsf{T}\mathbf{P}\mathbf{b}}\)</span> gives <span class="math inline">\(\mathbf{u}^\mathsf{T}\mathbf{P}\mathbf{u}=1\)</span>.
+Hence, the responses available at intensity <span class="math inline">\(i\)</span> form the ellipsoid</p>
+<p><span class="math display">\[\mathbf{R}^\mathsf{T}\mathbf{G}^{-1}\mathbf{P}
+\mathbf{G}^{-1}\mathbf{R}=i^2.\]</span></p>
+<p>A specified target <span class="math inline">\(\mathbf{d}\)</span>
+therefore requires exactly</p>
 <p><span class="math display">\[i_{\mathrm{required}} =
-\sqrt{d^\mathsf{T}G^{-1}PG^{-1}d},\]</span></p>
+\sqrt{\mathbf{d}^\mathsf{T}\mathbf{G}^{-1}\mathbf{P}
+\mathbf{G}^{-1}\mathbf{d}},\]</span></p>
 <p>and the selected proportion delivering that intensity follows from
-the normal-truncation relationship.</p>
+the normal-truncation relationship. This is an exact result under the
+linear-index model; its application remains conditional on the estimated
+covariance matrices and the truncation-selection assumptions.</p>
 </div>
 <div class="section level3">
-<h3 id="two-consequences">3.2 Two consequences<a class="anchor" aria-label="anchor" href="#two-consequences"></a>
+<h3 id="read-the-feasibility-output-without-ambiguity">3.2 Read the feasibility output without ambiguity<a class="anchor" aria-label="anchor" href="#read-the-feasibility-output-without-ambiguity"></a>
 </h3>
-<p><strong>The classical desired-gain index honours only the direction
-of <code>d</code>.</strong> Multiplying every desired gain by a constant
-leaves the index unchanged, because the attainable magnitude is fixed by
-selection intensity. Joukhadar et al. (2024) note this in passing when
-their INDEX1 and INDEX3, targeting 0.5 and 4.0 standard deviations
-respectively, produced identical rankings without iteration. Breeders
-who set absolute targets and then read back a realised gain are being
-misled unless the point is made explicit.</p>
-<p><strong>An antagonistic correlation structure can make a
-modest-looking target unreachable.</strong> This is not a marginal
-effect.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">feasibility</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gain_feasibility.html">gain_feasibility</a></span><span class="op">(</span></span>
 <span>  <span class="va">desired_gains</span>, <span class="va">dgr_G</span>, <span class="va">dgr_P</span>,</span>
@@ -270,18 +296,65 @@ effect.</p>
 <span><span class="co">#&gt;   Feasible at planned intensity: no</span></span>
 <span><span class="co">#&gt;   Feasible anywhere in this population: no</span></span>
 <span><span class="co">#&gt;   Attainable fraction of the requested gain: 54.7%</span></span></code></pre></div>
-<p>The request looks unremarkable — between 0.4 and 1.0 genetic standard
-deviations across six traits — and requires selecting fewer than one
-candidate from two hundred.</p>
+<p>The six requested gains range from 0.4 to 1.0 genetic standard
+deviations. Nevertheless, their joint ratio requires an intensity of
+3.2082. Under normal truncation selection, this is the best 0.1773%, or
+0.355 candidate among 200. The request is therefore impossible in this
+finite candidate set. Selecting the single best candidate would retain
+0.5% and would still provide less intensity than required.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">feasibility</span><span class="op">$</span><span class="va">attainable_response_input_units</span>, <span class="fl">3</span><span class="op">)</span></span>
 <span><span class="co">#&gt;    GY   PHT    AD   ASI   EPP   GLS </span></span>
 <span><span class="co">#&gt; 0.547 0.219 0.328 0.274 0.219 0.328</span></span></code></pre></div>
-<p>Fifty-five per cent of the request, in the requested proportion, is
-what the planned intensity delivers.</p>
+<p>The planned selection retains 20 of 200 candidates, giving an
+intensity of 1.7550. The attainable fraction is therefore <span class="math inline">\(1.7550/3.2082=0.547\)</span>. The output above
+reports the corresponding exact-ray response in the same
+genetic-standard-deviation units as the input.</p>
+<p>This is a precise but narrow statement: at the planned intensity, the
+model can deliver 54.7% of every component while preserving the ratio
+<span class="math inline">\(1.0:0.4:0.6:0.5:0.4:0.6\)</span>. It does
+not state that 0.547 is an upper bound for grain yield when the
+remaining ratios are allowed to change.</p>
 </div>
 <div class="section level3">
-<h3 id="where-this-check-belongs">3.3 Where this check belongs<a class="anchor" aria-label="anchor" href="#where-this-check-belongs"></a>
+<h3 id="exact-ratios-and-minimum-floors-are-different-objectives">3.3 Exact ratios and minimum floors are different objectives<a class="anchor" aria-label="anchor" href="#exact-ratios-and-minimum-floors-are-different-objectives"></a>
+</h3>
+<p><code><a href="../reference/gain_feasibility.html">gain_feasibility()</a></code> treats <span class="math inline">\(\mathbf{d}\)</span> as an exact response ray. In
+contrast, a breeder may mean that each value is a minimum: yield must
+gain at least 1.0 genetic standard deviation, while a larger gain in
+another trait is acceptable. Those are inequality constraints, not a
+fixed ratio. A response vector may meet all minimums without lying on
+the requested ray.</p>
+<p>Therefore, interpret the two cases separately:</p>
+<ol style="list-style-type: decimal">
+<li>If the trait ratio is part of the objective, use
+<code><a href="../reference/gain_feasibility.html">gain_feasibility()</a></code> and scale the whole vector to the
+planned intensity when necessary.</li>
+<li>If the values are trait-specific minimums, use
+<code><a href="../reference/suggest_desired_gains.html">suggest_desired_gains()</a></code> or interval optimisation. Read the
+worst-trait attainment and the lower confidence bound for joint
+attainment; a large response in one trait must not compensate for
+failure of another minimum.</li>
+</ol>
+<p>The classical desired-gain index honours only the direction of <span class="math inline">\(\mathbf{d}\)</span>. Multiplying every desired
+gain by the same positive constant leaves its ranking unchanged because
+selection intensity fixes the attainable magnitude. Joukhadar et
+al. (2024) illustrate this property: their non-iterated indices
+targeting 0.5 and 4.0 standard deviations gave identical rankings.</p>
+</div>
+<div class="section level3">
+<h3 id="conditions-that-must-accompany-the-conclusion">3.4 Conditions that must accompany the conclusion<a class="anchor" aria-label="anchor" href="#conditions-that-must-accompany-the-conclusion"></a>
+</h3>
+<p>The calculation assumes: (i) a linear index, (ii) one cycle of
+truncation selection, (iii) approximate multivariate normality, and (iv)
+fixed, correctly estimated <span class="math inline">\(\mathbf{G}\)</span> and <span class="math inline">\(\mathbf{P}\)</span>. Hence, a recommendation is
+not robust until <code><a href="../reference/index_uncertainty.html">index_uncertainty()</a></code> and
+<code><a href="../reference/weight_sensitivity.html">weight_sensitivity()</a></code> show that covariance and objective
+perturbations do not materially change the response direction or the
+selected set.</p>
+</div>
+<div class="section level3">
+<h3 id="where-this-check-belongs">3.5 Where this check belongs<a class="anchor" aria-label="anchor" href="#where-this-check-belongs"></a>
 </h3>
 <p>The CGIAR guideline directs breeders to separate software to
 determine whether “the progress of 1 or more σ is possible given your

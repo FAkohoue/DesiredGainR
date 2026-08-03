@@ -271,7 +271,11 @@ test_that("DGSI coefficients solve the Pesek-Baker system", {
     candidates[, .(GenoID)], candidates, traits,
     dg = c(t1 = 0.5, t2 = 0.3, t3 = 0.2),
     P = P, G = G,
-    n_select = 12, n_iter = 30, n_rep = 2, seed = 5
+    n_select = 12, n_iter = 30, n_rep = 2, seed = 5,
+    # This test verifies the unregularised Pesek-Baker/Yamada identity.
+    # Default ridge terms deliberately perturb that identity by a small,
+    # platform-dependent amount and are tested separately as stabilisers.
+    ridge_P = 0, ridge_M = 0
   )
 
   # The Yamada map gives G'b proportional to the desired gains, but in the

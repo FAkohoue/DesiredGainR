@@ -85,9 +85,21 @@
     <li><a class="dropdown-item" href="articles/DesiredGainR-objective.html">Defining a breeding objective</a></li>
     <li><a class="dropdown-item" href="articles/DesiredGainR-desired-gain-intervals.html">Defining desired gains and acceptable intervals</a></li>
     <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Evidence</h6></li>
+    <li><a class="dropdown-item" href="articles/DesiredGainR-covariance.html">Obtaining G and P</a></li>
+    <li><a class="dropdown-item" href="articles/DesiredGainR-reproduction.html">Reproducing published methods</a></li>
+    <li><a class="dropdown-item" href="articles/DesiredGainR-empirical-validation.html">Empirical validation with real breeding programmes</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Index methods</h6></li>
+    <li><a class="dropdown-item" href="articles/DesiredGainR-index-families.html">Choosing an index</a></li>
+    <li><a class="dropdown-item" href="articles/DesiredGainR-dgsi.html">Optimising desired gains</a></li>
+    <li><a class="dropdown-item" href="articles/DesiredGainR-qgsi.html">Quadratic genomic selection</a></li>
+    <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Looking ahead</h6></li>
     <li><a class="dropdown-item" href="articles/DesiredGainR-simulation.html">Comparing objectives over several cycles</a></li>
-    <li><a class="dropdown-item" href="articles/DesiredGainR-empirical-validation.html">Empirical validation with real breeding programmes</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Interoperation</h6></li>
+    <li><a class="dropdown-item" href="articles/DesiredGainR-interoperation.html">Working with other breeding software</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="breeder-guide.html">Breeder guide</a></li>
@@ -111,11 +123,14 @@
 </h1>
 </div>
 <!-- badges: start -->
+
 <!-- badges: end -->
 <p><strong>Computing a selection index is arithmetic. Deciding what it should select for is the difficult part.</strong></p>
 <p>DesiredGainR is organised around the breeding objective rather than around the index. The literature is consistent that specifying economic weights, not computing coefficients, is what obstructs routine index use: Guimarães et al. (2021) showed that supplying arbitrary weights eliminated the gains the same indices delivered under sensible ones, and Covarrubias-Pazaran (2021) advises breeders not to interpret index coefficients at all, because the desired response is the only decision genuinely available to them.</p>
 <p>The package therefore translates exactly between economic weights and desired gains, tests whether a stated objective can be attained at the planned selection intensity, recovers the objective a programme has been applying implicitly, and reports how far a decision depends on weights that are themselves uncertain. It provides the classical index families, the iterative desired-gain index of Joukhadar et al. (2024), and the quadratic genomic selection index of Cerón-Rojas et al. (2026), together with a multi-cycle simulation layer whose founders are built from the breeder’s own phased marker data.</p>
 <p>DesiredGainR begins <strong>after</strong> the genetic evaluation. It does not analyse field trials, fit mixed models, or estimate breeding values, and it does not design crossing plans.</p>
+<p align="center">
+<img src="reference/figures/DesiredGainR_schematic.png" alt="DesiredGainR architecture: Desired-gain selection indices, feasibility assessment, genomic ranking and breeding-cycle optimisation" width="100%"></p>
 <div class="section level2">
 <h2 id="why-desiredgainr-is-valuable">Why DesiredGainR is valuable<a class="anchor" aria-label="anchor" href="#why-desiredgainr-is-valuable"></a>
 </h2>
@@ -183,6 +198,22 @@
 <td>Trait-specific minima, interval elicitation and population-driven suggestions when one exact vector is not defensible</td>
 </tr>
 <tr>
+<td><a href="https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-covariance.html">Obtaining G and P</a></td>
+<td>Covariance estimands, import, working alternatives, diagnostics and reporting</td>
+</tr>
+<tr>
+<td><a href="https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-index-families.html">Choosing an index</a></td>
+<td>Matching the index family to the breeding objective and comparing decisions</td>
+</tr>
+<tr>
+<td><a href="https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-dgsi.html">Optimising desired gains</a></td>
+<td>Iterative DGSI fitting, transmitted response and optimisation stability</td>
+</tr>
+<tr>
+<td><a href="https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-qgsi.html">Quadratic genomic selection</a></td>
+<td>Complete QGSI demonstration, weight interpretation, contributions and linear comparison</td>
+</tr>
+<tr>
 <td><a href="https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-simulation.html">Multi-cycle simulation</a></td>
 <td>Comparing objectives over several breeding cycles</td>
 </tr>
@@ -193,6 +224,10 @@
 <tr>
 <td><a href="https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-empirical-validation.html">Empirical validation</a></td>
 <td>Six real-programme validations of cycle gain, genomic signal, index transport and multi-environment recommendation behaviour</td>
+</tr>
+<tr>
+<td><a href="https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-interoperation.html">Working with other breeding software</a></td>
+<td>Safe hand-offs from genetic evaluation through selection to downstream mating tools</td>
 </tr>
 </tbody>
 </table>
@@ -317,7 +352,14 @@
 </ul>
 </div>
 
-
+<div class="dev-status">
+<h2 data-toc-skip>Dev status</h2>
+<ul class="list-unstyled">
+<li><a href="https://github.com/FAkohoue/DesiredGainR/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/FAkohoue/DesiredGainR/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R-CMD-check"></a></li>
+<li><a href="https://github.com/FAkohoue/DesiredGainR/actions/workflows/pkgdown.yaml" class="external-link"><img src="https://github.com/FAkohoue/DesiredGainR/actions/workflows/pkgdown.yaml/badge.svg" alt="pkgdown"></a></li>
+<li><a href="https://opensource.org/licenses/MIT" class="external-link"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT"></a></li>
+</ul>
+</div>
 
   </aside>
 </div>

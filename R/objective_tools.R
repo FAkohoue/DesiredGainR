@@ -302,16 +302,21 @@ print.desiredgainr_gain_intervals <- function(x, ...) {
 #' A negative weight therefore never means that a trait should decrease; the
 #' direction has already been applied.
 #'
-#' @section Weight magnitudes are not comparable across traits:
-#' An economic weight carries inverse trait units, so a trait measured on a
-#' small scale receives a numerically large weight for the same breeding
-#' emphasis. Comparing the raw values across traits therefore misleads: the
-#' largest number in the vector can correspond to one of the smallest effects.
+#' @section The desired gains may be standardised while the weights are not:
+#' `gain_units = "genetic_sd"` means that `desired_gains` is already expressed
+#' in genetic standard deviations. However, when `G` and `P` are supplied in
+#' original trait units, this function converts the target to those units and
+#' returns a weight per original unit. A coefficient per tonne cannot be
+#' compared numerically with a coefficient per day or centimetre.
 #'
-#' Multiply each weight by that trait's genetic standard deviation before
-#' comparing them, which expresses every trait per unit of the genetic
-#' variation actually available. [effective_weights()] performs the equivalent
-#' calculation for index coefficients.
+#' Multiply each returned weight by that trait's genetic standard deviation to
+#' express the effect associated with one genetic standard deviation. This
+#' places the weights on a common scale; it does not standardise the desired
+#' gains a second time. If `G` and `P` have already been transformed to genetic
+#' standard-deviation units, the returned weights are already per genetic
+#' standard deviation and must not be multiplied by the original standard
+#' deviations. [effective_weights()] performs the corresponding calculation
+#' for index coefficients.
 #'
 #' Consequently these coefficients should not be read as statements of
 #' biological or economic importance. Covarrubias-Pazaran (2021) puts the point
@@ -483,12 +488,25 @@ implied_desired_gains <- function(
 #' and the selected proportion delivering that intensity follows from the
 #' normal-truncation relationship.
 #'
-#' Two consequences deserve emphasis. First, the classical Pesek-Baker index
-#' honours only the *direction* of the desired-gain vector; scaling every
-#' element by a constant leaves the index unchanged, because the attainable
-#' magnitude is fixed by selection intensity. Second, an antagonistic
-#' correlation structure can make a modest-looking target unreachable at any
-#' practical intensity.
+#' This is an exact-ray test. The target \eqn{d} specifies both a direction and
+#' fixed ratios among traits. The returned attainable response is the point on
+#' that ray delivered by the planned intensity. It does not test the different
+#' question of whether another response vector can meet a set of trait-specific
+#' minimum gains while exceeding some components and changing their ratios.
+#' Use [suggest_desired_gains()] or interval optimisation for minimum-floor
+#' objectives.
+#'
+#' Four consequences deserve emphasis. First, the classical Pesek-Baker index
+#' honours only the direction of the desired-gain vector; scaling every element
+#' by one positive constant leaves the ranking unchanged because selection
+#' intensity fixes the attainable magnitude. Second, a required continuous
+#' selected proportion that represents fewer than one candidate is not rounded
+#' up: selecting one candidate gives a lower intensity and does not attain the
+#' target. Third, `feasible_at_planned_intensity = FALSE` means that the full
+#' vector cannot be reached in one cycle at the planned proportion; it does not
+#' mean that the index cannot rank candidates. Fourth, the conclusion is
+#' conditional on a linear index, one-cycle truncation selection, approximate
+#' normality, and the supplied covariance matrices.
 #'
 #' This function replaces the external feasibility check that
 #' Covarrubias-Pazaran (2021) recommends performing in separate software, and
@@ -514,8 +532,8 @@ implied_desired_gains <- function(
 #' @return An object of class `desiredgainr_feasibility` reporting: (i) the
 #'   required selection intensity and the proportion that delivers it, (ii)
 #'   whether the target is attainable in a population of `n_candidates`, (iii)
-#'   the attainable response in the requested direction at the planned
-#'   intensity, and (iv) the per-trait shortfall.
+#'   the attainable response on the exact requested ray at the planned
+#'   intensity, and (iv) the per-trait shortfall on that ray.
 #'
 #'   The attainable response and the shortfall are returned twice:
 #'   `attainable_response` and `shortfall` are in original trait units, whereas
