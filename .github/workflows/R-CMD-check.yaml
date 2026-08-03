@@ -270,12 +270,24 @@ jobs:
         shell: Rscript {0}
         run: |
           library(testthat)
+          library(DesiredGainR)
+          library(data.table)
+
           results <- test_dir(
-            "tests/testthat", package = "DesiredGainR",
-            reporter = "summary", stop_on_failure = TRUE
+            "tests/testthat",
+            package = "DesiredGainR",
+            reporter = "summary",
+            stop_on_failure = TRUE
           )
+
           frame <- as.data.frame(results)
-          skipped <- frame[frame$skipped > 0, , drop = FALSE]
+
+          skipped <- frame[
+            frame$skipped > 0,
+            ,
+            drop = FALSE
+          ]
+
           intentional <- grepl(
             paste(
               "a missing edition errors rather than returning a bad path",
@@ -285,15 +297,28 @@ jobs:
             ),
             skipped$test
           )
-          unexpected <- skipped[!intentional, , drop = FALSE]
+
+          unexpected <- skipped[
+            !intentional,
+            ,
+            drop = FALSE
+          ]
+
           if (nrow(unexpected)) {
-            print(unexpected[, c("file", "test")])
+            print(
+              unexpected[
+                ,
+                c("file", "test"),
+                drop = FALSE
+              ]
+            )
+
             stop(
               "Unexpected tests skipped in the full-dependency job. Only ",
               "explicit tests of mutually exclusive absence branches may skip."
             )
           }
-
+          
   source-tarball:
     runs-on: ubuntu-latest
     name: source tarball --as-cran
