@@ -1,15 +1,19 @@
 test_that("run_qgsi returns canonical rankings and theory", {
   skip_if_not(
     !inherits(
-      try(utils::data("dgr_gebv", package = "DesiredGainR",
-                      envir = environment()), silent = TRUE),
+      try(utils::data("dgr_gebv",
+        package = "DesiredGainR",
+        envir = environment()
+      ), silent = TRUE),
       "try-error"
     ),
     "Example data not yet generated; run data-raw/generate_example_data.R."
   )
   utils::data("dgr_traits", package = "DesiredGainR", envir = environment())
-  utils::data("dgr_candidates", package = "DesiredGainR",
-              envir = environment())
+  utils::data("dgr_candidates",
+    package = "DesiredGainR",
+    envir = environment()
+  )
 
   traits <- dgr_traits$trait
   lower <- dgr_traits$trait[dgr_traits$direction == "decrease"]
@@ -49,8 +53,10 @@ test_that("run_qgsi returns canonical rankings and theory", {
 test_that("the example data exercise the standardisation warning", {
   skip_if_not(
     !inherits(
-      try(utils::data("dgr_candidates", package = "DesiredGainR",
-                      envir = environment()), silent = TRUE),
+      try(utils::data("dgr_candidates",
+        package = "DesiredGainR",
+        envir = environment()
+      ), silent = TRUE),
       "try-error"
     ),
     "Example data not yet generated; run data-raw/generate_example_data.R."
@@ -95,8 +101,10 @@ test_that("the example data exercise the standardisation warning", {
 test_that("run_qgsi warns when trait scales let one trait dominate", {
   skip_if_not(
     !inherits(
-      try(utils::data("dgr_gebv", package = "DesiredGainR",
-                      envir = environment()), silent = TRUE),
+      try(utils::data("dgr_gebv",
+        package = "DesiredGainR",
+        envir = environment()
+      ), silent = TRUE),
       "try-error"
     ),
     "Example data not yet generated; run data-raw/generate_example_data.R."
@@ -162,7 +170,8 @@ test_that("compare_dg_and_qgsi merges canonical outputs", {
   )
 
   comparison <- compare_dg_and_qgsi(
-    dg_result, qgsi_result, debug = FALSE
+    dg_result, qgsi_result,
+    debug = FALSE
   )
   expect_true(all(
     c("DG_SelectionIndex", "DG_Rank", "QGSI", "QGSI_Rank") %in%
@@ -219,7 +228,8 @@ test_that("combined pipeline never reuses dg as QGSI weights", {
 
 test_that("installed demonstration script remains syntactically valid", {
   demo <- system.file(
-    "examples", "demo_pipeline.R", package = "DesiredGainR"
+    "examples", "demo_pipeline.R",
+    package = "DesiredGainR"
   )
   expect_true(nzchar(demo))
   expect_silent(parse(file = demo))

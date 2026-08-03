@@ -26,6 +26,44 @@ DesiredGainR begins **after** the genetic evaluation. It does not
 analyse field trials, fit mixed models, or estimate breeding values, and
 it does not design crossing plans.
 
+## Why DesiredGainR is valuable
+
+DesiredGainR turns an uncertain breeding objective into a transparent,
+quantitative decision. It is especially useful when economic weights
+cannot be defended or when the breeder can state acceptable
+trait-specific gains more confidently than monetary values.
+
+- It expresses every objective in breeder-facing desired-gain units,
+  including genetic standard deviations and original trait units.
+- It checks whether requested gains are mathematically feasible before a
+  selection decision is made.
+- It can search trait-specific intervals and suggest both a
+  minimum-attainment solution and a maximum-balanced solution from the
+  current population.
+- It reports several defensible gain vectors with independently
+  confirmed support, stability and uncertainty instead of presenting one
+  opaque answer.
+- It compares classical, desired-gain and quadratic genomic indices
+  under a common audit trail.
+- It combines exact one-cycle quantitative-genetic mathematics,
+  independently validated optimisation, genomic prediction,
+  multi-environment testing and multi-cycle simulation.
+
+The package’s evidence portfolio includes 869 passing test assertions,
+independent Clarabel and OSQP solver comparisons, analytical and Monte
+Carlo theory checks, and six real breeding-programme validations. In the
+CIMMYT maize rapid-cycle programme, DesiredGainR’s validation suite
+reproduced the published yield-gain trajectory, recovered a strong raw
+genomic-prediction signal, verified all 1,000 training-family
+phenotype-to-genotype links, and tested desired-gain directions in
+environments excluded from fitting.
+
+DesiredGainR is therefore intended for rigorous, auditable breeding
+decision support. Its probabilities describe support under the fitted
+genetic model and declared breeding scenario; the package presents those
+assumptions alongside the recommendation so the breeder can judge and
+defend the decision.
+
 ------------------------------------------------------------------------
 
 ## Installation
@@ -62,7 +100,10 @@ Full documentation is at **<https://FAkohoue.github.io/DesiredGainR/>**.
 | [Full pipeline](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-pipeline.html) | Sixteen-stage walkthrough assuming no prior knowledge |
 | [Complete workflow](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-workflow.html) | The same path condensed, with cross-references |
 | [Defining a breeding objective](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-objective.html) | How to state, test and defend an objective |
+| [Defining desired gains and intervals](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-desired-gain-intervals.html) | Trait-specific minima, interval elicitation and population-driven suggestions when one exact vector is not defensible |
 | [Multi-cycle simulation](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-simulation.html) | Comparing objectives over several breeding cycles |
+| [Published-result reproduction](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-reproduction.html) | Independent checks against published selection-index results |
+| [Empirical validation](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-empirical-validation.html) | Six real-programme validations of cycle gain, genomic signal, index transport and multi-environment recommendation behaviour |
 
 The [function
 reference](https://FAkohoue.github.io/DesiredGainR/reference/) documents

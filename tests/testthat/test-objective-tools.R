@@ -9,7 +9,8 @@ test_G <- matrix(
     0.12, 0.45, 0.05,
     -0.08, 0.05, 0.70
   ),
-  3, dimnames = list(test_traits, test_traits)
+  3,
+  dimnames = list(test_traits, test_traits)
 )
 
 test_P <- matrix(
@@ -18,7 +19,8 @@ test_P <- matrix(
     0.25, 0.90, 0.08,
     -0.10, 0.08, 1.35
   ),
-  3, dimnames = list(test_traits, test_traits)
+  3,
+  dimnames = list(test_traits, test_traits)
 )
 
 test_that("orientation is declared rather than signed by hand", {
@@ -33,7 +35,8 @@ test_that("orientation is declared rather than signed by hand", {
     G = test_G, P = test_P
   )
   declared <- implied_economic_weights(
-    d, G = test_G, P = test_P, lower_is_better = "t2"
+    d,
+    G = test_G, P = test_P, lower_is_better = "t2"
   )
   # The hand-oriented result is in the raw direction; flipping t2 back aligns
   # the two.
@@ -47,13 +50,17 @@ test_that("the translation round trip preserves the units it was given", {
   d <- c(t1 = 0.5, t2 = 0.3, t3 = 0.2)
   for (units in c("trait", "genetic_sd", "phenotypic_sd")) {
     w <- implied_economic_weights(
-      d, test_G, test_P, lower_is_better = "t2", gain_units = units
+      d, test_G, test_P,
+      lower_is_better = "t2", gain_units = units
     )
     back <- implied_desired_gains(
-      w, test_G, test_P, lower_is_better = "t2", gain_units = units
+      w, test_G, test_P,
+      lower_is_better = "t2", gain_units = units
     )
-    expect_equal(as.numeric(back), as.numeric(d), tolerance = 1e-8,
-                 info = units)
+    expect_equal(as.numeric(back), as.numeric(d),
+      tolerance = 1e-8,
+      info = units
+    )
   }
 })
 
@@ -79,7 +86,8 @@ test_that("a required proportion below one candidate is not rounded up", {
   # required count of one would overstate what that population can deliver.
   d <- c(t1 = 1, t2 = 1, t3 = 1)
   probe <- gain_feasibility(
-    d, test_G, test_P, n_candidates = 1000, n_select = 100
+    d, test_G, test_P,
+    n_candidates = 1000, n_select = 100
   )
   skip_if(
     !is.finite(probe$required_proportion),
@@ -140,7 +148,8 @@ test_that("implied weights reproduce the Smith-Hazel coefficients", {
 test_that("required intensity matches the achievable-response ellipsoid", {
   d <- c(t1 = 0.4, t2 = 0.25, t3 = 0.30)
   feasibility <- gain_feasibility(
-    d, test_G, test_P, n_candidates = 1000, n_select = 100
+    d, test_G, test_P,
+    n_candidates = 1000, n_select = 100
   )
 
   G_inv <- solve(test_G)
@@ -160,19 +169,22 @@ test_that("required intensity matches the achievable-response ellipsoid", {
     tolerance = 1e-6
   )
   expect_equal(response, as.numeric(feasibility$attainable_response),
-               tolerance = 1e-6)
+    tolerance = 1e-6
+  )
 })
 
 test_that("feasibility is invariant to rescaling the desired-gain direction", {
   d <- c(t1 = 0.4, t2 = 0.25, t3 = 0.30)
   one <- gain_feasibility(d, test_G, test_P, n_candidates = 500, n_select = 50)
   ten <- gain_feasibility(
-    10 * d, test_G, test_P, n_candidates = 500, n_select = 50
+    10 * d, test_G, test_P,
+    n_candidates = 500, n_select = 50
   )
   # The requested magnitude changes the required intensity tenfold, but the
   # attainable direction is unchanged.
   expect_equal(ten$required_intensity, 10 * one$required_intensity,
-               tolerance = 1e-8)
+    tolerance = 1e-8
+  )
   expect_equal(
     as.numeric(ten$attainable_response),
     as.numeric(one$attainable_response),
@@ -183,7 +195,8 @@ test_that("feasibility is invariant to rescaling the desired-gain direction", {
 test_that("an unreachable target is reported as infeasible", {
   extreme <- c(t1 = 40, t2 = 40, t3 = 40)
   feasibility <- gain_feasibility(
-    extreme, test_G, test_P, n_candidates = 300, n_select = 30
+    extreme, test_G, test_P,
+    n_candidates = 300, n_select = 30
   )
   expect_false(feasibility$feasible_at_planned_intensity)
   expect_false(feasibility$feasible_in_this_population)
@@ -193,7 +206,8 @@ test_that("an unreachable target is reported as infeasible", {
 test_that("required proportion inverts the selection-intensity relation", {
   d <- c(t1 = 0.30, t2 = 0.20, t3 = 0.25)
   feasibility <- gain_feasibility(
-    d, test_G, test_P, n_candidates = 2000, n_select = 200
+    d, test_G, test_P,
+    n_candidates = 2000, n_select = 200
   )
   p <- feasibility$required_proportion
   skip_if(!is.finite(p))
@@ -205,7 +219,8 @@ test_that("retrospective weights recover a known linear preference", {
   set.seed(404)
   n <- 400L
   population <- matrix(
-    stats::rnorm(n * 3), ncol = 3, dimnames = list(NULL, test_traits)
+    stats::rnorm(n * 3),
+    ncol = 3, dimnames = list(NULL, test_traits)
   )
   truth <- c(t1 = 1.0, t2 = 0.5, t3 = -0.3)
   score <- as.numeric(population %*% truth)
@@ -240,17 +255,20 @@ test_that("effective weights flag a dominating trait when asked", {
 test_that("weight sensitivity is high under small perturbation", {
   set.seed(77)
   values <- matrix(
-    stats::rnorm(120 * 3), ncol = 3,
+    stats::rnorm(120 * 3),
+    ncol = 3,
     dimnames = list(paste0("c", 1:120), test_traits)
   )
   w <- c(t1 = 1, t2 = 0.5, t3 = 0.25)
 
   tight <- weight_sensitivity(
-    w, values, test_G, test_P, n_select = 12,
+    w, values, test_G, test_P,
+    n_select = 12,
     relative_sd = 0.02, n_draws = 60L, seed = 1
   )
   loose <- weight_sensitivity(
-    w, values, test_G, test_P, n_select = 12,
+    w, values, test_G, test_P,
+    n_select = 12,
     relative_sd = 1.20, n_draws = 60L, seed = 1
   )
   expect_gt(tight$stability_proportion, loose$stability_proportion)
@@ -262,7 +280,8 @@ test_that("weight sensitivity restores the caller's RNG state", {
   set.seed(11)
   before <- get(".Random.seed", envir = globalenv(), inherits = FALSE)
   values <- matrix(
-    stats::rnorm(60 * 3), ncol = 3,
+    stats::rnorm(60 * 3),
+    ncol = 3,
     dimnames = list(paste0("c", 1:60), test_traits)
   )
   set.seed(11)
@@ -334,4 +353,35 @@ test_that("the dominance threshold adapts to the number of traits", {
   # Warnings are off by default, because concentration can reflect a
   # deliberately asymmetric objective rather than mismatched scales.
   expect_silent(effective_weights(c(a = 20, b = 1), G2))
+})
+test_that("desired-gain intervals translate raw reductions to improvements", {
+  intervals <- define_desired_gain_intervals(
+    lower = c(Yield = 0.5, Disease = -1.0, Quality = 0.1),
+    upper = c(Yield = 1.5, Disease = -0.25, Quality = 0.8),
+    lower_is_better = "Disease",
+    gain_units = "genetic_sd"
+  )
+
+  expect_s3_class(intervals, "desiredgainr_gain_intervals")
+  expect_equal(
+    as.data.frame(intervals)["Disease", c("lower", "upper")],
+    data.frame(lower = 0.25, upper = 1, row.names = "Disease")
+  )
+  expect_identical(attr(intervals, "gain_units"), "genetic_sd")
+  expect_identical(attr(intervals, "lower_is_better"), "Disease")
+})
+
+test_that("desired-gain interval definitions reject ambiguous bounds", {
+  expect_error(
+    define_desired_gain_intervals(
+      lower = c(A = 1, B = 0), upper = c(A = 0, B = 1)
+    ),
+    "lower bound"
+  )
+  expect_error(
+    define_desired_gain_intervals(
+      lower = c(A = 0, B = 0), upper = c(A = 1, C = 1)
+    ),
+    "same named traits"
+  )
 })

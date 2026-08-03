@@ -1,6 +1,6 @@
 cff-version: 1.2.0
 message: "If you use DesiredGainR, cite the software and the method implemented in your analysis."
-title: "DesiredGainR: Defining, Testing and Applying Multi-Trait Breeding Objectives"
+title: "DesiredGainR: Desired-Gain Selection Index and Quadratic Genomic Selection Index Tools for Plant Breeding"
 type: software
 version: 0.5.0
 authors:
@@ -11,7 +11,6 @@ authors:
 license: MIT
 repository-code: "https://github.com/FAkohoue/DesiredGainR"
 url: "https://FAkohoue.github.io/DesiredGainR/"
-date-released: 2026-07-31
 abstract: >
   Multi-trait selection index tools organised around the breeding objective
   rather than around the index. DesiredGainR translates exactly between
@@ -32,7 +31,7 @@ keywords:
   - genomic selection
 preferred-citation:
   type: software
-  title: "DesiredGainR: Defining, Testing and Applying Multi-Trait Breeding Objectives"
+  title: "DesiredGainR: Desired-Gain Selection Index and Quadratic Genomic Selection Index Tools for Plant Breeding"
   authors:
     - family-names: Akohoue
       given-names: Félicien

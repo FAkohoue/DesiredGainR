@@ -60,9 +60,11 @@ oriented so that larger values are favourable."><meta property="og:image" conten
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Deciding what to select for</h6></li>
     <li><a class="dropdown-item" href="../articles/DesiredGainR-objective.html">Defining a breeding objective</a></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-desired-gain-intervals.html">Defining desired gains and acceptable intervals</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Looking ahead</h6></li>
     <li><a class="dropdown-item" href="../articles/DesiredGainR-simulation.html">Comparing objectives over several cycles</a></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-empirical-validation.html">Empirical validation with real breeding programmes</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../breeder-guide.html">Breeder guide</a></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -100,9 +102,11 @@ oriented so that larger values are favourable.</p>
 <span>  P <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  economic_weights <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  desired_gains <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  aggregate_weights <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  lower_is_better <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  center_traits <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  scale_traits <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  scale_by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"sample"</span>, <span class="st">"phenotypic"</span><span class="op">)</span>,</span>
 <span>  culling_thresholds <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  tandem_order <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  n_select <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -161,6 +165,16 @@ favourable-direction trait space. Required by <code>"pesek_baker"</code> and
 <code>"yamada"</code>.</p></dd>
 
 
+<dt id="arg-aggregate-weights">aggregate_weights<a class="anchor" aria-label="anchor" href="#arg-aggregate-weights"></a></dt>
+<dd><p>Optional named weights defining one common net
+merit for evaluation. This is separate from <code>desired_gains</code>: when it is
+absent, merit-dependent criteria (<code>R_HI</code> and <code>Delta_H</code>) are <code>NA</code> for the
+desired-gain families. Implied weights can be explored explicitly with
+<code><a href="implied_economic_weights.html">implied_economic_weights()</a></code>, but are not silently substituted because a
+different desired-gain direction would then change the definition of
+merit being compared.</p></dd>
+
+
 <dt id="arg-lower-is-better">lower_is_better<a class="anchor" aria-label="anchor" href="#arg-lower-is-better"></a></dt>
 <dd><p>Traits for which smaller original values are
 favourable.</p></dd>
@@ -176,9 +190,27 @@ from raw trait values.</p></dd>
 
 
 <dt id="arg-scale-traits">scale_traits<a class="anchor" aria-label="anchor" href="#arg-scale-traits"></a></dt>
-<dd><p>Whether to divide traits by their population standard
-deviations before indexing. Covarrubias-Pazaran (2021) recommends this,
-and a desired gain of 1 then means one standard deviation of progress.</p></dd>
+<dd><p>Whether to divide traits by their standard deviations
+before indexing. Covarrubias-Pazaran (2021) recommends this, and a desired
+gain of 1 then means one standard deviation of progress. See <code>scale_by</code>
+for which standard deviation is used.</p></dd>
+
+
+<dt id="arg-scale-by">scale_by<a class="anchor" aria-label="anchor" href="#arg-scale-by"></a></dt>
+<dd><p>Source of the scaling factors when <code>scale_traits = TRUE</code>.</p>
+<p><code>"sample"</code>, the default, divides by the standard deviations of the
+supplied candidates. This equals the population standard deviation only
+when the candidates are an unselected random sample of the population that
+<code>G</code> and <code>P</code> describe. Candidates at a late trial stage have already been
+selected, so their spread is narrower than the population's, and mixing
+that sample scale with population covariance matrices inflates the
+apparent heritability of every trait that selection has already narrowed.</p>
+<p><code>"phenotypic"</code> divides by \(\sqrt{\operatorname{diag}(\mathbf{P})}\),
+which comes from the same upstream model as <code>G</code> and <code>P</code> themselves. The
+scaled <code>P</code> then has a unit diagonal exactly, and the scaled <code>G</code> has the
+narrow-sense heritabilities on its diagonal. Prefer it whenever <code>P</code> is a
+genuine population estimate rather than a covariance computed from the
+candidates at hand.</p></dd>
 
 
 <dt id="arg-culling-thresholds">culling_thresholds<a class="anchor" aria-label="anchor" href="#arg-culling-thresholds"></a></dt>
@@ -305,14 +337,16 @@ Hayden MJ (2024). <em>Frontiers in Plant Science</em> 15:1337388.
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">traits</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"yield"</span>, <span class="st">"disease"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">values</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu">stats</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">40</span><span class="op">)</span>, <span class="fu">stats</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">40</span><span class="op">)</span><span class="op">)</span>, ncol <span class="op">=</span> <span class="fl">2</span>,</span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu">stats</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">40</span><span class="op">)</span>, <span class="fu">stats</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">40</span><span class="op">)</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  ncol <span class="op">=</span> <span class="fl">2</span>,</span></span>
 <span class="r-in"><span>  dimnames <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"G"</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">40</span><span class="op">)</span>, <span class="va">traits</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">G</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.60</span>, <span class="op">-</span><span class="fl">0.15</span>, <span class="op">-</span><span class="fl">0.15</span>, <span class="fl">0.40</span><span class="op">)</span>, <span class="fl">2</span>, dimnames <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">traits</span>, <span class="va">traits</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">P</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1.10</span>, <span class="op">-</span><span class="fl">0.20</span>, <span class="op">-</span><span class="fl">0.20</span>, <span class="fl">0.90</span><span class="op">)</span>, <span class="fl">2</span>, dimnames <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">traits</span>, <span class="va">traits</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu">selection_index</span><span class="op">(</span></span></span>
-<span class="r-in"><span>  <span class="va">values</span>, <span class="va">traits</span>, method <span class="op">=</span> <span class="st">"smith_hazel"</span>,</span></span>
+<span class="r-in"><span>  <span class="va">values</span>, <span class="va">traits</span>,</span></span>
+<span class="r-in"><span>  method <span class="op">=</span> <span class="st">"smith_hazel"</span>,</span></span>
 <span class="r-in"><span>  G <span class="op">=</span> <span class="va">G</span>, P <span class="op">=</span> <span class="va">P</span>,</span></span>
 <span class="r-in"><span>  economic_weights <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>yield <span class="op">=</span> <span class="fl">1</span>, disease <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>  lower_is_better <span class="op">=</span> <span class="st">"disease"</span>, n_select <span class="op">=</span> <span class="fl">4</span></span></span>

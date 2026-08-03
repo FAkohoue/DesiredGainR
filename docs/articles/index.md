@@ -13,8 +13,17 @@
 
 - [Defining a breeding
   objective](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-objective.md):
+- [Defining desired gains when one exact value is not
+  known](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-desired-gain-intervals.md):
 
 ### Looking ahead
 
 - [Comparing objectives over several
   cycles](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-simulation.md):
+
+### Evidence
+
+- [Reproducing published
+  results](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-reproduction.md):
+- [Empirical validation with real breeding-programme
+  data](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-empirical-validation.md):

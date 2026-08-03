@@ -94,7 +94,8 @@ P <- matrix(c(1.10, -0.20, -0.20, 0.90), 2, dimnames = list(traits, traits))
 
 # Disease severity should fall, so it is declared rather than signed by hand.
 implied_economic_weights(
-  c(yield = 0.5, disease = 0.3), G, P, lower_is_better = "disease"
+  c(yield = 0.5, disease = 0.3), G, P,
+  lower_is_better = "disease"
 )
 
 }

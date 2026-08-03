@@ -22,7 +22,10 @@ simulate_selection_cycles(
   use_doubled_haploids = FALSE,
   lower_is_better = NULL,
   reestimate_index = TRUE,
-  seed = 42L
+  n_clonal_replicates = 1L,
+  n_threads = 1L,
+  seed = 42L,
+  prediction = list(method = "phenotype")
 )
 ```
 
@@ -78,16 +81,41 @@ simulate_selection_cycles(
   Whether to rebuild the index from each cycle's own simulated data. See
   Details.
 
+- n_clonal_replicates:
+
+  Ramets evaluated per genotype in a clonal programme. A clonal trial
+  phenotypes several copies of each genotype and averages them, so its
+  selection is more accurate than a single plot; leaving this at 1
+  understates the response a clonal programme achieves. Only meaningful
+  with `mating_system = "clonal"`.
+
+- n_threads:
+
+  Threads AlphaSimR may use. The default of 1 is deliberate: above one,
+  the order in which random numbers are consumed is not guaranteed, so a
+  run cannot be reproduced exactly from its seed. Values above 1 warn.
+
 - seed:
 
   Random seed. The caller's random number generator state is restored on
-  exit.
+  exit, and `setup$SP` is deep-cloned so that the caller's `SimParam` is
+  not advanced by the simulation.
+
+- prediction:
+
+  A named list describing the selection criterion. The default
+  `list(method = "phenotype")` preserves phenotypic selection.
+  `method = "rrblup"` uses leakage-free cross-fitted RR-BLUP predictions
+  and requires a marker panel; optional fields are `folds` (5),
+  `max_iter` (10000), `update_training` (`TRUE`) and `max_training`
+  (`NULL`).
 
 ## Value
 
 An object of class `desiredgainr_simulation` containing a per-cycle
-table of genetic means, genetic variances, mean relationship and
-effective population size, together with the cumulative gain per trait.
+table of genetic means, genetic variances, mean relationship, effective
+population size, prediction accuracy and prediction-calibration slope,
+together with the cumulative gain per trait.
 
 ## What the simulation adds beyond the single-cycle formula
 
@@ -103,6 +131,29 @@ of relatedness in a finite population, (iii) the point at which an
 antagonistic correlation drives a secondary trait past an unacceptable
 level, and (iv) the compounding of estimation error when the index is
 rebuilt each cycle.
+
+## What a cycle means
+
+This is the definition to check before interpreting any number below.
+
+**Cycle 0** is the founder population, before any selection. It exists
+so that the cycle 1 row has something to be a response *to*.
+
+**Cycle \\t\\** records the population produced by selecting parents
+from the cycle \\t-1\\ candidates and crossing them. Every row from
+cycle 1 onward is therefore a transmitted selection response, and
+`n_cycles = 1` gives exactly one such response.
+
+Earlier versions measured the candidates rather than their selected
+descendants. Because random mating does not shift a population mean,
+that made the cycle 1 gain zero in expectation *for every desired-gain
+direction*, so a one-cycle run could not distinguish directions at all.
+Results from before this change should be re-run.
+
+Genetic mean, variance, relatedness and inbreeding are all measured on
+the same population, the cycle's response. `parent_inbreeding`
+additionally reports the selected parents, which is a different and
+smaller group.
 
 ## Mating systems
 
@@ -120,20 +171,27 @@ rebuilt each cycle.
 
 - `"clonal"`:
 
-  Clonally propagated crops. Selection acts on total genetic value
-  rather than breeding value, because the clone inherits dominance
-  intact. This mating system therefore requires a setup built with
-  `dominance_degree`, and `G` should be the genotypic covariance.
+  Clonally propagated crops, with the sexual and clonal phases kept
+  distinct. Recombination happens once per cycle, when selected parents
+  are crossed to raise a seedling generation; every evaluation stage
+  after that is a copy of a seedling, so no further meiosis occurs and
+  dominance is transmitted intact. Selection therefore acts on total
+  genotypic value rather than breeding value, and response is a
+  broad-sense quantity. Requires a setup built with `dominance_degree`,
+  and `G` should be the genotypic covariance. See
+  [`founder_population()`](https://FAkohoue.github.io/DesiredGainR/reference/founder_population.md)
+  for how the additive and dominance components are calibrated to that
+  target.
 
 ## Index re-estimation
 
-With `reestimate_index = TRUE`, the covariance matrices are re-estimated
-from each cycle's own simulated data, which is what a breeding programme
-actually does and which propagates estimation error across cycles. With
-`FALSE`, the coefficients from cycle one are reused, which isolates the
-effect of the desired-gain direction itself. A large divergence between
-the two settings means the recommendation is sensitive to estimation
-error, and the breeder should be told so.
+With `reestimate_index = TRUE`, the covariance of the observed selection
+criterion is re-estimated each cycle. Phenotypic selection retains the
+breeder-supplied `G_target`; it never estimates genetic covariance from
+hidden simulated breeding values. RR-BLUP uses the calibrated-prediction
+identity `Cov(A, Ahat) = Var(Ahat)` and reports held-out prediction
+accuracy as a diagnostic. With `FALSE`, cycle-one coefficients are
+reused. Thus no selection decision has access to simulation truth.
 
 ## See also
 

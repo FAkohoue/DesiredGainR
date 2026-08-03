@@ -41,7 +41,7 @@ run_qgsi_desired_gain(
   scale_traits = FALSE,
   impute_missing = FALSE,
   return_components = TRUE,
-  debug = TRUE
+  debug = FALSE
 )
 }
 \arguments{
@@ -179,7 +179,8 @@ gebv <- data.frame(
 )
 W <- matrix(
   c(0.10, -0.02, -0.02, -0.05),
-  2, dimnames = list(traits, traits)
+  2,
+  dimnames = list(traits, traits)
 )
 fit <- run_qgsi(
   init_data = gebv["GenoID"],

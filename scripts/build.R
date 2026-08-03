@@ -328,7 +328,7 @@ devtools::document()
 
 source("data-raw/generate_example_data.R")
 
-
+source("data-raw/build_breeder_guide.R")
 
 # 3. Compile C++ and install into the library.
 #    upgrade = FALSE  - do not touch other packages.

@@ -76,10 +76,14 @@ navbar:
         - text: "Deciding what to select for"
         - text: Defining a breeding objective
           href: articles/DesiredGainR-objective.html
+        - text: Defining desired gains and acceptable intervals
+          href: articles/DesiredGainR-desired-gain-intervals.html
         - text: -------
         - text: "Looking ahead"
         - text: Comparing objectives over several cycles
           href: articles/DesiredGainR-simulation.html
+        - text: Empirical validation with real breeding programmes
+          href: articles/DesiredGainR-empirical-validation.html
         # - text: Obtaining the genetic and phenotypic covariance matrices
         #   href: articles/DesiredGainR-covariance.html
         # - text: -------
@@ -141,10 +145,16 @@ articles:
     navbar: "Deciding what to select for"
     contents:
       - DesiredGainR-objective
+      - DesiredGainR-desired-gain-intervals
   - title: "Looking ahead"
     navbar: "Looking ahead"
     contents:
       - DesiredGainR-simulation
+  - title: "Evidence"
+    navbar: "Evidence"
+    contents:
+      - DesiredGainR-reproduction
+      - DesiredGainR-empirical-validation
   # - title: "Index methods"
   #   navbar: "Index methods"
   #   contents:
@@ -189,6 +199,8 @@ reference:
     contents:
       - implied_economic_weights
       - implied_desired_gains
+      - define_desired_gain_intervals
+      - suggest_desired_gains
       - gain_feasibility
       - retrospective_weights
       - weight_sensitivity
@@ -210,6 +222,7 @@ reference:
     contents:
       - estimate_genetic_covariance
       - matrix_diagnostics
+      - bend_covariance
 
 
 # ------------------------------------------------------------
@@ -224,6 +237,7 @@ reference:
       selection index.
     contents:
       - selection_index
+      - restricted_index
       - run_dgsi
       - run_qgsi
       - run_dgsi_qgsi_pipeline
@@ -240,10 +254,54 @@ reference:
       established selection-index software: the correlation between the index
       and net merit, the expected gain in aggregate merit, efficiency relative
       to direct selection on a main trait, and the coefficient of variation of
-      the index, alongside the expected response for every trait.
+      the index, alongside the expected response for every trait and the
+      heritability of the index itself. Also the tools for reusing a fitted
+      index on the next cycle and for asking how much of the answer is
+      determined by the data rather than by sampling error in the covariance
+      matrices.
     contents:
       - evaluate_index
+      - summary.desiredgainr_index
+      - predict.desiredgainr_index
+      - index_uncertainty
       - compare_dg_and_qgsi
+
+  - title: "Multi-environment structure"
+    desc: >
+      A multi-environment index is a single-environment index on an expanded
+      trait set, so the whole index layer applies once the separable covariance
+      has been built. The interaction share reported by the expansion says
+      whether modelling the environments separately was worth the complexity.
+    contents:
+      - expand_environments
+      - widen_environments
+
+  - title: "Uncertainty in the recommendation"
+    desc: >
+      Every reported gain conditions on covariance matrices that are
+      themselves estimates. These functions report how far the answer moves
+      when that is taken into account, and separate covariance-estimation
+      uncertainty from Monte Carlo simulation error, because only the second
+      falls with more computing.
+    contents:
+      - index_uncertainty
+      - draw_covariance_pairs
+      - propagate_covariance_uncertainty
+
+  - title: "Published reference values"
+    contents:
+      - rahimi_debnath_2023
+
+  - title: "Importing from upstream models"
+    desc: >
+      Adapters for the mixed-model packages that produce the covariance
+      matrices this package consumes. They reorder traits to the analysis
+      order rather than assuming it, distinguish a correlation matrix from a
+      covariance, and check the genetic and phenotypic matrices against each
+      other, because a silently transposed trait order produces an index that
+      is wrong in a way nothing downstream can detect.
+    contents:
+      - import_covariance
 
 
 # ------------------------------------------------------------

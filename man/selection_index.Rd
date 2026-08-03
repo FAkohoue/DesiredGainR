@@ -14,9 +14,11 @@ selection_index(
   P = NULL,
   economic_weights = NULL,
   desired_gains = NULL,
+  aggregate_weights = NULL,
   lower_is_better = NULL,
   center_traits = TRUE,
   scale_traits = TRUE,
+  scale_by = c("sample", "phenotypic"),
   culling_thresholds = NULL,
   tandem_order = NULL,
   n_select = NULL,
@@ -55,6 +57,14 @@ favourable-direction trait space. Required by \code{"smith_hazel"} and
 favourable-direction trait space. Required by \code{"pesek_baker"} and
 \code{"yamada"}.}
 
+\item{aggregate_weights}{Optional named weights defining one common net
+merit for evaluation. This is separate from \code{desired_gains}: when it is
+absent, merit-dependent criteria (\code{R_HI} and \code{Delta_H}) are \code{NA} for the
+desired-gain families. Implied weights can be explored explicitly with
+\code{\link[=implied_economic_weights]{implied_economic_weights()}}, but are not silently substituted because a
+different desired-gain direction would then change the definition of
+merit being compared.}
+
 \item{lower_is_better}{Traits for which smaller original values are
 favourable.}
 
@@ -65,9 +75,27 @@ makes the index coefficient of variation undefined. Set this to \code{FALSE}
 when reproducing published results that report \code{CV_I} on an index built
 from raw trait values.}
 
-\item{scale_traits}{Whether to divide traits by their population standard
-deviations before indexing. Covarrubias-Pazaran (2021) recommends this,
-and a desired gain of 1 then means one standard deviation of progress.}
+\item{scale_traits}{Whether to divide traits by their standard deviations
+before indexing. Covarrubias-Pazaran (2021) recommends this, and a desired
+gain of 1 then means one standard deviation of progress. See \code{scale_by}
+for which standard deviation is used.}
+
+\item{scale_by}{Source of the scaling factors when \code{scale_traits = TRUE}.
+
+\code{"sample"}, the default, divides by the standard deviations of the
+supplied candidates. This equals the population standard deviation only
+when the candidates are an unselected random sample of the population that
+\code{G} and \code{P} describe. Candidates at a late trial stage have already been
+selected, so their spread is narrower than the population's, and mixing
+that sample scale with population covariance matrices inflates the
+apparent heritability of every trait that selection has already narrowed.
+
+\code{"phenotypic"} divides by \eqn{\sqrt{\operatorname{diag}(\mathbf{P})}},
+which comes from the same upstream model as \code{G} and \code{P} themselves. The
+scaled \code{P} then has a unit diagonal exactly, and the scaled \code{G} has the
+narrow-sense heritabilities on its diagonal. Prefer it whenever \code{P} is a
+genuine population estimate rather than a covariance computed from the
+candidates at hand.}
 
 \item{culling_thresholds}{Named thresholds in the favourable-direction trait
 space, required by \code{"independent_culling"}.}
@@ -152,14 +180,16 @@ state which route produced a published result, and the reason
 set.seed(1)
 traits <- c("yield", "disease")
 values <- matrix(
-  c(stats::rnorm(40), stats::rnorm(40)), ncol = 2,
+  c(stats::rnorm(40), stats::rnorm(40)),
+  ncol = 2,
   dimnames = list(paste0("G", 1:40), traits)
 )
 G <- matrix(c(0.60, -0.15, -0.15, 0.40), 2, dimnames = list(traits, traits))
 P <- matrix(c(1.10, -0.20, -0.20, 0.90), 2, dimnames = list(traits, traits))
 
 fit <- selection_index(
-  values, traits, method = "smith_hazel",
+  values, traits,
+  method = "smith_hazel",
   G = G, P = P,
   economic_weights = c(yield = 1, disease = 0.5),
   lower_is_better = "disease", n_select = 4

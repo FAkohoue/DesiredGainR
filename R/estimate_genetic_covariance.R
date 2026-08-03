@@ -84,30 +84,30 @@
 #'   component matrices; and numerical diagnostics.
 #' @export
 estimate_genetic_covariance <- function(
-    values,
-    trait_cols = NULL,
-    method = c(
-      "prediction_covariance",
-      "pev_corrected",
-      "se_diagonal_corrected",
-      "relationship_adjusted",
-      "adjusted_means_surrogate"
-    ),
-    prediction_error_covariance = NULL,
-    prediction_se = NULL,
-    relationship_matrix = NULL,
-    ids = NULL,
-    eigen_tolerance = 1e-8,
-    symmetry_tolerance = 1e-8
+  values,
+  trait_cols = NULL,
+  method = c(
+    "prediction_covariance",
+    "pev_corrected",
+    "se_diagonal_corrected",
+    "relationship_adjusted",
+    "adjusted_means_surrogate"
+  ),
+  prediction_error_covariance = NULL,
+  prediction_se = NULL,
+  relationship_matrix = NULL,
+  ids = NULL,
+  eigen_tolerance = 1e-8,
+  symmetry_tolerance = 1e-8
 ) {
   method <- match.arg(method)
   if (!is.numeric(eigen_tolerance) || length(eigen_tolerance) != 1L ||
-      !is.finite(eigen_tolerance) || eigen_tolerance <= 0) {
+    !is.finite(eigen_tolerance) || eigen_tolerance <= 0) {
     stop("eigen_tolerance must be a positive finite scalar.", call. = FALSE)
   }
   if (!is.numeric(symmetry_tolerance) ||
-      length(symmetry_tolerance) != 1L ||
-      !is.finite(symmetry_tolerance) || symmetry_tolerance <= 0) {
+    length(symmetry_tolerance) != 1L ||
+    !is.finite(symmetry_tolerance) || symmetry_tolerance <= 0) {
     stop("symmetry_tolerance must be a positive finite scalar.", call. = FALSE)
   }
 
@@ -119,7 +119,8 @@ estimate_genetic_covariance <- function(
   prediction_covariance <- stats::cov(X)
   dimnames(prediction_covariance) <- list(trait_cols, trait_cols)
   correction <- matrix(
-    0, p, p, dimnames = list(trait_cols, trait_cols)
+    0, p, p,
+    dimnames = list(trait_cols, trait_cols)
   )
   estimand <- "covariance of supplied genetic predictions"
   source <- "sample covariance of supplied genetic predictions"
@@ -293,7 +294,7 @@ print.desiredgainr_covariance_estimate <- function(x, ...) {
 .dgr_genetic_covariance_values <- function(values, trait_cols) {
   if (is.data.frame(values)) {
     if (is.null(trait_cols) || !length(trait_cols) ||
-        anyDuplicated(trait_cols)) {
+      anyDuplicated(trait_cols)) {
       stop(
         "trait_cols must contain unique trait names for data-frame values.",
         call. = FALSE
@@ -314,7 +315,7 @@ print.desiredgainr_covariance_estimate <- function(x, ...) {
       trait_cols <- colnames(X)
     }
     if (is.null(trait_cols) || length(trait_cols) != ncol(X) ||
-        anyDuplicated(trait_cols)) {
+      anyDuplicated(trait_cols)) {
       stop(
         paste(
           "A matrix must have unique column names or be accompanied by",
@@ -349,17 +350,17 @@ print.desiredgainr_covariance_estimate <- function(x, ...) {
 }
 
 .dgr_average_pev <- function(
-    value,
-    trait_cols,
-    n,
-    eigen_tolerance,
-    symmetry_tolerance
+  value,
+  trait_cols,
+  n,
+  eigen_tolerance,
+  symmetry_tolerance
 ) {
   p <- length(trait_cols)
   if (is.matrix(value)) {
     matrices <- list(value)
   } else if (is.array(value) && length(dim(value)) == 3L &&
-             all(dim(value)[1:2] == p) && dim(value)[3] == n) {
+    all(dim(value)[1:2] == p) && dim(value)[3] == n) {
     matrices <- lapply(seq_len(n), function(i) value[, , i, drop = TRUE])
   } else {
     stop(
@@ -436,18 +437,19 @@ print.desiredgainr_covariance_estimate <- function(x, ...) {
   storage.mode(value) <- "double"
   if (any(!is.finite(value)) || any(value < 0)) {
     stop("prediction_se must contain finite non-negative values.",
-         call. = FALSE)
+      call. = FALSE
+    )
   }
   colnames(value) <- trait_cols
   value
 }
 
 .dgr_relationship_inverse <- function(
-    relationship_matrix,
-    ids,
-    n,
-    eigen_tolerance,
-    symmetry_tolerance
+  relationship_matrix,
+  ids,
+  n,
+  eigen_tolerance,
+  symmetry_tolerance
 ) {
   if (is.null(relationship_matrix)) {
     stop(
@@ -456,16 +458,16 @@ print.desiredgainr_covariance_estimate <- function(x, ...) {
     )
   }
   if (is.null(ids) || length(ids) != n || anyNA(ids) ||
-      anyDuplicated(ids)) {
+    anyDuplicated(ids)) {
     stop(
       "ids must contain one unique, non-missing identifier per genotype.",
       call. = FALSE
     )
   }
   if (!is.matrix(relationship_matrix) ||
-      any(dim(relationship_matrix) != n) ||
-      is.null(rownames(relationship_matrix)) ||
-      is.null(colnames(relationship_matrix))) {
+    any(dim(relationship_matrix) != n) ||
+    is.null(rownames(relationship_matrix)) ||
+    is.null(colnames(relationship_matrix))) {
     stop(
       paste(
         "relationship_matrix must be a named square matrix with one row and",
@@ -476,7 +478,7 @@ print.desiredgainr_covariance_estimate <- function(x, ...) {
   }
   ids <- as.character(ids)
   if (!all(ids %in% rownames(relationship_matrix)) ||
-      !all(ids %in% colnames(relationship_matrix))) {
+    !all(ids %in% colnames(relationship_matrix))) {
     stop(
       "relationship_matrix dimnames must contain every genotype id.",
       call. = FALSE
@@ -490,7 +492,8 @@ print.desiredgainr_covariance_estimate <- function(x, ...) {
   largest <- max(1, max(abs(decomposition$values)))
   if (min(decomposition$values) < -eigen_tolerance * largest) {
     stop("relationship_matrix must be positive semidefinite.",
-         call. = FALSE)
+      call. = FALSE
+    )
   }
   retained <- decomposition$values > eigen_tolerance * largest
   if (!any(retained)) {
@@ -503,10 +506,10 @@ print.desiredgainr_covariance_estimate <- function(x, ...) {
 }
 
 .dgr_named_symmetric_matrix <- function(
-    value,
-    names,
-    label,
-    symmetry_tolerance
+  value,
+  names,
+  label,
+  symmetry_tolerance
 ) {
   p <- length(names)
   if (!is.matrix(value) || any(dim(value) != p)) {
@@ -514,13 +517,15 @@ print.desiredgainr_covariance_estimate <- function(x, ...) {
   }
   if (xor(is.null(rownames(value)), is.null(colnames(value)))) {
     stop(label, " must have both row and column names, or neither.",
-         call. = FALSE)
+      call. = FALSE
+    )
   }
   if (!is.null(rownames(value))) {
     if (!all(names %in% rownames(value)) ||
-        !all(names %in% colnames(value))) {
+      !all(names %in% colnames(value))) {
       stop(label, " dimnames do not contain all required names.",
-           call. = FALSE)
+        call. = FALSE
+      )
     }
     value <- value[names, names, drop = FALSE]
   }

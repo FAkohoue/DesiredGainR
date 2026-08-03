@@ -12,5 +12,6 @@
 #'
 #' @import data.table
 #' @importFrom utils globalVariables
+#' @importFrom stats predict
 #' @keywords internal
 "_PACKAGE"

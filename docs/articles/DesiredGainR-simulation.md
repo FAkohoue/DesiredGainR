@@ -201,7 +201,7 @@ the unit of selection is the clone and dominance is inherited intact.
 ``` r
 setup_clonal <- founder_population(
   founders,
-  G = dgr_G,                       # genotypic covariance for a clonal crop
+  G = dgr_G, # genotypic covariance for a clonal crop
   h2 = stats::setNames(dgr_traits$heritability, traits),
   dominance_degree = stats::setNames(rep(0.3, length(traits)), traits),
   seed = 42L
@@ -215,8 +215,10 @@ setup_clonal <- founder_population(
 ``` r
 simulation <- simulate_selection_cycles(
   setup,
-  desired_gains = c(GY = 1.0, PHT = 0.4, AD = 0.6,
-                    ASI = 0.5, EPP = 0.4, GLS = 0.6),
+  desired_gains = c(
+    GY = 1.0, PHT = 0.4, AD = 0.6,
+    ASI = 0.5, EPP = 0.4, GLS = 0.6
+  ),
   n_cycles = 5L,
   mating_system = "outcross",
   n_parents = 20L,
@@ -243,39 +245,118 @@ simulation
 |----|----|----|
 | `"self"` | Wheat, rice, common bean, cowpea | Selected parents intercrossed, families advanced by selfing or doubled haploidy before evaluation. Recombination releases variance slowly. |
 | `"outcross"` | Maize, sorghum, pearl millet | Random mating each cycle, so half the selection-induced disequilibrium decays per generation. |
-| `"clonal"` | Cassava, sweetpotato, banana, potato | Selection acts on **total genetic value**, since the clone inherits dominance intact. Requires a setup built with `dominance_degree`. |
+| `"clonal"` | Cassava, sweetpotato, banana, potato | Recombination happens once per cycle, when selected parents are crossed to raise a seedling generation; every later stage is a copy, so dominance is transmitted intact and selection acts on **total genotypic value**. Requires a setup built with `dominance_degree`, and `G` is then the genotypic covariance. |
 
-### 5.2 What each cycle records
+### 5.2 What a cycle means
+
+Check this definition before reading any number below.
+
+**Cycle 0** is the founder population, before any selection. It exists
+so that the cycle 1 row has something to be a response *to*.
+
+**Cycle \\t\\** records the population produced by selecting parents
+from the cycle \\t-1\\ candidates and crossing them. Every row from
+cycle 1 onward is a transmitted selection response, so `n_cycles = 1`
+gives exactly one.
+
+Versions before 0.5.0 measured the *candidates* of each cycle rather
+than their selected descendants. Because random mating does not shift a
+population mean, the cycle 1 gain was zero in expectation for every
+desired-gain direction, and a one-cycle run could not distinguish
+directions at all. Re-run any stored result.
 
 ``` r
 simulation$cycle_table
 ```
 
     #>    cycle  trait genetic_mean cumulative_gain genetic_variance
-    #> 1:     1     GY        0.402           0.402            0.548
-    #> 2:     1    PHT       -1.907          -1.907          139.412
+    #> 1:     0     GY        0.000           0.000            0.612
+    #> 2:     0    PHT        0.000           0.000          148.203
+    #> 3:     1     GY        0.402           0.402            0.548
+    #> 4:     1    PHT       -1.907          -1.907          139.412
     #> ...
-    #>    mean_relationship effective_size selection_intensity n_evaluated
-    #>                0.021           23.9               1.755         500
+    #>    mean_relationship mean_inbreeding parent_inbreeding qtl_segregating
+    #>                0.021           0.014             0.038           0.981
+    #>    genic_variance_ratio effective_size selection_intensity n_evaluated
+    #>                   0.994           23.9               1.755         500
 
 Gain and the loss of diversity are recorded together deliberately. A
 direction that maximises cumulative gain while collapsing effective
 population size is not obviously preferable, and the trade-off should be
 visible rather than inferred.
 
+`mean_relationship` and `mean_inbreeding` are measured on a
+**genome-wide marker panel**, not on the quantitative trait loci, and
+against allele frequencies fixed at the founders. Both choices matter.
+Measuring on QTL would make the metric rise whenever selection succeeded
+— changing QTL frequencies is what genetic gain is — so a direction
+would be penalised for working. Recomputing the frequencies each cycle
+would pin the mean off-diagonal at \\-\overline{G}\_{ii}/(n-1)\\, a
+function of population size alone. QTL frequency change is reported
+separately as `qtl_segregating` and `genic_variance_ratio`.
+
+Supply `n_markers_per_chromosome` to
+[`founder_population()`](https://FAkohoue.github.io/DesiredGainR/reference/founder_population.md)
+to create the panel; without it, all segregating sites are used instead.
+
 ### 5.3 The re-estimation switch
 
-`reestimate_index = TRUE`, the default, rebuilds the index from each
-cycle’s own simulated data. That is what a breeding programme actually
-does, and it propagates estimation error across cycles. Setting it
-`FALSE` reuses the cycle one coefficients and isolates the effect of the
+`reestimate_index = TRUE`, the default, rebuilds the covariance of the
+observed selection criterion from each cycle. It does **not** estimate
+genetic covariance from hidden simulated breeding values. Phenotypic
+selection retains the breeder-supplied `G_target`; genomic selection
+uses the calibrated-GEBV identity described below. Setting it `FALSE`
+reuses the cycle-one coefficients and isolates the effect of the
 desired-gain direction alone.
 
 **Run both.** A large divergence means the recommendation is sensitive
 to estimation error rather than to the objective, and the breeder should
 be told so.
 
-### 5.4 The selection rule is deliberately simple
+### 5.4 Phenotypic or genomic selection
+
+The default is explicit phenotypic selection. To represent an additive
+genomic selection programme, create a marker panel and request
+cross-fitted RR-BLUP:
+
+``` r
+setup <- founder_population(
+  founders,
+  G = dgr_G, h2 = 0.4,
+  n_qtl_per_chromosome = 20,
+  n_markers_per_chromosome = 100,
+  seed = 42
+)
+
+genomic <- simulate_selection_cycles(
+  setup,
+  desired_gains = c(
+    GY = 1, PHT = 0.4, AD = 0.6,
+    ASI = 0.5, EPP = 0.4, GLS = 0.6
+  ),
+  mating_system = "outcross",
+  prediction = list(
+    method = "rrblup",
+    folds = 5,
+    update_training = TRUE,
+    max_training = 2000
+  )
+)
+```
+
+Every candidate is predicted by a model that excluded its fold,
+preventing training-set leakage. Earlier cycles may be retained as a
+rolling training population. The cycle table reports the correlation
+between held-out GEBV and true simulated breeding value as
+`prediction_accuracy`; truth is used only for this diagnostic, never for
+selection. `prediction_calibration_slope` additionally reports
+`Cov(A, Ahat) / Var(Ahat)`; values far from one warn that the
+calibrated- GEBV assumption used by the desired-gain index is poor.
+RR-BLUP currently supports additive, non-clonal programmes. A clonal
+dominance programme must use the phenotypic path until a validated
+total-genetic-value predictor is implemented.
+
+### 5.5 The selection rule is deliberately simple
 
 Truncation on the index, and nothing more. Optimal contribution
 selection, family quotas and coancestry constraints are the province of
@@ -337,19 +418,22 @@ the surrogate’s prior mean. That was rejected: it would embed a second
 genetic model whose assumptions could fail in precisely the situations
 where simulation is most needed.
 
-### 6.3 The four ranking modes
+### 6.3 The five ranking modes
 
 | Mode | Objective | Required arguments |
 |----|----|----|
 | `"pareto"` | Non-dominated set of multi-cycle outcomes | none |
+| `"interval"` | Maximise conservative joint probability of reaching all interval minima | `desired_gain_intervals` |
 | `"economic"` | Maximise \\\mathbf{w}^\mathsf{T}\mathbf{R}\_{\text{cum}}\\ | `economic_weights` |
 | `"target"` | Minimise distance to stated absolute targets | `target_gains` |
 | `"constrained"` | Maximise a focal trait subject to floors | `focal_trait`, `gain_floors` |
 
-`"pareto"` is the default because it is the only mode that does not
-require the economic weights breeders find hardest to state. Choosing a
-point on a frontier is an easier judgement than stating weights, and it
-is weight elicitation by revealed preference.
+`"pareto"` is the default because it makes no scalar preference
+assumption. `"interval"` is the breeder-facing recommendation mode when
+the team can state minimum and aspirational gains but cannot defend
+economic weights. It reports the joint probability of reaching every
+minimum and recommends conservatively by the lower credible bound. See
+the dedicated desired-gain interval vignette.
 
 The Pareto search uses randomised augmented-Chebyshev scalarisation,
 which converges on the frontier while requiring only single-objective
@@ -375,7 +459,7 @@ means.
 optimisation$pareto_set[, c("d_GY", "d_ASI", "posterior_GY", "posterior_ASI")]
 ```
 
-### 6.5 No single best direction is returned
+### 6.5 Recommendations retain their uncertainty
 
 For the scalar modes the result reports a **stability region**: every
 direction whose posterior outcome lies within `stability_tolerance` of
@@ -401,7 +485,8 @@ work.
 ``` r
 # Re-running the same call continues from where it stopped.
 optimisation <- optimize_desired_gains(
-  setup, n_cycles = 5L, mode = "pareto", budget = 120L,
+  setup,
+  n_cycles = 5L, mode = "pareto", budget = 120L,
   checkpoint = "search_state.rds", seed = 42L, ...
 )
 ```

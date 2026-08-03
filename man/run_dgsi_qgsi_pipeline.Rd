@@ -17,7 +17,7 @@ run_dgsi_qgsi_pipeline(
   select_mode = c("top_n", "trait_thresholds"),
   n_select = 100L,
   trait_min_sd = NULL,
-  fallback_to_top_n = TRUE,
+  fallback_to_top_n = FALSE,
   n_iter = 1000L,
   n_rep = 20L,
   sd_scale = 1,
@@ -40,7 +40,7 @@ run_dgsi_qgsi_pipeline(
   lower_is_better = NULL,
   merge_outputs = TRUE,
   compare_sort_by = c("DG_rank", "QGSI_rank", "DG", "QGSI", "none"),
-  debug = TRUE
+  debug = FALSE
 )
 }
 \arguments{

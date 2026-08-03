@@ -26,6 +26,10 @@ the decision depends on the stated weights at all.
   : Translate desired gains into the economic weights they imply
 - [`implied_desired_gains()`](https://FAkohoue.github.io/DesiredGainR/reference/implied_desired_gains.md)
   : Translate economic weights into the desired gains they imply
+- [`define_desired_gain_intervals()`](https://FAkohoue.github.io/DesiredGainR/reference/define_desired_gain_intervals.md)
+  : Define acceptable intervals for desired genetic gains
+- [`suggest_desired_gains()`](https://FAkohoue.github.io/DesiredGainR/reference/suggest_desired_gains.md)
+  : Suggest desired-gain directions from the current population
 - [`gain_feasibility()`](https://FAkohoue.github.io/DesiredGainR/reference/gain_feasibility.md)
   : Test whether a desired-gain vector is attainable
 - [`retrospective_weights()`](https://FAkohoue.github.io/DesiredGainR/reference/retrospective_weights.md)
@@ -48,6 +52,8 @@ predictions as a genetic covariance.
   : Estimate a working genetic covariance matrix
 - [`matrix_diagnostics()`](https://FAkohoue.github.io/DesiredGainR/reference/matrix_diagnostics.md)
   : Report the numerical conditioning of a covariance matrix
+- [`bend_covariance()`](https://FAkohoue.github.io/DesiredGainR/reference/bend_covariance.md)
+  : Bend a covariance matrix to positive definiteness
 
 ## Building a selection index
 
@@ -58,6 +64,8 @@ selection index.
 
 - [`selection_index()`](https://FAkohoue.github.io/DesiredGainR/reference/selection_index.md)
   : Construct a classical multi-trait selection index
+- [`restricted_index()`](https://FAkohoue.github.io/DesiredGainR/reference/restricted_index.md)
+  : Restricted and proportional-gain selection indices
 - [`run_dgsi()`](https://FAkohoue.github.io/DesiredGainR/reference/run_dgsi.md)
   : Fit an optimised desired-gain selection index
 - [`run_qgsi()`](https://FAkohoue.github.io/DesiredGainR/reference/run_qgsi.md)
@@ -72,12 +80,67 @@ The four criteria used by Rahimi and Debnath (2023) and by the
 established selection-index software: the correlation between the index
 and net merit, the expected gain in aggregate merit, efficiency relative
 to direct selection on a main trait, and the coefficient of variation of
-the index, alongside the expected response for every trait.
+the index, alongside the expected response for every trait and the
+heritability of the index itself. Also the tools for reusing a fitted
+index on the next cycle and for asking how much of the answer is
+determined by the data rather than by sampling error in the covariance
+matrices.
 
 - [`evaluate_index()`](https://FAkohoue.github.io/DesiredGainR/reference/evaluate_index.md)
   : Evaluate a selection index against the standard criteria
+- [`summary(`*`<desiredgainr_index>`*`)`](https://FAkohoue.github.io/DesiredGainR/reference/summary.desiredgainr_index.md)
+  : Summarise a fitted selection index
+- [`predict(`*`<desiredgainr_index>`*`)`](https://FAkohoue.github.io/DesiredGainR/reference/predict.desiredgainr_index.md)
+  : Score a new candidate set with a fitted index
+- [`index_uncertainty()`](https://FAkohoue.github.io/DesiredGainR/reference/index_uncertainty.md)
+  : Propagate sampling error in the covariance matrices into an index
 - [`compare_dg_and_qgsi()`](https://FAkohoue.github.io/DesiredGainR/reference/compare_dg_and_qgsi.md)
   : Compare DGSI and QGSI candidate rankings
+
+## Multi-environment structure
+
+A multi-environment index is a single-environment index on an expanded
+trait set, so the whole index layer applies once the separable
+covariance has been built. The interaction share reported by the
+expansion says whether modelling the environments separately was worth
+the complexity.
+
+- [`expand_environments()`](https://FAkohoue.github.io/DesiredGainR/reference/expand_environments.md)
+  : Expand a trait-by-environment structure into an index problem
+- [`widen_environments()`](https://FAkohoue.github.io/DesiredGainR/reference/widen_environments.md)
+  : Reshape long-format multi-environment trial data for indexing
+
+## Uncertainty in the recommendation
+
+Every reported gain conditions on covariance matrices that are
+themselves estimates. These functions report how far the answer moves
+when that is taken into account, and separate covariance-estimation
+uncertainty from Monte Carlo simulation error, because only the second
+falls with more computing.
+
+- [`index_uncertainty()`](https://FAkohoue.github.io/DesiredGainR/reference/index_uncertainty.md)
+  : Propagate sampling error in the covariance matrices into an index
+- [`draw_covariance_pairs()`](https://FAkohoue.github.io/DesiredGainR/reference/draw_covariance_pairs.md)
+  : Draw jointly admissible genetic and residual covariance matrices
+- [`propagate_covariance_uncertainty()`](https://FAkohoue.github.io/DesiredGainR/reference/propagate_covariance_uncertainty.md)
+  : Propagate covariance uncertainty into a desired-gain recommendation
+
+## Published reference values
+
+- [`rahimi_debnath_2023()`](https://FAkohoue.github.io/DesiredGainR/reference/rahimi_debnath_2023.md)
+  : Published selection-index results from Rahimi and Debnath (2023)
+
+## Importing from upstream models
+
+Adapters for the mixed-model packages that produce the covariance
+matrices this package consumes. They reorder traits to the analysis
+order rather than assuming it, distinguish a correlation matrix from a
+covariance, and check the genetic and phenotypic matrices against each
+other, because a silently transposed trait order produces an index that
+is wrong in a way nothing downstream can detect.
+
+- [`import_covariance()`](https://FAkohoue.github.io/DesiredGainR/reference/import_covariance.md)
+  : Validate and record an extracted genetic covariance matrix
 
 ## Multi-cycle simulation
 

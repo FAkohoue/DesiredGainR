@@ -56,6 +56,11 @@ Maximising it maximises the response in aggregate merit.}
 \eqn{k (Gb)_j / \sqrt{b^\mathsf{T}Pb}}.}
 \item{RE}{Efficiency relative to direct selection on a single main trait.}
 \item{\eqn{CV_I}}{The coefficient of variation of the index scores.}
+\item{\eqn{h^2_I}}{The heritability of the index treated as a trait,
+\eqn{b^\mathsf{T}Gb / b^\mathsf{T}Pb}, whose square root is the
+correlation between the index score and the genetic value it estimates.
+This is the only accuracy available for the desired-gain families
+without first supplying economic weights.}
 }
 }
 \section{Interpreting relative efficiency}{

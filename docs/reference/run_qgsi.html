@@ -68,9 +68,11 @@ not used to construct either \(w\) or \(W\)."><meta property="og:image" content=
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Deciding what to select for</h6></li>
     <li><a class="dropdown-item" href="../articles/DesiredGainR-objective.html">Defining a breeding objective</a></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-desired-gain-intervals.html">Defining desired gains and acceptable intervals</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Looking ahead</h6></li>
     <li><a class="dropdown-item" href="../articles/DesiredGainR-simulation.html">Comparing objectives over several cycles</a></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-empirical-validation.html">Empirical validation with real breeding programmes</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../breeder-guide.html">Breeder guide</a></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -138,7 +140,7 @@ not used to construct either \(w\) or \(W\).</p>
 <span>  scale_traits <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  impute_missing <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  return_components <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  debug <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span>  debug <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -329,7 +331,8 @@ Nonlinear genomic selection index accelerates multi-trait crop improvement.
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">W</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.10</span>, <span class="op">-</span><span class="fl">0.02</span>, <span class="op">-</span><span class="fl">0.02</span>, <span class="op">-</span><span class="fl">0.05</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>  <span class="fl">2</span>, dimnames <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">traits</span>, <span class="va">traits</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="fl">2</span>,</span></span>
+<span class="r-in"><span>  dimnames <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">traits</span>, <span class="va">traits</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu">run_qgsi</span><span class="op">(</span></span></span>
 <span class="r-in"><span>  init_data <span class="op">=</span> <span class="va">gebv</span><span class="op">[</span><span class="st">"GenoID"</span><span class="op">]</span>,</span></span>

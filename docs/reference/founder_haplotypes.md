@@ -135,10 +135,14 @@ file, in which case the phase is discarded on import.
 ``` r
 variants <- c("v1", "v2", "v3", "v4")
 individuals <- c("a", "b")
-hap1 <- matrix(c(0, 1, 0, 1, 1, 0, 1, 0), nrow = 4,
-               dimnames = list(variants, individuals))
-hap2 <- matrix(c(0, 0, 1, 1, 1, 1, 0, 0), nrow = 4,
-               dimnames = list(variants, individuals))
+hap1 <- matrix(c(0, 1, 0, 1, 1, 0, 1, 0),
+  nrow = 4,
+  dimnames = list(variants, individuals)
+)
+hap2 <- matrix(c(0, 0, 1, 1, 1, 1, 0, 0),
+  nrow = 4,
+  dimnames = list(variants, individuals)
+)
 map <- data.frame(
   variant_id = variants,
   chromosome = c(1, 1, 2, 2),

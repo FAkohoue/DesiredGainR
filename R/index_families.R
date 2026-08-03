@@ -1,6 +1,89 @@
 # Classical linear selection index families, plus the two non-index selection
 # strategies used as comparators throughout the selection-index literature.
 
+#' Aggregate weights implied by a desired-gain vector
+#'
+#' Net merit is \eqn{H = a^\mathsf{T}g}, and the correlation between an index
+#' and net merit is only defined once \eqn{a} is stated. A desired-gain vector
+#' is not an economic weight vector, so using \eqn{d} in place of \eqn{a}
+#' yields a quantity with no standard interpretation: substituting
+#' \eqn{b = G^{-1}d} gives
+#' \eqn{d^\mathsf{T}d / (\sqrt{d^\mathsf{T}G^{-1}PG^{-1}d}\sqrt{d^\mathsf{T}Gd})},
+#' which is not an accuracy and behaves erratically when trait scales differ.
+#'
+#' The economic weights that make the desired-gain index optimal are
+#' \eqn{w = G^{-1}PG^{-1}d}, and evaluating against those recovers the standard
+#' Smith-Hazel accuracy. Joukhadar et al. (2024) note the underlying point
+#' directly: the covariance between a desired-gain index and net merit is
+#' undefined until an economic weight vector is supplied.
+#'
+#' @param d Desired gains, oriented and transformed.
+#' @param G Genetic covariance, oriented and transformed.
+#' @param P Phenotypic covariance, or `NULL`.
+#' @param X Candidate matrix, used only when `P` is absent.
+#' @param trait_cols Trait names.
+#'
+#' @return Named implied economic weights, or `NULL` when they cannot be
+#'   computed, in which case the merit-based criteria are withheld.
+#' Index coefficients for the four matrix-based families
+#'
+#' Isolated from [selection_index()] so that [index_uncertainty()] recomputes
+#' coefficients by exactly the same route as the point estimate. A resampling
+#' interval built from a second implementation of the same formula measures the
+#' difference between the two implementations as well as the sampling error.
+#'
+#' `objective` holds the economic weights for `smith_hazel` and `base`, and the
+#' desired gains for `pesek_baker` and `yamada`, in the transformed space.
+#'
+#' @noRd
+.dgr_index_coefficients <- function(method, G, P, objective, X, trait_cols) {
+  aggregate_weights <- NULL
+  if (method == "smith_hazel") {
+    coefficients <- as.numeric(
+      .dgr_inverse(P, "P")$inverse %*% G %*% objective
+    )
+    aggregate_weights <- objective
+  } else if (method == "base") {
+    coefficients <- as.numeric(objective)
+    aggregate_weights <- objective
+  } else if (method == "pesek_baker") {
+    coefficients <- as.numeric(.dgr_inverse(G, "G")$inverse %*% objective)
+  } else if (method == "yamada") {
+    P_inverse <- .dgr_inverse(P, "P")$inverse
+    middle <- crossprod(G, P_inverse %*% G)
+    middle <- (middle + t(middle)) / 2
+    dimnames(middle) <- list(trait_cols, trait_cols)
+    coefficients <- as.numeric(
+      P_inverse %*% G %*%
+        (.dgr_inverse(middle, "G P^-1 G")$inverse %*% objective)
+    )
+  } else {
+    stop("method '", method, "' has no covariance-based coefficients.",
+      call. = FALSE
+    )
+  }
+  names(coefficients) <- trait_cols
+  list(coefficients = coefficients, aggregate_weights = aggregate_weights)
+}
+
+#' @noRd
+.dgr_aggregate_from_gains <- function(d, G, P, X, trait_cols) {
+  P_used <- if (is.null(P)) stats::cov(X) else P
+  dimnames(P_used) <- list(trait_cols, trait_cols)
+  weights <- tryCatch(
+    {
+      G_inverse <- .dgr_inverse(G, "G")$inverse
+      as.numeric(G_inverse %*% P_used %*% G_inverse %*% d)
+    },
+    error = function(e) NULL
+  )
+  if (is.null(weights)) {
+    return(NULL)
+  }
+  names(weights) <- trait_cols
+  weights
+}
+
 #' Rank-based index score, favourable direction assumed
 #'
 #' @param X Candidate-by-trait matrix in favourable-direction space.
@@ -11,7 +94,9 @@
 .dgr_rank_sum <- function(X, weights = NULL) {
   ranks <- apply(-X, 2L, function(column) rank(column, ties.method = "average"))
   if (is.null(dim(ranks))) ranks <- matrix(ranks, nrow = nrow(X))
-  if (is.null(weights)) return(rowSums(ranks))
+  if (is.null(weights)) {
+    return(rowSums(ranks))
+  }
   as.numeric(ranks %*% weights)
 }
 
@@ -97,6 +182,13 @@
 #' @param desired_gains Named non-negative desired gains in the
 #'   favourable-direction trait space. Required by `"pesek_baker"` and
 #'   `"yamada"`.
+#' @param aggregate_weights Optional named weights defining one common net
+#'   merit for evaluation. This is separate from `desired_gains`: when it is
+#'   absent, merit-dependent criteria (`R_HI` and `Delta_H`) are `NA` for the
+#'   desired-gain families. Implied weights can be explored explicitly with
+#'   [implied_economic_weights()], but are not silently substituted because a
+#'   different desired-gain direction would then change the definition of
+#'   merit being compared.
 #' @param lower_is_better Traits for which smaller original values are
 #'   favourable.
 #' @param center_traits Whether to subtract the trait means before indexing.
@@ -105,9 +197,26 @@
 #'   makes the index coefficient of variation undefined. Set this to `FALSE`
 #'   when reproducing published results that report `CV_I` on an index built
 #'   from raw trait values.
-#' @param scale_traits Whether to divide traits by their population standard
-#'   deviations before indexing. Covarrubias-Pazaran (2021) recommends this,
-#'   and a desired gain of 1 then means one standard deviation of progress.
+#' @param scale_traits Whether to divide traits by their standard deviations
+#'   before indexing. Covarrubias-Pazaran (2021) recommends this, and a desired
+#'   gain of 1 then means one standard deviation of progress. See `scale_by`
+#'   for which standard deviation is used.
+#' @param scale_by Source of the scaling factors when `scale_traits = TRUE`.
+#'
+#'   `"sample"`, the default, divides by the standard deviations of the
+#'   supplied candidates. This equals the population standard deviation only
+#'   when the candidates are an unselected random sample of the population that
+#'   `G` and `P` describe. Candidates at a late trial stage have already been
+#'   selected, so their spread is narrower than the population's, and mixing
+#'   that sample scale with population covariance matrices inflates the
+#'   apparent heritability of every trait that selection has already narrowed.
+#'
+#'   `"phenotypic"` divides by \eqn{\sqrt{\operatorname{diag}(\mathbf{P})}},
+#'   which comes from the same upstream model as `G` and `P` themselves. The
+#'   scaled `P` then has a unit diagonal exactly, and the scaled `G` has the
+#'   narrow-sense heritabilities on its diagonal. Prefer it whenever `P` is a
+#'   genuine population estimate rather than a covariance computed from the
+#'   candidates at hand.
 #' @param culling_thresholds Named thresholds in the favourable-direction trait
 #'   space, required by `"independent_culling"`.
 #' @param tandem_order Character vector giving the order in which traits are
@@ -128,14 +237,16 @@
 #' set.seed(1)
 #' traits <- c("yield", "disease")
 #' values <- matrix(
-#'   c(stats::rnorm(40), stats::rnorm(40)), ncol = 2,
+#'   c(stats::rnorm(40), stats::rnorm(40)),
+#'   ncol = 2,
 #'   dimnames = list(paste0("G", 1:40), traits)
 #' )
 #' G <- matrix(c(0.60, -0.15, -0.15, 0.40), 2, dimnames = list(traits, traits))
 #' P <- matrix(c(1.10, -0.20, -0.20, 0.90), 2, dimnames = list(traits, traits))
 #'
 #' fit <- selection_index(
-#'   values, traits, method = "smith_hazel",
+#'   values, traits,
+#'   method = "smith_hazel",
 #'   G = G, P = P,
 #'   economic_weights = c(yield = 1, disease = 0.5),
 #'   lower_is_better = "disease", n_select = 4
@@ -169,36 +280,41 @@
 #' @seealso [evaluate_index()], [gain_feasibility()], [run_dgsi()]
 #' @export
 selection_index <- function(
-    values,
-    trait_cols,
-    id_col = NULL,
-    method = c(
-      "smith_hazel", "base", "pesek_baker", "yamada",
-      "mulamba_mock", "independent_culling", "tandem"
-    ),
-    G = NULL,
-    P = NULL,
-    economic_weights = NULL,
-    desired_gains = NULL,
-    lower_is_better = NULL,
-    center_traits = TRUE,
-    scale_traits = TRUE,
-    culling_thresholds = NULL,
-    tandem_order = NULL,
-    n_select = NULL,
-    selection_intensity = NULL,
-    main_trait = trait_cols[1L]
+  values,
+  trait_cols,
+  id_col = NULL,
+  method = c(
+    "smith_hazel", "base", "pesek_baker", "yamada",
+    "mulamba_mock", "independent_culling", "tandem"
+  ),
+  G = NULL,
+  P = NULL,
+  economic_weights = NULL,
+  desired_gains = NULL,
+  aggregate_weights = NULL,
+  lower_is_better = NULL,
+  center_traits = TRUE,
+  scale_traits = TRUE,
+  scale_by = c("sample", "phenotypic"),
+  culling_thresholds = NULL,
+  tandem_order = NULL,
+  n_select = NULL,
+  selection_intensity = NULL,
+  main_trait = trait_cols[1L]
 ) {
   method <- match.arg(method)
+  common_aggregate_weights <- aggregate_weights
   if (!is.character(trait_cols) || !length(trait_cols) ||
-      anyDuplicated(trait_cols)) {
+    anyDuplicated(trait_cols)) {
     stop("trait_cols must contain unique trait names.", call. = FALSE)
   }
   frame <- as.data.frame(values)
   absent <- setdiff(trait_cols, names(frame))
   if (length(absent)) {
     stop("values is missing trait columns: ",
-         paste(absent, collapse = ", "), call. = FALSE)
+      paste(absent, collapse = ", "),
+      call. = FALSE
+    )
   }
   X_raw <- as.matrix(frame[, trait_cols, drop = FALSE])
   storage.mode(X_raw) <- "double"
@@ -212,7 +328,9 @@ selection_index <- function(
     candidate_id <- as.character(frame[[id_col]])
     if (anyNA(candidate_id) || anyDuplicated(candidate_id)) {
       stop("Candidate identifiers in '", id_col,
-           "' must be unique and non-missing.", call. = FALSE)
+        "' must be unique and non-missing.",
+        call. = FALSE
+      )
     }
   } else {
     candidate_id <- rownames(X_raw)
@@ -236,7 +354,8 @@ selection_index <- function(
         "Candidate identifiers were taken from row numbers, because id_col ",
         "was not supplied and values has no row names. Column(s) ",
         paste(sprintf("'%s'", utils::head(character_columns, 3L)),
-              collapse = ", "),
+          collapse = ", "
+        ),
         " look like identifiers; pass one through id_col to label the result.",
         call. = FALSE
       )
@@ -249,7 +368,9 @@ selection_index <- function(
     unknown <- setdiff(lower_is_better, trait_cols)
     if (length(unknown)) {
       stop("Unknown lower_is_better traits: ",
-           paste(unknown, collapse = ", "), call. = FALSE)
+        paste(unknown, collapse = ", "),
+        call. = FALSE
+      )
     }
     direction[lower_is_better] <- -1
   }
@@ -259,12 +380,34 @@ selection_index <- function(
     rep(0, length(trait_cols))
   }
   names(centre) <- trait_cols
+  scale_by <- match.arg(scale_by)
   scale_factor <- if (isTRUE(scale_traits)) {
-    sd_values <- apply(X_raw, 2L, stats::sd)
-    if (any(!is.finite(sd_values) | sd_values <= 0)) {
-      stop("Every trait must vary when scale_traits = TRUE.", call. = FALSE)
+    if (identical(scale_by, "phenotypic")) {
+      if (is.null(P)) {
+        stop("scale_by = 'phenotypic' requires P, because the scaling ",
+          "factors are the square roots of its diagonal.",
+          call. = FALSE
+        )
+      }
+      P_supplied <- .dgr_covariance(P, trait_cols, "P")
+      sd_values <- sqrt(diag(P_supplied))
+      if (any(!is.finite(sd_values) | sd_values <= 0)) {
+        stop("Every diagonal element of P must be positive when ",
+          "scale_by = 'phenotypic'.",
+          call. = FALSE
+        )
+      }
+      sd_values
+    } else {
+      # The candidate standard deviation. This is the population standard
+      # deviation only when the candidates are an unselected random sample of
+      # the population that G and P describe, which a late-stage trial is not.
+      sd_values <- apply(X_raw, 2L, stats::sd)
+      if (any(!is.finite(sd_values) | sd_values <= 0)) {
+        stop("Every trait must vary when scale_traits = TRUE.", call. = FALSE)
+      }
+      sd_values
     }
-    sd_values
   } else {
     rep(1, length(trait_cols))
   }
@@ -275,7 +418,9 @@ selection_index <- function(
   transform <- diag(direction / scale_factor, nrow = length(trait_cols))
   dimnames(transform) <- list(trait_cols, trait_cols)
   prepare_matrix <- function(M, name) {
-    if (is.null(M)) return(NULL)
+    if (is.null(M)) {
+      return(NULL)
+    }
     M <- .dgr_covariance(M, trait_cols, name)
     M <- transform %*% M %*% transform
     dimnames(M) <- list(trait_cols, trait_cols)
@@ -284,6 +429,11 @@ selection_index <- function(
   }
   G <- prepare_matrix(G, "G")
   P <- prepare_matrix(P, "P")
+  # Checked after the direction and scaling transform rather than before it.
+  # The transform is a diagonal congruence, which preserves definiteness, so
+  # the two are equivalent; doing it here means the message quotes the matrices
+  # the coefficients are actually built from.
+  .dgr_check_compatible(G, P, "selection_index()")
 
   require_matrix <- function(M, name) {
     if (is.null(M)) {
@@ -311,32 +461,35 @@ selection_index <- function(
   aggregate_weights <- NULL
   scores <- NULL
   strategy <- "index"
+  culling_report <- NULL
 
+  objective <- NULL
   if (method == "smith_hazel") {
-    require_matrix(G, "G"); require_matrix(P, "P")
-    a <- objective_vector(economic_weights, "economic_weights")
-    coefficients <- as.numeric(.dgr_inverse(P, "P")$inverse %*% G %*% a)
-    aggregate_weights <- a
+    require_matrix(G, "G")
+    require_matrix(P, "P")
+    objective <- objective_vector(economic_weights, "economic_weights")
   } else if (method == "base") {
-    a <- objective_vector(economic_weights, "economic_weights")
-    coefficients <- as.numeric(a)
-    aggregate_weights <- a
+    objective <- objective_vector(economic_weights, "economic_weights")
   } else if (method == "pesek_baker") {
     require_matrix(G, "G")
-    d <- objective_vector(desired_gains, "desired_gains")
-    coefficients <- as.numeric(.dgr_inverse(G, "G")$inverse %*% d)
-    aggregate_weights <- d
+    objective <- objective_vector(desired_gains, "desired_gains")
   } else if (method == "yamada") {
-    require_matrix(G, "G"); require_matrix(P, "P")
-    d <- objective_vector(desired_gains, "desired_gains")
-    P_inverse <- .dgr_inverse(P, "P")$inverse
-    middle <- crossprod(G, P_inverse %*% G)
-    middle <- (middle + t(middle)) / 2
-    dimnames(middle) <- list(trait_cols, trait_cols)
-    coefficients <- as.numeric(
-      P_inverse %*% G %*% (.dgr_inverse(middle, "G P^-1 G")$inverse %*% d)
-    )
-    aggregate_weights <- d
+    require_matrix(G, "G")
+    require_matrix(P, "P")
+    objective <- objective_vector(desired_gains, "desired_gains")
+  }
+
+  if (!is.null(objective)) {
+    fitted <- .dgr_index_coefficients(method, G, P, objective, X, trait_cols)
+    coefficients <- fitted$coefficients
+    aggregate_weights <- fitted$aggregate_weights
+    if (method %in% c("pesek_baker", "yamada") &&
+      !is.null(common_aggregate_weights)) {
+      aggregate_weights <- objective_vector(
+        common_aggregate_weights,
+        "aggregate_weights"
+      )
+    }
   } else if (method == "mulamba_mock") {
     rank_weights <- if (is.null(economic_weights)) {
       NULL
@@ -348,13 +501,26 @@ selection_index <- function(
     aggregate_weights <- rank_weights
   } else if (method == "independent_culling") {
     thresholds <- objective_vector(culling_thresholds, "culling_thresholds")
-    passes <- rowSums(sweep(X, 2L, thresholds, FUN = "<")) == 0L
+    below <- sweep(X, 2L, thresholds, FUN = "<")
+    passes <- rowSums(below) == 0L
+    # Which gate each candidate failed, so that a rejection can be explained
+    # rather than merely recorded.
+    failures <- apply(below, 1L, function(row) {
+      paste(trait_cols[row], collapse = ", ")
+    })
+    culling_report <- data.table::data.table(
+      id = candidate_id,
+      passed = passes,
+      n_failed = as.integer(rowSums(below)),
+      failed_traits = ifelse(passes, NA_character_, failures)
+    )
     scores <- as.numeric(passes)
     strategy <- "culling"
   } else if (method == "tandem") {
     if (is.null(tandem_order) || !all(tandem_order %in% trait_cols)) {
       stop("tandem_order must name traits present in trait_cols.",
-           call. = FALSE)
+        call. = FALSE
+      )
     }
     if (is.null(n_select)) {
       stop("n_select is required for method = 'tandem'.", call. = FALSE)
@@ -379,19 +545,52 @@ selection_index <- function(
   }
 
   selection <- rep(FALSE, nrow(X))
+  n_requested <- NULL
   if (!is.null(n_select)) {
     n_select <- .dgr_positive_integer(n_select, "n_select")
+    n_requested <- n_select
     if (n_select > nrow(X)) {
       stop("n_select cannot exceed the number of candidates.", call. = FALSE)
     }
-    selection[order(-scores, candidate_id)[seq_len(n_select)]] <- TRUE
+    # Independent culling is a hard gate. A candidate that fails any threshold
+    # must never be selected, whatever n_select asks for, so n_select is a
+    # maximum rather than a quota. Ranking on a 0/1 pass indicator and then
+    # taking the top n_select would fill the shortfall with failures.
+    eligible <- if (identical(strategy, "culling")) {
+      culling_report$passed
+    } else {
+      rep(TRUE, nrow(X))
+    }
+    ordering <- order(-scores, candidate_id)
+    ordering <- ordering[eligible[ordering]]
+    n_taken <- min(n_select, length(ordering))
+    if (n_taken > 0L) {
+      selection[ordering[seq_len(n_taken)]] <- TRUE
+    }
+    if (identical(strategy, "culling") && n_taken < n_select) {
+      warning(
+        sprintf(
+          paste(
+            "Only %d of %d candidates passed every culling threshold, so %d",
+            "were selected rather than the %d requested. Independent culling",
+            "does not fill a shortfall; relax the thresholds or use a method",
+            "that trades traits off against one another."
+          ),
+          sum(eligible), nrow(X), n_taken, n_select
+        ),
+        call. = FALSE
+      )
+    }
   }
+  n_selected <- sum(selection)
 
   if (is.null(selection_intensity)) {
-    selection_intensity <- if (is.null(n_select)) {
+    # The intensity that applies is the one actually achieved, not the one
+    # requested. These differ whenever culling truncated the selected set.
+    selection_intensity <- if (!n_selected) {
       NA_real_
     } else {
-      .dgr_intensity(n_select / nrow(X))
+      .dgr_intensity(n_selected / nrow(X))
     }
   }
 
@@ -444,32 +643,170 @@ selection_index <- function(
     effective_weights = effective,
     observed_differential = observed,
     selection_intensity = selection_intensity,
-    n_select = n_select,
+    # n_select is the number requested and is retained under that name because
+    # downstream packages read it. n_selected is the number actually taken,
+    # which is smaller whenever culling truncated the set.
+    n_select = n_requested,
+    n_selected = n_selected,
     n_candidates = nrow(X),
+    culling_report = culling_report,
     transformation = list(
       centre = centre, scale = scale_factor, direction = direction,
-      centred = isTRUE(center_traits), scaled = isTRUE(scale_traits)
+      centred = isTRUE(center_traits), scaled = isTRUE(scale_traits),
+      scale_by = if (isTRUE(scale_traits)) scale_by else "none"
     ),
     G = G,
-    P = P
+    P = P,
+    # The candidate matrix after direction, centring and scaling, together with
+    # the objective vector in that same space. Both are required to refit the
+    # index on a perturbed covariance matrix; see index_uncertainty().
+    scaled_values = X,
+    objective = objective,
+    candidate_id = candidate_id
   )
   class(result) <- c("desiredgainr_index", "list")
   result
+}
+
+#' Score a new candidate set with a fitted index
+#'
+#' An index fitted on one cycle is normally applied to the next. Doing that by
+#' hand means reproducing the direction, centring and scaling transformations
+#' exactly, and a transformation applied inconsistently between fitting and
+#' scoring silently reorders the candidates.
+#'
+#' @details
+#' The centring constants and scaling factors are those computed when the index
+#' was fitted, not recomputed from `newdata`. That is deliberate. Recomputing
+#' them would score each cycle on its own mean, so a candidate set that had
+#' advanced genetically would appear identical to one that had not, and the
+#' scores would not be comparable across cycles.
+#'
+#' The consequence is that `newdata` must be measured on the same scale and in
+#' the same units as the data the index was fitted on. Where a trial has been
+#' re-standardised or a trait recorded differently, refit rather than predict.
+#'
+#' @param object A fitted `desiredgainr_index` using a coefficient-based
+#'   method.
+#' @param newdata Data frame or matrix carrying every trait in
+#'   `object$trait_cols`, in the original trait units.
+#' @param id_col Optional column of `newdata` holding candidate identifiers.
+#' @param n_select Optional number of candidates to select. Defaults to the
+#'   number used when fitting.
+#' @param ... Unused.
+#'
+#' @return A `data.table` with one row per candidate, giving the identifier, the
+#'   index score, the rank, and whether it was selected.
+#'
+#' @examples
+#' set.seed(1)
+#' traits <- c("yield", "protein")
+#' G <- matrix(c(1.0, 0.2, 0.2, 0.5), 2, dimnames = list(traits, traits))
+#' P <- matrix(c(2.5, 0.4, 0.4, 1.2), 2, dimnames = list(traits, traits))
+#' cycle1 <- as.data.frame(matrix(
+#'   stats::rnorm(80),
+#'   ncol = 2, dimnames = list(paste0("A", 1:40), traits)
+#' ))
+#' cycle2 <- as.data.frame(matrix(
+#'   stats::rnorm(60),
+#'   ncol = 2, dimnames = list(paste0("B", 1:30), traits)
+#' ))
+#' fit <- selection_index(
+#'   cycle1, traits,
+#'   method = "smith_hazel", G = G, P = P,
+#'   economic_weights = c(yield = 2, protein = 1), n_select = 8
+#' )
+#' head(predict(fit, cycle2, n_select = 5))
+#'
+#' @seealso [selection_index()]
+#' @export
+predict.desiredgainr_index <- function(
+  object, newdata, id_col = NULL, n_select = object$n_select, ...
+) {
+  if (is.null(object$coefficients)) {
+    stop("method = '", object$method, "' produces no coefficients, so it ",
+      "cannot score a new candidate set. Refit on the combined data.",
+      call. = FALSE
+    )
+  }
+  trait_cols <- object$trait_cols
+  frame <- as.data.frame(newdata)
+  absent <- setdiff(trait_cols, names(frame))
+  if (length(absent)) {
+    stop("newdata is missing trait columns: ",
+      paste(absent, collapse = ", "),
+      call. = FALSE
+    )
+  }
+  X_raw <- as.matrix(frame[, trait_cols, drop = FALSE])
+  storage.mode(X_raw) <- "double"
+  if (!nrow(X_raw) || any(!is.finite(X_raw))) {
+    stop("newdata must contain finite values for every trait.", call. = FALSE)
+  }
+
+  if (!is.null(id_col)) {
+    if (!id_col %in% names(frame)) {
+      stop("id_col '", id_col, "' was not found in newdata.", call. = FALSE)
+    }
+    candidate_id <- as.character(frame[[id_col]])
+  } else {
+    candidate_id <- rownames(X_raw)
+    if (is.null(candidate_id)) {
+      candidate_id <- paste0("row_", seq_len(nrow(X_raw)))
+    }
+  }
+  if (anyNA(candidate_id) || anyDuplicated(candidate_id)) {
+    stop("Candidate identifiers must be unique and non-missing.", call. = FALSE)
+  }
+
+  transformation <- object$transformation
+  X <- sweep(X_raw, 2L, transformation$centre, "-")
+  X <- sweep(X, 2L, transformation$scale, "/")
+  X <- sweep(X, 2L, transformation$direction, "*")
+  scores <- as.numeric(X %*% object$coefficients)
+
+  selection <- rep(FALSE, nrow(X))
+  if (!is.null(n_select)) {
+    n_select <- .dgr_positive_integer(n_select, "n_select")
+    if (n_select > nrow(X)) {
+      stop("n_select cannot exceed the number of candidates in newdata.",
+        call. = FALSE
+      )
+    }
+    selection[order(-scores, candidate_id)[seq_len(n_select)]] <- TRUE
+  }
+
+  ranking <- data.table::data.table(
+    id = candidate_id,
+    score = scores,
+    rank = data.table::frank(-scores, ties.method = "min"),
+    selected = selection
+  )
+  data.table::setorderv(ranking, c("score", "id"), c(-1L, 1L))
+  ranking[]
 }
 
 #' @export
 print.desiredgainr_index <- function(x, ...) {
   cat("<desiredgainr_index>\n")
   cat("  Method:", x$method, "\n")
-  cat("  Candidates:", x$n_candidates,
-      " Traits:", length(x$trait_cols), "\n")
-  cat("  Traits standardised:",
-      if (isTRUE(x$transformation$scaled)) "yes" else "no", "\n")
+  cat(
+    "  Candidates:", x$n_candidates,
+    " Traits:", length(x$trait_cols), "\n"
+  )
+  cat(
+    "  Traits standardised:",
+    if (isTRUE(x$transformation$scaled)) "yes" else "no", "\n"
+  )
   if (!is.null(x$n_select)) {
     cat(sprintf(
       "  Selected: %d (%.1f%%), intensity %.3f\n",
-      x$n_select, 100 * x$n_select / x$n_candidates, x$selection_intensity
+      x$n_selected, 100 * x$n_selected / x$n_candidates,
+      x$selection_intensity
     ))
+    if (!identical(x$n_selected, x$n_select)) {
+      cat("  Requested:", x$n_select, "(hard eligibility rules limited it)\n")
+    }
   }
   if (!is.null(x$coefficients)) {
     cat("  Coefficients:\n")

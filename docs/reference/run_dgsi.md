@@ -35,6 +35,9 @@ run_dgsi(
   plateau_tolerance = 1e-04,
   validation_data = NULL,
   return_all_reps = TRUE,
+  allow_incompatible_estimated_P = FALSE,
+  replicate_selection = c("holdout", "training"),
+  holdout_fraction = 0.3,
   debug = FALSE
 )
 ```
@@ -155,12 +158,35 @@ run_dgsi(
 
 - validation_data:
 
-  Optional independent candidate values used only to evaluate the
-  winning coefficients after optimisation.
+  Optional independent candidate values. With
+  `replicate_selection = "holdout"`, these data choose the stochastic
+  replicate and are never used to fit its coefficients. When absent, an
+  internal candidate holdout is split off before optimisation.
 
 - return_all_reps:
 
   Whether to retain full replicate results.
+
+- allow_incompatible_estimated_P:
+
+  When `P` is estimated from `ref_data` and falls below `G` by more than
+  sampling error explains, the two matrices cannot describe the same
+  population and the call stops. Set this to `TRUE` to continue anyway;
+  the override and the offending eigenvalue are recorded in
+  `covariance_provenance$compatibility`.
+
+- replicate_selection:
+
+  How the winning stochastic search is chosen. `"holdout"`, the default,
+  fits every replicate without the held-out candidates and chooses among
+  them on that untouched set. `"training"` reproduces the earlier
+  behaviour of taking the lowest training objective, which is a minimum
+  over `n_rep` draws and is biased downward.
+
+- holdout_fraction:
+
+  Fraction of candidates reserved for choosing among replicates when
+  `replicate_selection = "holdout"`.
 
 - debug:
 
@@ -182,6 +208,33 @@ deviation of trait \\j\\ across all candidates in the
 favourable-direction analysis space. Both `dg` and `realised_response`
 are therefore in candidate standard-deviation units.
 
+This holds whatever `scale_traits` is set to. The coefficient solve
+happens in the units of `G` and `P`, which are raw trait units when
+`scale_traits = FALSE`, so `dg` is converted from standard-deviation
+units to that space before the solve and the coefficients are invariant
+to the units the traits happen to be recorded in. Releases up to 0.5.0
+passed the standard-deviation vector into the solve directly, which
+asked for \\d_j\\ *raw* units per trait; with candidate standard
+deviations of 10 and 1 and equal requested gains, that delivered
+standardised response in the ratio 1:10 rather than 1:1.
+
+## Empirical differential against transmitted response
+
+`realised_response` is a property of the candidates that were selected:
+the standardised differential between the selected group and the whole
+set. It is not what the next generation inherits.
+
+`theoretical_response` reports the model-based expectation \$\$\Delta G
+= i \frac{\mathbf{G}\mathbf{b}}
+{\sqrt{\mathbf{b}^\mathsf{T}\mathbf{P}\mathbf{b}}}\$\$ in the analysis
+space, in the original trait units, and standardised. This is the
+criterion on which a desired-gain index can be compared with the
+classical families, which report the same quantity through
+[`evaluate_index()`](https://FAkohoue.github.io/DesiredGainR/reference/evaluate_index.md).
+Keep the two apart when reporting: a large differential among candidates
+with a small transmitted response means selection is acting mostly on
+non-heritable variation.
+
 ## Objective function
 
 The search minimises \$\$\sum_j v_j \left(\frac{r_j -
@@ -200,12 +253,14 @@ vectors: each proposal is mapped to coefficients by \\b =
 P^{-1}G(G^\mathsf{T}P^{-1}G)^{-1}d\\ and accepted only if it lowers the
 objective. The objective is a step function of \\b\\, because it depends
 on \\b\\ only through the identity of the selected set, so a
-derivative-free search is used. The replicate with the lowest objective
-is returned; because that choice is made on the same candidates that are
-then selected, the reported objective is optimistically biased, and the
-result depends on `n_rep`. Use `validation_data` for an unbiased
-evaluation of the winning coefficients. `run_dgsi()` seeds the RNG from
-`seed` and restores the caller's RNG state before returning.
+derivative-free search is used. With the default holdout rule, the split
+is made before optimisation and the replicate is chosen on candidates
+that did not contribute to fitting. `validation_data`, when supplied, is
+preferred to an internal split and can therefore select the replicate as
+well as evaluate it. The final coefficients are applied to all
+candidates only after that choice; they are not refitted. `run_dgsi()`
+seeds the RNG from `seed` and restores the caller's RNG state before
+returning.
 
 Ties in the index score are broken by ascending candidate identifier, so
 the selected set does not depend on input row order.
@@ -223,13 +278,15 @@ candidates <- data.frame(
 # In practice G comes from a fitted multi-trait genetic model, or from
 # estimate_genetic_covariance(); it is not the covariance of raw phenotypes.
 G <- matrix(c(1.0, -0.3, -0.3, 0.8), 2, dimnames = list(traits, traits))
+P <- G + diag(c(0.8, 0.6))
+dimnames(P) <- list(traits, traits)
 
 fit <- run_dgsi(
   init_data = candidates["GenoID"],
   cand_data = candidates,
   trait_cols = traits,
   dg = c(yield = 0.6, disease = 0.4),
-  G = G,
+  G = G, P = P,
   lower_is_better = "disease",
   n_select = 8,
   n_iter = 50,
@@ -237,20 +294,20 @@ fit <- run_dgsi(
   seed = 3
 )
 fit$coefficients
-#>     yield   disease 
-#> 1.3963647 0.5127025 
+#>      yield    disease 
+#> 0.09362514 0.04617554 
 fit$realised_response
 #>     yield   disease 
-#> 1.1080826 0.4999344 
+#> 0.9357724 0.8574219 
 fit$replicate_diagnostics
 #>    Replicate Objective Iteration_of_best Selected Plateau
 #>        <int>     <num>             <int>    <int>  <lgcl>
-#> 1:         1 0.7794956                14        8   FALSE
-#> 2:         2 0.7794956                 2        8   FALSE
-#> 3:         3 0.7794956                15        8   FALSE
+#> 1:         1 0.3393454                21        8   FALSE
+#> 2:         2 0.3393454                 3        8   FALSE
+#> 3:         3 0.3393454                35        8   FALSE
 #>    Final_window_relative_improvement Chosen
 #>                                <num> <lgcl>
-#> 1:                         0.7859594   TRUE
-#> 2:                         0.7859594  FALSE
-#> 3:                         0.7859594  FALSE
+#> 1:                         0.7996234   TRUE
+#> 2:                         0.6075916  FALSE
+#> 3:                         0.7996234  FALSE
 ```

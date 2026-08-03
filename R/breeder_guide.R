@@ -26,7 +26,7 @@
 #' It is intended for breeders, programme managers and reviewers who will use
 #' or approve a selection decision but do not necessarily run R themselves.
 #'
-#' The tagged PDF provides a fixed reference edition and the HTML edition
+#' The PDF provides a fixed-layout reference edition and the HTML edition
 #' renders the same content for on-screen reading. These standalone files have
 #' no vignette engine, so they are not indexed by
 #' \code{vignette()}/\code{browseVignettes()} like the package's \code{.Rmd}
@@ -38,7 +38,10 @@
 #'   is interactive, the file is opened with the operating system's default
 #'   application through \code{\link[utils]{browseURL}}. When \code{FALSE}, or
 #'   in a non-interactive session, only the path is returned.
-#' @param format Character, one of \code{"pdf"} (default) or \code{"html"}.
+#' @param format Character, one of \code{"html"} (default) or \code{"pdf"}.
+#'   HTML is the default because it needs only pandoc, whereas the PDF edition
+#'   also requires a LaTeX installation and is therefore the more likely of the
+#'   two to be absent.
 #'
 #' @return The file path, invisibly, to the selected edition in the installed
 #'   package. An explicit error is raised when the requested edition is
@@ -56,16 +59,36 @@
 #' if (!inherits(path, "try-error")) file.exists(path)
 #'
 #' @export
-open_desiredgain_guide <- function(open = TRUE, format = c("pdf", "html")) {
+open_desiredgain_guide <- function(open = TRUE, format = c("html", "pdf")) {
+  # HTML is the default because it renders wherever pandoc is available,
+  # whereas the PDF edition additionally needs a LaTeX installation. Defaulting
+  # to the harder artifact meant the exported function failed on installations
+  # where the guide had in fact been built.
   format <- match.arg(format)
   guide_name <- paste0("DesiredGainR_Breeder_Guide.", format)
   guide_path <- system.file("extdata", guide_name, package = "DesiredGainR")
 
   if (!nzchar(guide_path) || !file.exists(guide_path)) {
+    alternative <- setdiff(c("html", "pdf"), format)
+    alternative_path <- system.file(
+      "extdata", paste0("DesiredGainR_Breeder_Guide.", alternative),
+      package = "DesiredGainR"
+    )
     stop(
       guide_name, " was not found in the installed package, where it is ",
-      "expected under inst/extdata/. Reinstall DesiredGainR, or obtain the ",
-      "guide directly from the package repository.",
+      "expected under inst/extdata/.\n",
+      if (nzchar(alternative_path) && file.exists(alternative_path)) {
+        paste0(
+          "  The ", alternative, " edition is installed; call ",
+          "open_desiredgain_guide(format = \"", alternative, "\")."
+        )
+      } else {
+        paste0(
+          "  No edition is installed. Build them by running ",
+          "data-raw/build_breeder_guide.R in the package source, then ",
+          "reinstall."
+        )
+      },
       call. = FALSE
     )
   }

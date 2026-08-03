@@ -19,6 +19,7 @@ test_that("DGSI automatically chooses the best replicate", {
     n_select = 8,
     n_iter = 25,
     n_rep = 4,
+    replicate_selection = "training",
     seed = 99
   )
 
@@ -27,8 +28,10 @@ test_that("DGSI automatically chooses the best replicate", {
     min(result$replicate_diagnostics$Objective)
   )
   expect_equal(sum(result$replicate_diagnostics$Chosen), 1)
-  expect_equal(result$best_replicate,
-               result$replicate_diagnostics[Chosen == TRUE, Replicate])
+  expect_equal(
+    result$best_replicate,
+    result$replicate_diagnostics[Chosen == TRUE, Replicate]
+  )
   expect_equal(sum(result$ranked_geno$Selected), 8)
 })
 

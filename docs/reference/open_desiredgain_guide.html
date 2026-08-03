@@ -64,9 +64,11 @@ recommendation is robust. No R code is required to read the guide."><meta proper
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Deciding what to select for</h6></li>
     <li><a class="dropdown-item" href="../articles/DesiredGainR-objective.html">Defining a breeding objective</a></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-desired-gain-intervals.html">Defining desired gains and acceptable intervals</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Looking ahead</h6></li>
     <li><a class="dropdown-item" href="../articles/DesiredGainR-simulation.html">Comparing objectives over several cycles</a></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-empirical-validation.html">Empirical validation with real breeding programmes</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../breeder-guide.html">Breeder guide</a></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -96,7 +98,7 @@ recommendation is robust. No R code is required to read the guide.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">open_desiredgain_guide</span><span class="op">(</span>open <span class="op">=</span> <span class="cn">TRUE</span>, format <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"pdf"</span>, <span class="st">"html"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">open_desiredgain_guide</span><span class="op">(</span>open <span class="op">=</span> <span class="cn">TRUE</span>, format <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"html"</span>, <span class="st">"pdf"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -111,7 +113,10 @@ in a non-interactive session, only the path is returned.</p></dd>
 
 
 <dt id="arg-format">format<a class="anchor" aria-label="anchor" href="#arg-format"></a></dt>
-<dd><p>Character, one of <code>"pdf"</code> (default) or <code>"html"</code>.</p></dd>
+<dd><p>Character, one of <code>"html"</code> (default) or <code>"pdf"</code>.
+HTML is the default because it needs only pandoc, whereas the PDF edition
+also requires a LaTeX installation and is therefore the more likely of the
+two to be absent.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -124,7 +129,7 @@ unavailable, rather than a silent fallback to the other format.</p>
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>It is intended for breeders, programme managers and reviewers who will use
 or approve a selection decision but do not necessarily run R themselves.</p>
-<p>The tagged PDF provides a fixed reference edition and the HTML edition
+<p>The PDF provides a fixed-layout reference edition and the HTML edition
 renders the same content for on-screen reading. These standalone files have
 no vignette engine, so they are not indexed by
 <code><a href="https://rdrr.io/r/utils/vignette.html" class="external-link">vignette()</a></code>/<code><a href="https://rdrr.io/r/utils/browseVignettes.html" class="external-link">browseVignettes()</a></code> like the package's <code>.Rmd</code>
@@ -145,7 +150,9 @@ the same material with full statistical detail and runnable code;
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Locate without opening, which is what a script should do.</span></span></span>
 <span class="r-in"><span><span class="va">path</span> <span class="op">&lt;-</span> <span class="kw"><a href="https://rdrr.io/r/base/try.html" class="external-link">try</a></span><span class="op">(</span><span class="fu">open_desiredgain_guide</span><span class="op">(</span>open <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>, silent <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> [open_desiredgain_guide] Guide located at: C:/Users/fakohoue/AppData/Local/R/win-library/4.5/DesiredGainR/extdata/DesiredGainR_Breeder_Guide.html</span>
 <span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">inherits</a></span><span class="op">(</span><span class="va">path</span>, <span class="st">"try-error"</span><span class="op">)</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/files.html" class="external-link">file.exists</a></span><span class="op">(</span><span class="va">path</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] TRUE</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

@@ -78,9 +78,11 @@
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Deciding what to select for</h6></li>
     <li><a class="dropdown-item" href="../articles/DesiredGainR-objective.html">Defining a breeding objective</a></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-desired-gain-intervals.html">Defining desired gains and acceptable intervals</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Looking ahead</h6></li>
     <li><a class="dropdown-item" href="../articles/DesiredGainR-simulation.html">Comparing objectives over several cycles</a></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-empirical-validation.html">Empirical validation with real breeding programmes</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="../breeder-guide.html">Breeder guide</a></li>
@@ -345,8 +347,10 @@ desired-gain index uses the second, <span class="math inline">\(\mathbf{b} =
 as improvements, in genetic standard deviations, and let
 <code>lower_is_better</code> handle direction.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">desired_gains</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>GY <span class="op">=</span> <span class="fl">1.0</span>, PHT <span class="op">=</span> <span class="fl">0.4</span>, AD <span class="op">=</span> <span class="fl">0.6</span>, ASI <span class="op">=</span> <span class="fl">0.5</span>,</span>
-<span>                   EPP <span class="op">=</span> <span class="fl">0.4</span>, GLS <span class="op">=</span> <span class="fl">0.6</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">desired_gains</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>  GY <span class="op">=</span> <span class="fl">1.0</span>, PHT <span class="op">=</span> <span class="fl">0.4</span>, AD <span class="op">=</span> <span class="fl">0.6</span>, ASI <span class="op">=</span> <span class="fl">0.5</span>,</span>
+<span>  EPP <span class="op">=</span> <span class="fl">0.4</span>, GLS <span class="op">=</span> <span class="fl">0.6</span></span>
+<span><span class="op">)</span></span></code></pre></div>
 <p>This says: one standard deviation of extra yield, four tenths of a
 standard deviation shorter plants, six tenths earlier flowering, and so
 on.</p>
@@ -486,16 +490,20 @@ before it becomes a forward-looking objective.</p>
 <p><code><a href="../reference/selection_index.html">selection_index()</a></code> provides every classical family
 through one interface.</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">economic_weights</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>GY <span class="op">=</span> <span class="fl">1.0</span>, PHT <span class="op">=</span> <span class="fl">0.2</span>, AD <span class="op">=</span> <span class="fl">0.5</span>,</span>
-<span>                      ASI <span class="op">=</span> <span class="fl">0.4</span>, EPP <span class="op">=</span> <span class="fl">0.3</span>, GLS <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">economic_weights</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>  GY <span class="op">=</span> <span class="fl">1.0</span>, PHT <span class="op">=</span> <span class="fl">0.2</span>, AD <span class="op">=</span> <span class="fl">0.5</span>,</span>
+<span>  ASI <span class="op">=</span> <span class="fl">0.4</span>, EPP <span class="op">=</span> <span class="fl">0.3</span>, GLS <span class="op">=</span> <span class="fl">0.5</span></span>
+<span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">smith_hazel</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/selection_index.html">selection_index</a></span><span class="op">(</span></span>
-<span>  <span class="va">dgr_candidates</span>, <span class="va">traits</span>, method <span class="op">=</span> <span class="st">"smith_hazel"</span>,</span>
+<span>  <span class="va">dgr_candidates</span>, <span class="va">traits</span>,</span>
+<span>  method <span class="op">=</span> <span class="st">"smith_hazel"</span>,</span>
 <span>  G <span class="op">=</span> <span class="va">dgr_G</span>, P <span class="op">=</span> <span class="va">dgr_P</span>, economic_weights <span class="op">=</span> <span class="va">economic_weights</span>,</span>
 <span>  lower_is_better <span class="op">=</span> <span class="va">lower_is_better</span>, n_select <span class="op">=</span> <span class="fl">20L</span>, main_trait <span class="op">=</span> <span class="st">"GY"</span></span>
 <span><span class="op">)</span></span>
 <span><span class="va">rank_sum</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/selection_index.html">selection_index</a></span><span class="op">(</span></span>
-<span>  <span class="va">dgr_candidates</span>, <span class="va">traits</span>, method <span class="op">=</span> <span class="st">"mulamba_mock"</span>,</span>
+<span>  <span class="va">dgr_candidates</span>, <span class="va">traits</span>,</span>
+<span>  method <span class="op">=</span> <span class="st">"mulamba_mock"</span>,</span>
 <span>  lower_is_better <span class="op">=</span> <span class="va">lower_is_better</span>, n_select <span class="op">=</span> <span class="fl">20L</span></span>
 <span><span class="op">)</span></span>
 <span><span class="va">smith_hazel</span></span>
@@ -648,13 +656,13 @@ set comes closest to your target.</p>
 <span>  n_select <span class="op">=</span> <span class="fl">20L</span>, n_iter <span class="op">=</span> <span class="fl">200L</span>, n_rep <span class="op">=</span> <span class="fl">5L</span>, seed <span class="op">=</span> <span class="fl">42L</span></span>
 <span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">dgsi</span><span class="op">$</span><span class="va">realised_response</span>, <span class="fl">3</span><span class="op">)</span></span>
-<span><span class="co">#&gt;    GY   PHT    AD   ASI   EPP   GLS </span></span>
-<span><span class="co">#&gt; 1.572 0.303 0.258 0.528 0.449 0.532</span></span></code></pre></div>
+<span><span class="co">#&gt;     GY    PHT     AD    ASI    EPP    GLS </span></span>
+<span><span class="co">#&gt; -0.455  0.283 -0.138  1.066  0.407  0.562</span></span></code></pre></div>
 <p>Read the deviation from target against Stage 7:</p>
 <div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">dgsi</span><span class="op">$</span><span class="va">realised_response</span> <span class="op">-</span> <span class="va">desired_gains</span>, <span class="fl">3</span><span class="op">)</span></span>
 <span><span class="co">#&gt;     GY    PHT     AD    ASI    EPP    GLS </span></span>
-<span><span class="co">#&gt;  0.572 -0.097 -0.342  0.028  0.049 -0.068</span></span></code></pre></div>
+<span><span class="co">#&gt; -1.455 -0.117 -0.738  0.566  0.007 -0.038</span></span></code></pre></div>
 <p>Feasibility constrained the requested <em>proportion</em>. The
 optimiser is not bound to that proportion, so it distributes the
 shortfall unevenly, overshooting grain yield while undershooting
@@ -667,18 +675,18 @@ stable:</p>
 <code class="sourceCode R"><span><span class="va">dgsi</span><span class="op">$</span><span class="va">replicate_diagnostics</span></span>
 <span><span class="co">#&gt;    Replicate Objective Iteration_of_best Selected Plateau</span></span>
 <span><span class="co">#&gt;        &lt;int&gt;     &lt;num&gt;             &lt;int&gt;    &lt;int&gt;  &lt;lgcl&gt;</span></span>
-<span><span class="co">#&gt; 1:         1 0.7427606               166       20   FALSE</span></span>
-<span><span class="co">#&gt; 2:         2 1.3406629               190       20   FALSE</span></span>
-<span><span class="co">#&gt; 3:         3 1.0778294                35       20    TRUE</span></span>
-<span><span class="co">#&gt; 4:         4 0.8216413               120       20   FALSE</span></span>
-<span><span class="co">#&gt; 5:         5 2.0393576               142       20   FALSE</span></span>
+<span><span class="co">#&gt; 1:         1  3.827818                24       20    TRUE</span></span>
+<span><span class="co">#&gt; 2:         2  3.798025                48       20    TRUE</span></span>
+<span><span class="co">#&gt; 3:         3  3.686678               107       20   FALSE</span></span>
+<span><span class="co">#&gt; 4:         4  4.013952               118       20   FALSE</span></span>
+<span><span class="co">#&gt; 5:         5  3.839667               142       20   FALSE</span></span>
 <span><span class="co">#&gt;    Final_window_relative_improvement Chosen</span></span>
 <span><span class="co">#&gt;                                &lt;num&gt; &lt;lgcl&gt;</span></span>
-<span><span class="co">#&gt; 1:                        0.71931914   TRUE</span></span>
-<span><span class="co">#&gt; 2:                        0.30952774  FALSE</span></span>
-<span><span class="co">#&gt; 3:                        0.00000000  FALSE</span></span>
-<span><span class="co">#&gt; 4:                        0.51939104  FALSE</span></span>
-<span><span class="co">#&gt; 5:                        0.01409831  FALSE</span></span></code></pre></div>
+<span><span class="co">#&gt; 1:                        0.00000000  FALSE</span></span>
+<span><span class="co">#&gt; 2:                        0.00000000  FALSE</span></span>
+<span><span class="co">#&gt; 3:                        0.16116898  FALSE</span></span>
+<span><span class="co">#&gt; 4:                        0.05597303  FALSE</span></span>
+<span><span class="co">#&gt; 5:                        0.01400224   TRUE</span></span></code></pre></div>
 <p>And compare against the classical solution without iteration:</p>
 <div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">dgsi</span><span class="op">$</span><span class="va">non_iterated</span><span class="op">$</span><span class="va">realised_response</span>, <span class="fl">3</span><span class="op">)</span></span>
@@ -775,7 +783,8 @@ heterozygosity first:</p>
 <span><span class="co">#&gt;      0.5046444      0.0000000</span></span></code></pre></div>
 <div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">converted</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/haplotypes_from_inbred_dosage.html">haplotypes_from_inbred_dosage</a></span><span class="op">(</span></span>
-<span>  <span class="va">dosage</span>, heterozygous_policy <span class="op">=</span> <span class="st">"drop_variant"</span></span>
+<span>  <span class="va">dosage</span>,</span>
+<span>  heterozygous_policy <span class="op">=</span> <span class="st">"drop_variant"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p>No threshold is imposed on residual heterozygosity, because no
 universally appropriate level exists; it is measured and reported

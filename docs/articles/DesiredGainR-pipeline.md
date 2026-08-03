@@ -198,8 +198,10 @@ improvements, in genetic standard deviations, and let `lower_is_better`
 handle direction.
 
 ``` r
-desired_gains <- c(GY = 1.0, PHT = 0.4, AD = 0.6, ASI = 0.5,
-                   EPP = 0.4, GLS = 0.6)
+desired_gains <- c(
+  GY = 1.0, PHT = 0.4, AD = 0.6, ASI = 0.5,
+  EPP = 0.4, GLS = 0.6
+)
 ```
 
 This says: one standard deviation of extra yield, four tenths of a
@@ -356,16 +358,20 @@ before it becomes a forward-looking objective.
 provides every classical family through one interface.
 
 ``` r
-economic_weights <- c(GY = 1.0, PHT = 0.2, AD = 0.5,
-                      ASI = 0.4, EPP = 0.3, GLS = 0.5)
+economic_weights <- c(
+  GY = 1.0, PHT = 0.2, AD = 0.5,
+  ASI = 0.4, EPP = 0.3, GLS = 0.5
+)
 
 smith_hazel <- selection_index(
-  dgr_candidates, traits, method = "smith_hazel",
+  dgr_candidates, traits,
+  method = "smith_hazel",
   G = dgr_G, P = dgr_P, economic_weights = economic_weights,
   lower_is_better = lower_is_better, n_select = 20L, main_trait = "GY"
 )
 rank_sum <- selection_index(
-  dgr_candidates, traits, method = "mulamba_mock",
+  dgr_candidates, traits,
+  method = "mulamba_mock",
   lower_is_better = lower_is_better, n_select = 20L
 )
 smith_hazel
@@ -460,8 +466,8 @@ dgsi <- run_dgsi(
   n_select = 20L, n_iter = 200L, n_rep = 5L, seed = 42L
 )
 round(dgsi$realised_response, 3)
-#>    GY   PHT    AD   ASI   EPP   GLS 
-#> 1.572 0.303 0.258 0.528 0.449 0.532
+#>     GY    PHT     AD    ASI    EPP    GLS 
+#> -0.455  0.283 -0.138  1.066  0.407  0.562
 ```
 
 Read the deviation from target against Stage 7:
@@ -469,7 +475,7 @@ Read the deviation from target against Stage 7:
 ``` r
 round(dgsi$realised_response - desired_gains, 3)
 #>     GY    PHT     AD    ASI    EPP    GLS 
-#>  0.572 -0.097 -0.342  0.028  0.049 -0.068
+#> -1.455 -0.117 -0.738  0.566  0.007 -0.038
 ```
 
 Feasibility constrained the requested *proportion*. The optimiser is not
@@ -484,18 +490,18 @@ agreement across replicates is the evidence that the answer is stable:
 dgsi$replicate_diagnostics
 #>    Replicate Objective Iteration_of_best Selected Plateau
 #>        <int>     <num>             <int>    <int>  <lgcl>
-#> 1:         1 0.7427606               166       20   FALSE
-#> 2:         2 1.3406629               190       20   FALSE
-#> 3:         3 1.0778294                35       20    TRUE
-#> 4:         4 0.8216413               120       20   FALSE
-#> 5:         5 2.0393576               142       20   FALSE
+#> 1:         1  3.827818                24       20    TRUE
+#> 2:         2  3.798025                48       20    TRUE
+#> 3:         3  3.686678               107       20   FALSE
+#> 4:         4  4.013952               118       20   FALSE
+#> 5:         5  3.839667               142       20   FALSE
 #>    Final_window_relative_improvement Chosen
 #>                                <num> <lgcl>
-#> 1:                        0.71931914   TRUE
-#> 2:                        0.30952774  FALSE
-#> 3:                        0.00000000  FALSE
-#> 4:                        0.51939104  FALSE
-#> 5:                        0.01409831  FALSE
+#> 1:                        0.00000000  FALSE
+#> 2:                        0.00000000  FALSE
+#> 3:                        0.16116898  FALSE
+#> 4:                        0.05597303  FALSE
+#> 5:                        0.01400224   TRUE
 ```
 
 And compare against the classical solution without iteration:
@@ -605,7 +611,8 @@ c(
 
 ``` r
 converted <- haplotypes_from_inbred_dosage(
-  dosage, heterozygous_policy = "drop_variant"
+  dosage,
+  heterozygous_policy = "drop_variant"
 )
 ```
 

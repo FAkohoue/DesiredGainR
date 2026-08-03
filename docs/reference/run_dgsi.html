@@ -60,9 +60,11 @@ replicate with the smallest objective is returned automatically."><meta property
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Deciding what to select for</h6></li>
     <li><a class="dropdown-item" href="../articles/DesiredGainR-objective.html">Defining a breeding objective</a></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-desired-gain-intervals.html">Defining desired gains and acceptable intervals</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Looking ahead</h6></li>
     <li><a class="dropdown-item" href="../articles/DesiredGainR-simulation.html">Comparing objectives over several cycles</a></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-empirical-validation.html">Empirical validation with real breeding programmes</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../breeder-guide.html">Breeder guide</a></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -117,6 +119,9 @@ replicate with the smallest objective is returned automatically.</p>
 <span>  plateau_tolerance <span class="op">=</span> <span class="fl">1e-04</span>,</span>
 <span>  validation_data <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  return_all_reps <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  allow_incompatible_estimated_P <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  replicate_selection <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"holdout"</span>, <span class="st">"training"</span><span class="op">)</span>,</span>
+<span>  holdout_fraction <span class="op">=</span> <span class="fl">0.3</span>,</span>
 <span>  debug <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -238,12 +243,36 @@ trait-specific squared response deviations.</p></dd>
 
 
 <dt id="arg-validation-data">validation_data<a class="anchor" aria-label="anchor" href="#arg-validation-data"></a></dt>
-<dd><p>Optional independent candidate values used only to
-evaluate the winning coefficients after optimisation.</p></dd>
+<dd><p>Optional independent candidate values. With
+<code>replicate_selection = "holdout"</code>, these data choose the stochastic
+replicate and are never used to fit its coefficients. When absent, an
+internal candidate holdout is split off before optimisation.</p></dd>
 
 
 <dt id="arg-return-all-reps">return_all_reps<a class="anchor" aria-label="anchor" href="#arg-return-all-reps"></a></dt>
 <dd><p>Whether to retain full replicate results.</p></dd>
+
+
+<dt id="arg-allow-incompatible-estimated-p">allow_incompatible_estimated_P<a class="anchor" aria-label="anchor" href="#arg-allow-incompatible-estimated-p"></a></dt>
+<dd><p>When <code>P</code> is estimated from <code>ref_data</code>
+and falls below <code>G</code> by more than sampling error explains, the two matrices
+cannot describe the same population and the call stops. Set this to <code>TRUE</code>
+to continue anyway; the override and the offending eigenvalue are recorded
+in <code>covariance_provenance$compatibility</code>.</p></dd>
+
+
+<dt id="arg-replicate-selection">replicate_selection<a class="anchor" aria-label="anchor" href="#arg-replicate-selection"></a></dt>
+<dd><p>How the winning stochastic search is chosen.
+<code>"holdout"</code>, the default, fits every replicate without the held-out
+candidates and chooses among them on that untouched set. <code>"training"</code>
+reproduces the earlier
+behaviour of taking the lowest training objective, which is a minimum over
+<code>n_rep</code> draws and is biased downward.</p></dd>
+
+
+<dt id="arg-holdout-fraction">holdout_fraction<a class="anchor" aria-label="anchor" href="#arg-holdout-fraction"></a></dt>
+<dd><p>Fraction of candidates reserved for choosing among
+replicates when <code>replicate_selection = "holdout"</code>.</p></dd>
 
 
 <dt id="arg-debug">debug<a class="anchor" aria-label="anchor" href="#arg-debug"></a></dt>
@@ -265,6 +294,30 @@ $$r_j = \frac{\bar{x}_{j,\mathrm{selected}} -
 where \(s_j\) is the standard deviation of trait \(j\) across all
 candidates in the favourable-direction analysis space. Both <code>dg</code> and
 <code>realised_response</code> are therefore in candidate standard-deviation units.</p>
+<p>This holds whatever <code>scale_traits</code> is set to. The coefficient solve happens
+in the units of <code>G</code> and <code>P</code>, which are raw trait units when
+<code>scale_traits = FALSE</code>, so <code>dg</code> is converted from standard-deviation units
+to that space before the solve and the coefficients are invariant to the
+units the traits happen to be recorded in. Releases up to 0.5.0 passed the
+standard-deviation vector into the solve directly, which asked for
+\(d_j\) <em>raw</em> units per trait; with candidate standard deviations of 10
+and 1 and equal requested gains, that delivered standardised response in the
+ratio 1:10 rather than 1:1.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="empirical-differential-against-transmitted-response">Empirical differential against transmitted response<a class="anchor" aria-label="anchor" href="#empirical-differential-against-transmitted-response"></a></h2>
+    <p><code>realised_response</code> is a property of the candidates that were selected: the
+standardised differential between the selected group and the whole set. It
+is not what the next generation inherits.</p>
+<p><code>theoretical_response</code> reports the model-based expectation
+$$\Delta G = i \frac{\mathbf{G}\mathbf{b}}
+{\sqrt{\mathbf{b}^\mathsf{T}\mathbf{P}\mathbf{b}}}$$
+in the analysis space, in the original trait units, and standardised. This
+is the criterion on which a desired-gain index can be compared with the
+classical families, which report the same quantity through
+<code><a href="evaluate_index.html">evaluate_index()</a></code>. Keep the two apart when reporting: a large differential
+among candidates with a small transmitted response means selection is
+acting mostly on non-heritable variation.</p>
     </div>
     <div class="section level2">
     <h2 id="objective-function">Objective function<a class="anchor" aria-label="anchor" href="#objective-function"></a></h2>
@@ -284,12 +337,13 @@ each proposal is mapped to coefficients by
 \(b = P^{-1}G(G^\mathsf{T}P^{-1}G)^{-1}d\) and accepted only if it lowers
 the objective. The objective is a step function of \(b\), because it
 depends on \(b\) only through the identity of the selected set, so a
-derivative-free search is used. The replicate with the lowest objective is
-returned; because that choice is made on the same candidates that are then
-selected, the reported objective is optimistically biased, and the result
-depends on <code>n_rep</code>. Use <code>validation_data</code> for an unbiased evaluation of the
-winning coefficients. <code>run_dgsi()</code> seeds the RNG from <code>seed</code> and restores
-the caller's RNG state before returning.</p>
+derivative-free search is used. With the default holdout rule, the split is
+made before optimisation and the replicate is chosen on candidates that did
+not contribute to fitting. <code>validation_data</code>, when supplied, is preferred
+to an internal split and can therefore select the replicate as well as
+evaluate it. The final coefficients are applied to all candidates only
+after that choice; they are not refitted. <code>run_dgsi()</code> seeds the RNG from
+<code>seed</code> and restores the caller's RNG state before returning.</p>
 <p>Ties in the index score are broken by ascending candidate identifier, so
 the selected set does not depend on input row order.</p>
     </div>
@@ -306,13 +360,15 @@ the selected set does not depend on input row order.</p>
 <span class="r-in"><span><span class="co"># In practice G comes from a fitted multi-trait genetic model, or from</span></span></span>
 <span class="r-in"><span><span class="co"># estimate_genetic_covariance(); it is not the covariance of raw phenotypes.</span></span></span>
 <span class="r-in"><span><span class="va">G</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1.0</span>, <span class="op">-</span><span class="fl">0.3</span>, <span class="op">-</span><span class="fl">0.3</span>, <span class="fl">0.8</span><span class="op">)</span>, <span class="fl">2</span>, dimnames <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">traits</span>, <span class="va">traits</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">P</span> <span class="op">&lt;-</span> <span class="va">G</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/base/diag.html" class="external-link">diag</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.8</span>, <span class="fl">0.6</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/dimnames.html" class="external-link">dimnames</a></span><span class="op">(</span><span class="va">P</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">traits</span>, <span class="va">traits</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu">run_dgsi</span><span class="op">(</span></span></span>
 <span class="r-in"><span>  init_data <span class="op">=</span> <span class="va">candidates</span><span class="op">[</span><span class="st">"GenoID"</span><span class="op">]</span>,</span></span>
 <span class="r-in"><span>  cand_data <span class="op">=</span> <span class="va">candidates</span>,</span></span>
 <span class="r-in"><span>  trait_cols <span class="op">=</span> <span class="va">traits</span>,</span></span>
 <span class="r-in"><span>  dg <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>yield <span class="op">=</span> <span class="fl">0.6</span>, disease <span class="op">=</span> <span class="fl">0.4</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>  G <span class="op">=</span> <span class="va">G</span>,</span></span>
+<span class="r-in"><span>  G <span class="op">=</span> <span class="va">G</span>, P <span class="op">=</span> <span class="va">P</span>,</span></span>
 <span class="r-in"><span>  lower_is_better <span class="op">=</span> <span class="st">"disease"</span>,</span></span>
 <span class="r-in"><span>  n_select <span class="op">=</span> <span class="fl">8</span>,</span></span>
 <span class="r-in"><span>  n_iter <span class="op">=</span> <span class="fl">50</span>,</span></span>
@@ -320,22 +376,22 @@ the selected set does not depend on input row order.</p>
 <span class="r-in"><span>  seed <span class="op">=</span> <span class="fl">3</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">fit</span><span class="op">$</span><span class="va">coefficients</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     yield   disease </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1.3963647 0.5127025 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      yield    disease </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 0.09362514 0.04617554 </span>
 <span class="r-in"><span><span class="va">fit</span><span class="op">$</span><span class="va">realised_response</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     yield   disease </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1.1080826 0.4999344 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 0.9357724 0.8574219 </span>
 <span class="r-in"><span><span class="va">fit</span><span class="op">$</span><span class="va">replicate_diagnostics</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    Replicate Objective Iteration_of_best Selected Plateau</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>        &lt;int&gt;     &lt;num&gt;             &lt;int&gt;    &lt;int&gt;  &lt;lgcl&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1:         1 0.7794956                14        8   FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2:         2 0.7794956                 2        8   FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3:         3 0.7794956                15        8   FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1:         1 0.3393454                21        8   FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2:         2 0.3393454                 3        8   FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3:         3 0.3393454                35        8   FALSE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    Final_window_relative_improvement Chosen</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                &lt;num&gt; &lt;lgcl&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1:                         0.7859594   TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2:                         0.7859594  FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3:                         0.7859594  FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1:                         0.7996234   TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2:                         0.6075916  FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3:                         0.7996234  FALSE</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

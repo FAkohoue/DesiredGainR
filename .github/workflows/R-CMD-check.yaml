@@ -1,3 +1,14 @@
+# Release gate for DesiredGainR.
+#
+# Two principles govern this file.
+#
+# 1. A test that skips is not a test that passes. The AlphaSimR and ASRgenomics
+#    layers, and the rendered Breeder Guide, were all covered only by tests that
+#    skip when their dependency is absent. One job therefore installs every
+#    optional dependency and fails if anything skips at all.
+# 2. The artefact that ships is the source tarball, so that is what gets
+#    checked, without regenerating documentation on the way.
+
 name: R-CMD-check
 
 on:
@@ -5,9 +16,12 @@ on:
     branches: [main, master]
   pull_request:
     branches: [main, master]
+  workflow_dispatch:
+
+permissions: read-all
 
 jobs:
-  R-CMD-check:
+  matrix-check:
     runs-on: ${{ matrix.config.os }}
     name: ${{ matrix.config.os }} (${{ matrix.config.r }})
 
@@ -15,9 +29,18 @@ jobs:
       fail-fast: false
       matrix:
         config:
-          - {os: ubuntu-latest, r: 'release'}
+          - {os: ubuntu-latest,  r: 'devel', http-user-agent: 'release'}
+          - {os: ubuntu-latest,  r: 'release'}
+          - {os: ubuntu-latest,  r: 'oldrel-1'}
+          # The minimum declared in DESCRIPTION. If this fails, either the code
+          # or the declaration is wrong.
+          - {os: ubuntu-latest,  r: '4.1'}
           - {os: windows-latest, r: 'release'}
-          - {os: macos-latest, r: 'release'}
+          - {os: macos-latest,   r: 'release'}
+
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      R_KEEP_PKG_SOURCE: yes
 
     steps:
       - uses: actions/checkout@v4
@@ -27,18 +50,218 @@ jobs:
       - uses: r-lib/actions/setup-r@v2
         with:
           r-version: ${{ matrix.config.r }}
+          http-user-agent: ${{ matrix.config.http-user-agent }}
           use-public-rspm: true
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          extra-packages: any::rcmdcheck, any::roxygen2
+          extra-packages: any::rcmdcheck
           needs: check
-
-      - name: Document package
-        shell: Rscript {0}
-        run: roxygen2::roxygenise()
 
       - uses: r-lib/actions/check-r-package@v2
         with:
           upload-snapshots: true
-          build_args: 'c("--no-manual", "--compact-vignettes=gs+qpdf")'
+          # Warnings are failures. The malformed Rd equation that produced two
+          # of them stayed invisible until a check was actually run.
+          error-on: '"warning"'
+
+  full-dependencies:
+    runs-on: ubuntu-latest
+    name: no-skip (AlphaSimR + ASRgenomics)
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: r-lib/actions/setup-pandoc@v2
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: release
+          use-public-rspm: true
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: |
+            any::AlphaSimR
+            any::ASRgenomics
+            any::testthat
+            any::rmarkdown
+            any::pkgbuild
+            any::jsonlite
+            any::devtools
+          needs: check
+
+      - name: Install independent QP solvers
+        run: >-
+          python -m pip install --disable-pip-version-check
+          clarabel==0.11.1 osqp==1.1.3 numpy==2.5.1 scipy==1.18.0
+
+      - name: Validate the internal QP solver independently
+        env:
+          DESIREDGAINR_PYTHON: python
+          DESIREDGAINR_QP_REPORT: inst/validation/qp-validation-results.csv
+        run: Rscript scripts/validate_qp_solvers.R
+
+      - name: Render the Breeder Guide
+        run: Rscript data-raw/build_breeder_guide.R
+
+      - name: Confirm the guide artefacts exist
+        shell: Rscript {0}
+        run: |
+          # open_desiredgain_guide() promises these files and the website links
+          # to them. A missing artefact must fail the build rather than leave a
+          # broken export in the release.
+          expected <- file.path(
+            "inst", "extdata", "DesiredGainR_Breeder_Guide.html"
+          )
+          if (!file.exists(expected)) {
+            stop("The Breeder Guide was not rendered: ", expected)
+          }
+
+      - name: Install the package
+        run: R CMD INSTALL --no-multiarch --with-keep.source .
+
+      - name: Run full-dependency tests and reject unexpected skips
+        shell: Rscript {0}
+        run: |
+          library(testthat)
+          results <- test_dir(
+            "tests/testthat", package = "DesiredGainR",
+            reporter = "summary", stop_on_failure = TRUE
+          )
+          frame <- as.data.frame(results)
+          skipped <- frame[frame$skipped > 0, , drop = FALSE]
+          intentional <- grepl(
+            paste(
+              "a missing edition errors rather than returning a bad path",
+              "a missing edition points at the one that is present",
+              "the missing dependency is named, not hidden",
+              sep = "|"
+            ),
+            skipped$test
+          )
+          unexpected <- skipped[!intentional, , drop = FALSE]
+          if (nrow(unexpected)) {
+            print(unexpected[, c("file", "test")])
+            stop(
+              "Unexpected tests skipped in the full-dependency job. Only ",
+              "explicit tests of mutually exclusive absence branches may skip."
+            )
+          }
+
+  source-tarball:
+    runs-on: ubuntu-latest
+    name: source tarball --as-cran
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: r-lib/actions/setup-pandoc@v2
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: release
+          use-public-rspm: true
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: |
+            any::AlphaSimR
+            any::ASRgenomics
+            any::rcmdcheck
+            any::roxygen2
+            any::rmarkdown
+            any::pkgbuild
+          needs: check
+
+      - name: Documentation is committed and current
+        shell: Rscript {0}
+        run: |
+          # Regenerating docs silently during a check hides the case where the
+          # committed Rd files do not match the roxygen source.
+          # pkgload is required because the roxygen blocks document package
+          # data objects (for example dgr_traits) that are not created by
+          # sourcing R/data.R in isolation.
+          roxygen2::roxygenise(load_code = "pkgload")
+          changed <- system("git status --porcelain man NAMESPACE",
+                            intern = TRUE)
+          if (length(changed)) {
+            cat(changed, sep = "\n")
+            stop(
+              "roxygen2 produced uncommitted changes. Run ",
+              "devtools::document() and commit the result."
+            )
+          }
+
+      - name: Render the Breeder Guide
+        run: Rscript data-raw/build_breeder_guide.R
+
+      - name: Build and check the tarball
+        shell: Rscript {0}
+        run: |
+          tarball <- pkgbuild::build(dest_path = tempdir())
+          rcmdcheck::rcmdcheck(
+            tarball, args = "--as-cran", error_on = "warning"
+          )
+
+  coverage-and-lint:
+    runs-on: ubuntu-latest
+    name: coverage and lint
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: r-lib/actions/setup-pandoc@v2
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: release
+          use-public-rspm: true
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: |
+            any::covr
+            any::lintr
+            any::styler
+            any::AlphaSimR
+            any::ASRgenomics
+          needs: coverage
+
+      - name: Test coverage
+        shell: Rscript {0}
+        run: |
+          coverage <- covr::package_coverage(quiet = FALSE)
+          print(coverage)
+          percent <- covr::percent_coverage(coverage)
+          cat(sprintf("Coverage: %.1f%%\n", percent))
+          if (percent < 70) {
+            stop(sprintf("Coverage %.1f%% is below the 70%% floor.", percent))
+          }
+
+      - name: Enforce canonical R formatting
+        shell: Rscript {0}
+        run: |
+          styler::style_pkg(dry = "fail")
+
+      - name: Lint
+        shell: Rscript {0}
+        run: |
+          lints <- lintr::lint_package(
+            linters = lintr::linters_with_defaults(
+              # styler is the authority for indentation and layout. Disabling
+              # overlapping linters avoids contradictory hanging-indent rules.
+              line_length_linter = lintr::line_length_linter(100L),
+              object_name_linter = NULL,
+              indentation_linter = NULL,
+              commented_code_linter = NULL,
+              object_length_linter = NULL,
+              object_usage_linter = NULL
+            )
+          )
+          print(lints)
+          if (length(lints)) {
+            stop("lintr reported ", length(lints), " issue(s).")
+          }

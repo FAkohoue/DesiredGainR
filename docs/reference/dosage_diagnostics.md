@@ -37,7 +37,8 @@ per-marker tables.
 
 ``` r
 dosage <- matrix(
-  c(0, 2, 1, 0, 2, 0, 2, NA, 2), nrow = 3,
+  c(0, 2, 1, 0, 2, 0, 2, NA, 2),
+  nrow = 3,
   dimnames = list(c("v1", "v2", "v3"), c("l1", "l2", "l3"))
 )
 dosage_diagnostics(dosage)

@@ -104,7 +104,8 @@
 #' )
 #' W <- matrix(
 #'   c(0.10, -0.02, -0.02, -0.05),
-#'   2, dimnames = list(traits, traits)
+#'   2,
+#'   dimnames = list(traits, traits)
 #' )
 #' fit <- run_qgsi(
 #'   init_data = gebv["GenoID"],
@@ -120,26 +121,26 @@
 #'
 #' @export
 run_qgsi <- function(
-    init_data,
-    gebv_data,
-    trait_cols,
-    linear_weights,
-    W,
-    id_col = "GenoID",
-    reference_gebv_data = NULL,
-    Gamma = NULL,
-    relationship_matrix = NULL,
-    true_G = NULL,
-    lower_is_better = NULL,
-    center_traits = TRUE,
-    scale_traits = FALSE,
-    missing_policy = c("error", "complete_cases", "mean_impute"),
-    n_select = NULL,
-    selection_proportion = NULL,
-    return_contributions = TRUE,
-    relationship_tolerance = 1e-8,
-    symmetry_tolerance = sqrt(.Machine$double.eps),
-    debug = FALSE
+  init_data,
+  gebv_data,
+  trait_cols,
+  linear_weights,
+  W,
+  id_col = "GenoID",
+  reference_gebv_data = NULL,
+  Gamma = NULL,
+  relationship_matrix = NULL,
+  true_G = NULL,
+  lower_is_better = NULL,
+  center_traits = TRUE,
+  scale_traits = FALSE,
+  missing_policy = c("error", "complete_cases", "mean_impute"),
+  n_select = NULL,
+  selection_proportion = NULL,
+  return_contributions = TRUE,
+  relationship_tolerance = 1e-8,
+  symmetry_tolerance = sqrt(.Machine$double.eps),
+  debug = FALSE
 ) {
   missing_policy <- match.arg(missing_policy)
   .dgr_qg_traits(trait_cols)
@@ -199,7 +200,7 @@ run_qgsi <- function(
     candidate_sd <- apply(X, 2L, stats::sd)
     candidate_sd <- candidate_sd[is.finite(candidate_sd) & candidate_sd > 0]
     if (length(candidate_sd) > 1L &&
-        max(candidate_sd) / min(candidate_sd) > 5) {
+      max(candidate_sd) / min(candidate_sd) > 5) {
       contribution <- abs(weights) * apply(X, 2L, stats::sd)
       share <- contribution / sum(contribution)
       dominant <- which.max(share)
@@ -272,6 +273,16 @@ run_qgsi <- function(
     G_analysis <- transform %*% G_analysis %*% transform
     dimnames(G_analysis) <- list(trait_cols, trait_cols)
     .dgr_check_psd(G_analysis, "true_G")
+    # Gamma is the covariance of the genomic predictions and true_G that of the
+    # values being predicted. A prediction cannot vary more than what it
+    # predicts in any direction, so true_G - Gamma must be a covariance matrix.
+    # Without this, MSPE = Var(H) + Var(I) - 2Cov(H, I) can come out negative
+    # and the squared correlation can exceed one, both of which are impossible
+    # and both of which the previous code would have reported without comment.
+    .dgr_check_compatible(
+      Gamma, G_analysis, "run_qgsi() accuracy and MSPE",
+      g_name = "Gamma", p_name = "true_G"
+    )
   }
 
   linear_by_trait <- sweep(X, 2L, weights, "*")
@@ -414,10 +425,11 @@ run_qgsi <- function(
 
 .dgr_qg_traits <- function(trait_cols) {
   if (!is.character(trait_cols) || !length(trait_cols) ||
-      anyNA(trait_cols) || any(!nzchar(trait_cols)) ||
-      anyDuplicated(trait_cols)) {
+    anyNA(trait_cols) || any(!nzchar(trait_cols)) ||
+    anyDuplicated(trait_cols)) {
     stop("trait_cols must contain unique, non-missing trait names.",
-         call. = FALSE)
+      call. = FALSE
+    )
   }
   invisible(TRUE)
 }
@@ -430,13 +442,14 @@ run_qgsi <- function(
   if (!valid) {
     relation <- if (lower_open) "greater than" else "at least"
     stop(name, " must be a finite scalar ", relation, " ", lower, ".",
-         call. = FALSE)
+      call. = FALSE
+    )
   }
   invisible(TRUE)
 }
 
 .dgr_qg_symmetric_matrix <- function(
-    x, trait_cols, name, tolerance
+  x, trait_cols, name, tolerance
 ) {
   p <- length(trait_cols)
   if (!is.matrix(x) || any(dim(x) != p)) {
@@ -444,7 +457,8 @@ run_qgsi <- function(
   }
   if (xor(is.null(rownames(x)), is.null(colnames(x)))) {
     stop(name, " must have both row and column names, or neither.",
-         call. = FALSE)
+      call. = FALSE
+    )
   }
   if (!is.null(rownames(x))) {
     absent_rows <- setdiff(trait_cols, rownames(x))
@@ -462,7 +476,8 @@ run_qgsi <- function(
   matrix_scale <- max(1, max(abs(x)))
   if (asymmetry > tolerance * matrix_scale) {
     stop(name, " must be symmetric within symmetry_tolerance.",
-         call. = FALSE)
+      call. = FALSE
+    )
   }
   x <- (x + t(x)) / 2
   dimnames(x) <- list(trait_cols, trait_cols)
@@ -470,12 +485,12 @@ run_qgsi <- function(
 }
 
 .dgr_qg_estimate_gamma <- function(
-    X,
-    ids,
-    relationship_matrix,
-    trait_cols,
-    tolerance,
-    symmetry_tolerance
+  X,
+  ids,
+  relationship_matrix,
+  trait_cols,
+  tolerance,
+  symmetry_tolerance
 ) {
   X_cov <- sweep(X, 2L, colMeans(X), "-")
   g <- nrow(X_cov)
@@ -520,7 +535,7 @@ run_qgsi <- function(
   }
   id_names <- as.character(ids)
   if (!all(id_names %in% rownames(K)) ||
-      !all(id_names %in% colnames(K))) {
+    !all(id_names %in% colnames(K))) {
     stop(
       "relationship_matrix dimnames must contain every reference genotype.",
       call. = FALSE
@@ -535,7 +550,8 @@ run_qgsi <- function(
   negative_limit <- tolerance * max(1, largest)
   if (min(decomposition$values) < -negative_limit) {
     stop("relationship_matrix must be positive semidefinite.",
-         call. = FALSE)
+      call. = FALSE
+    )
   }
   retained <- decomposition$values > tolerance * max(1, largest)
   if (!any(retained)) {
@@ -571,7 +587,7 @@ run_qgsi <- function(
 }
 
 .dgr_qg_select <- function(
-    score, ids, n_select, selection_proportion
+  score, ids, n_select, selection_proportion
 ) {
   n <- length(score)
   if (!is.null(n_select) && !is.null(selection_proportion)) {
@@ -593,17 +609,18 @@ run_qgsi <- function(
   }
   if (!is.null(n_select)) {
     if (!is.numeric(n_select) || length(n_select) != 1L ||
-        !is.finite(n_select) || n_select != as.integer(n_select) ||
-        n_select < 1L || n_select > n) {
+      !is.finite(n_select) || n_select != as.integer(n_select) ||
+      n_select < 1L || n_select > n) {
       stop("n_select must be an integer between 1 and the candidate count.",
-           call. = FALSE)
+        call. = FALSE
+      )
     }
     selected_n <- as.integer(n_select)
   } else {
     if (!is.numeric(selection_proportion) ||
-        length(selection_proportion) != 1L ||
-        !is.finite(selection_proportion) ||
-        selection_proportion <= 0 || selection_proportion > 1) {
+      length(selection_proportion) != 1L ||
+      !is.finite(selection_proportion) ||
+      selection_proportion <= 0 || selection_proportion > 1) {
       stop("selection_proportion must be in (0, 1].", call. = FALSE)
     }
     selected_n <- min(n, max(1L, ceiling(selection_proportion * n)))
@@ -637,7 +654,7 @@ run_qgsi <- function(
 }
 
 .dgr_qg_theory <- function(
-    weights, W, Gamma, true_G, selection_intensity, trait_cols
+  weights, W, Gamma, true_G, selection_intensity, trait_cols
 ) {
   linear_variance <- as.numeric(
     crossprod(weights, Gamma %*% weights)
@@ -647,7 +664,7 @@ run_qgsi <- function(
   )
   numerical_scale <- max(1, abs(linear_variance), abs(quadratic_variance))
   if (linear_variance < -1e-10 * numerical_scale ||
-      quadratic_variance < -1e-10 * numerical_scale) {
+    quadratic_variance < -1e-10 * numerical_scale) {
     stop(
       "The supplied weights and Gamma produced an invalid negative variance.",
       call. = FALSE
@@ -702,8 +719,21 @@ run_qgsi <- function(
       2 * .dgr_qg_trace(W %*% Gamma %*% W %*% true_G)
     mspe <- merit_variance + index_variance -
       2 * merit_index_covariance
-    if (abs(mspe) <= 1e-10 * max(1, merit_variance, index_variance)) {
+    tolerance <- 1e-10 * max(1, merit_variance, index_variance)
+    if (abs(mspe) <= tolerance) {
       mspe <- 0
+    } else if (mspe < 0) {
+      # Compatibility of Gamma and true_G was validated above, so a negative
+      # mean squared error beyond rounding cannot arise from admissible inputs.
+      stop(
+        "The mean squared prediction error evaluated to ",
+        format(mspe, digits = 6), ", which is impossible. Var(H) = ",
+        format(merit_variance, digits = 6), ", Var(I) = ",
+        format(index_variance, digits = 6), ", Cov(H, I) = ",
+        format(merit_index_covariance, digits = 6), ". Check that W and ",
+        "linear_weights describe the same trait space as Gamma and true_G.",
+        call. = FALSE
+      )
     }
     # General definition: rho^2 = Cov(H, I)^2 / (Var(I) Var(H)). Releases up
     # to 0.3.0 returned Var(I) / Var(H), which coincides with rho^2 only when
@@ -715,8 +745,10 @@ run_qgsi <- function(
       variance_ratio <- index_variance / merit_variance
     }
     if (merit_variance > 0 && index_variance > 0) {
-      accuracy_squared <- merit_index_covariance^2 /
-        (index_variance * merit_variance)
+      accuracy_squared <- .dgr_clamp_correlation(
+        merit_index_covariance^2 / (index_variance * merit_variance),
+        "The squared index-merit correlation"
+      )
     }
   }
 

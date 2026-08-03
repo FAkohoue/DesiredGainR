@@ -45,35 +45,51 @@
 #'   signal ratio.
 #' @param X,y Training inputs and responses.
 #' @param H Prior-mean basis.
+#' @param n_lengthscale Number of free lengthscales, either `ncol(X)` for an
+#'   anisotropic kernel or 1 for an isotropic one.
 #'
 #' @return The negative log marginal likelihood, or a large finite penalty when
 #'   the covariance is not decomposable.
 #' @noRd
-.dgr_gp_nlml <- function(parameters, X, y, H) {
+.dgr_gp_nlml <- function(parameters, X, y, H, n_lengthscale = ncol(X),
+                         noise_ratio = NULL) {
   d <- ncol(X)
-  lengthscale <- exp(parameters[seq_len(d)])
-  nugget_ratio <- exp(parameters[d + 1L])
+  lengthscale <- rep_len(
+    exp(parameters[seq_len(n_lengthscale)]), d
+  )
+  nugget_ratio <- exp(parameters[n_lengthscale + 1L])
   n <- nrow(X)
 
   R <- .dgr_matern52(X, X, lengthscale)
-  diag(R) <- diag(R) + nugget_ratio + 1e-8
+  # A known per-observation noise variance is added on top of the fitted
+  # homogeneous nugget, so the surrogate distinguishes points measured
+  # precisely from points measured noisily instead of averaging over both.
+  diag(R) <- diag(R) + nugget_ratio + 1e-8 +
+    if (is.null(noise_ratio)) 0 else noise_ratio
   chol_R <- tryCatch(chol(R), error = function(e) NULL)
-  if (is.null(chol_R)) return(1e10)
+  if (is.null(chol_R)) {
+    return(1e10)
+  }
 
   solve_R <- function(z) backsolve(chol_R, backsolve(chol_R, z, transpose = TRUE))
   R_inv_y <- solve_R(y)
   R_inv_H <- solve_R(H)
   HtRinvH <- crossprod(H, R_inv_H)
   chol_H <- tryCatch(chol(HtRinvH), error = function(e) NULL)
-  if (is.null(chol_H)) return(1e10)
+  if (is.null(chol_H)) {
+    return(1e10)
+  }
 
   beta <- backsolve(chol_H, backsolve(chol_H, crossprod(H, R_inv_y),
-                                      transpose = TRUE))
+    transpose = TRUE
+  ))
   residual <- y - H %*% beta
   R_inv_residual <- solve_R(residual)
   # Profile out the signal variance analytically.
   sigma2 <- as.numeric(crossprod(residual, R_inv_residual)) / n
-  if (!is.finite(sigma2) || sigma2 <= 0) return(1e10)
+  if (!is.finite(sigma2) || sigma2 <= 0) {
+    return(1e10)
+  }
 
   log_determinant <- 2 * sum(log(diag(chol_R)))
   0.5 * (n * log(sigma2) + log_determinant)
@@ -85,36 +101,65 @@
 #' @param y Numeric response vector.
 #' @param prior_mean Either `"constant"` or `"linear"`.
 #' @param n_restarts Number of random restarts of the hyperparameter search.
+#' @param anisotropic Whether to fit one lengthscale per input dimension. When
+#'   `NULL`, an anisotropic kernel is used only if the design is large enough
+#'   to determine its hyperparameters.
 #'
 #' @return A fitted model object used by `.dgr_gp_predict()`.
 #' @noRd
-.dgr_gp_fit <- function(X, y, prior_mean = "constant", n_restarts = 5L) {
+.dgr_gp_fit <- function(
+  X, y, prior_mean = "constant", n_restarts = 5L, anisotropic = NULL,
+  noise_variance = NULL
+) {
   X <- as.matrix(X)
   d <- ncol(X)
   n <- nrow(X)
+  if (is.null(anisotropic)) {
+    # One lengthscale per trait costs one hyperparameter per trait, fitted by
+    # maximising a marginal likelihood on however many objective evaluations
+    # the budget allowed. Below roughly ten evaluations per dimension those
+    # estimates are dominated by noise, and a shared lengthscale, which is
+    # scale-free on a unit sphere where all pairwise distances lie in [0, 2],
+    # gives a better-behaved surrogate.
+    anisotropic <- n >= 10L * d
+  }
+  n_lengthscale <- if (isTRUE(anisotropic)) d else 1L
   # Standardise the response so that the hyperparameter scales are comparable
   # between problems.
   y_centre <- mean(y)
   y_scale <- stats::sd(y)
   if (!is.finite(y_scale) || y_scale <= 0) y_scale <- 1
   y_standard <- (y - y_centre) / y_scale
+  # The known noise is expressed on the same standardised scale as the
+  # response, so that it is comparable with the fitted nugget.
+  noise_ratio <- NULL
+  if (!is.null(noise_variance) && length(noise_variance) == n) {
+    noise_ratio <- as.numeric(noise_variance) / (y_scale^2)
+    noise_ratio[!is.finite(noise_ratio) | noise_ratio < 0] <- 0
+    if (all(noise_ratio == 0)) noise_ratio <- NULL
+  }
   H <- .dgr_mean_basis(X, prior_mean)
 
   best <- NULL
   best_value <- Inf
   starts <- c(
-    list(c(rep(log(0.3), d), log(1e-4))),
+    list(c(rep(log(0.3), n_lengthscale), log(1e-4))),
     lapply(seq_len(max(0L, n_restarts - 1L)), function(i) {
-      c(stats::runif(d, log(0.05), log(2)), stats::runif(1, log(1e-6), log(0.5)))
+      c(
+        stats::runif(n_lengthscale, log(0.05), log(2)),
+        stats::runif(1, log(1e-6), log(0.5))
+      )
     })
   )
   for (start in starts) {
     fit <- tryCatch(
       stats::optim(
-        start, .dgr_gp_nlml, X = X, y = y_standard, H = H,
+        start, .dgr_gp_nlml,
+        X = X, y = y_standard, H = H,
+        n_lengthscale = n_lengthscale, noise_ratio = noise_ratio,
         method = "L-BFGS-B",
-        lower = c(rep(log(0.02), d), log(1e-8)),
-        upper = c(rep(log(10), d), log(2)),
+        lower = c(rep(log(0.02), n_lengthscale), log(1e-8)),
+        upper = c(rep(log(10), n_lengthscale), log(2)),
         control = list(maxit = 200L)
       ),
       error = function(e) NULL
@@ -125,20 +170,22 @@
     }
   }
   if (is.null(best)) {
-    best <- list(par = c(rep(log(0.3), d), log(1e-3)))
+    best <- list(par = c(rep(log(0.3), n_lengthscale), log(1e-3)))
   }
 
-  lengthscale <- exp(best$par[seq_len(d)])
-  nugget_ratio <- exp(best$par[d + 1L])
+  lengthscale <- rep_len(exp(best$par[seq_len(n_lengthscale)]), d)
+  nugget_ratio <- exp(best$par[n_lengthscale + 1L])
   R <- .dgr_matern52(X, X, lengthscale)
-  diag(R) <- diag(R) + nugget_ratio + 1e-8
+  diag(R) <- diag(R) + nugget_ratio + 1e-8 +
+    if (is.null(noise_ratio)) 0 else noise_ratio
   chol_R <- chol(R)
   solve_R <- function(z) backsolve(chol_R, backsolve(chol_R, z, transpose = TRUE))
   R_inv_H <- solve_R(H)
   HtRinvH <- crossprod(H, R_inv_H)
   chol_H <- chol(HtRinvH)
   beta <- backsolve(chol_H, backsolve(chol_H, crossprod(H, solve_R(y_standard)),
-                                      transpose = TRUE))
+    transpose = TRUE
+  ))
   residual <- y_standard - H %*% beta
   R_inv_residual <- solve_R(residual)
   sigma2 <- as.numeric(crossprod(residual, R_inv_residual)) / n
@@ -148,6 +195,8 @@
       X = X, y = y, prior_mean = prior_mean,
       y_centre = y_centre, y_scale = y_scale,
       lengthscale = lengthscale, nugget_ratio = nugget_ratio,
+      anisotropic = isTRUE(anisotropic), n_lengthscale = n_lengthscale,
+      heteroskedastic = !is.null(noise_ratio),
       sigma2 = sigma2, beta = beta,
       chol_R = chol_R, chol_H = chol_H,
       R_inv_residual = R_inv_residual, R_inv_H = R_inv_H,

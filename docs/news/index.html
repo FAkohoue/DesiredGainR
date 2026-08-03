@@ -54,9 +54,11 @@
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Deciding what to select for</h6></li>
     <li><a class="dropdown-item" href="../articles/DesiredGainR-objective.html">Defining a breeding objective</a></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-desired-gain-intervals.html">Defining desired gains and acceptable intervals</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Looking ahead</h6></li>
     <li><a class="dropdown-item" href="../articles/DesiredGainR-simulation.html">Comparing objectives over several cycles</a></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-empirical-validation.html">Empirical validation with real breeding programmes</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../breeder-guide.html">Breeder guide</a></li>
 <li class="active nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -76,6 +78,233 @@
 
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.5.0" id="desiredgainr-050-in-development">DesiredGainR 0.5.0 (in development)<a class="anchor" aria-label="anchor" href="#desiredgainr-050-in-development"></a></h2>
+<div class="section level3">
+<h3 id="critical-remediation-of-august-0-5-0">Critical remediation of 1 August 2026<a class="anchor" aria-label="anchor" href="#critical-remediation-of-august-0-5-0"></a></h3>
+<ul><li><p>Added a reproducible empirical validation suite using six real breeding- programme sources. It estimates common-check and year-adjusted recurrent- cycle trends, freezes a desired-gain index before later INIA rice cohorts, compares it with yield-only selection under a hierarchical temporal bootstrap, tests Genomes-to-Fields transport across non-overlapping year windows, and records the CIMMYT wheat predicted-versus-realized aggregate anchor. Every endpoint ships with its evidence tier and interpretation, making the package’s mathematical, genomic and transport evidence directly auditable. A prospective comparison of competing vectors is identified as a future opportunity to estimate incremental field response among strategies. The sixth source is the Zhang et al. CIMMYT maize RCGS programme: raw two-location cycle gains reproduce the published trend, a nested leave-one-environment-out analysis tests desired-gain directions, and a marker-subsampled repeated five-fold GBLUP reproduction includes a permuted negative control. Cross-file checks expose the 43-versus-44 C4 discrepancy and the byte-identical C3/C4 selected genotype files. Unphased bulk-family calls are explicitly rejected as actual AlphaSimR founders.</p></li>
+<li><p>The population-driven recommender now uses <code>G_target</code> for breeder-facing genetic-SD units and treats <code>G_realised</code> only as a finite-QTL calibration diagnostic. It confirms multiple finalists, applies exact simultaneous lower and upper probability bounds, reports supported/uncertain/not-supported decisions, runs independent multi-start and half-budget stability checks, and validates finalists across newly sampled genetic architectures. Optional covariance draws are integrated when genetic/residual degrees of freedom are supplied; otherwise support is explicitly conditional on the point covariance.</p></li>
+<li><p>Added leakage-free cross-fitted RR-BLUP selection to <code><a href="../reference/simulate_selection_cycles.html">simulate_selection_cycles()</a></code> through its compact <code>prediction</code> list. The simulator reports held-out GEBV accuracy and never uses hidden simulated breeding values to construct a selection index.</p></li>
+<li><p>The exact box-QP active-set solver is now independently validated in CI against Clarabel (primary interior-point oracle) and polished/unpolished OSQP across analytical, random, ill-conditioned, degenerate and invariance cases. Full KKT, feasibility, objective, status and discrepancy results ship under <code>inst/validation/</code>.</p></li>
+<li><p>Added an independent multivariate-normal Monte Carlo test of the desired-gain response direction and achievable-response ellipsoid. It calls neither the package coefficient helper nor AlphaSimR, providing a separate check of the one-cycle selection-response mathematics.</p></li>
+<li><p>Renamed misleading <code>probability_best</code> outputs to <code>bootstrap_selection_frequency</code>; this is a resampling stability diagnostic, not a posterior probability that a vector is truly best.</p></li>
+<li><p>Added <code><a href="../reference/suggest_desired_gains.html">suggest_desired_gains()</a></code> for breeders who cannot defend a complete desired-gain vector. It accepts trait-specific minimum gains in estimated <code>G_target</code> genetic-standard-deviation units and returns separate minimum-attainment and maximum-balanced recommendations. An exact convex active-set solution verifies one-cycle feasibility and the maximum common response on the achievable-response ellipsoid. Adaptive discovery, independent multiplicity-controlled screening, and independent final confirmation are separated so recommendation uncertainty is not estimated from the same simulation noise that selected the candidates.</p></li>
+<li><p>Desired gains can now be elicited as breeder-defined intervals with <code><a href="../reference/define_desired_gain_intervals.html">define_desired_gain_intervals()</a></code>. <code><a href="../reference/optimize_desired_gains.html">optimize_desired_gains()</a></code> restricts its search to the admissible interval cone and searches in genetic-standard- deviation units by default, while retaining representative requested gains and the trait-unit directions used by the simulator. A dedicated vignette explains signs, units, feasibility and what “optimum” means. Its new <code>mode = "interval"</code> recommends only actually simulated vectors, defines high gain as jointly reaching every breeder-specified lower bound, reports Jeffreys-binomial posterior probabilities and credible intervals per vector, and ranks conservatively by the lower joint-probability bound with balanced interval attainment as a tie-breaker.</p></li>
+<li><p>DGSI holdouts are split before optimisation; external validation data can select the replicate and never enter coefficient fitting.</p></li>
+<li><p>Mallard, Tallis and Kemp–Harville now use exact proportional-response contrasts. The undocumented Harville soft penalty and Mallard absolute-gain claim were removed.</p></li>
+<li><p>Covariance propagation passes sampled residual covariance directly to AlphaSimR, evaluates the point covariance separately, and computes rank churn only under a declared scalarisation.</p></li>
+<li><p>Optimizer checkpoints use complete SHA-256 fingerprints including objective and search inputs. Replicate outcomes are retained, scalar uncertainty is computed per replicate, paired shared-seed bootstrapping preserves objective covariance, and exhausted candidate pools stop explicitly.</p></li>
+<li><p>Diversity defaults off and requires verified marker–QTL disjointness unless an experimental override is recorded.</p></li>
+<li><p>Desired-gain families no longer invent a different aggregate merit for every direction. Merit-dependent criteria require common <code>aggregate_weights</code>.</p></li>
+<li><p>Multi-environment stability contrasts now feed <code><a href="../reference/restricted_index.html">restricted_index()</a></code> through <code>constraint_matrix</code>; duplicate genotype–environment records are rejected.</p></li>
+<li><p>The default covariance repair preserves trait variances by repairing the correlation matrix. The aggressive ASRgenomics route remains explicit.</p></li>
+</ul></div>
+<div class="section level3">
+<h3 id="technical-review-of-july--remaining-items-0-5-0">Technical review of 31 July 2026 — remaining items<a class="anchor" aria-label="anchor" href="#technical-review-of-july--remaining-items-0-5-0"></a></h3>
+<div class="section level4">
+<h4 id="new-covariance-uncertainty-reaches-the-recommendation-0-5-0">New: covariance uncertainty reaches the recommendation<a class="anchor" aria-label="anchor" href="#new-covariance-uncertainty-reaches-the-recommendation-0-5-0"></a></h4>
+<p><code><a href="../reference/optimize_desired_gains.html">optimize_desired_gains()</a></code> conditions on one covariance estimate, so a direction that is best only because of how <code>G</code> happened to be estimated looked identical to one that is robustly best.</p>
+<p><code><a href="../reference/propagate_covariance_uncertainty.html">propagate_covariance_uncertainty()</a></code> re-evaluates a fixed set of directions across draws from the sampling distribution of the covariance. <code><a href="../reference/draw_covariance_pairs.html">draw_covariance_pairs()</a></code> draws the genetic and residual matrices separately and reassembles <code>P* = G* + E*</code>, so every pair is admissible by construction rather than by rejection.</p>
+<p>Each draw <strong>rebuilds the founder population</strong>, because <code>G</code> is the architecture the traits are built from rather than a matrix the simulation multiplies by. That is what makes this expensive and why directions are supplied rather than searched: the intended workflow is to take the Pareto set from <code><a href="../reference/optimize_desired_gains.html">optimize_desired_gains()</a></code> and pass it here.</p>
+<p>The result separates the two sources of uncertainty. Monte Carlo error falls with more replicates; covariance-estimation error does not and can only be reduced by estimating <code>G</code> from more independent genetic units. When the covariance component dominates, <code>variance_components$dominant_source</code> says so, because running more replicates in that situation is wasted effort.</p>
+</div>
+<div class="section level4">
+<h4 id="fixed-clonal-calibration-now-reproduces-the-whole-covariance-0-5-0">Fixed: clonal calibration now reproduces the whole covariance<a class="anchor" aria-label="anchor" href="#fixed-clonal-calibration-now-reproduces-the-whole-covariance-0-5-0"></a></h4>
+<p>The previous release calibrated the genotypic <em>variances</em> and left the correlations emergent, so the setup accepted a full covariance matrix as its target and reproduced only its diagonal. Dominance perturbs the correlation structure as well, and that perturbation is a smooth, near-identity function of the additive correlations supplied, so the fixed-point iteration now corrects both and projects the correction back onto the set of valid correlation matrices. <code>calibration_error</code> records the largest remaining deviation in each of the variances and correlations, and non-convergence warns rather than passing silently.</p>
+</div>
+<div class="section level4">
+<h4 id="new-multi-environment-and-genotype-by-environment-structure-0-5-0">New: multi-environment and genotype-by-environment structure<a class="anchor" aria-label="anchor" href="#new-multi-environment-and-genotype-by-environment-structure-0-5-0"></a></h4>
+<p><code><a href="../reference/expand_environments.html">expand_environments()</a></code> builds the separable covariance <code>Cov(g_je, g_kf) = G_jk * C_ef</code> over trait-environment combinations, so the whole index layer applies to a multi-environment problem unchanged. It supports environment-specific economic weights, and <code>include_stability = TRUE</code> returns per-trait response contrasts that can be passed to <code><a href="../reference/restricted_index.html">restricted_index()</a></code>.</p>
+<p>The residual is expanded separately and <code>P</code> reassembled from the two, so the expanded pair remains admissible; expanding <code>P</code> directly with the genetic environmental correlation would not guarantee that. The reported <code>interaction_share</code> says whether modelling the environments separately was worth the complexity. <code><a href="../reference/widen_environments.html">widen_environments()</a></code> reshapes long-format trial data.</p>
+</div>
+<div class="section level4">
+<h4 id="new-validation-against-the-qgsi-reference-implementation-0-5-0">New: validation against the QGSI reference implementation<a class="anchor" aria-label="anchor" href="#new-validation-against-the-qgsi-reference-implementation-0-5-0"></a></h4>
+<p><code><a href="../reference/run_qgsi.html">run_qgsi()</a></code> implements Cerón-Rojas et al. (2026) and was previously checked only against the equations as this package restates them, which establishes that the code matches our reading and nothing more.</p>
+<p>That paper’s replication deposit (<a href="https://doi.org/10.71682/10549385" class="external-link">doi:10.71682/10549385</a>) contains the authors’ own R scripts. The intermediate data files those scripts read were not deposited, so their published figures cannot be recomputed — but the algorithm can, and a reference implementation is a stronger comparison than a table, because it runs on any input rather than only on theirs.</p>
+<p><code>tests/testthat/test-reference-implementation.R</code> transcribes their code verbatim and runs both implementations on identical inputs. Compared: the Smith–Hazel coefficients <code>b = P^-1 G w</code>, the accuracy <code>corrHI</code>, the aggregate response <code>Rs</code>, the quadratic index variance <code>Vpq = b'Pb + 2 tr(BB P BB P)</code> and the quadratic merit variance <code>VHq = w'Gw + 2 tr(A G A G)</code>.</p>
+<p>The accuracy comparison is the informative one. The reference computes a ratio of standard deviations and this package computes a correlation; they coincide only because <code>b'Gw = b'Pb</code> for the optimum index, an identity asserted as its own test. Agreement establishes that both parties mean the same thing by accuracy, which comparing coefficients alone would not.</p>
+</div>
+<div class="section level4">
+<h4 id="new-reproduction-against-published-results-0-5-0">New: reproduction against published results<a class="anchor" aria-label="anchor" href="#new-reproduction-against-published-results-0-5-0"></a></h4>
+<p><code><a href="../articles/DesiredGainR-reproduction.html">vignette("DesiredGainR-reproduction")</a></code> checks the package against tables computed in SAS PROC IML and published by Rahimi and Debnath (2023), <em>Scientific Reports</em> 13:18977. The reference values are frozen in <code><a href="../reference/rahimi_debnath_2023.html">rahimi_debnath_2023()</a></code>.</p>
+<p>The article’s covariance matrices are not distributed, so coefficients cannot be recomputed. What is checkable is stronger: Pesek–Baker gives expected response <em>exactly</em> proportional to the desired gains, and dividing the published gains by the published <code>d</code> vector gives the same constant, 0.3358, to four significant figures across all seven traits. Seven ratios cannot coincide by accident.</p>
+<p>The vignette also explains the article’s reported <code>R_HI = 0.0018</code> for Pesek–Baker against 0.9887 for the optimum index. It is not an arithmetic error: it follows from using the desired-gain vector as the aggregate weights, which is what this package did until 0.5.0, and collapses because the trait scales span a factor of 200.</p>
+</div>
+<div class="section level4">
+<h4 id="release-infrastructure-0-5-0">Release infrastructure<a class="anchor" aria-label="anchor" href="#release-infrastructure-0-5-0"></a></h4>
+<p><code>cran-comments.md</code>, <code>.zenodo.json</code> for DOI minting on tag, <code>paper/paper.md</code> with a bibliography for the method paper, and <code>data-raw/release_checklist.R</code>, which reports every outstanding release step rather than stopping at the first.</p>
+</div>
+</div>
+<div class="section level3">
+<h3 id="technical-review-of-july--gates-b-and-c-0-5-0">Technical review of 31 July 2026 — Gates B and C<a class="anchor" aria-label="anchor" href="#technical-review-of-july--gates-b-and-c-0-5-0"></a></h3>
+<div class="section level4">
+<h4 id="new-restricted-and-proportional-gain-indices-0-5-0">New: restricted and proportional-gain indices<a class="anchor" aria-label="anchor" href="#new-restricted-and-proportional-gain-indices-0-5-0"></a></h4>
+<p><code><a href="../reference/restricted_index.html">restricted_index()</a></code> adds the closed-form constrained families: Kempthorne–Nordskog, Tallis, Mallard, Harville, and the projection form of restricted Smith–Hazel. Where a constraint is linear these give exactly what <code><a href="../reference/run_dgsi.html">run_dgsi()</a></code> approaches by stochastic search, without the replicate dependence or the selection optimism, so they also serve as a convergence check on the search.</p>
+</div>
+<div class="section level4">
+<h4 id="new-upstream-adapters-summary-and-coef-0-5-0">New: upstream adapters, <code>summary()</code> and <code>coef()</code>
+<a class="anchor" aria-label="anchor" href="#new-upstream-adapters-summary-and-coef-0-5-0"></a></h4>
+<p><code><a href="../reference/import_covariance.html">import_covariance()</a></code> converts variance components and covariance matrices from ASReml-R, sommer, breedR, BGLR and StageWise. It reorders traits to the analysis order rather than assuming it, refuses an incomplete component set, detects a correlation matrix passed as a covariance, and checks the imported matrix against <code>P</code>. A silently transposed trait order produces an index that is wrong in a way nothing downstream can detect, which is what this exists to prevent.</p>
+<p><code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> and <code><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef()</a></code> methods are added for fitted indices and for <code><a href="../reference/run_dgsi.html">run_dgsi()</a></code> results, returning tidy tables rather than printed text.</p>
+</div>
+<div class="section level4">
+<h4 id="fixed-best-of-replicate-optimism-is-now-removed-not-just-reported-0-5-0">Fixed: best-of-replicate optimism is now removed, not just reported<a class="anchor" aria-label="anchor" href="#fixed-best-of-replicate-optimism-is-now-removed-not-just-reported-0-5-0"></a></h4>
+<p><code><a href="../reference/run_dgsi.html">run_dgsi()</a></code> gains <code>replicate_selection</code>, defaulting to <code>"holdout"</code>: each replicate’s coefficients are scored on candidates held out of that comparison, so the choice no longer depends on the candidates finally selected. The previous behaviour remains as <code>replicate_selection = "training"</code> and is labelled as biased.</p>
+</div>
+<div class="section level4">
+<h4 id="fixed-the-estimated-p-exception-is-part-of-the-api-0-5-0">Fixed: the estimated-<code>P</code> exception is part of the API<a class="anchor" aria-label="anchor" href="#fixed-the-estimated-p-exception-is-part-of-the-api-0-5-0"></a></h4>
+<p><code><a href="../reference/run_dgsi.html">run_dgsi()</a></code> enforced admissibility for a supplied <code>P</code> but silently permitted an inadmissible estimated one. It now stops unless <code>allow_incompatible_estimated_P = TRUE</code>, and records the smallest residual eigenvalue, the sampling threshold, the status and any override in <code>covariance_provenance$compatibility</code>.</p>
+</div>
+<div class="section level4">
+<h4 id="fixed-optimiser-checkpoints-identified-only-trait-names-0-5-0">Fixed: optimiser checkpoints identified only trait names<a class="anchor" aria-label="anchor" href="#fixed-optimiser-checkpoints-identified-only-trait-names-0-5-0"></a></h4>
+<p>A checkpoint could resume evaluations produced under different founders, a different genetic covariance, a different mating system or a different cycle count and present them as this run’s frontier. Checkpoints now carry a fingerprint of every result-defining input, including package and AlphaSimR versions, and a mismatch stops with the differing fields named rather than resuming.</p>
+</div>
+<div class="section level4">
+<h4 id="fixed-simulation-error-was-computed-and-discarded-0-5-0">Fixed: simulation error was computed and discarded<a class="anchor" aria-label="anchor" href="#fixed-simulation-error-was-computed-and-discarded-0-5-0"></a></h4>
+<p><code>.dgr_evaluate_direction()</code> returned Monte Carlo standard errors that the optimiser threw away, so the surrogate fitted one homogeneous nugget and treated a precisely evaluated direction and a noisy one alike. Replicate-level outcomes, standard errors and their covariance are now retained and supplied to the Gaussian process as a per-point nugget.</p>
+<p>The frontier reports <code>pareto_probability</code>, the proportion of resampled frontiers on which each direction remained non-dominated given its own Monte Carlo error. This represents <em>simulation</em> error only; <code>G</code> and <code>P</code> are still treated as fixed, and that limitation is stated in the result.</p>
+</div>
+<div class="section level4">
+<h4 id="fixed-the-optimiser-could-spend-its-budget-re-evaluating-one-direction-0-5-0">Fixed: the optimiser could spend its budget re-evaluating one direction<a class="anchor" aria-label="anchor" href="#fixed-the-optimiser-could-spend-its-budget-re-evaluating-one-direction-0-5-0"></a></h4>
+<p>Expected improvement at an already-observed point can stay positive under a fitted nugget. Evaluated directions are now excluded from the acquisition pool, and a repeat that does occur is pooled as additional replication with a correspondingly reduced standard error rather than recorded as a new point.</p>
+</div>
+<div class="section level4">
+<h4 id="changed-clonal-replication-0-5-0">Changed: clonal replication<a class="anchor" aria-label="anchor" href="#changed-clonal-replication-0-5-0"></a></h4>
+<p><code><a href="../reference/simulate_selection_cycles.html">simulate_selection_cycles()</a></code> gains <code>n_clonal_replicates</code>. A clonal trial phenotypes several ramets per genotype and averages them, so selection is more accurate than a single plot; the previous single-phenotype assumption understated clonal response.</p>
+</div>
+<div class="section level4">
+<h4 id="other-0-5-0">Other<a class="anchor" aria-label="anchor" href="#other-0-5-0"></a></h4>
+<p><code>MATURITY.md</code> states which components are stable, beta and experimental, and what the package deliberately does not do. CI now covers R-devel, oldrel and the declared minimum 4.1, treats warnings as failures, checks the source tarball, verifies that roxygen output is committed, renders the Breeder Guide as a build step, and runs one job with every optional dependency installed that <strong>fails if any test skips</strong>. The legacy <code>inst/extdata</code> example CSVs are excluded from the build.</p>
+</div>
+</div>
+<div class="section level3">
+<h3 id="technical-review-of-july--gate-a-0-5-0">Technical review of 31 July 2026 — Gate A<a class="anchor" aria-label="anchor" href="#technical-review-of-july--gate-a-0-5-0"></a></h3>
+<div class="section level4">
+<h4 id="fixed-dgsi-desired-gains-were-in-the-wrong-space-when-traits-were-unscaled-0-5-0">Fixed: DGSI desired gains were in the wrong space when traits were unscaled<a class="anchor" aria-label="anchor" href="#fixed-dgsi-desired-gains-were-in-the-wrong-space-when-traits-were-unscaled-0-5-0"></a></h4>
+<p><code><a href="../reference/run_dgsi.html">run_dgsi()</a></code> documents <code>dg</code> and <code>realised_response</code> in candidate standard-deviation units, and its objective follows that definition. The Yamada coefficient solve, however, operates in the units of <code>G</code> and <code>P</code>. With <code>scale_traits = TRUE</code> the two coincide; with <code>scale_traits = FALSE</code> the analysis space is raw trait units, so the standard-deviation vector was asking for  <em>raw</em> units per trait.</p>
+<p>For two traits with candidate standard deviations 10 and 1 and equal requested gains, this targeted standardised response in the ratio 1:10 rather than 1:1. The stochastic search could partly recover, since the map is invertible, but the proposal coordinates were mislabelled, <code>optimised_d</code> was not in the documented units, and the non-iterated Yamada comparator was simply wrong.</p>
+<p>Desired gains are now converted to the analysis space before the solve, and the index is invariant to the units the traits are recorded in. New tests assert that invariance directly. <strong>Re-run any <code><a href="../reference/run_dgsi.html">run_dgsi()</a></code> analysis that used <code>scale_traits = FALSE</code> on traits with dissimilar scales.</strong></p>
+</div>
+<div class="section level4">
+<h4 id="new-theoretical-transmitted-response-0-5-0">New: theoretical transmitted response<a class="anchor" aria-label="anchor" href="#new-theoretical-transmitted-response-0-5-0"></a></h4>
+<p><code><a href="../reference/run_dgsi.html">run_dgsi()</a></code> now reports <code>theoretical_response</code>, the classical , in the analysis space, in original trait units and standardised. <code>realised_response</code> is a differential among the candidates that were selected; this is what the next generation inherits. Keeping them apart is what allows DGSI to be compared with the classical families on the same criterion.</p>
+</div>
+<div class="section level4">
+<h4 id="fixed-release-blockers-0-5-0">Fixed: release blockers<a class="anchor" aria-label="anchor" href="#fixed-release-blockers-0-5-0"></a></h4>
+<p><code><a href="../reference/index_uncertainty.html">index_uncertainty()</a></code>’s roxygen contained a raw <code>$$…$$</code> display that was copied literally into the Rd file, where <code>\mathbf</code>, <code>\sim</code>, <code>\mathcal</code> and <code>\nu</code> parsed as unknown macros. This was the sole source of both <code>R CMD check</code> warnings. It is now <code>\deqn{}</code> with an ASCII fallback.</p>
+<p><code>inst/CITATION</code> reported version 0.3.1 while <code>DESCRIPTION</code> and <code>CITATION.cff</code> said 0.5.0. It now derives the version from package metadata so it cannot drift again.</p>
+<p><code><a href="../reference/open_desiredgain_guide.html">open_desiredgain_guide()</a></code> defaults to <code>"html"</code> rather than <code>"pdf"</code>. The PDF edition needs LaTeX as well as pandoc, so defaulting to it meant the export failed even where the guide had been built. A missing edition now names the one that is present.</p>
+</div>
+<div class="section level4">
+<h4 id="fixed-provenance-that-claimed-more-than-it-verified-0-5-0">Fixed: provenance that claimed more than it verified<a class="anchor" aria-label="anchor" href="#fixed-provenance-that-claimed-more-than-it-verified-0-5-0"></a></h4>
+<p>The simulation recorded the <em>requested</em> thread count even when the assignment failed on an older AlphaSimR, so a multithreaded run could carry a single-thread reproducibility claim. It now reads back the effective count, records both, and warns on a mismatch.</p>
+<p><code>.dgr_diversity_geno()</code> intersected a stored marker panel with whatever was available and fell back to the full genotype matrix when nothing matched — silently changing the basis of the diversity measure, and reintroducing the QTL the panel exists to exclude. The panel is now required exactly, ordered by identifier, and retained loci are stored by name rather than as a positional logical vector.</p>
+</div>
+<div class="section level4">
+<h4 id="changed-diversity-optimisation-requires-a-verified-panel-0-5-0">Changed: diversity optimisation requires a verified panel<a class="anchor" aria-label="anchor" href="#changed-diversity-optimisation-requires-a-verified-panel-0-5-0"></a></h4>
+<p><code>optimize_desired_gains(include_diversity = TRUE)</code> now errors when the setup has no marker panel, rather than silently falling back to all segregating sites. Without a panel the diversity axis partly measures genetic gain itself, so a direction is penalised for working. Where the panel cannot be verified as disjoint from the QTL on the installed AlphaSimR, it warns.</p>
+</div>
+<div class="section level4">
+<h4 id="other-0-5-0-1">Other<a class="anchor" aria-label="anchor" href="#other-0-5-0-1"></a></h4>
+<p>Seeds route through <code>.dgr_seed()</code> in <code><a href="../reference/run_dgsi.html">run_dgsi()</a></code> and <code><a href="../reference/optimize_desired_gains.html">optimize_desired_gains()</a></code> rather than <code><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer()</a></code>, so fractional seeds no longer truncate silently, and a base seed too close to the integer limit for its derived replicate seeds is rejected. <code>ridge_P</code>, <code>ridge_M</code> and <code>plateau_tolerance</code> are validated for length, finiteness and sign.</p>
+</div>
+</div>
+<div class="section level3">
+<h3 id="external-review-august--release-blockers-0-5-0">External review, August 2026 — release blockers<a class="anchor" aria-label="anchor" href="#external-review-august--release-blockers-0-5-0"></a></h3>
+<div class="section level4">
+<h4 id="breaking-what-a-simulation-cycle-means-has-changed-0-5-0">Breaking: what a simulation cycle means has changed<a class="anchor" aria-label="anchor" href="#breaking-what-a-simulation-cycle-means-has-changed-0-5-0"></a></h4>
+<p><code><a href="../reference/simulate_selection_cycles.html">simulate_selection_cycles()</a></code> measured the <em>candidates</em> of each cycle rather than the population its selection produced. Because random mating does not shift a population mean, the cycle 1 gain was zero in expectation <strong>for every desired-gain direction</strong>, so a one-cycle run could not distinguish directions at all and <code>optimize_desired_gains(n_cycles = 1)</code> was comparing noise.</p>
+<p>Cycle 0 is now the founder population, and cycle <em>t</em> records the population produced by selecting parents from the cycle <em>t-1</em> candidates and crossing them. Every row from cycle 1 onward is a transmitted selection response. <code>cycle_table</code> gains a cycle 0 row, <code>parent_inbreeding</code>, <code>n_parents_selected</code>, <code>qtl_segregating</code> and <code>genic_variance_ratio</code>. <strong>Re-run any stored simulation result.</strong></p>
+<p>Genetic mean and diversity are now measured on the same population; previously merit came from the whole evaluation population and relatedness from the selected parents.</p>
+</div>
+<div class="section level4">
+<h4 id="breaking-independent-culling-is-a-hard-gate-again-0-5-0">Breaking: independent culling is a hard gate again<a class="anchor" aria-label="anchor" href="#breaking-independent-culling-is-a-hard-gate-again-0-5-0"></a></h4>
+<p><code>selection_index(method = "independent_culling")</code> ranked candidates on a 0/1 pass indicator and then took the top <code>n_select</code>, so requesting 20 when 7 passed selected 13 failures. <code>n_select</code> is now a maximum: 7 pass, 7 are returned, with a warning. Selection intensity is computed from the number actually selected, and <code>culling_report</code> names the gates each candidate failed. New <code>n_selected</code> records the executed count; <code>n_select</code> still holds the request.</p>
+</div>
+<div class="section level4">
+<h4 id="new-covariance-compatibility-is-validated-0-5-0">New: covariance compatibility is validated<a class="anchor" aria-label="anchor" href="#new-covariance-compatibility-is-validated-0-5-0"></a></h4>
+<p><code>P - G</code> must be positive semidefinite — a diagonal check is not enough, since a linear combination of traits can exceed its phenotypic variance while no single trait does. Enforced in <code><a href="../reference/selection_index.html">selection_index()</a></code>, <code><a href="../reference/evaluate_index.html">evaluate_index()</a></code>, <code><a href="../reference/run_dgsi.html">run_dgsi()</a></code> and <code><a href="../reference/index_uncertainty.html">index_uncertainty()</a></code>, and <code>true_G - Gamma</code> in <code><a href="../reference/run_qgsi.html">run_qgsi()</a></code> when accuracy or MSPE is requested. Correlations are clamped only for floating-point excursions, after validation. No valid run can now report a heritability above one, an accuracy above one, a squared correlation above one, or a negative MSPE.</p>
+<p><code><a href="../reference/index_uncertainty.html">index_uncertainty()</a></code> with <code>P</code> fixed now discards draws where the drawn <code>G</code> exceeds it, counts them in <code>n_inadmissible</code>, and describes itself as local sensitivity analysis rather than joint resampling.</p>
+</div>
+<div class="section level4">
+<h4 id="fixed-simulations-mutated-the-callers-simparam-0-5-0">Fixed: simulations mutated the caller’s SimParam<a class="anchor" aria-label="anchor" href="#fixed-simulations-mutated-the-callers-simparam-0-5-0"></a></h4>
+<p><code>SimParam</code> is an R6 object, so every crossing call advanced the caller’s <code>lastId</code> and two runs from one setup were not independent. It is now deep-cloned per call. <code>n_threads</code> defaults to 1 and warns above it, since thread count affects the order random numbers are consumed. The result carries a <code>provenance</code> record with the AlphaSimR, R and package versions, seed, thread count and simulation settings.</p>
+</div>
+<div class="section level4">
+<h4 id="fixed-diversity-was-measured-on-the-loci-under-selection-0-5-0">Fixed: diversity was measured on the loci under selection<a class="anchor" aria-label="anchor" href="#fixed-diversity-was-measured-on-the-loci-under-selection-0-5-0"></a></h4>
+<p>Relatedness used <code>pullQtlGeno()</code>. Changing QTL frequencies is what genetic gain <em>is</em>, so the metric rose whenever selection succeeded and a direction was penalised for working. <code><a href="../reference/founder_population.html">founder_population()</a></code> gains <code>n_markers_per_chromosome</code>, creating a neutral panel held disjoint from the QTL, and diversity is measured there. QTL frequency change is reported separately as <code>qtl_segregating</code> and <code>genic_variance_ratio</code>.</p>
+</div>
+<div class="section level4">
+<h4 id="fixed-clonal-mode-was-miscalibrated-0-5-0">Fixed: clonal mode was miscalibrated<a class="anchor" aria-label="anchor" href="#fixed-clonal-mode-was-miscalibrated-0-5-0"></a></h4>
+<p>AlphaSimR’s <code>var</code> argument sets <em>additive</em> variance, so with dominance present the dominance variance was added on top and the realised genotypic variance exceeded the supplied <code>G</code> — the matrix a clonal programme selects on. Since scaling QTL effects by <em>c</em> scales both components by <em>c²</em>, the correction is exact in one pass and is now applied. <code><a href="../reference/founder_population.html">founder_population()</a></code> gains <code>heritability = c("narrow", "broad")</code>, because the two diverge exactly when dominance is simulated. <code>G_realised</code> records the achieved covariance; realised correlations are emergent and warn above a 0.15 deviation. The sexual and clonal phases are now explicit in <code><a href="../reference/simulate_selection_cycles.html">simulate_selection_cycles()</a></code>.</p>
+</div>
+<div class="section level4">
+<h4 id="fixed-counts-and-defaults-0-5-0">Fixed: counts and defaults<a class="anchor" aria-label="anchor" href="#fixed-counts-and-defaults-0-5-0"></a></h4>
+<p><code>run_dgsi(n_select)</code> bypassed the strict validator, so <code>1.9</code> silently became <code>1</code>. All counts now route through it; <code>NA</code>, <code>Inf</code>, zero, negative, non-integral and out-of-range values fail with distinct messages. <code><a href="../reference/run_dgsi_qgsi_pipeline.html">run_dgsi_qgsi_pipeline()</a></code> now defaults to <code>fallback_to_top_n = FALSE</code> and <code>debug = FALSE</code>, <code><a href="../reference/run_qgsi.html">run_qgsi_desired_gain()</a></code> to <code>debug = FALSE</code>. Enabling the fallback warns at request and again if it fires, and <code>$selection_rule</code> records requested versus executed.</p>
+</div>
+<div class="section level4">
+<h4 id="other-0-5-0-2">Other<a class="anchor" aria-label="anchor" href="#other-0-5-0-2"></a></h4>
+<p><code><a href="../reference/evaluate_index.html">evaluate_index()</a></code> reports <code>h2_index</code> and <code>accuracy_index</code>. <code><a href="../reference/run_dgsi.html">run_dgsi()</a></code> gains a <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> method and the additional class <code>desiredgainr_dgsi</code> alongside <code>desired_gain_index</code>, which is retained for dependent packages. The Breeder’s Guide source ships in <code>inst/guide/</code> with a build script in <code>data-raw/</code>, and tests verify the artifacts resolve through <code><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file()</a></code>.</p>
+</div>
+</div>
+<div class="section level3">
+<h3 id="audit-of-july-0-5-0">Audit of 31 July 2026<a class="anchor" aria-label="anchor" href="#audit-of-july-0-5-0"></a></h3>
+<p><code>AUDIT-2026-07-31.md</code> records the full findings. The changes below follow from it.</p>
+<div class="section level4">
+<h4 id="fixed-the-diversity-metric-could-not-detect-diversity-loss-0-5-0">Fixed: the diversity metric could not detect diversity loss<a class="anchor" aria-label="anchor" href="#fixed-the-diversity-metric-could-not-detect-diversity-loss-0-5-0"></a></h4>
+<p><code>.dgr_mean_relationship()</code> recomputed allele frequencies from the population being measured. Centring on a sample’s own frequencies forces every marker column to sum to zero, so the whole genomic relationship matrix sums to zero and its mean off-diagonal element equals <span class="math inline">\(-1/(n-1)\)</span> regardless of what has happened to the germplasm. The reported value was a function of the number of parents and almost nothing else.</p>
+<p>This mattered beyond the reporting, because <code>optimize_desired_gains(include_diversity = TRUE)</code> used it as the diversity axis of a Pareto frontier. Any direction chosen for its diversity properties was chosen on noise.</p>
+<p>Allele frequencies are now fixed at the founder population and reused for every subsequent measurement. <code><a href="../reference/simulate_selection_cycles.html">simulate_selection_cycles()</a></code> gains <code>mean_inbreeding</code> per cycle and <code>final_inbreeding</code>, and <code>effective_size</code> is now derived from the rate of inbreeding rather than from differencing the old metric.</p>
+<p><strong>If you have run <code>optimize_desired_gains(include_diversity = TRUE)</code> on an earlier version, re-run it.</strong> The gain axis was unaffected; the diversity axis was not meaningful.</p>
+</div>
+<div class="section level4">
+<h4 id="fixed-r_hi-for-the-desired-gain-families-0-5-0">Fixed: <code>R_HI</code> for the desired-gain families<a class="anchor" aria-label="anchor" href="#fixed-r_hi-for-the-desired-gain-families-0-5-0"></a></h4>
+<p><code><a href="../reference/evaluate_index.html">evaluate_index()</a></code> was passed the desired-gain vector as the aggregate weights for <code>pesek_baker</code> and <code>yamada</code>. There is no theory under which desired gains define net merit, and the resulting quantity behaved erratically when trait scales differed. The implied economic weights <span class="math inline">\(\mathbf{w} = \mathbf{G}^{-1}\mathbf{P}\mathbf{G}^{-1}\mathbf{d}\)</span> are now used instead, so <span class="math inline">\(R_{HI}\)</span> recovers its standard interpretation and the index families become comparable on one criterion.</p>
+</div>
+<div class="section level4">
+<h4 id="fixed-the-reference-set-for-estimating-p-was-unguarded-0-5-0">Fixed: the reference set for estimating <code>P</code> was unguarded<a class="anchor" aria-label="anchor" href="#fixed-the-reference-set-for-estimating-p-was-unguarded-0-5-0"></a></h4>
+<p><code><a href="../reference/run_dgsi.html">run_dgsi()</a></code> estimated <code>P</code> from <code>ref_data</code> with no check beyond two records. A covariance matrix from fewer records than traits is singular, passes the positive-semidefinite check unchanged, and is then made invertible by the ridge term, so the failure was silent. It now stops below <code>length(trait_cols) + 1</code> records, warns below five times the trait count, and records <code>P_numerical_rank</code> in <code>covariance_provenance</code>.</p>
+</div>
+<div class="section level4">
+<h4 id="new-bend_covariance-0-5-0">New: <code>bend_covariance()</code>
+<a class="anchor" aria-label="anchor" href="#new-bend_covariance-0-5-0"></a></h4>
+<p>Multi-trait restricted maximum likelihood routinely returns a genetic covariance matrix that is not positive definite. The package previously rejected it outright, which sent users to an ad hoc repair outside the audit trail. <code>.dgr_check_psd()</code> now names the repair in its rejection message.</p>
+<p><code><a href="../reference/bend_covariance.html">bend_covariance()</a></code> is a wrapper around <code>ASRgenomics::G.tuneup(bend = TRUE)</code>, which bends by calling <code><a href="https://rdrr.io/pkg/Matrix/man/nearPD.html" class="external-link">Matrix::nearPD()</a></code> — Higham’s (2002) alternating-projections algorithm. That is the only bending route the package offers, deliberately. A package that repairs covariance matrices two different ways invites two different answers to the same question, and there is no defensible basis on which a user would choose between them mid-analysis. A test asserts that the wrapper returns exactly what <code>G.tuneup()</code> returns, so a result obtained here is reproducible by anyone running the underlying function directly.</p>
+<p>Two of <code>G.tuneup()</code>’s fixed choices have real consequences for a trait covariance, and the result surfaces both rather than letting them pass unnoticed.</p>
+<p><code>keepDiag = FALSE</code>, so <strong>the trait variances are not preserved</strong>. The heritabilities implied by the bent matrix are not the ones supplied. <code>adjustment$max_variance_change</code> and <code>max_relative_variance_change</code> report how far they moved, and the print method shows them.</p>
+<p><code>posd.tol = 1e-2</code>, which floors eigenvalues at a hundredth of the largest and so caps the condition number near 100. That is the right target for the  genomic relationship matrix <code>G.tuneup()</code> was written for, which is near-singular by construction. For a  trait covariance it is aggressive: condition numbers of  to  are ordinary and genuine there, so bending will smooth away correlation structure the data support. <code>eig_tol</code> is passed through but governs <code>nearPD()</code>’s <code>eig.tol</code>, not <code>posd.tol</code>, so it does not lift that cap. Compare [matrix_diagnostics()] before and after.</p>
+<p><code>ASRgenomics</code> is in <code>Suggests</code> rather than <code>Imports</code>, because it brings in roughly ten further packages for plotting and pedigree handling and a single function should not be able to make the whole package uninstallable. <code><a href="../reference/bend_covariance.html">bend_covariance()</a></code> stops with an install instruction when it is absent.</p>
+</div>
+<div class="section level4">
+<h4 id="new-index_uncertainty-0-5-0">New: <code>index_uncertainty()</code>
+<a class="anchor" aria-label="anchor" href="#new-index_uncertainty-0-5-0"></a></h4>
+<p>Every quantity a selection index reports has treated <code>G</code> and <code>P</code> as known constants. <code><a href="../reference/index_uncertainty.html">index_uncertainty()</a></code> resamples them from a Wishart sampling distribution, refits the index on each draw, and reports coefficient intervals, sign stability, rank correlation, and retention of the selected set.</p>
+<p>The genetic and residual matrices are resampled, and <code>P</code> reassembled as their sum, rather than resampling <code>G</code> and <code>P</code> independently, because they are estimated from the same records.</p>
+<p>For the desired-gain families the reported cost of estimation error has an exact reference point: since <span class="math inline">\(\mathbf{G}\mathbf{b} = \mathbf{d}\)</span> identically, an index fitted on the true <code>G</code> delivers the desired gains in the requested proportions, and the cosine between the achieved response and <code>d</code> isolates estimation error with no confounding.</p>
+<p><code>genetic_df</code> is the user’s judgement and governs every interval width. It counts independent genetic units — families, parents, distinct clones — and not plots.</p>
+</div>
+<div class="section level4">
+<h4 id="new-predict-for-a-fitted-index-0-5-0">New: <code>predict()</code> for a fitted index<a class="anchor" aria-label="anchor" href="#new-predict-for-a-fitted-index-0-5-0"></a></h4>
+<p>Applies a fitted index to a new candidate set, reusing the centring and scaling constants from fitting rather than recomputing them, so that scores remain comparable across cycles.</p>
+</div>
+<div class="section level4">
+<h4 id="new-index-heritability-0-5-0">New: index heritability<a class="anchor" aria-label="anchor" href="#new-index-heritability-0-5-0"></a></h4>
+<p><code><a href="../reference/evaluate_index.html">evaluate_index()</a></code> now reports <code>h2_index</code> (<span class="math inline">\(\mathbf{b}'\mathbf{G}\mathbf{b} /
+\mathbf{b}'\mathbf{P}\mathbf{b}\)</span>) and <code>accuracy_index</code>, its square root. This is the only accuracy measure available for the desired-gain families before economic weights are supplied.</p>
+</div>
+<div class="section level4">
+<h4 id="new-scale_by-in-selection_index-0-5-0">New: <code>scale_by</code> in <code>selection_index()</code>
+<a class="anchor" aria-label="anchor" href="#new-scale_by-in-selection_index-0-5-0"></a></h4>
+<p><code>scale_traits</code> was documented as dividing by population standard deviations but divided by the candidates’ standard deviations. Those coincide only when the candidates are an unselected random sample, which a late-stage trial is not. <code>scale_by = "phenotypic"</code> divides by <span class="math inline">\(\sqrt{\operatorname{diag}(\mathbf{P})}\)</span> instead, giving a scaled <code>P</code> with a unit diagonal exactly and a scaled <code>G</code> carrying the heritabilities. The default remains <code>"sample"</code>, so existing calls are unchanged.</p>
+</div>
+<div class="section level4">
+<h4 id="changed-the-surrogates-kernel-0-5-0">Changed: the surrogate’s kernel<a class="anchor" aria-label="anchor" href="#changed-the-surrogates-kernel-0-5-0"></a></h4>
+<p>The Gaussian process in <code><a href="../reference/optimize_desired_gains.html">optimize_desired_gains()</a></code> fitted one lengthscale per trait, estimated by marginal likelihood from however many objective evaluations the budget allowed. Below roughly ten evaluations per trait those estimates are dominated by noise, which then steers the acquisition function. A single shared lengthscale is now used in that regime.</p>
+</div>
+<div class="section level4">
+<h4 id="reported-optimism-in-run_dgsi-0-5-0">Reported optimism in <code>run_dgsi()</code>
+<a class="anchor" aria-label="anchor" href="#reported-optimism-in-run_dgsi-0-5-0"></a></h4>
+<p>At that stage the winning replicate was chosen on the same candidates it then selected, so its objective was biased downward. The result gained an <code>optimism</code> element; the 1 August remediation above subsequently made a pre-fit holdout the default while retaining the training rule explicitly.</p>
+</div>
+</div>
 <div class="section level3">
 <h3 id="example-data-0-5-0">Example data<a class="anchor" aria-label="anchor" href="#example-data-0-5-0"></a></h3>
 <p>Nine datasets replace the previous examples, which were uncorrelated standard normal variates. That earlier material made the genetic covariance matrix effectively an identity matrix, and an identity matrix cannot illustrate a multi-trait selection index, because the purpose of an index is to resolve the tension between correlated traits measured on different scales.</p>
@@ -245,7 +474,7 @@ Relative efficiency below 1 is the intended trade-off of multi-trait selection, 
 <div class="section level3">
 <h3 id="documentation-0-3-1">Documentation<a class="anchor" aria-label="anchor" href="#documentation-0-3-1"></a></h3>
 <ul><li>
-<code><a href="../reference/run_dgsi.html">run_dgsi()</a></code>: <code>dg</code> is now documented as being in <strong>candidate standard-deviation units</strong>, which is what the objective has always compared against, regardless of <code>scale_traits</code>. A new Details section gives the realised-response and objective formulas, explains the <code>0.25</code> and <code>0.05</code> floors that were previously undocumented constants, and states that best-of-<code>n_rep</code> selection is optimistically biased because it is made on the same candidates that are then selected.</li>
+<code><a href="../reference/run_dgsi.html">run_dgsi()</a></code>: <code>dg</code> is now documented as being in <strong>candidate standard-deviation units</strong>, which is what the objective has always compared against, regardless of <code>scale_traits</code>. A new Details section gives the realised-response and objective formulas, explains the <code>0.25</code> and <code>0.05</code> floors that were previously undocumented constants, and states that best-of-<code>n_rep</code> training selection is optimistically biased. The current default avoids that rule with a pre-fit holdout.</li>
 <li>Added a worked <code>@examples</code> block to <code><a href="../reference/run_dgsi.html">run_dgsi()</a></code>.</li>
 </ul></div>
 <div class="section level3">

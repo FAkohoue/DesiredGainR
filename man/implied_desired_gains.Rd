@@ -49,10 +49,12 @@ P <- matrix(c(1.10, -0.20, -0.20, 0.90), 2, dimnames = list(traits, traits))
 # The translation is exactly invertible when the units match.
 d <- c(yield = 0.5, disease = 0.3)
 w <- implied_economic_weights(
-  d, G, P, lower_is_better = "disease", gain_units = "genetic_sd"
+  d, G, P,
+  lower_is_better = "disease", gain_units = "genetic_sd"
 )
 implied_desired_gains(
-  w, G, P, lower_is_better = "disease", gain_units = "genetic_sd"
+  w, G, P,
+  lower_is_better = "disease", gain_units = "genetic_sd"
 )
 
 }

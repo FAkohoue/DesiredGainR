@@ -11,7 +11,7 @@ the guide.
 ## Usage
 
 ``` r
-open_desiredgain_guide(open = TRUE, format = c("pdf", "html"))
+open_desiredgain_guide(open = TRUE, format = c("html", "pdf"))
 ```
 
 ## Arguments
@@ -25,7 +25,10 @@ open_desiredgain_guide(open = TRUE, format = c("pdf", "html"))
 
 - format:
 
-  Character, one of `"pdf"` (default) or `"html"`.
+  Character, one of `"html"` (default) or `"pdf"`. HTML is the default
+  because it needs only pandoc, whereas the PDF edition also requires a
+  LaTeX installation and is therefore the more likely of the two to be
+  absent.
 
 ## Value
 
@@ -39,7 +42,7 @@ It is intended for breeders, programme managers and reviewers who will
 use or approve a selection decision but do not necessarily run R
 themselves.
 
-The tagged PDF provides a fixed reference edition and the HTML edition
+The PDF provides a fixed-layout reference edition and the HTML edition
 renders the same content for on-screen reading. These standalone files
 have no vignette engine, so they are not indexed by
 [`vignette()`](https://rdrr.io/r/utils/vignette.html)/[`browseVignettes()`](https://rdrr.io/r/utils/browseVignettes.html)
@@ -62,5 +65,7 @@ for the same material with full statistical detail and runnable code;
 ``` r
 # Locate without opening, which is what a script should do.
 path <- try(open_desiredgain_guide(open = FALSE), silent = TRUE)
+#> [open_desiredgain_guide] Guide located at: C:/Users/fakohoue/AppData/Local/R/win-library/4.5/DesiredGainR/extdata/DesiredGainR_Breeder_Guide.html
 if (!inherits(path, "try-error")) file.exists(path)
+#> [1] TRUE
 ```

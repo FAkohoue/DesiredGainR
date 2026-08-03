@@ -8,29 +8,52 @@ founder_population(
   founders,
   G,
   h2,
+  residual_covariance = NULL,
   n_qtl_per_chromosome = 100L,
+  n_markers_per_chromosome = NULL,
   dominance_degree = NULL,
   dominance_variance = NULL,
+  heritability = c("narrow", "broad"),
   seed = 42L
 )
 }
 \arguments{
 \item{founders}{An object from \code{\link[=founder_haplotypes]{founder_haplotypes()}}.}
 
-\item{G}{Genetic variance-covariance matrix, named by trait.}
+\item{G}{Genetic variance-covariance matrix, named by trait. Without
+dominance this is the additive covariance. With dominance it is the total
+\strong{genotypic} covariance, because that is what a clonal programme selects
+on; see Details.}
 
-\item{h2}{Named narrow-sense heritabilities, or a single value applied to
-every trait.}
+\item{h2}{Named heritabilities, or a single value applied to every trait.
+Narrow- or broad-sense according to \code{heritability}.}
+
+\item{residual_covariance}{Optional named residual covariance matrix. When
+supplied it is passed directly to AlphaSimR and takes precedence over the
+marginal \code{h2} values. This is the route used when propagating a sampled
+residual covariance; \code{h2} remains recorded as the nominal setup input.}
 
 \item{n_qtl_per_chromosome}{Number of quantitative trait loci simulated per
 chromosome.}
+
+\item{n_markers_per_chromosome}{Optional number of neutral markers per
+chromosome, used for coancestry. When supplied, the markers are held
+disjoint from the quantitative trait loci where the installed AlphaSimR
+supports it. Strongly recommended: without a panel, diversity is measured
+on all segregating sites.}
 
 \item{dominance_degree}{Optional named mean degree of dominance per trait.
 Supplying it adds dominance to the simulated traits, which the clonal
 mating system requires.}
 
-\item{dominance_variance}{Optional named variance of the degree of
-dominance.}
+\item{dominance_variance}{Optional named variance of the \strong{degree of
+dominance} across loci. This is AlphaSimR's \code{varDD} and is not the
+dominance genetic variance; the two are different quantities.}
+
+\item{heritability}{Whether \code{h2} is narrow-sense (the default, a statement
+about breeding values) or broad-sense (a statement about genotypic values).
+They differ exactly when dominance is simulated, which is when a clonal
+programme is being represented, so it must be stated rather than assumed.}
 
 \item{seed}{Random seed. The caller's random number generator state is
 restored on exit.}
@@ -49,12 +72,56 @@ trait variances and correlations, rather than an assumed demography.
 }
 \details{
 Trait variances are taken from the diagonal of \code{G} and trait correlations
-from the corresponding correlation matrix. For a clonal programme, supply
-\code{dominance_degree}, and \code{G} should then be the \strong{genotypic} covariance,
-because the unit of selection is the clone and dominance is therefore
-inherited intact. For a self-pollinated or cross-pollinated programme, \code{G}
-should be the additive genetic covariance.
+from the corresponding correlation matrix.
 }
+\section{Additive and clonal programmes calibrate differently}{
+For a self-pollinated or cross-pollinated programme, \code{G} is the additive
+genetic covariance and is passed straight to AlphaSimR.
+
+For a clonal programme, supply \code{dominance_degree}. \code{G} is then the total
+\strong{genotypic} covariance, because the unit of selection is the clone and
+dominance is inherited intact. This needs a calibration step that earlier
+versions omitted. AlphaSimR's \code{var} argument sets the \emph{additive} variance,
+so with dominance present the dominance variance is added on top and the
+realised genotypic variance exceeds the supplied target. Since scaling every
+quantitative trait locus effect by \eqn{c} scales both the additive and the
+dominance variance by \eqn{c^2}, the correction is exact in one pass: the
+trait is built, the realised genotypic variance measured, and the additive
+target rescaled by the ratio.
+
+The correlations are calibrated too, by the same fixed point. Rescaling the
+variances alone would leave the realised genotypic correlations emergent, so
+the setup would accept a full covariance matrix as its target and reproduce
+only its diagonal. Dominance perturbs the correlation structure as well, and
+that perturbation is a smooth, near-identity function of the additive
+correlations supplied, so correcting both and projecting the correction back
+onto the set of valid correlation matrices recovers the whole of \code{G}.
+
+\code{setup$G_realised} records what was achieved and \code{setup$calibration_error}
+the largest remaining deviation in each of the variances and correlations.
+Convergence is not guaranteed for every target: a strongly antagonistic
+correlation structure at a high dominance degree may not be attainable by
+any additive-plus-dominance architecture. Failure warns and is recorded in
+\code{setup$calibration_converged} rather than passing silently.
+}
+
+\section{Which heritability}{
+\code{heritability = "narrow"} sets the error variance so that
+\eqn{V_A / V_P} equals \code{h2}; \code{"broad"} targets \eqn{V_G / V_P}. They
+coincide without dominance and diverge with it, so a clonal programme must
+say which is meant. Selection in a clonal programme acts on genotypic value,
+making broad sense usually the relevant one.
+}
+
+\section{Markers for coancestry}{
+\code{n_markers_per_chromosome} creates a neutral marker panel, held disjoint
+from the quantitative trait loci where the installed AlphaSimR supports it.
+Diversity should not be measured on the loci under selection: changing their
+frequencies is what genetic gain is, so a relationship matrix built from
+them rises whenever selection succeeds, and a desired-gain direction would
+be penalised for working.
+}
+
 \seealso{
 \code{\link[=founder_haplotypes]{founder_haplotypes()}}, \code{\link[=simulate_selection_cycles]{simulate_selection_cycles()}}
 }

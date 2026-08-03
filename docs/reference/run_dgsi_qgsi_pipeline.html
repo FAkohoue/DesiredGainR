@@ -62,9 +62,11 @@ economic-weight vector."><meta property="og:image" content="https://FAkohoue.git
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Deciding what to select for</h6></li>
     <li><a class="dropdown-item" href="../articles/DesiredGainR-objective.html">Defining a breeding objective</a></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-desired-gain-intervals.html">Defining desired gains and acceptable intervals</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Looking ahead</h6></li>
     <li><a class="dropdown-item" href="../articles/DesiredGainR-simulation.html">Comparing objectives over several cycles</a></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-empirical-validation.html">Empirical validation with real breeding programmes</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../breeder-guide.html">Breeder guide</a></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -106,7 +108,7 @@ economic-weight vector.</p>
 <span>  select_mode <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"top_n"</span>, <span class="st">"trait_thresholds"</span><span class="op">)</span>,</span>
 <span>  n_select <span class="op">=</span> <span class="fl">100L</span>,</span>
 <span>  trait_min_sd <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  fallback_to_top_n <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  fallback_to_top_n <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  n_iter <span class="op">=</span> <span class="fl">1000L</span>,</span>
 <span>  n_rep <span class="op">=</span> <span class="fl">20L</span>,</span>
 <span>  sd_scale <span class="op">=</span> <span class="fl">1</span>,</span>
@@ -129,7 +131,7 @@ economic-weight vector.</p>
 <span>  lower_is_better <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  merge_outputs <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  compare_sort_by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"DG_rank"</span>, <span class="st">"QGSI_rank"</span>, <span class="st">"DG"</span>, <span class="st">"QGSI"</span>, <span class="st">"none"</span><span class="op">)</span>,</span>
-<span>  debug <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span>  debug <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 

@@ -78,9 +78,11 @@
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Deciding what to select for</h6></li>
     <li><a class="dropdown-item" href="../articles/DesiredGainR-objective.html">Defining a breeding objective</a></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-desired-gain-intervals.html">Defining desired gains and acceptable intervals</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Looking ahead</h6></li>
     <li><a class="dropdown-item" href="../articles/DesiredGainR-simulation.html">Comparing objectives over several cycles</a></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-empirical-validation.html">Empirical validation with real breeding programmes</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="../breeder-guide.html">Breeder guide</a></li>
@@ -215,8 +217,10 @@ vignette uses it directly.</p>
 The covariance matrices are oriented internally, so nothing needs
 signing by hand.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">desired_gains</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>GY <span class="op">=</span> <span class="fl">1.0</span>, PHT <span class="op">=</span> <span class="fl">0.4</span>, AD <span class="op">=</span> <span class="fl">0.6</span>, ASI <span class="op">=</span> <span class="fl">0.5</span>,</span>
-<span>                   EPP <span class="op">=</span> <span class="fl">0.4</span>, GLS <span class="op">=</span> <span class="fl">0.6</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">desired_gains</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>  GY <span class="op">=</span> <span class="fl">1.0</span>, PHT <span class="op">=</span> <span class="fl">0.4</span>, AD <span class="op">=</span> <span class="fl">0.6</span>, ASI <span class="op">=</span> <span class="fl">0.5</span>,</span>
+<span>  EPP <span class="op">=</span> <span class="fl">0.4</span>, GLS <span class="op">=</span> <span class="fl">0.6</span></span>
+<span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">implied</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/implied_economic_weights.html">implied_economic_weights</a></span><span class="op">(</span></span>
 <span>  <span class="va">desired_gains</span>, <span class="va">dgr_G</span>, <span class="va">dgr_P</span>,</span>
@@ -296,16 +300,20 @@ generated the historical decision.</p>
 <h2 id="stage-6-build-and-compare-index-families">7. Stage 6 — Build and compare index families<a class="anchor" aria-label="anchor" href="#stage-6-build-and-compare-index-families"></a>
 </h2>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">economic_weights</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>GY <span class="op">=</span> <span class="fl">1.0</span>, PHT <span class="op">=</span> <span class="fl">0.2</span>, AD <span class="op">=</span> <span class="fl">0.5</span>,</span>
-<span>                      ASI <span class="op">=</span> <span class="fl">0.4</span>, EPP <span class="op">=</span> <span class="fl">0.3</span>, GLS <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">economic_weights</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>  GY <span class="op">=</span> <span class="fl">1.0</span>, PHT <span class="op">=</span> <span class="fl">0.2</span>, AD <span class="op">=</span> <span class="fl">0.5</span>,</span>
+<span>  ASI <span class="op">=</span> <span class="fl">0.4</span>, EPP <span class="op">=</span> <span class="fl">0.3</span>, GLS <span class="op">=</span> <span class="fl">0.5</span></span>
+<span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">smith_hazel</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/selection_index.html">selection_index</a></span><span class="op">(</span></span>
-<span>  <span class="va">dgr_candidates</span>, <span class="va">traits</span>, method <span class="op">=</span> <span class="st">"smith_hazel"</span>,</span>
+<span>  <span class="va">dgr_candidates</span>, <span class="va">traits</span>,</span>
+<span>  method <span class="op">=</span> <span class="st">"smith_hazel"</span>,</span>
 <span>  G <span class="op">=</span> <span class="va">dgr_G</span>, P <span class="op">=</span> <span class="va">dgr_P</span>, economic_weights <span class="op">=</span> <span class="va">economic_weights</span>,</span>
 <span>  lower_is_better <span class="op">=</span> <span class="va">lower_is_better</span>, n_select <span class="op">=</span> <span class="fl">20L</span>, main_trait <span class="op">=</span> <span class="st">"GY"</span></span>
 <span><span class="op">)</span></span>
 <span><span class="va">rank_sum</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/selection_index.html">selection_index</a></span><span class="op">(</span></span>
-<span>  <span class="va">dgr_candidates</span>, <span class="va">traits</span>, method <span class="op">=</span> <span class="st">"mulamba_mock"</span>,</span>
+<span>  <span class="va">dgr_candidates</span>, <span class="va">traits</span>,</span>
+<span>  method <span class="op">=</span> <span class="st">"mulamba_mock"</span>,</span>
 <span>  lower_is_better <span class="op">=</span> <span class="va">lower_is_better</span>, n_select <span class="op">=</span> <span class="fl">20L</span></span>
 <span><span class="op">)</span></span>
 <span><span class="va">smith_hazel</span></span>
@@ -376,7 +384,7 @@ response in the selected set approaches the stated target.</p>
 <span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">dgsi</span><span class="op">$</span><span class="va">realised_response</span> <span class="op">-</span> <span class="va">desired_gains</span>, <span class="fl">3</span><span class="op">)</span></span>
 <span><span class="co">#&gt;     GY    PHT     AD    ASI    EPP    GLS </span></span>
-<span><span class="co">#&gt;  0.572 -0.097 -0.342  0.028  0.049 -0.068</span></span></code></pre></div>
+<span><span class="co">#&gt; -1.455 -0.117 -0.738  0.566  0.007 -0.038</span></span></code></pre></div>
 <p>Read that against Stage 4. Feasibility constrains the requested
 <em>proportion</em>; the optimiser is not bound to it, and distributes
 the shortfall unevenly, overshooting grain yield while undershooting

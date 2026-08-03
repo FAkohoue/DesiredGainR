@@ -22,7 +22,8 @@ test_that("QGSI index mean and variance match simulation", {
       0.30, 0.80, 0.10,
       -0.20, 0.10, 1.40
     ),
-    3, dimnames = list(traits, traits)
+    3,
+    dimnames = list(traits, traits)
   )
   w <- c(t1 = 1.0, t2 = 0.5, t3 = -0.4)
   W <- matrix(
@@ -31,7 +32,8 @@ test_that("QGSI index mean and variance match simulation", {
       0.03, -0.07, 0.01,
       -0.02, 0.01, 0.09
     ),
-    3, dimnames = list(traits, traits)
+    3,
+    dimnames = list(traits, traits)
   )
 
   n <- 400000L
@@ -95,7 +97,8 @@ test_that("Cov(gamma, I) equals Gamma w, which the gain formula rests on", {
   # per-trait gain, and it is exact rather than approximate.
   observed_covariance <- as.numeric(stats::cov(gamma_draws, index))
   expect_equal(
-    observed_covariance, as.numeric(Gamma %*% w), tolerance = 0.03
+    observed_covariance, as.numeric(Gamma %*% w),
+    tolerance = 0.03
   )
 })
 
@@ -251,7 +254,8 @@ test_that("DGSI coefficients solve the Pesek-Baker system", {
       0.30, 0.90, -0.20,
       0.10, -0.20, 1.05
     ),
-    3, dimnames = list(traits, traits)
+    3,
+    dimnames = list(traits, traits)
   )
   G <- matrix(
     c(
@@ -259,7 +263,8 @@ test_that("DGSI coefficients solve the Pesek-Baker system", {
       0.15, 0.45, -0.10,
       0.05, -0.10, 0.50
     ),
-    3, dimnames = list(traits, traits)
+    3,
+    dimnames = list(traits, traits)
   )
 
   fit <- run_dgsi(
@@ -269,13 +274,83 @@ test_that("DGSI coefficients solve the Pesek-Baker system", {
     n_select = 12, n_iter = 30, n_rep = 2, seed = 5
   )
 
-  # b = P^-1 G (G' P^-1 G)^-1 d must reproduce the optimised d exactly, up to
-  # the ridge constants, via G' b = d.
+  # The Yamada map gives G'b proportional to the desired gains, but in the
+  # units of G and P. Since 0.5.0, run_dgsi() converts dg from the documented
+  # candidate-standard-deviation units into that space before the solve, so
+  # the identity is
+  #
+  #     G'b = d * s
+  #
+  # with s the candidate standard deviations in the analysis space. Equivalently
+  # the STANDARDISED response reproduces d, which is the contract the
+  # documentation states and the objective function uses.
+  #
+  # Before that fix this test asserted G'b = d, which held only because these
+  # candidates are standard normal and s is therefore near 1. On traits with
+  # dissimilar scales the old identity was wrong by a factor of s per trait.
+  analysis_sd <- apply(as.matrix(candidates[, ..traits]), 2L, stats::sd)
   reconstructed <- as.numeric(crossprod(fit$G, fit$coefficients))
   expect_equal(
-    reconstructed, as.numeric(fit$optimised_d),
+    reconstructed / analysis_sd, as.numeric(fit$optimised_d),
+    tolerance = 1e-5, ignore_attr = TRUE
+  )
+
+  # And the difference from the old identity is exactly the standard
+  # deviations, so a regression to the pre-0.5.0 behaviour would be visible
+  # here rather than hidden by a loose tolerance.
+  expect_equal(
+    reconstructed / as.numeric(fit$optimised_d), unname(analysis_sd),
     tolerance = 1e-5
   )
+})
+
+test_that("independent MVN simulation validates desired-gain response geometry", {
+  skip_on_cran()
+  set.seed(90210)
+  traits <- c("yield", "disease", "quality")
+  G <- matrix(c(
+    1.00, -0.20, 0.15,
+    -0.20, 0.70, -0.05,
+    0.15, -0.05, 0.50
+  ), 3, dimnames = list(traits, traits))
+  E <- matrix(c(
+    1.20, 0.10, 0.00,
+    0.10, 0.90, 0.08,
+    0.00, 0.08, 0.60
+  ), 3, dimnames = list(traits, traits))
+  P <- G + E
+  desired <- c(yield = 1, disease = 0.5, quality = 0.25)
+
+  # This is a direct transcription of the Yamada/Pesek-Baker equations. It
+  # deliberately calls no DesiredGainR coefficient or simulation helper.
+  pg <- solve(P, G)
+  coefficients <- as.numeric(pg %*% solve(crossprod(G, pg), desired))
+  proportion <- 0.10
+  intensity <- stats::dnorm(stats::qnorm(1 - proportion)) / proportion
+  index_sd <- sqrt(as.numeric(
+    crossprod(coefficients, P %*% coefficients)
+  ))
+  predicted <- as.numeric(
+    intensity * G %*% coefficients / index_sd
+  )
+
+  n <- 500000L
+  breeding_value <- rmvn(n, G)
+  phenotype <- breeding_value + rmvn(n, E)
+  score <- as.numeric(phenotype %*% coefficients)
+  selected <- order(score, decreasing = TRUE)[seq_len(n * proportion)]
+  observed <- colMeans(breeding_value[selected, , drop = FALSE])
+
+  expect_equal(observed, predicted, tolerance = 0.02)
+  expect_equal(
+    predicted / predicted[1L],
+    as.numeric(desired / desired[1L]),
+    tolerance = 1e-10
+  )
+  ellipsoid <- as.numeric(
+    crossprod(predicted, solve(G) %*% P %*% solve(G) %*% predicted)
+  )
+  expect_equal(ellipsoid, intensity^2, tolerance = 1e-10)
 })
 
 test_that("run_dgsi restores the caller's RNG state", {

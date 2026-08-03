@@ -8,19 +8,19 @@
 #' @param return_components Whether to return candidate-specific contributions.
 #' @export
 run_qgsi_desired_gain <- function(
-    init_data,
-    gebv_data,
-    trait_cols,
-    id_col = "GenoID",
-    dg,
-    W_d = NULL,
-    quadratic_diag_weights = NULL,
-    lower_is_better = NULL,
-    center_traits = FALSE,
-    scale_traits = FALSE,
-    impute_missing = FALSE,
-    return_components = TRUE,
-    debug = TRUE
+  init_data,
+  gebv_data,
+  trait_cols,
+  id_col = "GenoID",
+  dg,
+  W_d = NULL,
+  quadratic_diag_weights = NULL,
+  lower_is_better = NULL,
+  center_traits = FALSE,
+  scale_traits = FALSE,
+  impute_missing = FALSE,
+  return_components = TRUE,
+  debug = FALSE
 ) {
   warning(
     paste(

@@ -73,8 +73,10 @@ those weights actually request often reveals that the objective is not what
 anyone intended.
 
 ```{r duality}
-desired_gains <- c(GY = 1.0, PHT = 0.4, AD = 0.6, ASI = 0.5,
-                   EPP = 0.4, GLS = 0.6)
+desired_gains <- c(
+  GY = 1.0, PHT = 0.4, AD = 0.6, ASI = 0.5,
+  EPP = 0.4, GLS = 0.6
+)
 
 implied <- implied_economic_weights(
   desired_gains, dgr_G, dgr_P,
@@ -259,8 +261,10 @@ Weights are estimates, and refining them costs meetings. Before spending that
 effort it is worth knowing whether the decision would change.
 
 ```{r sensitivity}
-economic_weights <- c(GY = 1.0, PHT = 0.2, AD = 0.5,
-                      ASI = 0.4, EPP = 0.3, GLS = 0.5)
+economic_weights <- c(
+  GY = 1.0, PHT = 0.2, AD = 0.5,
+  ASI = 0.4, EPP = 0.3, GLS = 0.5
+)
 sensitivity <- weight_sensitivity(
   economic_weights, dgr_candidates, dgr_G, dgr_P,
   n_select = 20L, trait_cols = traits, n_draws = 100L
@@ -291,7 +295,8 @@ to, while contributing about six per cent of the index:
 
 ```{r effective}
 smith_hazel <- selection_index(
-  dgr_candidates, traits, method = "smith_hazel",
+  dgr_candidates, traits,
+  method = "smith_hazel",
   G = dgr_G, P = dgr_P, economic_weights = economic_weights,
   lower_is_better = lower_is_better, n_select = 20L, main_trait = "GY"
 )

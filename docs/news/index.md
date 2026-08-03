@@ -2,6 +2,697 @@
 
 ## DesiredGainR 0.5.0 (in development)
 
+### Critical remediation of 1 August 2026
+
+- Added a reproducible empirical validation suite using six real
+  breeding- programme sources. It estimates common-check and
+  year-adjusted recurrent- cycle trends, freezes a desired-gain index
+  before later INIA rice cohorts, compares it with yield-only selection
+  under a hierarchical temporal bootstrap, tests Genomes-to-Fields
+  transport across non-overlapping year windows, and records the CIMMYT
+  wheat predicted-versus-realized aggregate anchor. Every endpoint ships
+  with its evidence tier and interpretation, making the package’s
+  mathematical, genomic and transport evidence directly auditable. A
+  prospective comparison of competing vectors is identified as a future
+  opportunity to estimate incremental field response among strategies.
+  The sixth source is the Zhang et al. CIMMYT maize RCGS programme: raw
+  two-location cycle gains reproduce the published trend, a nested
+  leave-one-environment-out analysis tests desired-gain directions, and
+  a marker-subsampled repeated five-fold GBLUP reproduction includes a
+  permuted negative control. Cross-file checks expose the 43-versus-44
+  C4 discrepancy and the byte-identical C3/C4 selected genotype files.
+  Unphased bulk-family calls are explicitly rejected as actual AlphaSimR
+  founders.
+
+- The population-driven recommender now uses `G_target` for
+  breeder-facing genetic-SD units and treats `G_realised` only as a
+  finite-QTL calibration diagnostic. It confirms multiple finalists,
+  applies exact simultaneous lower and upper probability bounds, reports
+  supported/uncertain/not-supported decisions, runs independent
+  multi-start and half-budget stability checks, and validates finalists
+  across newly sampled genetic architectures. Optional covariance draws
+  are integrated when genetic/residual degrees of freedom are supplied;
+  otherwise support is explicitly conditional on the point covariance.
+
+- Added leakage-free cross-fitted RR-BLUP selection to
+  [`simulate_selection_cycles()`](https://FAkohoue.github.io/DesiredGainR/reference/simulate_selection_cycles.md)
+  through its compact `prediction` list. The simulator reports held-out
+  GEBV accuracy and never uses hidden simulated breeding values to
+  construct a selection index.
+
+- The exact box-QP active-set solver is now independently validated in
+  CI against Clarabel (primary interior-point oracle) and
+  polished/unpolished OSQP across analytical, random, ill-conditioned,
+  degenerate and invariance cases. Full KKT, feasibility, objective,
+  status and discrepancy results ship under `inst/validation/`.
+
+- Added an independent multivariate-normal Monte Carlo test of the
+  desired-gain response direction and achievable-response ellipsoid. It
+  calls neither the package coefficient helper nor AlphaSimR, providing
+  a separate check of the one-cycle selection-response mathematics.
+
+- Renamed misleading `probability_best` outputs to
+  `bootstrap_selection_frequency`; this is a resampling stability
+  diagnostic, not a posterior probability that a vector is truly best.
+
+- Added
+  [`suggest_desired_gains()`](https://FAkohoue.github.io/DesiredGainR/reference/suggest_desired_gains.md)
+  for breeders who cannot defend a complete desired-gain vector. It
+  accepts trait-specific minimum gains in estimated `G_target`
+  genetic-standard-deviation units and returns separate
+  minimum-attainment and maximum-balanced recommendations. An exact
+  convex active-set solution verifies one-cycle feasibility and the
+  maximum common response on the achievable-response ellipsoid. Adaptive
+  discovery, independent multiplicity-controlled screening, and
+  independent final confirmation are separated so recommendation
+  uncertainty is not estimated from the same simulation noise that
+  selected the candidates.
+
+- Desired gains can now be elicited as breeder-defined intervals with
+  [`define_desired_gain_intervals()`](https://FAkohoue.github.io/DesiredGainR/reference/define_desired_gain_intervals.md).
+  [`optimize_desired_gains()`](https://FAkohoue.github.io/DesiredGainR/reference/optimize_desired_gains.md)
+  restricts its search to the admissible interval cone and searches in
+  genetic-standard- deviation units by default, while retaining
+  representative requested gains and the trait-unit directions used by
+  the simulator. A dedicated vignette explains signs, units, feasibility
+  and what “optimum” means. Its new `mode = "interval"` recommends only
+  actually simulated vectors, defines high gain as jointly reaching
+  every breeder-specified lower bound, reports Jeffreys-binomial
+  posterior probabilities and credible intervals per vector, and ranks
+  conservatively by the lower joint-probability bound with balanced
+  interval attainment as a tie-breaker.
+
+- DGSI holdouts are split before optimisation; external validation data
+  can select the replicate and never enter coefficient fitting.
+
+- Mallard, Tallis and Kemp–Harville now use exact proportional-response
+  contrasts. The undocumented Harville soft penalty and Mallard
+  absolute-gain claim were removed.
+
+- Covariance propagation passes sampled residual covariance directly to
+  AlphaSimR, evaluates the point covariance separately, and computes
+  rank churn only under a declared scalarisation.
+
+- Optimizer checkpoints use complete SHA-256 fingerprints including
+  objective and search inputs. Replicate outcomes are retained, scalar
+  uncertainty is computed per replicate, paired shared-seed
+  bootstrapping preserves objective covariance, and exhausted candidate
+  pools stop explicitly.
+
+- Diversity defaults off and requires verified marker–QTL disjointness
+  unless an experimental override is recorded.
+
+- Desired-gain families no longer invent a different aggregate merit for
+  every direction. Merit-dependent criteria require common
+  `aggregate_weights`.
+
+- Multi-environment stability contrasts now feed
+  [`restricted_index()`](https://FAkohoue.github.io/DesiredGainR/reference/restricted_index.md)
+  through `constraint_matrix`; duplicate genotype–environment records
+  are rejected.
+
+- The default covariance repair preserves trait variances by repairing
+  the correlation matrix. The aggressive ASRgenomics route remains
+  explicit.
+
+### Technical review of 31 July 2026 — remaining items
+
+#### New: covariance uncertainty reaches the recommendation
+
+[`optimize_desired_gains()`](https://FAkohoue.github.io/DesiredGainR/reference/optimize_desired_gains.md)
+conditions on one covariance estimate, so a direction that is best only
+because of how `G` happened to be estimated looked identical to one that
+is robustly best.
+
+[`propagate_covariance_uncertainty()`](https://FAkohoue.github.io/DesiredGainR/reference/propagate_covariance_uncertainty.md)
+re-evaluates a fixed set of directions across draws from the sampling
+distribution of the covariance.
+[`draw_covariance_pairs()`](https://FAkohoue.github.io/DesiredGainR/reference/draw_covariance_pairs.md)
+draws the genetic and residual matrices separately and reassembles
+`P* = G* + E*`, so every pair is admissible by construction rather than
+by rejection.
+
+Each draw **rebuilds the founder population**, because `G` is the
+architecture the traits are built from rather than a matrix the
+simulation multiplies by. That is what makes this expensive and why
+directions are supplied rather than searched: the intended workflow is
+to take the Pareto set from
+[`optimize_desired_gains()`](https://FAkohoue.github.io/DesiredGainR/reference/optimize_desired_gains.md)
+and pass it here.
+
+The result separates the two sources of uncertainty. Monte Carlo error
+falls with more replicates; covariance-estimation error does not and can
+only be reduced by estimating `G` from more independent genetic units.
+When the covariance component dominates,
+`variance_components$dominant_source` says so, because running more
+replicates in that situation is wasted effort.
+
+#### Fixed: clonal calibration now reproduces the whole covariance
+
+The previous release calibrated the genotypic *variances* and left the
+correlations emergent, so the setup accepted a full covariance matrix as
+its target and reproduced only its diagonal. Dominance perturbs the
+correlation structure as well, and that perturbation is a smooth,
+near-identity function of the additive correlations supplied, so the
+fixed-point iteration now corrects both and projects the correction back
+onto the set of valid correlation matrices. `calibration_error` records
+the largest remaining deviation in each of the variances and
+correlations, and non-convergence warns rather than passing silently.
+
+#### New: multi-environment and genotype-by-environment structure
+
+[`expand_environments()`](https://FAkohoue.github.io/DesiredGainR/reference/expand_environments.md)
+builds the separable covariance `Cov(g_je, g_kf) = G_jk * C_ef` over
+trait-environment combinations, so the whole index layer applies to a
+multi-environment problem unchanged. It supports environment-specific
+economic weights, and `include_stability = TRUE` returns per-trait
+response contrasts that can be passed to
+[`restricted_index()`](https://FAkohoue.github.io/DesiredGainR/reference/restricted_index.md).
+
+The residual is expanded separately and `P` reassembled from the two, so
+the expanded pair remains admissible; expanding `P` directly with the
+genetic environmental correlation would not guarantee that. The reported
+`interaction_share` says whether modelling the environments separately
+was worth the complexity.
+[`widen_environments()`](https://FAkohoue.github.io/DesiredGainR/reference/widen_environments.md)
+reshapes long-format trial data.
+
+#### New: validation against the QGSI reference implementation
+
+[`run_qgsi()`](https://FAkohoue.github.io/DesiredGainR/reference/run_qgsi.md)
+implements Cerón-Rojas et al. (2026) and was previously checked only
+against the equations as this package restates them, which establishes
+that the code matches our reading and nothing more.
+
+That paper’s replication deposit
+([doi:10.71682/10549385](https://doi.org/10.71682/10549385)) contains
+the authors’ own R scripts. The intermediate data files those scripts
+read were not deposited, so their published figures cannot be recomputed
+— but the algorithm can, and a reference implementation is a stronger
+comparison than a table, because it runs on any input rather than only
+on theirs.
+
+`tests/testthat/test-reference-implementation.R` transcribes their code
+verbatim and runs both implementations on identical inputs. Compared:
+the Smith–Hazel coefficients `b = P^-1 G w`, the accuracy `corrHI`, the
+aggregate response `Rs`, the quadratic index variance
+`Vpq = b'Pb + 2 tr(BB P BB P)` and the quadratic merit variance
+`VHq = w'Gw + 2 tr(A G A G)`.
+
+The accuracy comparison is the informative one. The reference computes a
+ratio of standard deviations and this package computes a correlation;
+they coincide only because `b'Gw = b'Pb` for the optimum index, an
+identity asserted as its own test. Agreement establishes that both
+parties mean the same thing by accuracy, which comparing coefficients
+alone would not.
+
+#### New: reproduction against published results
+
+[`vignette("DesiredGainR-reproduction")`](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-reproduction.md)
+checks the package against tables computed in SAS PROC IML and published
+by Rahimi and Debnath (2023), *Scientific Reports* 13:18977. The
+reference values are frozen in
+[`rahimi_debnath_2023()`](https://FAkohoue.github.io/DesiredGainR/reference/rahimi_debnath_2023.md).
+
+The article’s covariance matrices are not distributed, so coefficients
+cannot be recomputed. What is checkable is stronger: Pesek–Baker gives
+expected response *exactly* proportional to the desired gains, and
+dividing the published gains by the published `d` vector gives the same
+constant, 0.3358, to four significant figures across all seven traits.
+Seven ratios cannot coincide by accident.
+
+The vignette also explains the article’s reported `R_HI = 0.0018` for
+Pesek–Baker against 0.9887 for the optimum index. It is not an
+arithmetic error: it follows from using the desired-gain vector as the
+aggregate weights, which is what this package did until 0.5.0, and
+collapses because the trait scales span a factor of 200.
+
+#### Release infrastructure
+
+`cran-comments.md`, `.zenodo.json` for DOI minting on tag,
+`paper/paper.md` with a bibliography for the method paper, and
+`data-raw/release_checklist.R`, which reports every outstanding release
+step rather than stopping at the first.
+
+### Technical review of 31 July 2026 — Gates B and C
+
+#### New: restricted and proportional-gain indices
+
+[`restricted_index()`](https://FAkohoue.github.io/DesiredGainR/reference/restricted_index.md)
+adds the closed-form constrained families: Kempthorne–Nordskog, Tallis,
+Mallard, Harville, and the projection form of restricted Smith–Hazel.
+Where a constraint is linear these give exactly what
+[`run_dgsi()`](https://FAkohoue.github.io/DesiredGainR/reference/run_dgsi.md)
+approaches by stochastic search, without the replicate dependence or the
+selection optimism, so they also serve as a convergence check on the
+search.
+
+#### New: upstream adapters, `summary()` and `coef()`
+
+[`import_covariance()`](https://FAkohoue.github.io/DesiredGainR/reference/import_covariance.md)
+converts variance components and covariance matrices from ASReml-R,
+sommer, breedR, BGLR and StageWise. It reorders traits to the analysis
+order rather than assuming it, refuses an incomplete component set,
+detects a correlation matrix passed as a covariance, and checks the
+imported matrix against `P`. A silently transposed trait order produces
+an index that is wrong in a way nothing downstream can detect, which is
+what this exists to prevent.
+
+[`summary()`](https://rdrr.io/r/base/summary.html) and
+[`coef()`](https://rdrr.io/r/stats/coef.html) methods are added for
+fitted indices and for
+[`run_dgsi()`](https://FAkohoue.github.io/DesiredGainR/reference/run_dgsi.md)
+results, returning tidy tables rather than printed text.
+
+#### Fixed: best-of-replicate optimism is now removed, not just reported
+
+[`run_dgsi()`](https://FAkohoue.github.io/DesiredGainR/reference/run_dgsi.md)
+gains `replicate_selection`, defaulting to `"holdout"`: each replicate’s
+coefficients are scored on candidates held out of that comparison, so
+the choice no longer depends on the candidates finally selected. The
+previous behaviour remains as `replicate_selection = "training"` and is
+labelled as biased.
+
+#### Fixed: the estimated-`P` exception is part of the API
+
+[`run_dgsi()`](https://FAkohoue.github.io/DesiredGainR/reference/run_dgsi.md)
+enforced admissibility for a supplied `P` but silently permitted an
+inadmissible estimated one. It now stops unless
+`allow_incompatible_estimated_P = TRUE`, and records the smallest
+residual eigenvalue, the sampling threshold, the status and any override
+in `covariance_provenance$compatibility`.
+
+#### Fixed: optimiser checkpoints identified only trait names
+
+A checkpoint could resume evaluations produced under different founders,
+a different genetic covariance, a different mating system or a different
+cycle count and present them as this run’s frontier. Checkpoints now
+carry a fingerprint of every result-defining input, including package
+and AlphaSimR versions, and a mismatch stops with the differing fields
+named rather than resuming.
+
+#### Fixed: simulation error was computed and discarded
+
+`.dgr_evaluate_direction()` returned Monte Carlo standard errors that
+the optimiser threw away, so the surrogate fitted one homogeneous nugget
+and treated a precisely evaluated direction and a noisy one alike.
+Replicate-level outcomes, standard errors and their covariance are now
+retained and supplied to the Gaussian process as a per-point nugget.
+
+The frontier reports `pareto_probability`, the proportion of resampled
+frontiers on which each direction remained non-dominated given its own
+Monte Carlo error. This represents *simulation* error only; `G` and `P`
+are still treated as fixed, and that limitation is stated in the result.
+
+#### Fixed: the optimiser could spend its budget re-evaluating one direction
+
+Expected improvement at an already-observed point can stay positive
+under a fitted nugget. Evaluated directions are now excluded from the
+acquisition pool, and a repeat that does occur is pooled as additional
+replication with a correspondingly reduced standard error rather than
+recorded as a new point.
+
+#### Changed: clonal replication
+
+[`simulate_selection_cycles()`](https://FAkohoue.github.io/DesiredGainR/reference/simulate_selection_cycles.md)
+gains `n_clonal_replicates`. A clonal trial phenotypes several ramets
+per genotype and averages them, so selection is more accurate than a
+single plot; the previous single-phenotype assumption understated clonal
+response.
+
+#### Other
+
+`MATURITY.md` states which components are stable, beta and experimental,
+and what the package deliberately does not do. CI now covers R-devel,
+oldrel and the declared minimum 4.1, treats warnings as failures, checks
+the source tarball, verifies that roxygen output is committed, renders
+the Breeder Guide as a build step, and runs one job with every optional
+dependency installed that **fails if any test skips**. The legacy
+`inst/extdata` example CSVs are excluded from the build.
+
+### Technical review of 31 July 2026 — Gate A
+
+#### Fixed: DGSI desired gains were in the wrong space when traits were unscaled
+
+[`run_dgsi()`](https://FAkohoue.github.io/DesiredGainR/reference/run_dgsi.md)
+documents `dg` and `realised_response` in candidate standard-deviation
+units, and its objective follows that definition. The Yamada coefficient
+solve, however, operates in the units of `G` and `P`. With
+`scale_traits = TRUE` the two coincide; with `scale_traits = FALSE` the
+analysis space is raw trait units, so the standard-deviation vector was
+asking for *raw* units per trait.
+
+For two traits with candidate standard deviations 10 and 1 and equal
+requested gains, this targeted standardised response in the ratio 1:10
+rather than 1:1. The stochastic search could partly recover, since the
+map is invertible, but the proposal coordinates were mislabelled,
+`optimised_d` was not in the documented units, and the non-iterated
+Yamada comparator was simply wrong.
+
+Desired gains are now converted to the analysis space before the solve,
+and the index is invariant to the units the traits are recorded in. New
+tests assert that invariance directly. **Re-run any
+[`run_dgsi()`](https://FAkohoue.github.io/DesiredGainR/reference/run_dgsi.md)
+analysis that used `scale_traits = FALSE` on traits with dissimilar
+scales.**
+
+#### New: theoretical transmitted response
+
+[`run_dgsi()`](https://FAkohoue.github.io/DesiredGainR/reference/run_dgsi.md)
+now reports `theoretical_response`, the classical , in the analysis
+space, in original trait units and standardised. `realised_response` is
+a differential among the candidates that were selected; this is what the
+next generation inherits. Keeping them apart is what allows DGSI to be
+compared with the classical families on the same criterion.
+
+#### Fixed: release blockers
+
+[`index_uncertainty()`](https://FAkohoue.github.io/DesiredGainR/reference/index_uncertainty.md)’s
+roxygen contained a raw `$$…$$` display that was copied literally into
+the Rd file, where `\mathbf`, `\sim`, `\mathcal` and `\nu` parsed as
+unknown macros. This was the sole source of both `R CMD check` warnings.
+It is now `\deqn{}` with an ASCII fallback.
+
+`inst/CITATION` reported version 0.3.1 while `DESCRIPTION` and
+`CITATION.cff` said 0.5.0. It now derives the version from package
+metadata so it cannot drift again.
+
+[`open_desiredgain_guide()`](https://FAkohoue.github.io/DesiredGainR/reference/open_desiredgain_guide.md)
+defaults to `"html"` rather than `"pdf"`. The PDF edition needs LaTeX as
+well as pandoc, so defaulting to it meant the export failed even where
+the guide had been built. A missing edition now names the one that is
+present.
+
+#### Fixed: provenance that claimed more than it verified
+
+The simulation recorded the *requested* thread count even when the
+assignment failed on an older AlphaSimR, so a multithreaded run could
+carry a single-thread reproducibility claim. It now reads back the
+effective count, records both, and warns on a mismatch.
+
+`.dgr_diversity_geno()` intersected a stored marker panel with whatever
+was available and fell back to the full genotype matrix when nothing
+matched — silently changing the basis of the diversity measure, and
+reintroducing the QTL the panel exists to exclude. The panel is now
+required exactly, ordered by identifier, and retained loci are stored by
+name rather than as a positional logical vector.
+
+#### Changed: diversity optimisation requires a verified panel
+
+`optimize_desired_gains(include_diversity = TRUE)` now errors when the
+setup has no marker panel, rather than silently falling back to all
+segregating sites. Without a panel the diversity axis partly measures
+genetic gain itself, so a direction is penalised for working. Where the
+panel cannot be verified as disjoint from the QTL on the installed
+AlphaSimR, it warns.
+
+#### Other
+
+Seeds route through `.dgr_seed()` in
+[`run_dgsi()`](https://FAkohoue.github.io/DesiredGainR/reference/run_dgsi.md)
+and
+[`optimize_desired_gains()`](https://FAkohoue.github.io/DesiredGainR/reference/optimize_desired_gains.md)
+rather than [`as.integer()`](https://rdrr.io/r/base/integer.html), so
+fractional seeds no longer truncate silently, and a base seed too close
+to the integer limit for its derived replicate seeds is rejected.
+`ridge_P`, `ridge_M` and `plateau_tolerance` are validated for length,
+finiteness and sign.
+
+### External review, August 2026 — release blockers
+
+#### Breaking: what a simulation cycle means has changed
+
+[`simulate_selection_cycles()`](https://FAkohoue.github.io/DesiredGainR/reference/simulate_selection_cycles.md)
+measured the *candidates* of each cycle rather than the population its
+selection produced. Because random mating does not shift a population
+mean, the cycle 1 gain was zero in expectation **for every desired-gain
+direction**, so a one-cycle run could not distinguish directions at all
+and `optimize_desired_gains(n_cycles = 1)` was comparing noise.
+
+Cycle 0 is now the founder population, and cycle *t* records the
+population produced by selecting parents from the cycle *t-1* candidates
+and crossing them. Every row from cycle 1 onward is a transmitted
+selection response. `cycle_table` gains a cycle 0 row,
+`parent_inbreeding`, `n_parents_selected`, `qtl_segregating` and
+`genic_variance_ratio`. **Re-run any stored simulation result.**
+
+Genetic mean and diversity are now measured on the same population;
+previously merit came from the whole evaluation population and
+relatedness from the selected parents.
+
+#### Breaking: independent culling is a hard gate again
+
+`selection_index(method = "independent_culling")` ranked candidates on a
+0/1 pass indicator and then took the top `n_select`, so requesting 20
+when 7 passed selected 13 failures. `n_select` is now a maximum: 7 pass,
+7 are returned, with a warning. Selection intensity is computed from the
+number actually selected, and `culling_report` names the gates each
+candidate failed. New `n_selected` records the executed count;
+`n_select` still holds the request.
+
+#### New: covariance compatibility is validated
+
+`P - G` must be positive semidefinite — a diagonal check is not enough,
+since a linear combination of traits can exceed its phenotypic variance
+while no single trait does. Enforced in
+[`selection_index()`](https://FAkohoue.github.io/DesiredGainR/reference/selection_index.md),
+[`evaluate_index()`](https://FAkohoue.github.io/DesiredGainR/reference/evaluate_index.md),
+[`run_dgsi()`](https://FAkohoue.github.io/DesiredGainR/reference/run_dgsi.md)
+and
+[`index_uncertainty()`](https://FAkohoue.github.io/DesiredGainR/reference/index_uncertainty.md),
+and `true_G - Gamma` in
+[`run_qgsi()`](https://FAkohoue.github.io/DesiredGainR/reference/run_qgsi.md)
+when accuracy or MSPE is requested. Correlations are clamped only for
+floating-point excursions, after validation. No valid run can now report
+a heritability above one, an accuracy above one, a squared correlation
+above one, or a negative MSPE.
+
+[`index_uncertainty()`](https://FAkohoue.github.io/DesiredGainR/reference/index_uncertainty.md)
+with `P` fixed now discards draws where the drawn `G` exceeds it, counts
+them in `n_inadmissible`, and describes itself as local sensitivity
+analysis rather than joint resampling.
+
+#### Fixed: simulations mutated the caller’s SimParam
+
+`SimParam` is an R6 object, so every crossing call advanced the caller’s
+`lastId` and two runs from one setup were not independent. It is now
+deep-cloned per call. `n_threads` defaults to 1 and warns above it,
+since thread count affects the order random numbers are consumed. The
+result carries a `provenance` record with the AlphaSimR, R and package
+versions, seed, thread count and simulation settings.
+
+#### Fixed: diversity was measured on the loci under selection
+
+Relatedness used `pullQtlGeno()`. Changing QTL frequencies is what
+genetic gain *is*, so the metric rose whenever selection succeeded and a
+direction was penalised for working.
+[`founder_population()`](https://FAkohoue.github.io/DesiredGainR/reference/founder_population.md)
+gains `n_markers_per_chromosome`, creating a neutral panel held disjoint
+from the QTL, and diversity is measured there. QTL frequency change is
+reported separately as `qtl_segregating` and `genic_variance_ratio`.
+
+#### Fixed: clonal mode was miscalibrated
+
+AlphaSimR’s `var` argument sets *additive* variance, so with dominance
+present the dominance variance was added on top and the realised
+genotypic variance exceeded the supplied `G` — the matrix a clonal
+programme selects on. Since scaling QTL effects by *c* scales both
+components by *c²*, the correction is exact in one pass and is now
+applied.
+[`founder_population()`](https://FAkohoue.github.io/DesiredGainR/reference/founder_population.md)
+gains `heritability = c("narrow", "broad")`, because the two diverge
+exactly when dominance is simulated. `G_realised` records the achieved
+covariance; realised correlations are emergent and warn above a 0.15
+deviation. The sexual and clonal phases are now explicit in
+[`simulate_selection_cycles()`](https://FAkohoue.github.io/DesiredGainR/reference/simulate_selection_cycles.md).
+
+#### Fixed: counts and defaults
+
+`run_dgsi(n_select)` bypassed the strict validator, so `1.9` silently
+became `1`. All counts now route through it; `NA`, `Inf`, zero,
+negative, non-integral and out-of-range values fail with distinct
+messages.
+[`run_dgsi_qgsi_pipeline()`](https://FAkohoue.github.io/DesiredGainR/reference/run_dgsi_qgsi_pipeline.md)
+now defaults to `fallback_to_top_n = FALSE` and `debug = FALSE`,
+[`run_qgsi_desired_gain()`](https://FAkohoue.github.io/DesiredGainR/reference/run_qgsi.md)
+to `debug = FALSE`. Enabling the fallback warns at request and again if
+it fires, and `$selection_rule` records requested versus executed.
+
+#### Other
+
+[`evaluate_index()`](https://FAkohoue.github.io/DesiredGainR/reference/evaluate_index.md)
+reports `h2_index` and `accuracy_index`.
+[`run_dgsi()`](https://FAkohoue.github.io/DesiredGainR/reference/run_dgsi.md)
+gains a [`print()`](https://rdrr.io/r/base/print.html) method and the
+additional class `desiredgainr_dgsi` alongside `desired_gain_index`,
+which is retained for dependent packages. The Breeder’s Guide source
+ships in `inst/guide/` with a build script in `data-raw/`, and tests
+verify the artifacts resolve through
+[`system.file()`](https://rdrr.io/r/base/system.file.html).
+
+### Audit of 31 July 2026
+
+`AUDIT-2026-07-31.md` records the full findings. The changes below
+follow from it.
+
+#### Fixed: the diversity metric could not detect diversity loss
+
+`.dgr_mean_relationship()` recomputed allele frequencies from the
+population being measured. Centring on a sample’s own frequencies forces
+every marker column to sum to zero, so the whole genomic relationship
+matrix sums to zero and its mean off-diagonal element equals
+\\-1/(n-1)\\ regardless of what has happened to the germplasm. The
+reported value was a function of the number of parents and almost
+nothing else.
+
+This mattered beyond the reporting, because
+`optimize_desired_gains(include_diversity = TRUE)` used it as the
+diversity axis of a Pareto frontier. Any direction chosen for its
+diversity properties was chosen on noise.
+
+Allele frequencies are now fixed at the founder population and reused
+for every subsequent measurement.
+[`simulate_selection_cycles()`](https://FAkohoue.github.io/DesiredGainR/reference/simulate_selection_cycles.md)
+gains `mean_inbreeding` per cycle and `final_inbreeding`, and
+`effective_size` is now derived from the rate of inbreeding rather than
+from differencing the old metric.
+
+**If you have run `optimize_desired_gains(include_diversity = TRUE)` on
+an earlier version, re-run it.** The gain axis was unaffected; the
+diversity axis was not meaningful.
+
+#### Fixed: `R_HI` for the desired-gain families
+
+[`evaluate_index()`](https://FAkohoue.github.io/DesiredGainR/reference/evaluate_index.md)
+was passed the desired-gain vector as the aggregate weights for
+`pesek_baker` and `yamada`. There is no theory under which desired gains
+define net merit, and the resulting quantity behaved erratically when
+trait scales differed. The implied economic weights \\\mathbf{w} =
+\mathbf{G}^{-1}\mathbf{P}\mathbf{G}^{-1}\mathbf{d}\\ are now used
+instead, so \\R\_{HI}\\ recovers its standard interpretation and the
+index families become comparable on one criterion.
+
+#### Fixed: the reference set for estimating `P` was unguarded
+
+[`run_dgsi()`](https://FAkohoue.github.io/DesiredGainR/reference/run_dgsi.md)
+estimated `P` from `ref_data` with no check beyond two records. A
+covariance matrix from fewer records than traits is singular, passes the
+positive-semidefinite check unchanged, and is then made invertible by
+the ridge term, so the failure was silent. It now stops below
+`length(trait_cols) + 1` records, warns below five times the trait
+count, and records `P_numerical_rank` in `covariance_provenance`.
+
+#### New: `bend_covariance()`
+
+Multi-trait restricted maximum likelihood routinely returns a genetic
+covariance matrix that is not positive definite. The package previously
+rejected it outright, which sent users to an ad hoc repair outside the
+audit trail. `.dgr_check_psd()` now names the repair in its rejection
+message.
+
+[`bend_covariance()`](https://FAkohoue.github.io/DesiredGainR/reference/bend_covariance.md)
+is a wrapper around `ASRgenomics::G.tuneup(bend = TRUE)`, which bends by
+calling [`Matrix::nearPD()`](https://rdrr.io/pkg/Matrix/man/nearPD.html)
+— Higham’s (2002) alternating-projections algorithm. That is the only
+bending route the package offers, deliberately. A package that repairs
+covariance matrices two different ways invites two different answers to
+the same question, and there is no defensible basis on which a user
+would choose between them mid-analysis. A test asserts that the wrapper
+returns exactly what `G.tuneup()` returns, so a result obtained here is
+reproducible by anyone running the underlying function directly.
+
+Two of `G.tuneup()`’s fixed choices have real consequences for a trait
+covariance, and the result surfaces both rather than letting them pass
+unnoticed.
+
+`keepDiag = FALSE`, so **the trait variances are not preserved**. The
+heritabilities implied by the bent matrix are not the ones supplied.
+`adjustment$max_variance_change` and `max_relative_variance_change`
+report how far they moved, and the print method shows them.
+
+`posd.tol = 1e-2`, which floors eigenvalues at a hundredth of the
+largest and so caps the condition number near 100. That is the right
+target for the genomic relationship matrix `G.tuneup()` was written for,
+which is near-singular by construction. For a trait covariance it is
+aggressive: condition numbers of to are ordinary and genuine there, so
+bending will smooth away correlation structure the data support.
+`eig_tol` is passed through but governs `nearPD()`’s `eig.tol`, not
+`posd.tol`, so it does not lift that cap. Compare
+\[matrix_diagnostics()\] before and after.
+
+`ASRgenomics` is in `Suggests` rather than `Imports`, because it brings
+in roughly ten further packages for plotting and pedigree handling and a
+single function should not be able to make the whole package
+uninstallable.
+[`bend_covariance()`](https://FAkohoue.github.io/DesiredGainR/reference/bend_covariance.md)
+stops with an install instruction when it is absent.
+
+#### New: `index_uncertainty()`
+
+Every quantity a selection index reports has treated `G` and `P` as
+known constants.
+[`index_uncertainty()`](https://FAkohoue.github.io/DesiredGainR/reference/index_uncertainty.md)
+resamples them from a Wishart sampling distribution, refits the index on
+each draw, and reports coefficient intervals, sign stability, rank
+correlation, and retention of the selected set.
+
+The genetic and residual matrices are resampled, and `P` reassembled as
+their sum, rather than resampling `G` and `P` independently, because
+they are estimated from the same records.
+
+For the desired-gain families the reported cost of estimation error has
+an exact reference point: since \\\mathbf{G}\mathbf{b} = \mathbf{d}\\
+identically, an index fitted on the true `G` delivers the desired gains
+in the requested proportions, and the cosine between the achieved
+response and `d` isolates estimation error with no confounding.
+
+`genetic_df` is the user’s judgement and governs every interval width.
+It counts independent genetic units — families, parents, distinct clones
+— and not plots.
+
+#### New: `predict()` for a fitted index
+
+Applies a fitted index to a new candidate set, reusing the centring and
+scaling constants from fitting rather than recomputing them, so that
+scores remain comparable across cycles.
+
+#### New: index heritability
+
+[`evaluate_index()`](https://FAkohoue.github.io/DesiredGainR/reference/evaluate_index.md)
+now reports `h2_index` (\\\mathbf{b}'\mathbf{G}\mathbf{b} /
+\mathbf{b}'\mathbf{P}\mathbf{b}\\) and `accuracy_index`, its square
+root. This is the only accuracy measure available for the desired-gain
+families before economic weights are supplied.
+
+#### New: `scale_by` in `selection_index()`
+
+`scale_traits` was documented as dividing by population standard
+deviations but divided by the candidates’ standard deviations. Those
+coincide only when the candidates are an unselected random sample, which
+a late-stage trial is not. `scale_by = "phenotypic"` divides by
+\\\sqrt{\operatorname{diag}(\mathbf{P})}\\ instead, giving a scaled `P`
+with a unit diagonal exactly and a scaled `G` carrying the
+heritabilities. The default remains `"sample"`, so existing calls are
+unchanged.
+
+#### Changed: the surrogate’s kernel
+
+The Gaussian process in
+[`optimize_desired_gains()`](https://FAkohoue.github.io/DesiredGainR/reference/optimize_desired_gains.md)
+fitted one lengthscale per trait, estimated by marginal likelihood from
+however many objective evaluations the budget allowed. Below roughly ten
+evaluations per trait those estimates are dominated by noise, which then
+steers the acquisition function. A single shared lengthscale is now used
+in that regime.
+
+#### Reported optimism in `run_dgsi()`
+
+At that stage the winning replicate was chosen on the same candidates it
+then selected, so its objective was biased downward. The result gained
+an `optimism` element; the 1 August remediation above subsequently made
+a pre-fit holdout the default while retaining the training rule
+explicitly.
+
 ### Example data
 
 Nine datasets replace the previous examples, which were uncorrelated
@@ -568,8 +1259,8 @@ under new names.
   regardless of `scale_traits`. A new Details section gives the
   realised-response and objective formulas, explains the `0.25` and
   `0.05` floors that were previously undocumented constants, and states
-  that best-of-`n_rep` selection is optimistically biased because it is
-  made on the same candidates that are then selected.
+  that best-of-`n_rep` training selection is optimistically biased. The
+  current default avoids that rule with a pre-fit holdout.
 - Added a worked `@examples` block to
   [`run_dgsi()`](https://FAkohoue.github.io/DesiredGainR/reference/run_dgsi.md).
 

@@ -76,12 +76,12 @@ N_TRAITS <- length(TRAITS)
 genetic_correlation <- matrix(
   c(
     #  GY    PHT     AD    ASI    EPP    GLS
-     1.00,  0.25,  0.30, -0.55,  0.45, -0.35,
-     0.25,  1.00,  0.35, -0.10,  0.15, -0.20,
-     0.30,  0.35,  1.00,  0.20,  0.05, -0.15,
-    -0.55, -0.10,  0.20,  1.00, -0.30,  0.25,
-     0.45,  0.15,  0.05, -0.30,  1.00, -0.20,
-    -0.35, -0.20, -0.15,  0.25, -0.20,  1.00
+    1.00, 0.25, 0.30, -0.55, 0.45, -0.35,
+    0.25, 1.00, 0.35, -0.10, 0.15, -0.20,
+    0.30, 0.35, 1.00, 0.20, 0.05, -0.15,
+    -0.55, -0.10, 0.20, 1.00, -0.30, 0.25,
+    0.45, 0.15, 0.05, -0.30, 1.00, -0.20,
+    -0.35, -0.20, -0.15, 0.25, -0.20, 1.00
   ),
   nrow = N_TRAITS, byrow = TRUE,
   dimnames = list(TRAITS, TRAITS)
@@ -109,12 +109,16 @@ nearest_positive_definite <- function(M, minimum_eigenvalue = 1e-6,
                                       label = "matrix") {
   decomposition <- eigen((M + t(M)) / 2, symmetric = TRUE)
   if (min(decomposition$values) >= minimum_eigenvalue) {
-    message(label, ": already positive definite (smallest eigenvalue ",
-            format(min(decomposition$values), digits = 3), ")")
+    message(
+      label, ": already positive definite (smallest eigenvalue ",
+      format(min(decomposition$values), digits = 3), ")"
+    )
     return(M)
   }
-  message(label, ": adjusted to positive definite (smallest eigenvalue was ",
-          format(min(decomposition$values), digits = 3), ")")
+  message(
+    label, ": adjusted to positive definite (smallest eigenvalue was ",
+    format(min(decomposition$values), digits = 3), ")"
+  )
   values <- pmax(decomposition$values, minimum_eigenvalue)
   adjusted <- decomposition$vectors %*% diag(values) %*% t(decomposition$vectors)
   adjusted <- stats::cov2cor(adjusted)
@@ -123,10 +127,12 @@ nearest_positive_definite <- function(M, minimum_eigenvalue = 1e-6,
 }
 
 genetic_correlation <- nearest_positive_definite(
-  genetic_correlation, label = "Genetic correlation"
+  genetic_correlation,
+  label = "Genetic correlation"
 )
 residual_correlation <- nearest_positive_definite(
-  residual_correlation, label = "Residual correlation"
+  residual_correlation,
+  label = "Residual correlation"
 )
 
 ## Covariance matrices. The residual variance follows from the declared
@@ -134,7 +140,7 @@ residual_correlation <- nearest_positive_definite(
 genetic_sd <- dgr_traits$genetic_sd
 names(genetic_sd) <- TRAITS
 residual_sd <- genetic_sd * sqrt((1 - dgr_traits$heritability) /
-                                   dgr_traits$heritability)
+  dgr_traits$heritability)
 names(residual_sd) <- TRAITS
 
 dgr_G <- diag(genetic_sd) %*% genetic_correlation %*% diag(genetic_sd)
@@ -148,9 +154,12 @@ dimnames(dgr_P) <- list(TRAITS, TRAITS)
 stopifnot(
   all(abs(diag(dgr_G) / diag(dgr_P) - dgr_traits$heritability) < 1e-8)
 )
-message("Heritabilities reproduced from G and P: ",
-        paste(sprintf("%s=%.2f", TRAITS, diag(dgr_G) / diag(dgr_P)),
-              collapse = ", "))
+message(
+  "Heritabilities reproduced from G and P: ",
+  paste(sprintf("%s=%.2f", TRAITS, diag(dgr_G) / diag(dgr_P)),
+    collapse = ", "
+  )
+)
 
 # -- Marker panel with linkage disequilibrium ---------------------------------
 
@@ -173,8 +182,10 @@ draw_homologue <- function() {
   for (chromosome in seq_len(N_CHR)) {
     for (block in seq_len(BLOCKS_PER_CHR)) {
       pool <- matrix(
-        rbinom(N_FOUNDER_HAPLOTYPES * MARKERS_PER_BLOCK, 1L,
-               runif(1L, 0.25, 0.75)),
+        rbinom(
+          N_FOUNDER_HAPLOTYPES * MARKERS_PER_BLOCK, 1L,
+          runif(1L, 0.25, 0.75)
+        ),
         nrow = N_FOUNDER_HAPLOTYPES
       )
       chosen <- sample.int(N_FOUNDER_HAPLOTYPES, N_IND, replace = TRUE)
@@ -203,8 +214,10 @@ dgr_hap2 <- dgr_hap2[informative, , drop = FALSE]
 dosage <- dosage[informative, , drop = FALSE]
 marker_id <- marker_id[informative]
 n_markers <- length(marker_id)
-message("Retained ", n_markers, " polymorphic markers of ",
-        length(informative))
+message(
+  "Retained ", n_markers, " polymorphic markers of ",
+  length(informative)
+)
 
 ## Physical map. Markers sit about one megabase apart within a block, with a
 ## larger gap between blocks.
@@ -213,10 +226,12 @@ chromosome_label <- character(0)
 retained_index <- which(informative)
 original_chromosome <- rep(seq_len(N_CHR), each = markers_per_chr)
 original_block <- rep(
-  rep(seq_len(BLOCKS_PER_CHR), each = MARKERS_PER_BLOCK), times = N_CHR
+  rep(seq_len(BLOCKS_PER_CHR), each = MARKERS_PER_BLOCK),
+  times = N_CHR
 )
 original_within <- rep(
-  rep(seq_len(MARKERS_PER_BLOCK), times = BLOCKS_PER_CHR), times = N_CHR
+  rep(seq_len(MARKERS_PER_BLOCK), times = BLOCKS_PER_CHR),
+  times = N_CHR
 )
 position_all <- (original_block - 1L) * 25e6 + (original_within - 1L) * 1e6 + 1e6
 
@@ -274,14 +289,17 @@ dgr_candidates <- data.frame(
 ## predictor and the prediction error are orthogonal, so the true genetic value
 ## is the prediction plus an independent error, and the reliability determines
 ## how much of the genetic variance the prediction retains.
-reliability <- c(GY = 0.35, PHT = 0.65, AD = 0.70, ASI = 0.30,
-                 EPP = 0.40, GLS = 0.50)[TRAITS]
+reliability <- c(
+  GY = 0.35, PHT = 0.65, AD = 0.70, ASI = 0.30,
+  EPP = 0.40, GLS = 0.50
+)[TRAITS]
 reliability_root <- diag(sqrt(reliability))
 prediction_covariance <- reliability_root %*% dgr_G %*% reliability_root
 dimnames(prediction_covariance) <- list(TRAITS, TRAITS)
 error_covariance <- dgr_G - prediction_covariance
 error_covariance <- nearest_positive_definite(
-  stats::cov2cor(error_covariance), label = "Prediction error correlation"
+  stats::cov2cor(error_covariance),
+  label = "Prediction error correlation"
 )
 error_sd <- sqrt(pmax(diag(dgr_G - prediction_covariance), 1e-10))
 error_covariance <- diag(error_sd) %*% error_covariance %*% diag(error_sd)
@@ -303,8 +321,10 @@ dgr_gebv <- data.frame(
 ##
 ## The weights act on the favourable-direction, standardised scale, so a
 ## positive value always means improvement.
-generating_weights <- c(GY = 1.00, PHT = 0.25, AD = 0.60, ASI = 0.45,
-                        EPP = 0.30, GLS = 0.55)[TRAITS]
+generating_weights <- c(
+  GY = 1.00, PHT = 0.25, AD = 0.60, ASI = 0.45,
+  EPP = 0.30, GLS = 0.55
+)[TRAITS]
 hidden_weights <- generating_weights
 direction_sign <- ifelse(dgr_traits$direction == "increase", 1, -1)
 names(direction_sign) <- TRAITS
@@ -324,21 +344,23 @@ attr(dgr_history, "generating_scale") <- paste(
   "scaled, then oriented so that larger is better, before the weights were",
   "applied."
 )
-message("Historical decision: ", sum(dgr_history$selected), " of ", N_IND,
-        " candidates selected (", round(100 * 40 / N_IND, 1), "%)")
+message(
+  "Historical decision: ", sum(dgr_history$selected), " of ", N_IND,
+  " candidates selected (", round(100 * 40 / N_IND, 1), "%)"
+)
 message("Generating weights attached to dgr_history for verification.")
 
 # -- Save ---------------------------------------------------------------------
 
-usethis::use_data(dgr_traits,     overwrite = TRUE, compress = "xz")
-usethis::use_data(dgr_G,          overwrite = TRUE, compress = "xz")
-usethis::use_data(dgr_P,          overwrite = TRUE, compress = "xz")
+usethis::use_data(dgr_traits, overwrite = TRUE, compress = "xz")
+usethis::use_data(dgr_G, overwrite = TRUE, compress = "xz")
+usethis::use_data(dgr_P, overwrite = TRUE, compress = "xz")
 usethis::use_data(dgr_candidates, overwrite = TRUE, compress = "xz")
-usethis::use_data(dgr_gebv,       overwrite = TRUE, compress = "xz")
-usethis::use_data(dgr_history,    overwrite = TRUE, compress = "xz")
-usethis::use_data(dgr_hap1,       overwrite = TRUE, compress = "xz")
-usethis::use_data(dgr_hap2,       overwrite = TRUE, compress = "xz")
-usethis::use_data(dgr_map,        overwrite = TRUE, compress = "xz")
+usethis::use_data(dgr_gebv, overwrite = TRUE, compress = "xz")
+usethis::use_data(dgr_history, overwrite = TRUE, compress = "xz")
+usethis::use_data(dgr_hap1, overwrite = TRUE, compress = "xz")
+usethis::use_data(dgr_hap2, overwrite = TRUE, compress = "xz")
+usethis::use_data(dgr_map, overwrite = TRUE, compress = "xz")
 
 message("Saved nine datasets to data/")
 
@@ -350,11 +372,15 @@ condition_number <- function(M) {
 }
 scale_ratio <- max(genetic_sd) / min(genetic_sd)
 
-message("Trait standard deviations span a factor of ", round(scale_ratio, 0),
-        ", so the standardisation diagnostics have something to detect")
+message(
+  "Trait standard deviations span a factor of ", round(scale_ratio, 0),
+  ", so the standardisation diagnostics have something to detect"
+)
 message("Condition number of G: ", format(condition_number(dgr_G), digits = 4))
 message("Condition number of P: ", format(condition_number(dgr_P), digits = 4))
-message("Strongest antagonism: GY with AD, genetic correlation ",
-        genetic_correlation["GY", "AD"],
-        " while the objective requires GY up and AD down")
+message(
+  "Strongest antagonism: GY with AD, genetic correlation ",
+  genetic_correlation["GY", "AD"],
+  " while the objective requires GY up and AD down"
+)
 message("Data generation complete.")

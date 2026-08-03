@@ -1,0 +1,440 @@
+# Defining desired gains when one exact value is not known
+
+## 1. What a desired gain means
+
+A desired gain is the genetic response pattern that the breeding
+programme wants the index to pursue. It is not an economic weight, an
+index coefficient, or a guarantee about the response that selection will
+deliver.
+
+For example, a breeder might describe the objective as:
+
+- increase yield by roughly 0.5 to 1.5 genetic standard deviations;
+- reduce disease severity by roughly 0.25 to 1.0 genetic standard
+  deviations;
+- improve quality by 0.1 to 0.8 genetic standard deviations.
+
+The relative sizes describe the requested balance among traits. The
+signs describe the direction of change in the original trait scale. A
+reduction in disease severity is therefore negative before the trait is
+oriented.
+
+The classical desired-gain index uses only the **direction** of this
+vector. The vectors `(1.5, -0.5, 0.4)` and `(3, -1, 0.8)` produce the
+same index because their ratios are identical. Actual response magnitude
+is determined by the available genetic variation, correlations, accuracy
+and selection intensity.
+
+## 2. Why genetic standard deviations are a useful language
+
+Original units are easy to discuss within one trait but misleading
+across traits. One tonne per hectare of yield and one disease-score unit
+do not represent comparable amounts of selectable variation.
+
+A genetic standard deviation (genetic SD) expresses change relative to
+the breeder’s estimate of additive genetic variation in the target
+population:
+
+\\d\_{j,\mathrm{SD}} = d_j / \sqrt{G\_{jj}}.\\
+
+Thus `+1.0 genetic SD` means one estimated genetic standard deviation of
+improvement. For a lower-is-better trait, `-0.5 genetic SD` in the raw
+scale means a favourable reduction of half a genetic SD. In a simulation
+setup this scale is `sqrt(diag(setup$G_target))`. The random finite-QTL
+covariance stored as `G_realised` is a calibration diagnostic, never a
+replacement for the breeder’s estimand; otherwise the same threshold
+would change with a simulator seed.
+
+Genetic SD is recommended for eliciting multi-trait intervals. It does
+not make `1.5 SD` attainable. Feasibility must be checked against the
+covariance matrix and planned selection intensity.
+
+## 3. When the breeder cannot propose a desired-gain vector
+
+Sometimes even an interval is more precision than the breeder can
+defend. The breeder may know only the smallest useful response for each
+trait. Those minima need not be equal:
+
+``` r
+suggestion <- suggest_desired_gains(
+  setup,
+  minimum_gains = c(Yield = 1.0, Disease = 0.5, Quality = 0.25),
+  lower_is_better = "Disease",
+  programme = list(
+    mating_system = "outcross",
+    n_parents = 20,
+    n_crosses = 50,
+    n_progeny_per_cross = 10
+  )
+)
+```
+
+This asks for at least one estimated genetic SD of yield improvement,
+half an SD of disease reduction, and one-quarter SD of quality
+improvement. The numbers are favourable magnitudes, so the disease
+minimum is positive even though its response in original disease units
+should be negative.
+
+The result deliberately gives two answers:
+
+- `minimum_recommendation` is the direction with the strongest
+  conservative evidence of reaching **all three trait-specific minima**;
+- `maximum_balanced_recommendation` is the direction with the highest
+  robust lower bound on the worst-responding trait, after every trait is
+  expressed in genetic SD.
+
+The second answer needs a definition of “highest.” There is no single
+largest multi-trait vector without economic weights or another
+preference rule: one vector may provide more yield and another more
+resistance.
+[`suggest_desired_gains()`](https://FAkohoue.github.io/DesiredGainR/reference/suggest_desired_gains.md)
+uses maximin because it treats the traits symmetrically and prevents
+exceptional gain in one trait from concealing a weak response in
+another.
+
+The mathematical diagnostic first uses the achievable-response ellipsoid
+
+\\R^\mathsf{T}G^{-1}PG^{-1}R=i^2\\
+
+and solves an exact convex quadratic programme subject to the
+trait-specific lower bounds. It reports whether all minima can be
+reached in one cycle, the maximum common gain possible at the planned
+selection intensity, the limiting traits, and the numerical KKT residual
+verifying the global solution.
+
+Forward simulation then handles processes that the one-cycle ellipsoid
+cannot: recombination, finite-family sampling, drift, variance erosion
+and repeated selection. The adaptive search is used only for discovery.
+All discovered directions are locked and rerun with new common random
+numbers before either recommendation is chosen. The package ranks
+minimum attainment using an exact multiplicity-adjusted Clopper–Pearson
+lower confidence bound, and ranks the balanced solution using a
+simultaneous distribution-free lower confidence bound for the median
+worst-trait gain. Several finalists for each objective are then run a
+third time with independent seeds. The final vector is chosen only from
+this confirmation stream. Exact simultaneous lower and upper probability
+bounds classify it as `supported`, `uncertain`, or `not_supported`
+relative to the declared required success probability. An uncertain
+best-available vector is not printed as a recommendation.
+
+Three further checks can prevent a recommendation:
+multi-start/half-budget search disagreement, inadequate reproduction of
+`G_target` by the simulated finite-QTL architecture, and failure across
+newly sampled architectures. Covariance-estimation uncertainty is also
+propagated when defensible genetic and residual degrees of freedom are
+supplied. Without them, any supported answer is labelled
+`supported_conditional_on_covariance`; simulation cannot manufacture
+uncertainty information that the data analysis did not provide.
+
+Read the result as follows:
+
+``` r
+suggestion$analytical_feasibility
+suggestion$minimum_recommendation
+suggestion$maximum_balanced_recommendation
+suggestion$confirmation
+suggestion$model_diagnostic
+suggestion$search_stability
+suggestion$outer_validation
+```
+
+The returned `desired_gain_direction` is a direction in favourable
+genetic-SD space; its length is fixed to one because multiplying the
+entire vector by a constant does not change a classical desired-gain
+index. The confirmation table reports expected realised responses and
+probabilities. Do not interpret the direction entries themselves as
+guaranteed gains.
+
+Defaults use three independent searches, 50 discovery replicates, 50
+independent screening replicates, 200 independent confirmation
+replicates, and 30 newly sampled finite-QTL architectures. These are
+intentionally substantial because the function may make a
+recommendation. Reduce them only for code testing, not to support a
+breeding decision. To propagate sampling uncertainty in covariance
+estimates, add for example:
+
+``` r
+control <- list(
+  uncertainty = list(
+    covariance_draws = 50,
+    genetic_df = 120, # independent genetic units, not plot count
+    residual_df = 400
+  )
+)
+```
+
+## 4. Ask for intervals, not false precision
+
+Use
+[`define_desired_gain_intervals()`](https://FAkohoue.github.io/DesiredGainR/reference/define_desired_gain_intervals.md)
+to record what the breeder can defend:
+
+``` r
+gain_intervals <- define_desired_gain_intervals(
+  lower = c(Yield = 0.5, Disease = -1.0, Quality = 0.1),
+  upper = c(Yield = 1.5, Disease = -0.25, Quality = 0.8),
+  lower_is_better = "Disease",
+  gain_units = "genetic_sd",
+  horizon_cycles = 5
+)
+gain_intervals
+#> <desiredgainr_gain_intervals>
+#>   Units: genetic_sd 
+#>   Planning horizon: 5 cycles
+#>   Bounds shown as favourable genetic change (larger is better):
+#> [1] trait lower upper
+#> <0 rows> (or 0-length row.names)
+#>   Lower-is-better traits were entered as raw reductions: Disease
+```
+
+The input uses familiar raw changes, so disease reductions are negative.
+The printed object uses the favourable-direction convention internally:
+every positive value means improvement. This prevents a sign error later
+when the phenotypes and covariance matrices are oriented.
+
+The questions behind each interval should be recorded:
+
+1.  What is the smallest change that would matter to the programme?
+2.  What is an ambitious but still biologically credible change?
+3.  Is deterioration ever acceptable, and if so how much?
+4.  Is the interval stated per cycle or over the full planning horizon?
+5.  Does the genetic SD come from the current target population?
+
+## 5. The interval-mode definition of “best”
+
+The interval box tells DesiredGainR which desired-gain ratios the
+breeder is willing to consider. In `mode = "interval"`, its lower bounds
+also define the high-gain event at the declared planning horizon.
+
+Let \\R_j\\ be the favourable cumulative response for trait \\j\\,
+expressed in the interval’s units, and let \\L_j\\ be its lower bound.
+One simulation replicate is a joint success when
+
+\\R_j \ge L_j \quad \text{for every trait } j.\\
+
+This definition is deliberately strict. Exceptional yield cannot
+compensate for disease response below the breeder’s minimum.
+
+If the joint event occurs in \\s\\ of \\n\\ independent simulation
+replicates, the reported probability uses the Jeffreys binomial
+posterior
+
+\\p \mid s,n \sim \operatorname{Beta}(s+1/2,n-s+1/2).\\
+
+The package reports its posterior mean and credible interval. The
+recommended vector maximises the **lower credible bound**, not the raw
+success proportion. This conservative rule penalises poorly replicated
+apparent winners.
+
+When probabilities tie, a balanced achievement score compares how far
+each trait progressed through its interval:
+
+\\A_j = \frac{R_j-L_j}{U_j-L_j},\\
+
+\\S = \min_j A_j + 0.05\\\operatorname{mean}\_j\\\min(A_j,1)\\.\\
+
+The worst-satisfied trait is primary. The small bounded average term
+breaks ties without allowing one exceptional trait to conceal another
+trait’s failure. This is an augmented achievement-scalarising rule, not
+an implicit economic weighting scheme.
+
+Other modes remain available when a different decision is intended:
+
+[`optimize_desired_gains()`](https://FAkohoue.github.io/DesiredGainR/reference/optimize_desired_gains.md)
+offers four routes that do not require economic weights:
+
+| Breeder’s decision | Recommended mode |
+|----|----|
+| Recommend the vector most reliably reaching every interval minimum | `"interval"` |
+| Show the defensible trade-offs and do not force one answer | `"pareto"` |
+| Come closest to operational absolute targets | `"target"` |
+| Maximise one focal trait while protecting the others | `"constrained"` |
+
+The economic mode is optional and is appropriate only when credible
+economic weights exist.
+
+## 6. Search only within the breeder’s intervals
+
+After constructing a simulation setup from the programme’s founder
+population, the probability-based interval search is:
+
+``` r
+optimisation <- optimize_desired_gains(
+  setup,
+  desired_gain_intervals = gain_intervals,
+  mode = "interval",
+  n_cycles = 5,
+  budget = 80,
+  n_replicates = 50,
+  lower_is_better = "Disease",
+  mating_system = "outcross",
+  n_parents = 20,
+  n_crosses = 50,
+  n_progeny_per_cross = 10,
+  seed = 42
+)
+```
+
+The optimiser samples only desired-gain directions whose ray intersects
+the specified interval box. `optimisation$desired_gains` contains a
+representative request within the interval for every evaluated
+direction. Columns beginning with `requested_` in `optimisation$results`
+report the same values.
+
+Read the probability-based recommendation directly:
+
+``` r
+optimisation$recommended_desired_gains
+optimisation$recommended_probability
+optimisation$recommendations[, c(
+  "requested_Yield", "requested_Disease", "requested_Quality",
+  "joint_high_gain_probability", "joint_probability_lower",
+  "joint_probability_upper", "bootstrap_selection_frequency"
+)]
+```
+
+Every row is an actually simulated desired-gain vector. The
+Gaussian-process surrogate decides only where to spend the next
+simulation; an unsimulated surrogate optimum is never recommended.
+Common random numbers make comparisons more precise, and the paired
+bootstrap used for `bootstrap_selection_frequency` preserves the
+shared-seed dependence among vectors. It is a stability frequency under
+resampling, not a probability that a vector is the unknown true best.
+
+Twenty replicates is a screening minimum, not a guarantee of precision.
+Use at least 50 when recommendations are close, and increase the count
+until credible intervals and rankings are stable.
+
+With `mode = "pareto"`, inspect `optimisation$pareto_set` instead. There
+is then deliberately no single recommendation because one non-dominated
+solution can provide more yield while another provides more disease
+resistance or retained diversity.
+
+If the programme has an operational target, use it to select within the
+interval-constrained search:
+
+``` r
+optimisation <- optimize_desired_gains(
+  setup,
+  desired_gain_intervals = gain_intervals,
+  mode = "target",
+  # These are cumulative responses in original trait units after five cycles.
+  target_gains = c(Yield = 1.2, Disease = -0.7, Quality = 0.5),
+  n_cycles = 5,
+  lower_is_better = "Disease",
+  ...
+)
+
+optimisation$recommended_desired_gains
+optimisation$stability_proportion
+```
+
+The first output is the desired-gain request selected from the breeder’s
+intervals. The stability proportion shows how much of the searched
+region is practically indistinguishable from the numerical optimum. A
+broad stable region is often more useful than a highly precise-looking
+point.
+
+For covariance-uncertainty propagation, pass the complete `optimisation`
+object rather than extracting its normalized search directions. The
+function will use the corresponding original-trait-unit directions
+automatically:
+
+``` r
+propagate_covariance_uncertainty(
+  setup,
+  directions = optimisation,
+  genetic_df = 80,
+  P = P,
+  residual_df = 300
+)
+```
+
+## 7. Check feasibility separately
+
+An interval can contain requests that are biologically impossible at the
+planned selection intensity. Check representative points before spending
+a large simulation budget. For example, the interval midpoint in
+favourable genetic-SD units is:
+
+``` r
+midpoint <- setNames(
+  rowMeans(gain_intervals[c("lower", "upper")]),
+  gain_intervals$trait
+)
+midpoint
+#>   Yield Disease Quality 
+#>   1.000   0.625   0.450
+```
+
+With the programme covariance matrices, assess it using:
+
+``` r
+gain_feasibility(
+  midpoint,
+  G,
+  P,
+  n_candidates = 500,
+  n_select = 50,
+  lower_is_better = "Disease",
+  gain_units = "genetic_sd"
+)
+```
+
+If the midpoint is infeasible, the breeder can revise the intervals or
+accept that the desired proportions will be scaled down. Simulation
+cannot create genetic variation that the population does not contain.
+
+## 8. What the probability does and does not mean
+
+The reported probability integrates the segregation, recombination,
+mating, selection and phenotype-generation randomness represented by the
+simulation. It is conditional on the supplied model. It is not the
+probability that an unknown real breeding programme will succeed under
+every possible model.
+
+Covariance-estimation uncertainty is separate. Pass the optimisation
+object to
+[`propagate_covariance_uncertainty()`](https://FAkohoue.github.io/DesiredGainR/reference/propagate_covariance_uncertainty.md)
+and report whether its recommendation remains competitive across
+plausible covariance matrices.
+
+No finite simulation makes a biological conclusion irrefutable. What
+makes the analysis defensible is that the event, probability model,
+assumptions, random seeds, uncertainty interval and decision rule are
+all explicit and testable.
+
+## 9. What “optimum” means in DesiredGainR
+
+The selected solution is conditional on:
+
+- the breeder-defined intervals and ranking mode;
+- the founder germplasm and covariance matrices;
+- selection intensity, mating system and population size;
+- the number of simulated cycles;
+- the assumed genetic architecture and estimation error.
+
+DesiredGainR therefore helps the breeder replace an unjustifiably
+precise statement such as “the correct desired gain is exactly
+`+1.5 SD`” with the more defensible statement:
+
+> We considered the desired-gain ratios the breeding team judged
+> acceptable, simulated their multi-cycle consequences under the planned
+> programme, and selected a stable solution using a decision rule stated
+> in advance.
+
+That is the intended role of interval-based desired-gain optimisation.
+
+## References
+
+Brown LD, Cai TT, DasGupta A (2001). Interval estimation for a binomial
+proportion. *Statistical Science* **16**:101–133.
+<doi:10.1214/ss/1009213286>.
+
+Wierzbicki AP (1982). A mathematical basis for satisficing decision
+making. *Mathematical Modelling* **3**:391–405.
+<doi:10.1016/0270-0255(82)90038-0>.
+
+Yang W-N, Nelson BL (1991). Using common random numbers and control
+variates in multiple-comparison procedures. *Operations Research*
+**39**:583–591. <doi:10.1287/opre.39.4.583>.

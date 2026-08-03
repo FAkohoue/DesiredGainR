@@ -8,7 +8,8 @@ family_G <- matrix(
     -0.18, 0.42, -0.02,
     0.05, -0.02, 0.55
   ),
-  3, dimnames = list(family_traits, family_traits)
+  3,
+  dimnames = list(family_traits, family_traits)
 )
 
 family_P <- matrix(
@@ -17,13 +18,15 @@ family_P <- matrix(
     -0.25, 0.85, -0.04,
     0.08, -0.04, 1.00
   ),
-  3, dimnames = list(family_traits, family_traits)
+  3,
+  dimnames = list(family_traits, family_traits)
 )
 
 family_values <- function(n = 60L, seed = 21L) {
   set.seed(seed)
   matrix(
-    stats::rnorm(n * 3), ncol = 3,
+    stats::rnorm(n * 3),
+    ncol = 3,
     dimnames = list(sprintf("g%03d", seq_len(n)), family_traits)
   )
 }
@@ -32,7 +35,8 @@ test_that("Smith-Hazel coefficients match the closed form", {
   values <- family_values()
   a <- c(YLD = 1, DIS = 0.5, HT = 0.2)
   fit <- selection_index(
-    values, family_traits, method = "smith_hazel",
+    values, family_traits,
+    method = "smith_hazel",
     G = family_G, P = family_P, economic_weights = a,
     scale_traits = FALSE, n_select = 6
   )
@@ -49,7 +53,8 @@ test_that("base index returns the economic weights unchanged", {
   values <- family_values()
   a <- c(YLD = 1, DIS = 0.5, HT = 0.2)
   fit <- selection_index(
-    values, family_traits, method = "base",
+    values, family_traits,
+    method = "base",
     G = family_G, P = family_P, economic_weights = a,
     scale_traits = FALSE, n_select = 6
   )
@@ -61,12 +66,14 @@ test_that("the two desired-gain formulations coincide for invertible G", {
   d <- c(YLD = 0.5, DIS = 0.3, HT = 0.2)
 
   pesek <- selection_index(
-    values, family_traits, method = "pesek_baker",
+    values, family_traits,
+    method = "pesek_baker",
     G = family_G, P = family_P, desired_gains = d,
     scale_traits = FALSE, n_select = 6
   )
   yamada <- selection_index(
-    values, family_traits, method = "yamada",
+    values, family_traits,
+    method = "yamada",
     G = family_G, P = family_P, desired_gains = d,
     scale_traits = FALSE, n_select = 6
   )
@@ -109,17 +116,32 @@ test_that("the two routes diverge numerically when G is ill-conditioned", {
   diagnostics <- matrix_diagnostics(ill, "G")
   expect_lt(diagnostics$reciprocal_condition, 1e-6)
 
+  # P must remain compatible with the perturbed G, which the original
+  # family_P is not: making HT a near-copy of YLD in G alone leaves P - G with
+  # a negative eigenvalue, so the pair could not both be true even though no
+  # single trait has a genetic variance above its phenotypic one. Rebuilding P
+  # as the perturbed G plus the original residual keeps the residual positive
+  # definite while leaving G exactly as ill-conditioned as intended.
+  ill_P <- ill + (family_P - family_G)
+  ill_P <- (ill_P + t(ill_P)) / 2
+  dimnames(ill_P) <- dimnames(family_P)
+  expect_gt(
+    min(eigen(ill_P - ill, symmetric = TRUE, only.values = TRUE)$values), 0
+  )
+
   # Inverting a badly conditioned G directly, and reaching the same solution
   # through P, are not numerically equivalent. This is the practical reason the
   # formulation must be stated, and the reason conditioning is reported.
   pesek <- suppressWarnings(selection_index(
-    values, family_traits, method = "pesek_baker",
-    G = ill, P = family_P, desired_gains = d,
+    values, family_traits,
+    method = "pesek_baker",
+    G = ill, P = ill_P, desired_gains = d,
     scale_traits = FALSE, n_select = 6
   ))
   yamada <- suppressWarnings(selection_index(
-    values, family_traits, method = "yamada",
-    G = ill, P = family_P, desired_gains = d,
+    values, family_traits,
+    method = "yamada",
+    G = ill, P = ill_P, desired_gains = d,
     scale_traits = FALSE, n_select = 6
   ))
   expect_true(all(is.finite(pesek$coefficients)))
@@ -130,12 +152,14 @@ test_that("Yamada honours only the direction of the desired gains", {
   values <- family_values()
   d <- c(YLD = 0.5, DIS = 0.3, HT = 0.2)
   one <- selection_index(
-    values, family_traits, method = "yamada",
+    values, family_traits,
+    method = "yamada",
     G = family_G, P = family_P, desired_gains = d,
     scale_traits = FALSE, n_select = 8
   )
   ten <- selection_index(
-    values, family_traits, method = "yamada",
+    values, family_traits,
+    method = "yamada",
     G = family_G, P = family_P, desired_gains = 10 * d,
     scale_traits = FALSE, n_select = 8
   )
@@ -159,7 +183,8 @@ test_that("Mulamba-Mock needs no weights and orients traits correctly", {
     dimnames = list(c("a", "b", "c"), family_traits)
   )
   fit <- selection_index(
-    values, family_traits, method = "mulamba_mock",
+    values, family_traits,
+    method = "mulamba_mock",
     scale_traits = FALSE, n_select = 1
   )
   expect_null(fit$coefficients)
@@ -167,7 +192,8 @@ test_that("Mulamba-Mock needs no weights and orients traits correctly", {
 
   # Declaring DIS as lower-is-better must change the ranking.
   flipped <- selection_index(
-    values, family_traits, method = "mulamba_mock",
+    values, family_traits,
+    method = "mulamba_mock",
     lower_is_better = "DIS", scale_traits = FALSE, n_select = 1
   )
   expect_false(identical(fit$ranking$id, flipped$ranking$id))
@@ -184,7 +210,8 @@ test_that("independent culling retains only candidates passing every gate", {
     dimnames = list(c("pass", "fail_dis", "fail_yld"), family_traits)
   )
   fit <- selection_index(
-    values, family_traits, method = "independent_culling",
+    values, family_traits,
+    method = "independent_culling",
     culling_thresholds = c(YLD = 0, DIS = 0, HT = 0),
     scale_traits = FALSE
   )
@@ -196,7 +223,8 @@ test_that("negative objective magnitudes are rejected", {
   values <- family_values()
   expect_error(
     selection_index(
-      values, family_traits, method = "smith_hazel",
+      values, family_traits,
+      method = "smith_hazel",
       G = family_G, P = family_P,
       economic_weights = c(YLD = 1, DIS = -0.5, HT = 0.2),
       scale_traits = FALSE
@@ -213,7 +241,8 @@ test_that("evaluation criteria match independent calculations", {
   intensity <- 1.755
 
   evaluation <- evaluate_index(
-    b, family_G, family_P, aggregate_weights = a,
+    b, family_G, family_P,
+    aggregate_weights = a,
     selection_intensity = intensity, main_trait = "YLD"
   )
 
@@ -257,7 +286,8 @@ test_that("Smith-Hazel maximises R_HI among the families tested", {
     list(smith = smith, base = base, pesek = pesek),
     function(b) {
       evaluate_index(
-        b, family_G, family_P, aggregate_weights = a,
+        b, family_G, family_P,
+        aggregate_weights = a,
         selection_intensity = intensity
       )$R_HI
     },
@@ -277,7 +307,8 @@ test_that("the selected table holds the actual top-ranked candidates", {
   values <- family_values(n = 80L, seed = 404L)
   a <- c(YLD = 1, DIS = 0.5, HT = 0.2)
   fit <- selection_index(
-    values, family_traits, method = "smith_hazel",
+    values, family_traits,
+    method = "smith_hazel",
     G = family_G, P = family_P, economic_weights = a,
     lower_is_better = "DIS", n_select = 8L
   )
@@ -306,12 +337,14 @@ test_that("two similar indices select overlapping sets", {
   a <- c(YLD = 1, DIS = 0.5, HT = 0.2)
 
   smith <- selection_index(
-    values, family_traits, method = "smith_hazel",
+    values, family_traits,
+    method = "smith_hazel",
     G = family_G, P = family_P, economic_weights = a,
     lower_is_better = "DIS", n_select = 12L
   )
   base <- selection_index(
-    values, family_traits, method = "base",
+    values, family_traits,
+    method = "base",
     G = family_G, P = family_P, economic_weights = a,
     lower_is_better = "DIS", n_select = 12L
   )
@@ -322,7 +355,8 @@ test_that("two similar indices select overlapping sets", {
     by = "id", suffixes = c("_a", "_b")
   )
   rank_correlation <- stats::cor(
-    paired$score_a, paired$score_b, method = "spearman"
+    paired$score_a, paired$score_b,
+    method = "spearman"
   )
   overlap <- length(intersect(smith$selected$id, base$selected$id)) / 12
 
@@ -338,7 +372,8 @@ test_that("the index coefficient of variation is withheld when undefined", {
   # Standardising centres the index at zero, so its coefficient of variation
   # diverges and must be withheld rather than reported as an enormous number.
   standardised <- selection_index(
-    values, family_traits, method = "smith_hazel",
+    values, family_traits,
+    method = "smith_hazel",
     G = family_G, P = family_P, economic_weights = a,
     scale_traits = TRUE, n_select = 6
   )
@@ -349,7 +384,8 @@ test_that("the index coefficient of variation is withheld when undefined", {
   # Centring is what makes it undefined, not standardising, so switching off
   # the scaling alone changes nothing.
   unscaled <- selection_index(
-    values, family_traits, method = "smith_hazel",
+    values, family_traits,
+    method = "smith_hazel",
     G = family_G, P = family_P, economic_weights = a,
     scale_traits = FALSE, n_select = 6
   )
@@ -359,7 +395,8 @@ test_that("the index coefficient of variation is withheld when undefined", {
   # the form in which published results report it.
   shifted <- values + 100
   uncentred <- selection_index(
-    shifted, family_traits, method = "smith_hazel",
+    shifted, family_traits,
+    method = "smith_hazel",
     G = family_G, P = family_P, economic_weights = a,
     center_traits = FALSE, scale_traits = FALSE, n_select = 6
   )
@@ -370,7 +407,8 @@ test_that("the index coefficient of variation is withheld when undefined", {
   # Centring shifts every score by one constant, so it cannot change the
   # ranking or the selected set.
   centred <- selection_index(
-    shifted, family_traits, method = "smith_hazel",
+    shifted, family_traits,
+    method = "smith_hazel",
     G = family_G, P = family_P, economic_weights = a,
     center_traits = TRUE, scale_traits = FALSE, n_select = 6
   )
@@ -380,7 +418,8 @@ test_that("the index coefficient of variation is withheld when undefined", {
 test_that("selection_index reports evaluation and effective weights", {
   values <- family_values()
   fit <- selection_index(
-    values, family_traits, method = "smith_hazel",
+    values, family_traits,
+    method = "smith_hazel",
     G = family_G, P = family_P,
     economic_weights = c(YLD = 1, DIS = 0.5, HT = 0.2),
     lower_is_better = "DIS", n_select = 6

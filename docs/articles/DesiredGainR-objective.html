@@ -78,9 +78,11 @@
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Deciding what to select for</h6></li>
     <li><a class="dropdown-item" href="../articles/DesiredGainR-objective.html">Defining a breeding objective</a></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-desired-gain-intervals.html">Defining desired gains and acceptable intervals</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Looking ahead</h6></li>
     <li><a class="dropdown-item" href="../articles/DesiredGainR-simulation.html">Comparing objectives over several cycles</a></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-empirical-validation.html">Empirical validation with real breeding programmes</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="../breeder-guide.html">Breeder guide</a></li>
@@ -163,8 +165,10 @@ under-exploited. When a programme proposes weights, showing them the
 response those weights actually request often reveals that the objective
 is not what anyone intended.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">desired_gains</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>GY <span class="op">=</span> <span class="fl">1.0</span>, PHT <span class="op">=</span> <span class="fl">0.4</span>, AD <span class="op">=</span> <span class="fl">0.6</span>, ASI <span class="op">=</span> <span class="fl">0.5</span>,</span>
-<span>                   EPP <span class="op">=</span> <span class="fl">0.4</span>, GLS <span class="op">=</span> <span class="fl">0.6</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">desired_gains</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>  GY <span class="op">=</span> <span class="fl">1.0</span>, PHT <span class="op">=</span> <span class="fl">0.4</span>, AD <span class="op">=</span> <span class="fl">0.6</span>, ASI <span class="op">=</span> <span class="fl">0.5</span>,</span>
+<span>  EPP <span class="op">=</span> <span class="fl">0.4</span>, GLS <span class="op">=</span> <span class="fl">0.6</span></span>
+<span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">implied</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/implied_economic_weights.html">implied_economic_weights</a></span><span class="op">(</span></span>
 <span>  <span class="va">desired_gains</span>, <span class="va">dgr_G</span>, <span class="va">dgr_P</span>,</span>
@@ -373,8 +377,10 @@ against the target product profile.</p>
 spending that effort it is worth knowing whether the decision would
 change.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">economic_weights</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>GY <span class="op">=</span> <span class="fl">1.0</span>, PHT <span class="op">=</span> <span class="fl">0.2</span>, AD <span class="op">=</span> <span class="fl">0.5</span>,</span>
-<span>                      ASI <span class="op">=</span> <span class="fl">0.4</span>, EPP <span class="op">=</span> <span class="fl">0.3</span>, GLS <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">economic_weights</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>  GY <span class="op">=</span> <span class="fl">1.0</span>, PHT <span class="op">=</span> <span class="fl">0.2</span>, AD <span class="op">=</span> <span class="fl">0.5</span>,</span>
+<span>  ASI <span class="op">=</span> <span class="fl">0.4</span>, EPP <span class="op">=</span> <span class="fl">0.3</span>, GLS <span class="op">=</span> <span class="fl">0.5</span></span>
+<span><span class="op">)</span></span>
 <span><span class="va">sensitivity</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/weight_sensitivity.html">weight_sensitivity</a></span><span class="op">(</span></span>
 <span>  <span class="va">economic_weights</span>, <span class="va">dgr_candidates</span>, <span class="va">dgr_G</span>, <span class="va">dgr_P</span>,</span>
 <span>  n_select <span class="op">=</span> <span class="fl">20L</span>, trait_cols <span class="op">=</span> <span class="va">traits</span>, n_draws <span class="op">=</span> <span class="fl">100L</span></span>
@@ -434,7 +440,8 @@ disagree.</p>
 sensitive to, while contributing about six per cent of the index:</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">smith_hazel</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/selection_index.html">selection_index</a></span><span class="op">(</span></span>
-<span>  <span class="va">dgr_candidates</span>, <span class="va">traits</span>, method <span class="op">=</span> <span class="st">"smith_hazel"</span>,</span>
+<span>  <span class="va">dgr_candidates</span>, <span class="va">traits</span>,</span>
+<span>  method <span class="op">=</span> <span class="st">"smith_hazel"</span>,</span>
 <span>  G <span class="op">=</span> <span class="va">dgr_G</span>, P <span class="op">=</span> <span class="va">dgr_P</span>, economic_weights <span class="op">=</span> <span class="va">economic_weights</span>,</span>
 <span>  lower_is_better <span class="op">=</span> <span class="va">lower_is_better</span>, n_select <span class="op">=</span> <span class="fl">20L</span>, main_trait <span class="op">=</span> <span class="st">"GY"</span></span>
 <span><span class="op">)</span></span>

@@ -4,7 +4,7 @@
 \alias{open_desiredgain_guide}
 \title{Locate or Open the DesiredGainR Breeder's Guide}
 \usage{
-open_desiredgain_guide(open = TRUE, format = c("pdf", "html"))
+open_desiredgain_guide(open = TRUE, format = c("html", "pdf"))
 }
 \arguments{
 \item{open}{Logical, default \code{TRUE}. When \code{TRUE} and the session
@@ -12,7 +12,10 @@ is interactive, the file is opened with the operating system's default
 application through \code{\link[utils]{browseURL}}. When \code{FALSE}, or
 in a non-interactive session, only the path is returned.}
 
-\item{format}{Character, one of \code{"pdf"} (default) or \code{"html"}.}
+\item{format}{Character, one of \code{"html"} (default) or \code{"pdf"}.
+HTML is the default because it needs only pandoc, whereas the PDF edition
+also requires a LaTeX installation and is therefore the more likely of the
+two to be absent.}
 }
 \value{
 The file path, invisibly, to the selected edition in the installed
@@ -31,7 +34,7 @@ recommendation is robust. No R code is required to read the guide.
 It is intended for breeders, programme managers and reviewers who will use
 or approve a selection decision but do not necessarily run R themselves.
 
-The tagged PDF provides a fixed reference edition and the HTML edition
+The PDF provides a fixed-layout reference edition and the HTML edition
 renders the same content for on-screen reading. These standalone files have
 no vignette engine, so they are not indexed by
 \code{vignette()}/\code{browseVignettes()} like the package's \code{.Rmd}

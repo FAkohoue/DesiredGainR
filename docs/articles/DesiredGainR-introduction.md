@@ -188,8 +188,10 @@ the correlations, which is why the package standardises by default.
 **State the objective and see what it implies.**
 
 ``` r
-desired_gains <- c(GY = 1.0, PHT = 0.4, AD = 0.6, ASI = 0.5,
-                   EPP = 0.4, GLS = 0.6)
+desired_gains <- c(
+  GY = 1.0, PHT = 0.4, AD = 0.6, ASI = 0.5,
+  EPP = 0.4, GLS = 0.6
+)
 round(
   implied_economic_weights(
     desired_gains, dgr_G, dgr_P,
@@ -230,10 +232,13 @@ the index.
 
 ``` r
 selection_index(
-  dgr_candidates, traits, method = "smith_hazel",
+  dgr_candidates, traits,
+  method = "smith_hazel",
   G = dgr_G, P = dgr_P,
-  economic_weights = c(GY = 1.0, PHT = 0.2, AD = 0.5,
-                       ASI = 0.4, EPP = 0.3, GLS = 0.5),
+  economic_weights = c(
+    GY = 1.0, PHT = 0.2, AD = 0.5,
+    ASI = 0.4, EPP = 0.3, GLS = 0.5
+  ),
   lower_is_better = lower_is_better, n_select = 20L, main_trait = "GY"
 )
 #> <desiredgainr_index>

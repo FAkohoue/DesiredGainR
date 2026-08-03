@@ -54,9 +54,11 @@
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Deciding what to select for</h6></li>
     <li><a class="dropdown-item" href="../articles/DesiredGainR-objective.html">Defining a breeding objective</a></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-desired-gain-intervals.html">Defining desired gains and acceptable intervals</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Looking ahead</h6></li>
     <li><a class="dropdown-item" href="../articles/DesiredGainR-simulation.html">Comparing objectives over several cycles</a></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-empirical-validation.html">Empirical validation with real breeding programmes</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../breeder-guide.html">Breeder guide</a></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -122,6 +124,20 @@
 
         <dt>
 
+          <code><a href="define_desired_gain_intervals.html">define_desired_gain_intervals()</a></code>
+
+        </dt>
+        <dd>Define acceptable intervals for desired genetic gains</dd>
+
+        <dt>
+
+          <code><a href="suggest_desired_gains.html">suggest_desired_gains()</a></code>
+
+        </dt>
+        <dd>Suggest desired-gain directions from the current population</dd>
+
+        <dt>
+
           <code><a href="gain_feasibility.html">gain_feasibility()</a></code>
 
         </dt>
@@ -170,6 +186,13 @@
 
         </dt>
         <dd>Report the numerical conditioning of a covariance matrix</dd>
+
+        <dt>
+
+          <code><a href="bend_covariance.html">bend_covariance()</a></code>
+
+        </dt>
+        <dd>Bend a covariance matrix to positive definiteness</dd>
       </dl></div><div class="section level2">
       <h2 id="building-a-selection-index">Building a selection index<a class="anchor" aria-label="anchor" href="#building-a-selection-index"></a></h2>
 
@@ -186,6 +209,13 @@
 
         </dt>
         <dd>Construct a classical multi-trait selection index</dd>
+
+        <dt>
+
+          <code><a href="restricted_index.html">restricted_index()</a></code>
+
+        </dt>
+        <dd>Restricted and proportional-gain selection indices</dd>
 
         <dt>
 
@@ -210,7 +240,7 @@
       </dl></div><div class="section level2">
       <h2 id="evaluating-and-comparing-indices">Evaluating and comparing indices<a class="anchor" aria-label="anchor" href="#evaluating-and-comparing-indices"></a></h2>
 
-      <div class="section-desc"><p>The four criteria used by Rahimi and Debnath (2023) and by the established selection-index software: the correlation between the index and net merit, the expected gain in aggregate merit, efficiency relative to direct selection on a main trait, and the coefficient of variation of the index, alongside the expected response for every trait.</p></div>
+      <div class="section-desc"><p>The four criteria used by Rahimi and Debnath (2023) and by the established selection-index software: the correlation between the index and net merit, the expected gain in aggregate merit, efficiency relative to direct selection on a main trait, and the coefficient of variation of the index, alongside the expected response for every trait and the heritability of the index itself. Also the tools for reusing a fitted index on the next cycle and for asking how much of the answer is determined by the data rather than by sampling error in the covariance matrices.</p></div>
 
       <dl></dl></div><div class="section level2">
 
@@ -226,10 +256,116 @@
 
         <dt>
 
+          <code><a href="summary.desiredgainr_index.html">summary(<i>&lt;desiredgainr_index&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Summarise a fitted selection index</dd>
+
+        <dt>
+
+          <code><a href="predict.desiredgainr_index.html">predict(<i>&lt;desiredgainr_index&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Score a new candidate set with a fitted index</dd>
+
+        <dt>
+
+          <code><a href="index_uncertainty.html">index_uncertainty()</a></code>
+
+        </dt>
+        <dd>Propagate sampling error in the covariance matrices into an index</dd>
+
+        <dt>
+
           <code><a href="compare_dg_and_qgsi.html">compare_dg_and_qgsi()</a></code>
 
         </dt>
         <dd>Compare DGSI and QGSI candidate rankings</dd>
+      </dl></div><div class="section level2">
+      <h2 id="multi-environment-structure">Multi-environment structure<a class="anchor" aria-label="anchor" href="#multi-environment-structure"></a></h2>
+
+      <div class="section-desc"><p>A multi-environment index is a single-environment index on an expanded trait set, so the whole index layer applies once the separable covariance has been built. The interaction share reported by the expansion says whether modelling the environments separately was worth the complexity.</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="expand_environments.html">expand_environments()</a></code>
+
+        </dt>
+        <dd>Expand a trait-by-environment structure into an index problem</dd>
+
+        <dt>
+
+          <code><a href="widen_environments.html">widen_environments()</a></code>
+
+        </dt>
+        <dd>Reshape long-format multi-environment trial data for indexing</dd>
+      </dl></div><div class="section level2">
+      <h2 id="uncertainty-in-the-recommendation">Uncertainty in the recommendation<a class="anchor" aria-label="anchor" href="#uncertainty-in-the-recommendation"></a></h2>
+
+      <div class="section-desc"><p>Every reported gain conditions on covariance matrices that are themselves estimates. These functions report how far the answer moves when that is taken into account, and separate covariance-estimation uncertainty from Monte Carlo simulation error, because only the second falls with more computing.</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="index_uncertainty.html">index_uncertainty()</a></code>
+
+        </dt>
+        <dd>Propagate sampling error in the covariance matrices into an index</dd>
+
+        <dt>
+
+          <code><a href="draw_covariance_pairs.html">draw_covariance_pairs()</a></code>
+
+        </dt>
+        <dd>Draw jointly admissible genetic and residual covariance matrices</dd>
+
+        <dt>
+
+          <code><a href="propagate_covariance_uncertainty.html">propagate_covariance_uncertainty()</a></code>
+
+        </dt>
+        <dd>Propagate covariance uncertainty into a desired-gain recommendation</dd>
+      </dl></div><div class="section level2">
+      <h2 id="published-reference-values">Published reference values<a class="anchor" aria-label="anchor" href="#published-reference-values"></a></h2>
+
+
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="rahimi_debnath_2023.html">rahimi_debnath_2023()</a></code>
+
+        </dt>
+        <dd>Published selection-index results from Rahimi and Debnath (2023)</dd>
+      </dl></div><div class="section level2">
+      <h2 id="importing-from-upstream-models">Importing from upstream models<a class="anchor" aria-label="anchor" href="#importing-from-upstream-models"></a></h2>
+
+      <div class="section-desc"><p>Adapters for the mixed-model packages that produce the covariance matrices this package consumes. They reorder traits to the analysis order rather than assuming it, distinguish a correlation matrix from a covariance, and check the genetic and phenotypic matrices against each other, because a silently transposed trait order produces an index that is wrong in a way nothing downstream can detect.</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="import_covariance.html">import_covariance()</a></code>
+
+        </dt>
+        <dd>Validate and record an extracted genetic covariance matrix</dd>
       </dl></div><div class="section level2">
       <h2 id="multi-cycle-simulation">Multi-cycle simulation<a class="anchor" aria-label="anchor" href="#multi-cycle-simulation"></a></h2>
 

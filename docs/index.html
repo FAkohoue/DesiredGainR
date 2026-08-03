@@ -83,9 +83,11 @@
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Deciding what to select for</h6></li>
     <li><a class="dropdown-item" href="articles/DesiredGainR-objective.html">Defining a breeding objective</a></li>
+    <li><a class="dropdown-item" href="articles/DesiredGainR-desired-gain-intervals.html">Defining desired gains and acceptable intervals</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Looking ahead</h6></li>
     <li><a class="dropdown-item" href="articles/DesiredGainR-simulation.html">Comparing objectives over several cycles</a></li>
+    <li><a class="dropdown-item" href="articles/DesiredGainR-empirical-validation.html">Empirical validation with real breeding programmes</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="breeder-guide.html">Breeder guide</a></li>
@@ -114,7 +116,22 @@
 <p>DesiredGainR is organised around the breeding objective rather than around the index. The literature is consistent that specifying economic weights, not computing coefficients, is what obstructs routine index use: Guimarães et al. (2021) showed that supplying arbitrary weights eliminated the gains the same indices delivered under sensible ones, and Covarrubias-Pazaran (2021) advises breeders not to interpret index coefficients at all, because the desired response is the only decision genuinely available to them.</p>
 <p>The package therefore translates exactly between economic weights and desired gains, tests whether a stated objective can be attained at the planned selection intensity, recovers the objective a programme has been applying implicitly, and reports how far a decision depends on weights that are themselves uncertain. It provides the classical index families, the iterative desired-gain index of Joukhadar et al. (2024), and the quadratic genomic selection index of Cerón-Rojas et al. (2026), together with a multi-cycle simulation layer whose founders are built from the breeder’s own phased marker data.</p>
 <p>DesiredGainR begins <strong>after</strong> the genetic evaluation. It does not analyse field trials, fit mixed models, or estimate breeding values, and it does not design crossing plans.</p>
+<div class="section level2">
+<h2 id="why-desiredgainr-is-valuable">Why DesiredGainR is valuable<a class="anchor" aria-label="anchor" href="#why-desiredgainr-is-valuable"></a>
+</h2>
+<p>DesiredGainR turns an uncertain breeding objective into a transparent, quantitative decision. It is especially useful when economic weights cannot be defended or when the breeder can state acceptable trait-specific gains more confidently than monetary values.</p>
+<ul>
+<li>It expresses every objective in breeder-facing desired-gain units, including genetic standard deviations and original trait units.</li>
+<li>It checks whether requested gains are mathematically feasible before a selection decision is made.</li>
+<li>It can search trait-specific intervals and suggest both a minimum-attainment solution and a maximum-balanced solution from the current population.</li>
+<li>It reports several defensible gain vectors with independently confirmed support, stability and uncertainty instead of presenting one opaque answer.</li>
+<li>It compares classical, desired-gain and quadratic genomic indices under a common audit trail.</li>
+<li>It combines exact one-cycle quantitative-genetic mathematics, independently validated optimisation, genomic prediction, multi-environment testing and multi-cycle simulation.</li>
+</ul>
+<p>The package’s evidence portfolio includes 869 passing test assertions, independent Clarabel and OSQP solver comparisons, analytical and Monte Carlo theory checks, and six real breeding-programme validations. In the CIMMYT maize rapid-cycle programme, DesiredGainR’s validation suite reproduced the published yield-gain trajectory, recovered a strong raw genomic-prediction signal, verified all 1,000 training-family phenotype-to-genotype links, and tested desired-gain directions in environments excluded from fitting.</p>
+<p>DesiredGainR is therefore intended for rigorous, auditable breeding decision support. Its probabilities describe support under the fitted genetic model and declared breeding scenario; the package presents those assumptions alongside the recommendation so the breeder can judge and defend the decision.</p>
 <hr>
+</div>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
@@ -162,8 +179,20 @@
 <td>How to state, test and defend an objective</td>
 </tr>
 <tr>
+<td><a href="https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-desired-gain-intervals.html">Defining desired gains and intervals</a></td>
+<td>Trait-specific minima, interval elicitation and population-driven suggestions when one exact vector is not defensible</td>
+</tr>
+<tr>
 <td><a href="https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-simulation.html">Multi-cycle simulation</a></td>
 <td>Comparing objectives over several breeding cycles</td>
+</tr>
+<tr>
+<td><a href="https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-reproduction.html">Published-result reproduction</a></td>
+<td>Independent checks against published selection-index results</td>
+</tr>
+<tr>
+<td><a href="https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-empirical-validation.html">Empirical validation</a></td>
+<td>Six real-programme validations of cycle gain, genomic signal, index transport and multi-environment recommendation behaviour</td>
 </tr>
 </tbody>
 </table>

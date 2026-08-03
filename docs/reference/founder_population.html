@@ -62,9 +62,11 @@ trait variances and correlations, rather than an assumed demography."><meta prop
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Deciding what to select for</h6></li>
     <li><a class="dropdown-item" href="../articles/DesiredGainR-objective.html">Defining a breeding objective</a></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-desired-gain-intervals.html">Defining desired gains and acceptable intervals</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Looking ahead</h6></li>
     <li><a class="dropdown-item" href="../articles/DesiredGainR-simulation.html">Comparing objectives over several cycles</a></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-empirical-validation.html">Empirical validation with real breeding programmes</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../breeder-guide.html">Breeder guide</a></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -97,9 +99,12 @@ trait variances and correlations, rather than an assumed demography.</p>
 <span>  <span class="va">founders</span>,</span>
 <span>  <span class="va">G</span>,</span>
 <span>  <span class="va">h2</span>,</span>
+<span>  residual_covariance <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  n_qtl_per_chromosome <span class="op">=</span> <span class="fl">100L</span>,</span>
+<span>  n_markers_per_chromosome <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  dominance_degree <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  dominance_variance <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  heritability <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"narrow"</span>, <span class="st">"broad"</span><span class="op">)</span>,</span>
 <span>  seed <span class="op">=</span> <span class="fl">42L</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -113,17 +118,35 @@ trait variances and correlations, rather than an assumed demography.</p>
 
 
 <dt id="arg-g">G<a class="anchor" aria-label="anchor" href="#arg-g"></a></dt>
-<dd><p>Genetic variance-covariance matrix, named by trait.</p></dd>
+<dd><p>Genetic variance-covariance matrix, named by trait. Without
+dominance this is the additive covariance. With dominance it is the total
+<strong>genotypic</strong> covariance, because that is what a clonal programme selects
+on; see Details.</p></dd>
 
 
 <dt id="arg-h-">h2<a class="anchor" aria-label="anchor" href="#arg-h-"></a></dt>
-<dd><p>Named narrow-sense heritabilities, or a single value applied to
-every trait.</p></dd>
+<dd><p>Named heritabilities, or a single value applied to every trait.
+Narrow- or broad-sense according to <code>heritability</code>.</p></dd>
+
+
+<dt id="arg-residual-covariance">residual_covariance<a class="anchor" aria-label="anchor" href="#arg-residual-covariance"></a></dt>
+<dd><p>Optional named residual covariance matrix. When
+supplied it is passed directly to AlphaSimR and takes precedence over the
+marginal <code>h2</code> values. This is the route used when propagating a sampled
+residual covariance; <code>h2</code> remains recorded as the nominal setup input.</p></dd>
 
 
 <dt id="arg-n-qtl-per-chromosome">n_qtl_per_chromosome<a class="anchor" aria-label="anchor" href="#arg-n-qtl-per-chromosome"></a></dt>
 <dd><p>Number of quantitative trait loci simulated per
 chromosome.</p></dd>
+
+
+<dt id="arg-n-markers-per-chromosome">n_markers_per_chromosome<a class="anchor" aria-label="anchor" href="#arg-n-markers-per-chromosome"></a></dt>
+<dd><p>Optional number of neutral markers per
+chromosome, used for coancestry. When supplied, the markers are held
+disjoint from the quantitative trait loci where the installed AlphaSimR
+supports it. Strongly recommended: without a panel, diversity is measured
+on all segregating sites.</p></dd>
 
 
 <dt id="arg-dominance-degree">dominance_degree<a class="anchor" aria-label="anchor" href="#arg-dominance-degree"></a></dt>
@@ -133,8 +156,16 @@ mating system requires.</p></dd>
 
 
 <dt id="arg-dominance-variance">dominance_variance<a class="anchor" aria-label="anchor" href="#arg-dominance-variance"></a></dt>
-<dd><p>Optional named variance of the degree of
-dominance.</p></dd>
+<dd><p>Optional named variance of the <strong>degree of
+dominance</strong> across loci. This is AlphaSimR's <code>varDD</code> and is not the
+dominance genetic variance; the two are different quantities.</p></dd>
+
+
+<dt id="arg-heritability">heritability<a class="anchor" aria-label="anchor" href="#arg-heritability"></a></dt>
+<dd><p>Whether <code>h2</code> is narrow-sense (the default, a statement
+about breeding values) or broad-sense (a statement about genotypic values).
+They differ exactly when dominance is simulated, which is when a clonal
+programme is being represented, so it must be stated rather than assumed.</p></dd>
 
 
 <dt id="arg-seed">seed<a class="anchor" aria-label="anchor" href="#arg-seed"></a></dt>
@@ -151,11 +182,52 @@ targets.</p>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>Trait variances are taken from the diagonal of <code>G</code> and trait correlations
-from the corresponding correlation matrix. For a clonal programme, supply
-<code>dominance_degree</code>, and <code>G</code> should then be the <strong>genotypic</strong> covariance,
-because the unit of selection is the clone and dominance is therefore
-inherited intact. For a self-pollinated or cross-pollinated programme, <code>G</code>
-should be the additive genetic covariance.</p>
+from the corresponding correlation matrix.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="additive-and-clonal-programmes-calibrate-differently">Additive and clonal programmes calibrate differently<a class="anchor" aria-label="anchor" href="#additive-and-clonal-programmes-calibrate-differently"></a></h2>
+    <p>For a self-pollinated or cross-pollinated programme, <code>G</code> is the additive
+genetic covariance and is passed straight to AlphaSimR.</p>
+<p>For a clonal programme, supply <code>dominance_degree</code>. <code>G</code> is then the total
+<strong>genotypic</strong> covariance, because the unit of selection is the clone and
+dominance is inherited intact. This needs a calibration step that earlier
+versions omitted. AlphaSimR's <code>var</code> argument sets the <em>additive</em> variance,
+so with dominance present the dominance variance is added on top and the
+realised genotypic variance exceeds the supplied target. Since scaling every
+quantitative trait locus effect by \(c\) scales both the additive and the
+dominance variance by \(c^2\), the correction is exact in one pass: the
+trait is built, the realised genotypic variance measured, and the additive
+target rescaled by the ratio.</p>
+<p>The correlations are calibrated too, by the same fixed point. Rescaling the
+variances alone would leave the realised genotypic correlations emergent, so
+the setup would accept a full covariance matrix as its target and reproduce
+only its diagonal. Dominance perturbs the correlation structure as well, and
+that perturbation is a smooth, near-identity function of the additive
+correlations supplied, so correcting both and projecting the correction back
+onto the set of valid correlation matrices recovers the whole of <code>G</code>.</p>
+<p><code>setup$G_realised</code> records what was achieved and <code>setup$calibration_error</code>
+the largest remaining deviation in each of the variances and correlations.
+Convergence is not guaranteed for every target: a strongly antagonistic
+correlation structure at a high dominance degree may not be attainable by
+any additive-plus-dominance architecture. Failure warns and is recorded in
+<code>setup$calibration_converged</code> rather than passing silently.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="which-heritability">Which heritability<a class="anchor" aria-label="anchor" href="#which-heritability"></a></h2>
+    <p><code>heritability = "narrow"</code> sets the error variance so that
+\(V_A / V_P\) equals <code>h2</code>; <code>"broad"</code> targets \(V_G / V_P\). They
+coincide without dominance and diverge with it, so a clonal programme must
+say which is meant. Selection in a clonal programme acts on genotypic value,
+making broad sense usually the relevant one.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="markers-for-coancestry">Markers for coancestry<a class="anchor" aria-label="anchor" href="#markers-for-coancestry"></a></h2>
+    <p><code>n_markers_per_chromosome</code> creates a neutral marker panel, held disjoint
+from the quantitative trait loci where the installed AlphaSimR supports it.
+Diversity should not be measured on the loci under selection: changing their
+frequencies is what genetic gain is, so a relationship matrix built from
+them rises whenever selection succeeds, and a desired-gain direction would
+be penalised for working.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

@@ -78,9 +78,11 @@
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Deciding what to select for</h6></li>
     <li><a class="dropdown-item" href="../articles/DesiredGainR-objective.html">Defining a breeding objective</a></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-desired-gain-intervals.html">Defining desired gains and acceptable intervals</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Looking ahead</h6></li>
     <li><a class="dropdown-item" href="../articles/DesiredGainR-simulation.html">Comparing objectives over several cycles</a></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-empirical-validation.html">Empirical validation with real breeding programmes</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="../breeder-guide.html">Breeder guide</a></li>
@@ -303,7 +305,7 @@ intact.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">setup_clonal</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/founder_population.html">founder_population</a></span><span class="op">(</span></span>
 <span>  <span class="va">founders</span>,</span>
-<span>  G <span class="op">=</span> <span class="va">dgr_G</span>,                       <span class="co"># genotypic covariance for a clonal crop</span></span>
+<span>  G <span class="op">=</span> <span class="va">dgr_G</span>, <span class="co"># genotypic covariance for a clonal crop</span></span>
 <span>  h2 <span class="op">=</span> <span class="fu">stats</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/stats/setNames.html" class="external-link">setNames</a></span><span class="op">(</span><span class="va">dgr_traits</span><span class="op">$</span><span class="va">heritability</span>, <span class="va">traits</span><span class="op">)</span>,</span>
 <span>  dominance_degree <span class="op">=</span> <span class="fu">stats</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/stats/setNames.html" class="external-link">setNames</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">0.3</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">traits</span><span class="op">)</span><span class="op">)</span>, <span class="va">traits</span><span class="op">)</span>,</span>
 <span>  seed <span class="op">=</span> <span class="fl">42L</span></span>
@@ -316,8 +318,10 @@ intact.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">simulation</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/simulate_selection_cycles.html">simulate_selection_cycles</a></span><span class="op">(</span></span>
 <span>  <span class="va">setup</span>,</span>
-<span>  desired_gains <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>GY <span class="op">=</span> <span class="fl">1.0</span>, PHT <span class="op">=</span> <span class="fl">0.4</span>, AD <span class="op">=</span> <span class="fl">0.6</span>,</span>
-<span>                    ASI <span class="op">=</span> <span class="fl">0.5</span>, EPP <span class="op">=</span> <span class="fl">0.4</span>, GLS <span class="op">=</span> <span class="fl">0.6</span><span class="op">)</span>,</span>
+<span>  desired_gains <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>    GY <span class="op">=</span> <span class="fl">1.0</span>, PHT <span class="op">=</span> <span class="fl">0.4</span>, AD <span class="op">=</span> <span class="fl">0.6</span>,</span>
+<span>    ASI <span class="op">=</span> <span class="fl">0.5</span>, EPP <span class="op">=</span> <span class="fl">0.4</span>, GLS <span class="op">=</span> <span class="fl">0.6</span></span>
+<span>  <span class="op">)</span>,</span>
 <span>  n_cycles <span class="op">=</span> <span class="fl">5L</span>,</span>
 <span>  mating_system <span class="op">=</span> <span class="st">"outcross"</span>,</span>
 <span>  n_parents <span class="op">=</span> <span class="fl">20L</span>,</span>
@@ -366,43 +370,122 @@ disequilibrium decays per generation.</td>
 <tr class="odd">
 <td><code>"clonal"</code></td>
 <td>Cassava, sweetpotato, banana, potato</td>
-<td>Selection acts on <strong>total genetic value</strong>, since the
-clone inherits dominance intact. Requires a setup built with
-<code>dominance_degree</code>.</td>
+<td>Recombination happens once per cycle, when selected parents are
+crossed to raise a seedling generation; every later stage is a copy, so
+dominance is transmitted intact and selection acts on <strong>total
+genotypic value</strong>. Requires a setup built with
+<code>dominance_degree</code>, and <code>G</code> is then the genotypic
+covariance.</td>
 </tr>
 </tbody>
 </table>
 </div>
 <div class="section level3">
-<h3 id="what-each-cycle-records">5.2 What each cycle records<a class="anchor" aria-label="anchor" href="#what-each-cycle-records"></a>
+<h3 id="what-a-cycle-means">5.2 What a cycle means<a class="anchor" aria-label="anchor" href="#what-a-cycle-means"></a>
 </h3>
+<p>Check this definition before reading any number below.</p>
+<p><strong>Cycle 0</strong> is the founder population, before any
+selection. It exists so that the cycle 1 row has something to be a
+response <em>to</em>.</p>
+<p><strong>Cycle <span class="math inline">\(t\)</span></strong> records
+the population produced by selecting parents from the cycle <span class="math inline">\(t-1\)</span> candidates and crossing them. Every
+row from cycle 1 onward is a transmitted selection response, so
+<code>n_cycles = 1</code> gives exactly one.</p>
+<p>Versions before 0.5.0 measured the <em>candidates</em> of each cycle
+rather than their selected descendants. Because random mating does not
+shift a population mean, the cycle 1 gain was zero in expectation for
+every desired-gain direction, and a one-cycle run could not distinguish
+directions at all. Re-run any stored result.</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">simulation</span><span class="op">$</span><span class="va">cycle_table</span></span></code></pre></div>
 <pre><code><span><span class="co">#&gt;    cycle  trait genetic_mean cumulative_gain genetic_variance</span></span>
-<span><span class="co">#&gt; 1:     1     GY        0.402           0.402            0.548</span></span>
-<span><span class="co">#&gt; 2:     1    PHT       -1.907          -1.907          139.412</span></span>
+<span><span class="co">#&gt; 1:     0     GY        0.000           0.000            0.612</span></span>
+<span><span class="co">#&gt; 2:     0    PHT        0.000           0.000          148.203</span></span>
+<span><span class="co">#&gt; 3:     1     GY        0.402           0.402            0.548</span></span>
+<span><span class="co">#&gt; 4:     1    PHT       -1.907          -1.907          139.412</span></span>
 <span><span class="co">#&gt; ...</span></span>
-<span><span class="co">#&gt;    mean_relationship effective_size selection_intensity n_evaluated</span></span>
-<span><span class="co">#&gt;                0.021           23.9               1.755         500</span></span></code></pre>
+<span><span class="co">#&gt;    mean_relationship mean_inbreeding parent_inbreeding qtl_segregating</span></span>
+<span><span class="co">#&gt;                0.021           0.014             0.038           0.981</span></span>
+<span><span class="co">#&gt;    genic_variance_ratio effective_size selection_intensity n_evaluated</span></span>
+<span><span class="co">#&gt;                   0.994           23.9               1.755         500</span></span></code></pre>
 <p>Gain and the loss of diversity are recorded together deliberately. A
 direction that maximises cumulative gain while collapsing effective
 population size is not obviously preferable, and the trade-off should be
 visible rather than inferred.</p>
+<p><code>mean_relationship</code> and <code>mean_inbreeding</code> are
+measured on a <strong>genome-wide marker panel</strong>, not on the
+quantitative trait loci, and against allele frequencies fixed at the
+founders. Both choices matter. Measuring on QTL would make the metric
+rise whenever selection succeeded — changing QTL frequencies is what
+genetic gain is — so a direction would be penalised for working.
+Recomputing the frequencies each cycle would pin the mean off-diagonal
+at <span class="math inline">\(-\overline{G}_{ii}/(n-1)\)</span>, a
+function of population size alone. QTL frequency change is reported
+separately as <code>qtl_segregating</code> and
+<code>genic_variance_ratio</code>.</p>
+<p>Supply <code>n_markers_per_chromosome</code> to
+<code><a href="../reference/founder_population.html">founder_population()</a></code> to create the panel; without it, all
+segregating sites are used instead.</p>
 </div>
 <div class="section level3">
 <h3 id="the-re-estimation-switch">5.3 The re-estimation switch<a class="anchor" aria-label="anchor" href="#the-re-estimation-switch"></a>
 </h3>
-<p><code>reestimate_index = TRUE</code>, the default, rebuilds the index
-from each cycle’s own simulated data. That is what a breeding programme
-actually does, and it propagates estimation error across cycles. Setting
-it <code>FALSE</code> reuses the cycle one coefficients and isolates the
-effect of the desired-gain direction alone.</p>
+<p><code>reestimate_index = TRUE</code>, the default, rebuilds the
+covariance of the observed selection criterion from each cycle. It does
+<strong>not</strong> estimate genetic covariance from hidden simulated
+breeding values. Phenotypic selection retains the breeder-supplied
+<code>G_target</code>; genomic selection uses the calibrated-GEBV
+identity described below. Setting it <code>FALSE</code> reuses the
+cycle-one coefficients and isolates the effect of the desired-gain
+direction alone.</p>
 <p><strong>Run both.</strong> A large divergence means the
 recommendation is sensitive to estimation error rather than to the
 objective, and the breeder should be told so.</p>
 </div>
 <div class="section level3">
-<h3 id="the-selection-rule-is-deliberately-simple">5.4 The selection rule is deliberately simple<a class="anchor" aria-label="anchor" href="#the-selection-rule-is-deliberately-simple"></a>
+<h3 id="phenotypic-or-genomic-selection">5.4 Phenotypic or genomic selection<a class="anchor" aria-label="anchor" href="#phenotypic-or-genomic-selection"></a>
+</h3>
+<p>The default is explicit phenotypic selection. To represent an
+additive genomic selection programme, create a marker panel and request
+cross-fitted RR-BLUP:</p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">setup</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/founder_population.html">founder_population</a></span><span class="op">(</span></span>
+<span>  <span class="va">founders</span>,</span>
+<span>  G <span class="op">=</span> <span class="va">dgr_G</span>, h2 <span class="op">=</span> <span class="fl">0.4</span>,</span>
+<span>  n_qtl_per_chromosome <span class="op">=</span> <span class="fl">20</span>,</span>
+<span>  n_markers_per_chromosome <span class="op">=</span> <span class="fl">100</span>,</span>
+<span>  seed <span class="op">=</span> <span class="fl">42</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">genomic</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/simulate_selection_cycles.html">simulate_selection_cycles</a></span><span class="op">(</span></span>
+<span>  <span class="va">setup</span>,</span>
+<span>  desired_gains <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>    GY <span class="op">=</span> <span class="fl">1</span>, PHT <span class="op">=</span> <span class="fl">0.4</span>, AD <span class="op">=</span> <span class="fl">0.6</span>,</span>
+<span>    ASI <span class="op">=</span> <span class="fl">0.5</span>, EPP <span class="op">=</span> <span class="fl">0.4</span>, GLS <span class="op">=</span> <span class="fl">0.6</span></span>
+<span>  <span class="op">)</span>,</span>
+<span>  mating_system <span class="op">=</span> <span class="st">"outcross"</span>,</span>
+<span>  prediction <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>    method <span class="op">=</span> <span class="st">"rrblup"</span>,</span>
+<span>    folds <span class="op">=</span> <span class="fl">5</span>,</span>
+<span>    update_training <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>    max_training <span class="op">=</span> <span class="fl">2000</span></span>
+<span>  <span class="op">)</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p>Every candidate is predicted by a model that excluded its fold,
+preventing training-set leakage. Earlier cycles may be retained as a
+rolling training population. The cycle table reports the correlation
+between held-out GEBV and true simulated breeding value as
+<code>prediction_accuracy</code>; truth is used only for this
+diagnostic, never for selection.
+<code>prediction_calibration_slope</code> additionally reports
+<code>Cov(A, Ahat) / Var(Ahat)</code>; values far from one warn that the
+calibrated- GEBV assumption used by the desired-gain index is poor.
+RR-BLUP currently supports additive, non-clonal programmes. A clonal
+dominance programme must use the phenotypic path until a validated
+total-genetic-value predictor is implemented.</p>
+</div>
+<div class="section level3">
+<h3 id="the-selection-rule-is-deliberately-simple">5.5 The selection rule is deliberately simple<a class="anchor" aria-label="anchor" href="#the-selection-rule-is-deliberately-simple"></a>
 </h3>
 <p>Truncation on the index, and nothing more. Optimal contribution
 selection, family quotas and coancestry constraints are the province of
@@ -432,7 +515,7 @@ concede ground somewhere.</p>
 <div class="section level3">
 <h3 id="the-simulation-is-the-objective-function">6.2 The simulation is the objective function<a class="anchor" aria-label="anchor" href="#the-simulation-is-the-objective-function"></a>
 </h3>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">optimisation</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/optimize_desired_gains.html">optimize_desired_gains</a></span><span class="op">(</span></span>
 <span>  <span class="va">setup</span>,</span>
 <span>  n_cycles <span class="op">=</span> <span class="fl">5L</span>,</span>
@@ -465,7 +548,7 @@ second genetic model whose assumptions could fail in precisely the
 situations where simulation is most needed.</p>
 </div>
 <div class="section level3">
-<h3 id="the-four-ranking-modes">6.3 The four ranking modes<a class="anchor" aria-label="anchor" href="#the-four-ranking-modes"></a>
+<h3 id="the-five-ranking-modes">6.3 The five ranking modes<a class="anchor" aria-label="anchor" href="#the-five-ranking-modes"></a>
 </h3>
 <table class="table">
 <colgroup>
@@ -485,17 +568,23 @@ situations where simulation is most needed.</p>
 <td>none</td>
 </tr>
 <tr class="even">
+<td><code>"interval"</code></td>
+<td>Maximise conservative joint probability of reaching all interval
+minima</td>
+<td><code>desired_gain_intervals</code></td>
+</tr>
+<tr class="odd">
 <td><code>"economic"</code></td>
 <td>Maximise <span class="math inline">\(\mathbf{w}^\mathsf{T}\mathbf{R}_{\text{cum}}\)</span>
 </td>
 <td><code>economic_weights</code></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>"target"</code></td>
 <td>Minimise distance to stated absolute targets</td>
 <td><code>target_gains</code></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code>"constrained"</code></td>
 <td>Maximise a focal trait subject to floors</td>
 <td>
@@ -504,10 +593,13 @@ situations where simulation is most needed.</p>
 </tr>
 </tbody>
 </table>
-<p><code>"pareto"</code> is the default because it is the only mode that
-does not require the economic weights breeders find hardest to state.
-Choosing a point on a frontier is an easier judgement than stating
-weights, and it is weight elicitation by revealed preference.</p>
+<p><code>"pareto"</code> is the default because it makes no scalar
+preference assumption. <code>"interval"</code> is the breeder-facing
+recommendation mode when the team can state minimum and aspirational
+gains but cannot defend economic weights. It reports the joint
+probability of reaching every minimum and recommends conservatively by
+the lower credible bound. See the dedicated desired-gain interval
+vignette.</p>
 <p>The Pareto search uses randomised augmented-Chebyshev scalarisation,
 which converges on the frontier while requiring only single-objective
 improvement. A fresh weight vector is drawn each iteration so the search
@@ -526,16 +618,16 @@ increasing the replicate count.</p>
 draws.</strong> A frontier built from raw replicate averages is
 populated by fortunate runs. The reported non-dominated set is computed
 from Gaussian-process posterior means.</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">optimisation</span><span class="op">$</span><span class="va">pareto_set</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"d_GY"</span>, <span class="st">"d_ASI"</span>, <span class="st">"posterior_GY"</span>, <span class="st">"posterior_ASI"</span><span class="op">)</span><span class="op">]</span></span></code></pre></div>
 </div>
 <div class="section level3">
-<h3 id="no-single-best-direction-is-returned">6.5 No single best direction is returned<a class="anchor" aria-label="anchor" href="#no-single-best-direction-is-returned"></a>
+<h3 id="recommendations-retain-their-uncertainty">6.5 Recommendations retain their uncertainty<a class="anchor" aria-label="anchor" href="#recommendations-retain-their-uncertainty"></a>
 </h3>
 <p>For the scalar modes the result reports a <strong>stability
 region</strong>: every direction whose posterior outcome lies within
 <code>stability_tolerance</code> of the best.</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">optimisation</span><span class="op">$</span><span class="va">stability_proportion</span></span>
 <span><span class="va">optimisation</span><span class="op">$</span><span class="va">recommended_direction</span></span></code></pre></div>
 <p>The optimum is conditional on the supplied genetic covariance, the
@@ -550,10 +642,11 @@ have.</p>
 writes the accumulated evaluations after every simulation and reloads
 them automatically on a later call, so an interruption does not discard
 the work.</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Re-running the same call continues from where it stopped.</span></span>
 <span><span class="va">optimisation</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/optimize_desired_gains.html">optimize_desired_gains</a></span><span class="op">(</span></span>
-<span>  <span class="va">setup</span>, n_cycles <span class="op">=</span> <span class="fl">5L</span>, mode <span class="op">=</span> <span class="st">"pareto"</span>, budget <span class="op">=</span> <span class="fl">120L</span>,</span>
+<span>  <span class="va">setup</span>,</span>
+<span>  n_cycles <span class="op">=</span> <span class="fl">5L</span>, mode <span class="op">=</span> <span class="st">"pareto"</span>, budget <span class="op">=</span> <span class="fl">120L</span>,</span>
 <span>  checkpoint <span class="op">=</span> <span class="st">"search_state.rds"</span>, seed <span class="op">=</span> <span class="fl">42L</span>, <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <hr>

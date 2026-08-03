@@ -55,7 +55,9 @@
 #' @return The standardised selection intensity under normality.
 #' @noRd
 .dgr_intensity <- function(proportion) {
-  if (proportion >= 1) return(0)
+  if (proportion >= 1) {
+    return(0)
+  }
   stats::dnorm(stats::qnorm(1 - proportion)) / proportion
 }
 
@@ -67,10 +69,14 @@
 #'   what truncation selection can deliver in a finite population.
 #' @noRd
 .dgr_proportion_for_intensity <- function(intensity) {
-  if (!is.finite(intensity) || intensity <= 0) return(NA_real_)
+  if (!is.finite(intensity) || intensity <= 0) {
+    return(NA_real_)
+  }
   objective <- function(p) .dgr_intensity(p) - intensity
   lower <- 1e-12
-  if (objective(lower) < 0) return(NA_real_)
+  if (objective(lower) < 0) {
+    return(NA_real_)
+  }
   stats::uniroot(objective, interval = c(lower, 1 - 1e-12))$root
 }
 
@@ -83,8 +89,7 @@
 #' @return The desired gains expressed in original trait units.
 #' @noRd
 .dgr_gain_to_trait_units <- function(d, G, P, units) {
-  switch(
-    units,
+  switch(units,
     trait = d,
     genetic_sd = d * sqrt(diag(G)),
     phenotypic_sd = d * sqrt(diag(P))
@@ -100,8 +105,7 @@
 #' @return The vector expressed in the requested units.
 #' @noRd
 .dgr_gain_from_trait_units <- function(d, G, P, units) {
-  switch(
-    units,
+  switch(units,
     trait = d,
     genetic_sd = d / sqrt(diag(G)),
     phenotypic_sd = d / sqrt(diag(P))
@@ -126,7 +130,9 @@
     unknown <- setdiff(lower_is_better, trait_cols)
     if (length(unknown)) {
       stop("Unknown lower_is_better traits: ",
-           paste(unknown, collapse = ", "), call. = FALSE)
+        paste(unknown, collapse = ", "),
+        call. = FALSE
+      )
     }
     direction[lower_is_better] <- -1
   }
@@ -145,6 +151,129 @@
   oriented <- D %*% M %*% D
   dimnames(oriented) <- dimnames(M)
   oriented
+}
+
+#' Define acceptable intervals for desired genetic gains
+#'
+#' Breeders are often more confident about an acceptable range than about one
+#' exact desired-gain vector. This function records those ranges in familiar
+#' raw trait directions and converts them to the favourable-direction
+#' convention used by DesiredGainR. Thus a requested reduction of 0.25 to 1.0
+#' genetic standard deviations in disease severity can be entered as
+#' `lower = -1` and `upper = -0.25` while declaring the disease trait in
+#' `lower_is_better`.
+#'
+#' The resulting intervals constrain the *relative desired-gain directions*
+#' searched by [optimize_desired_gains()]. They are not promises that every
+#' value in the interval is attainable. Use [gain_feasibility()] to test an
+#' absolute point and multi-cycle simulation to compare admissible directions.
+#'
+#' @param lower,upper Named numeric vectors giving the lower and upper bounds
+#'   of acceptable genetic change in the raw trait direction. Both vectors
+#'   must contain the same traits. For a trait in `lower_is_better`, reductions
+#'   are normally negative; for other traits, improvements are normally
+#'   positive.
+#' @param lower_is_better Traits for which a reduction is favourable.
+#' @param gain_units Units of the bounds: genetic standard deviations,
+#'   phenotypic standard deviations, or original trait units. Genetic standard
+#'   deviations are recommended for eliciting intervals across traits.
+#' @param horizon_cycles Optional number of selection cycles over which the
+#'   bounds are intended to be achieved. Recording the horizon prevents a
+#'   one-cycle target from being silently evaluated as a five-cycle target.
+#'
+#' @return A `desiredgainr_gain_intervals` data frame containing favourable-
+#'   direction lower and upper bounds, with the raw bounds and units retained
+#'   as attributes.
+#'
+#' @examples
+#' intervals <- define_desired_gain_intervals(
+#'   lower = c(Yield = 0.5, Disease = -1.0, Quality = 0.1),
+#'   upper = c(Yield = 1.5, Disease = -0.25, Quality = 0.8),
+#'   lower_is_better = "Disease",
+#'   gain_units = "genetic_sd"
+#' )
+#' intervals
+#'
+#' @export
+define_desired_gain_intervals <- function(
+  lower,
+  upper,
+  lower_is_better = NULL,
+  gain_units = c("genetic_sd", "phenotypic_sd", "trait"),
+  horizon_cycles = NULL
+) {
+  gain_units <- match.arg(gain_units)
+  if (!is.null(horizon_cycles)) {
+    horizon_cycles <- .dgr_positive_integer(horizon_cycles, "horizon_cycles")
+  }
+  validate_bound <- function(x, name) {
+    if (!is.numeric(x) || !length(x) || is.null(names(x)) ||
+      any(!nzchar(names(x))) || anyDuplicated(names(x)) ||
+      any(!is.finite(x))) {
+      stop(name, " must be a finite, uniquely named numeric vector.",
+        call. = FALSE
+      )
+    }
+    x
+  }
+  lower <- validate_bound(lower, "lower")
+  upper <- validate_bound(upper, "upper")
+  if (!setequal(names(lower), names(upper))) {
+    stop("lower and upper must contain the same named traits.",
+      call. = FALSE
+    )
+  }
+  upper <- upper[names(lower)]
+  if (any(lower > upper)) {
+    stop("Every raw lower bound must be less than or equal to its upper bound.",
+      call. = FALSE
+    )
+  }
+  unknown <- setdiff(lower_is_better, names(lower))
+  if (length(unknown)) {
+    stop("Unknown lower_is_better traits: ", paste(unknown, collapse = ", "),
+      call. = FALSE
+    )
+  }
+  orientation <- stats::setNames(rep(1, length(lower)), names(lower))
+  orientation[lower_is_better] <- -1
+  endpoint_one <- lower * orientation
+  endpoint_two <- upper * orientation
+  result <- data.frame(
+    trait = names(lower),
+    lower = pmin(endpoint_one, endpoint_two),
+    upper = pmax(endpoint_one, endpoint_two),
+    row.names = names(lower),
+    stringsAsFactors = FALSE
+  )
+  attr(result, "raw_lower") <- lower
+  attr(result, "raw_upper") <- upper
+  attr(result, "lower_is_better") <- lower_is_better
+  attr(result, "gain_units") <- gain_units
+  attr(result, "horizon_cycles") <- horizon_cycles
+  class(result) <- c("desiredgainr_gain_intervals", "data.frame")
+  result
+}
+
+#' @export
+print.desiredgainr_gain_intervals <- function(x, ...) {
+  cat("<desiredgainr_gain_intervals>\n")
+  cat("  Units:", attr(x, "gain_units"), "\n")
+  if (!is.null(attr(x, "horizon_cycles"))) {
+    cat("  Planning horizon:", attr(x, "horizon_cycles"), "cycles\n")
+  }
+  cat("  Bounds shown as favourable genetic change (larger is better):\n")
+  print.data.frame(unclass(x)[c("trait", "lower", "upper")],
+    row.names = FALSE
+  )
+  lower_is_better <- attr(x, "lower_is_better")
+  if (length(lower_is_better)) {
+    cat(
+      "  Lower-is-better traits were entered as raw reductions:",
+      paste(lower_is_better, collapse = ", "), "\n"
+    )
+  }
+  invisible(x)
 }
 
 #' Translate desired gains into the economic weights they imply
@@ -223,23 +352,25 @@
 #'
 #' # Disease severity should fall, so it is declared rather than signed by hand.
 #' implied_economic_weights(
-#'   c(yield = 0.5, disease = 0.3), G, P, lower_is_better = "disease"
+#'   c(yield = 0.5, disease = 0.3), G, P,
+#'   lower_is_better = "disease"
 #' )
 #'
 #' @seealso [implied_desired_gains()], [gain_feasibility()]
 #' @export
 implied_economic_weights <- function(
-    desired_gains,
-    G,
-    P,
-    lower_is_better = NULL,
-    gain_units = c("trait", "genetic_sd", "phenotypic_sd")
+  desired_gains,
+  G,
+  P,
+  lower_is_better = NULL,
+  gain_units = c("trait", "genetic_sd", "phenotypic_sd")
 ) {
   gain_units <- match.arg(gain_units)
   trait_cols <- names(desired_gains)
   if (is.null(trait_cols) || anyDuplicated(trait_cols)) {
     stop("desired_gains must be a numeric vector with unique trait names.",
-         call. = FALSE)
+      call. = FALSE
+    )
   }
   G <- .dgr_covariance(G, trait_cols, "G")
   P <- .dgr_covariance(P, trait_cols, "P")
@@ -299,26 +430,29 @@ implied_economic_weights <- function(
 #' # The translation is exactly invertible when the units match.
 #' d <- c(yield = 0.5, disease = 0.3)
 #' w <- implied_economic_weights(
-#'   d, G, P, lower_is_better = "disease", gain_units = "genetic_sd"
+#'   d, G, P,
+#'   lower_is_better = "disease", gain_units = "genetic_sd"
 #' )
 #' implied_desired_gains(
-#'   w, G, P, lower_is_better = "disease", gain_units = "genetic_sd"
+#'   w, G, P,
+#'   lower_is_better = "disease", gain_units = "genetic_sd"
 #' )
 #'
 #' @seealso [implied_economic_weights()]
 #' @export
 implied_desired_gains <- function(
-    economic_weights,
-    G,
-    P,
-    lower_is_better = NULL,
-    gain_units = c("trait", "genetic_sd", "phenotypic_sd")
+  economic_weights,
+  G,
+  P,
+  lower_is_better = NULL,
+  gain_units = c("trait", "genetic_sd", "phenotypic_sd")
 ) {
   gain_units <- match.arg(gain_units)
   trait_cols <- names(economic_weights)
   if (is.null(trait_cols) || anyDuplicated(trait_cols)) {
     stop("economic_weights must be a numeric vector with unique trait names.",
-         call. = FALSE)
+      call. = FALSE
+    )
   }
   G <- .dgr_covariance(G, trait_cols, "G")
   P <- .dgr_covariance(P, trait_cols, "P")
@@ -406,28 +540,30 @@ implied_desired_gains <- function(
 #'
 #' @export
 gain_feasibility <- function(
-    desired_gains,
-    G,
-    P,
-    n_candidates,
-    n_select = NULL,
-    selection_proportion = NULL,
-    lower_is_better = NULL,
-    gain_units = c("trait", "genetic_sd", "phenotypic_sd")
+  desired_gains,
+  G,
+  P,
+  n_candidates,
+  n_select = NULL,
+  selection_proportion = NULL,
+  lower_is_better = NULL,
+  gain_units = c("trait", "genetic_sd", "phenotypic_sd")
 ) {
   gain_units <- match.arg(gain_units)
   trait_cols <- names(desired_gains)
   if (is.null(trait_cols) || anyDuplicated(trait_cols)) {
     stop("desired_gains must be a numeric vector with unique trait names.",
-         call. = FALSE)
+      call. = FALSE
+    )
   }
   if (!is.numeric(n_candidates) || length(n_candidates) != 1L ||
-      !is.finite(n_candidates) || n_candidates < 2) {
+    !is.finite(n_candidates) || n_candidates < 2) {
     stop("n_candidates must be a single number of at least 2.", call. = FALSE)
   }
   if (is.null(n_select) == is.null(selection_proportion)) {
     stop("Supply exactly one of n_select and selection_proportion.",
-         call. = FALSE)
+      call. = FALSE
+    )
   }
   planned_proportion <- if (is.null(selection_proportion)) {
     n_select / n_candidates
@@ -435,7 +571,7 @@ gain_feasibility <- function(
     selection_proportion
   }
   if (!is.finite(planned_proportion) || planned_proportion <= 0 ||
-      planned_proportion > 1) {
+    planned_proportion > 1) {
     stop("The planned selected proportion must lie in (0, 1].", call. = FALSE)
   }
 
@@ -451,7 +587,8 @@ gain_feasibility <- function(
   quadratic_form <- as.numeric(crossprod(d, G_inverse %*% P %*% G_inverse %*% d))
   if (quadratic_form <= 0) {
     stop("The desired-gain vector has no positive required intensity.",
-         call. = FALSE)
+      call. = FALSE
+    )
   }
   required_intensity <- sqrt(quadratic_form)
   required_proportion <- .dgr_proportion_for_intensity(required_intensity)
@@ -479,7 +616,7 @@ gain_feasibility <- function(
     # integer selection, so reporting a rounded-up count of one would overstate
     # what the population can deliver.
     required_n_select = if (is.finite(required_proportion) &&
-                            required_proportion * n_candidates >= 1) {
+      required_proportion * n_candidates >= 1) {
       ceiling(required_proportion * n_candidates)
     } else {
       NA_real_
@@ -578,13 +715,13 @@ print.desiredgainr_feasibility <- function(x, ...) {
 #'
 #' @export
 retrospective_weights <- function(
-    selected_values,
-    population_values,
-    trait_cols,
-    P = NULL
+  selected_values,
+  population_values,
+  trait_cols,
+  P = NULL
 ) {
   if (!is.character(trait_cols) || !length(trait_cols) ||
-      anyDuplicated(trait_cols)) {
+    anyDuplicated(trait_cols)) {
     stop("trait_cols must contain unique trait names.", call. = FALSE)
   }
   extract <- function(x, name) {
@@ -599,7 +736,8 @@ retrospective_weights <- function(
   population <- extract(population_values, "population_values")
   if (nrow(population) < 2L) {
     stop("population_values must contain at least two candidates.",
-         call. = FALSE)
+      call. = FALSE
+    )
   }
 
   P_was_estimated <- is.null(P)
@@ -658,8 +796,10 @@ print.desiredgainr_retrospective <- function(x, ...) {
   cat("  P:", x$P_source, "\n")
   cat("  Recovered coefficients, per trait standard deviation:\n")
   print(round(x$coefficients_per_sd, 4L))
-  cat("  (Raw coefficients are in $coefficients; they carry inverse trait",
-      "units and are not comparable across traits.)\n")
+  cat(
+    "  (Raw coefficients are in $coefficients; they carry inverse trait",
+    "units and are not comparable across traits.)\n"
+  )
   invisible(x)
 }
 
@@ -699,16 +839,17 @@ print.desiredgainr_retrospective <- function(x, ...) {
 #'
 #' @export
 effective_weights <- function(
-    coefficients,
-    G,
-    P = NULL,
-    warn = FALSE,
-    dominance_threshold = NULL
+  coefficients,
+  G,
+  P = NULL,
+  warn = FALSE,
+  dominance_threshold = NULL
 ) {
   trait_cols <- names(coefficients)
   if (is.null(trait_cols) || anyDuplicated(trait_cols)) {
     stop("coefficients must be a numeric vector with unique trait names.",
-         call. = FALSE)
+      call. = FALSE
+    )
   }
   G <- .dgr_covariance(G, trait_cols, "G")
   b <- .dgr_named_vector(coefficients, trait_cols, "coefficients")
@@ -739,8 +880,8 @@ effective_weights <- function(
   if (isTRUE(warn) && any(is.finite(genetic_share))) {
     dominant <- which.max(genetic_share)
     if (length(dominant) == 1L &&
-        is.finite(genetic_share[dominant]) &&
-        genetic_share[dominant] > dominance_threshold) {
+      is.finite(genetic_share[dominant]) &&
+      genetic_share[dominant] > dominance_threshold) {
       warning(
         sprintf(
           paste(
@@ -814,16 +955,16 @@ effective_weights <- function(
 #'
 #' @export
 weight_sensitivity <- function(
-    economic_weights,
-    values,
-    G,
-    P,
-    n_select,
-    trait_cols = names(economic_weights),
-    relative_sd = 0.25,
-    n_draws = 200L,
-    agreement_threshold = 0.9,
-    seed = 42L
+  economic_weights,
+  values,
+  G,
+  P,
+  n_select,
+  trait_cols = names(economic_weights),
+  relative_sd = 0.25,
+  n_draws = 200L,
+  agreement_threshold = 0.9,
+  seed = 42L
 ) {
   if (is.null(trait_cols) || anyDuplicated(trait_cols)) {
     stop("trait_cols must contain unique trait names.", call. = FALSE)
@@ -841,13 +982,14 @@ weight_sensitivity <- function(
     stop("n_select cannot exceed the number of candidates.", call. = FALSE)
   }
   n_draws <- .dgr_positive_integer(n_draws, "n_draws")
+  seed <- .dgr_seed(seed)
 
   if (!exists(".Random.seed", envir = globalenv(), inherits = FALSE)) {
     stats::runif(1L)
   }
   entry_seed <- get(".Random.seed", envir = globalenv(), inherits = FALSE)
   on.exit(assign(".Random.seed", entry_seed, envir = globalenv()), add = TRUE)
-  set.seed(as.integer(seed))
+  set.seed(seed)
 
   P_inverse <- .dgr_inverse(P, "P")$inverse
   index_scores <- function(weights) {
@@ -863,7 +1005,8 @@ weight_sensitivity <- function(
   agreement <- numeric(n_draws)
   rank_correlation <- numeric(n_draws)
   draws <- matrix(NA_real_, n_draws, length(trait_cols),
-                  dimnames = list(NULL, trait_cols))
+    dimnames = list(NULL, trait_cols)
+  )
   for (draw in seq_len(n_draws)) {
     perturbed <- w * exp(stats::rnorm(length(w), sd = relative_sd))
     draws[draw, ] <- perturbed
@@ -928,7 +1071,9 @@ print.desiredgainr_sensitivity <- function(x, ...) {
   ))
   cat("  Weights the decision is most sensitive to:\n")
   print(round(utils::head(x$weight_influence, 3L), 3L))
-  cat("  (Sensitivity of the decision, not share of the index; see",
-      "effective_weights().)\n")
+  cat(
+    "  (Sensitivity of the decision, not share of the index; see",
+    "effective_weights().)\n"
+  )
   invisible(x)
 }

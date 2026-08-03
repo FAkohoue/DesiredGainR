@@ -19,14 +19,14 @@
 #' @return A list with `comparison_table` and `correlation_summary`.
 #' @export
 compare_dg_and_qgsi <- function(
-    dg_result,
-    qgsi_result,
-    id_col = "GenoID",
-    include_metadata = TRUE,
-    compute_rank_differences = TRUE,
-    add_correlation_summary = TRUE,
-    sort_by = c("DG_rank", "QGSI_rank", "DG", "QGSI", "none"),
-    debug = FALSE
+  dg_result,
+  qgsi_result,
+  id_col = "GenoID",
+  include_metadata = TRUE,
+  compute_rank_differences = TRUE,
+  add_correlation_summary = TRUE,
+  sort_by = c("DG_rank", "QGSI_rank", "DG", "QGSI", "none"),
+  debug = FALSE
 ) {
   sort_by <- match.arg(sort_by)
   if (is.null(dg_result$ranked_geno)) {
@@ -43,7 +43,8 @@ compare_dg_and_qgsi <- function(
   }
   if (anyDuplicated(dg[[id_col]]) || anyDuplicated(qg[[id_col]])) {
     stop("Candidate identifiers must be unique in both results.",
-         call. = FALSE)
+      call. = FALSE
+    )
   }
 
   if (!"Rank" %in% names(dg) && "SelectionIndex" %in% names(dg)) {
@@ -69,7 +70,8 @@ compare_dg_and_qgsi <- function(
   }
   if (length(setdiff(required_qg, names(qg)))) {
     stop("qgsi_result lacks canonical component, score, or rank columns.",
-         call. = FALSE)
+      call. = FALSE
+    )
   }
 
   dg_keep <- if (isTRUE(include_metadata)) {
@@ -94,12 +96,16 @@ compare_dg_and_qgsi <- function(
   qg_sub <- qg[, qg_keep, with = FALSE]
   data.table::setnames(
     qg_sub,
-    intersect(c("LinearPart", "QuadraticPart", "Rank", "Selected"),
-              names(qg_sub)),
+    intersect(
+      c("LinearPart", "QuadraticPart", "Rank", "Selected"),
+      names(qg_sub)
+    ),
     paste0(
       "QGSI_",
-      intersect(c("LinearPart", "QuadraticPart", "Rank", "Selected"),
-                names(qg_sub))
+      intersect(
+        c("LinearPart", "QuadraticPart", "Rank", "Selected"),
+        names(qg_sub)
+      )
     )
   )
 

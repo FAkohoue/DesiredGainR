@@ -64,9 +64,11 @@ variance that response depends on within a few more."><meta property="og:image" 
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Deciding what to select for</h6></li>
     <li><a class="dropdown-item" href="../articles/DesiredGainR-objective.html">Defining a breeding objective</a></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-desired-gain-intervals.html">Defining desired gains and acceptable intervals</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Looking ahead</h6></li>
     <li><a class="dropdown-item" href="../articles/DesiredGainR-simulation.html">Comparing objectives over several cycles</a></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-empirical-validation.html">Empirical validation with real breeding programmes</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../breeder-guide.html">Breeder guide</a></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -108,7 +110,10 @@ variance that response depends on within a few more.</p>
 <span>  use_doubled_haploids <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  lower_is_better <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  reestimate_index <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  seed <span class="op">=</span> <span class="fl">42L</span></span>
+<span>  n_clonal_replicates <span class="op">=</span> <span class="fl">1L</span>,</span>
+<span>  n_threads <span class="op">=</span> <span class="fl">1L</span>,</span>
+<span>  seed <span class="op">=</span> <span class="fl">42L</span>,</span>
+<span>  prediction <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>method <span class="op">=</span> <span class="st">"phenotype"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -165,16 +170,41 @@ instead of advancing by selfing.</p></dd>
 simulated data. See Details.</p></dd>
 
 
+<dt id="arg-n-clonal-replicates">n_clonal_replicates<a class="anchor" aria-label="anchor" href="#arg-n-clonal-replicates"></a></dt>
+<dd><p>Ramets evaluated per genotype in a clonal
+programme. A clonal trial phenotypes several copies of each genotype and
+averages them, so its selection is more accurate than a single plot;
+leaving this at 1 understates the response a clonal programme achieves.
+Only meaningful with <code>mating_system = "clonal"</code>.</p></dd>
+
+
+<dt id="arg-n-threads">n_threads<a class="anchor" aria-label="anchor" href="#arg-n-threads"></a></dt>
+<dd><p>Threads AlphaSimR may use. The default of 1 is deliberate:
+above one, the order in which random numbers are consumed is not
+guaranteed, so a run cannot be reproduced exactly from its seed. Values
+above 1 warn.</p></dd>
+
+
 <dt id="arg-seed">seed<a class="anchor" aria-label="anchor" href="#arg-seed"></a></dt>
 <dd><p>Random seed. The caller's random number generator state is
-restored on exit.</p></dd>
+restored on exit, and <code>setup$SP</code> is deep-cloned so that the caller's
+<code>SimParam</code> is not advanced by the simulation.</p></dd>
+
+
+<dt id="arg-prediction">prediction<a class="anchor" aria-label="anchor" href="#arg-prediction"></a></dt>
+<dd><p>A named list describing the selection criterion. The
+default <code>list(method = "phenotype")</code> preserves phenotypic selection.
+<code>method = "rrblup"</code> uses leakage-free cross-fitted RR-BLUP predictions and
+requires a marker panel; optional fields are <code>folds</code> (5), <code>max_iter</code>
+(10000), <code>update_training</code> (<code>TRUE</code>) and <code>max_training</code> (<code>NULL</code>).</p></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>An object of class <code>desiredgainr_simulation</code> containing a per-cycle
-table of genetic means, genetic variances, mean relationship and effective
-population size, together with the cumulative gain per trait.</p>
+table of genetic means, genetic variances, mean relationship, effective
+population size, prediction accuracy and prediction-calibration slope,
+together with the cumulative gain per trait.</p>
     </div>
     <div class="section level2">
     <h2 id="what-the-simulation-adds-beyond-the-single-cycle-formula">What the simulation adds beyond the single-cycle formula<a class="anchor" aria-label="anchor" href="#what-the-simulation-adds-beyond-the-single-cycle-formula"></a></h2>
@@ -187,6 +217,24 @@ variance caused by truncation selection, (ii) drift and the accumulation of
 relatedness in a finite population, (iii) the point at which an antagonistic
 correlation drives a secondary trait past an unacceptable level, and (iv)
 the compounding of estimation error when the index is rebuilt each cycle.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="what-a-cycle-means">What a cycle means<a class="anchor" aria-label="anchor" href="#what-a-cycle-means"></a></h2>
+    <p>This is the definition to check before interpreting any number below.</p>
+<p><strong>Cycle 0</strong> is the founder population, before any selection. It exists so
+that the cycle 1 row has something to be a response <em>to</em>.</p>
+<p><strong>Cycle \(t\)</strong> records the population produced by selecting parents from
+the cycle \(t-1\) candidates and crossing them. Every row from cycle 1
+onward is therefore a transmitted selection response, and <code>n_cycles = 1</code>
+gives exactly one such response.</p>
+<p>Earlier versions measured the candidates rather than their selected
+descendants. Because random mating does not shift a population mean, that
+made the cycle 1 gain zero in expectation <em>for every desired-gain
+direction</em>, so a one-cycle run could not distinguish directions at all.
+Results from before this change should be re-run.</p>
+<p>Genetic mean, variance, relatedness and inbreeding are all measured on the
+same population, the cycle's response. <code>parent_inbreeding</code> additionally
+reports the selected parents, which is a different and smaller group.</p>
     </div>
     <div class="section level2">
     <h2 id="mating-systems">Mating systems<a class="anchor" aria-label="anchor" href="#mating-systems"></a></h2>
@@ -203,22 +251,28 @@ Selected parents are intercrossed each cycle, so half the disequilibrium
 generated by selection decays per generation.</p></dd>
 
 <dt><code>"clonal"</code></dt>
-<dd><p>Clonally propagated crops. Selection acts on total
-genetic value rather than breeding value, because the clone inherits
-dominance intact. This mating system therefore requires a setup built
-with <code>dominance_degree</code>, and <code>G</code> should be the genotypic covariance.</p></dd>
+<dd><p>Clonally propagated crops, with the sexual and clonal
+phases kept distinct. Recombination happens once per cycle, when
+selected parents are crossed to raise a seedling generation; every
+evaluation stage after that is a copy of a seedling, so no further
+meiosis occurs and dominance is transmitted intact. Selection therefore
+acts on total genotypic value rather than breeding value, and response
+is a broad-sense quantity. Requires a setup built with
+<code>dominance_degree</code>, and <code>G</code> should be the genotypic covariance. See
+<code><a href="founder_population.html">founder_population()</a></code> for how the additive and dominance components are
+calibrated to that target.</p></dd>
 
 
 </dl></div>
     <div class="section level2">
     <h2 id="index-re-estimation">Index re-estimation<a class="anchor" aria-label="anchor" href="#index-re-estimation"></a></h2>
-    <p>With <code>reestimate_index = TRUE</code>, the covariance matrices are re-estimated
-from each cycle's own simulated data, which is what a breeding programme
-actually does and which propagates estimation error across cycles. With
-<code>FALSE</code>, the coefficients from cycle one are reused, which isolates the
-effect of the desired-gain direction itself. A large divergence between the
-two settings means the recommendation is sensitive to estimation error, and
-the breeder should be told so.</p>
+    <p>With <code>reestimate_index = TRUE</code>, the covariance of the observed selection
+criterion is re-estimated each cycle. Phenotypic selection retains the
+breeder-supplied <code>G_target</code>; it never estimates genetic covariance from
+hidden simulated breeding values. RR-BLUP uses the calibrated-prediction
+identity <code>Cov(A, Ahat) = Var(Ahat)</code> and reports held-out prediction accuracy
+as a diagnostic. With <code>FALSE</code>, cycle-one coefficients are reused. Thus no
+selection decision has access to simulation truth.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

@@ -69,7 +69,8 @@ individuals or markers, and the cheaper of `"drop_variant"` and
 
 ``` r
 dosage <- matrix(
-  c(0, 2, 2, 0, 2, 0), nrow = 3,
+  c(0, 2, 2, 0, 2, 0),
+  nrow = 3,
   dimnames = list(c("v1", "v2", "v3"), c("line1", "line2"))
 )
 haplotypes_from_inbred_dosage(dosage)

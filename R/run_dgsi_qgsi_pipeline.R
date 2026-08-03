@@ -79,48 +79,71 @@
 #'
 #' @export
 run_dgsi_qgsi_pipeline <- function(
-    mode = c("both", "dg", "qgsi"),
-    init_data,
-    trait_cols,
-    id_col = "GenoID",
-    dg = NULL,
-    cand_data = NULL,
-    ref_data = NULL,
-    P = NULL,
-    G = NULL,
-    select_mode = c("top_n", "trait_thresholds"),
-    n_select = 100L,
-    trait_min_sd = NULL,
-    fallback_to_top_n = TRUE,
-    n_iter = 1000L,
-    n_rep = 20L,
-    sd_scale = 1,
-    seed = 42L,
-    ridge_P = 1e-6,
-    ridge_M = 1e-6,
-    dg_scale_traits = FALSE,
-    gebv_data = NULL,
-    qgsi_linear_weights = NULL,
-    W = NULL,
-    qgsi_reference_gebv_data = NULL,
-    Gamma = NULL,
-    relationship_matrix = NULL,
-    true_G = NULL,
-    qgsi_center_traits = TRUE,
-    qgsi_scale_traits = FALSE,
-    qgsi_missing_policy = c("error", "complete_cases", "mean_impute"),
-    qgsi_n_select = NULL,
-    qgsi_selection_proportion = NULL,
-    lower_is_better = NULL,
-    merge_outputs = TRUE,
-    compare_sort_by = c("DG_rank", "QGSI_rank", "DG", "QGSI", "none"),
-    debug = TRUE
+  mode = c("both", "dg", "qgsi"),
+  init_data,
+  trait_cols,
+  id_col = "GenoID",
+  dg = NULL,
+  cand_data = NULL,
+  ref_data = NULL,
+  P = NULL,
+  G = NULL,
+  select_mode = c("top_n", "trait_thresholds"),
+  n_select = 100L,
+  trait_min_sd = NULL,
+  fallback_to_top_n = FALSE,
+  n_iter = 1000L,
+  n_rep = 20L,
+  sd_scale = 1,
+  seed = 42L,
+  ridge_P = 1e-6,
+  ridge_M = 1e-6,
+  dg_scale_traits = FALSE,
+  gebv_data = NULL,
+  qgsi_linear_weights = NULL,
+  W = NULL,
+  qgsi_reference_gebv_data = NULL,
+  Gamma = NULL,
+  relationship_matrix = NULL,
+  true_G = NULL,
+  qgsi_center_traits = TRUE,
+  qgsi_scale_traits = FALSE,
+  qgsi_missing_policy = c("error", "complete_cases", "mean_impute"),
+  qgsi_n_select = NULL,
+  qgsi_selection_proportion = NULL,
+  lower_is_better = NULL,
+  merge_outputs = TRUE,
+  compare_sort_by = c("DG_rank", "QGSI_rank", "DG", "QGSI", "none"),
+  debug = FALSE
 ) {
   mode <- match.arg(mode)
   select_mode <- match.arg(select_mode)
   qgsi_missing_policy <- match.arg(qgsi_missing_policy)
   compare_sort_by <- match.arg(compare_sort_by)
   out <- list()
+
+  # Falling back to unrestricted top-n when no candidate clears the thresholds
+  # silently substitutes a different selection rule for the one requested, and
+  # the result carries no trace of the substitution. It is available, but it
+  # must be asked for and it must be visible in the output.
+  if (isTRUE(fallback_to_top_n)) {
+    warning(
+      "fallback_to_top_n = TRUE. If no candidate meets trait_min_sd, the ",
+      "eligibility thresholds will be abandoned and selection will fall back ",
+      "to unrestricted top-n. The executed rule will then differ from the ",
+      "requested one; check $selection_rule in the result before reporting.",
+      call. = FALSE
+    )
+  }
+  selection_rule <- list(
+    requested = if (select_mode == "trait_thresholds") {
+      "eligible_top_n"
+    } else {
+      "top_n"
+    },
+    fallback_permitted = isTRUE(fallback_to_top_n),
+    trait_min_sd = trait_min_sd
+  )
 
   if (mode %in% c("dg", "both")) {
     if (is.null(cand_data)) {
@@ -163,12 +186,27 @@ run_dgsi_qgsi_pipeline <- function(
       ridge_M = ridge_M,
       debug = debug
     )
+    # Record what was actually executed, which is not necessarily what was
+    # asked for when a fallback was permitted.
+    selection_rule$executed <- out$dg_result$eligibility$mode
+    selection_rule$fallback_used <- !identical(
+      selection_rule$executed, selection_rule$requested
+    )
+    if (isTRUE(selection_rule$fallback_used)) {
+      warning(
+        "No candidate met the eligibility thresholds, so selection fell back ",
+        "to unrestricted top-n. The reported selection was not made under the ",
+        "requested rule.",
+        call. = FALSE
+      )
+    }
   }
 
   if (mode %in% c("qgsi", "both")) {
     if (is.null(gebv_data)) {
       stop("gebv_data is required when mode includes 'qgsi'.",
-           call. = FALSE)
+        call. = FALSE
+      )
     }
     if (is.null(qgsi_linear_weights)) {
       stop(
@@ -212,5 +250,6 @@ run_dgsi_qgsi_pipeline <- function(
       debug = debug
     )
   }
+  out$selection_rule <- selection_rule
   out
 }

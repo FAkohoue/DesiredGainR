@@ -7,7 +7,7 @@
 optimize_desired_gains(
   setup,
   n_cycles = 5L,
-  mode = c("pareto", "economic", "target", "constrained"),
+  mode = c("pareto", "interval", "economic", "target", "constrained"),
   budget = 60L,
   n_initial = NULL,
   n_replicates = 3L,
@@ -15,8 +15,12 @@ optimize_desired_gains(
   target_gains = NULL,
   focal_trait = NULL,
   gain_floors = NULL,
-  include_diversity = TRUE,
+  include_diversity = FALSE,
+  allow_unverified_diversity = FALSE,
   non_negative = TRUE,
+  desired_gain_intervals = NULL,
+  desired_gain_units = c("genetic_sd", "phenotypic_sd", "trait"),
+  probability_level = 0.95,
   stability_tolerance = 0.05,
   n_candidates = 2000L,
   checkpoint = NULL,
@@ -38,7 +42,10 @@ design.}
 \item{n_initial}{Size of the quasi-random initial design. Defaults to ten
 times the number of free parameters.}
 
-\item{n_replicates}{Simulation replicates per direction.}
+\item{n_replicates}{Simulation replicates per direction. When omitted,
+interval mode uses 50 and other modes use 3. Interval mode warns below 20;
+at least 50 are recommended when leading vectors have similar success
+probabilities.}
 
 \item{economic_weights}{Named weights required by \code{mode = "economic"}.}
 
@@ -50,10 +57,33 @@ times the number of free parameters.}
 \item{include_diversity}{Whether to treat diversity, measured as the negated
 mean relationship among selected parents, as an additional Pareto
 objective. Family balancing and coancestry control can cost a large share
-of nominal gain, so the trade-off is reported rather than assumed away.}
+of nominal gain, so the trade-off is reported rather than assumed away.
+Defaults to \code{FALSE} because a default founder setup has no verified marker
+panel.}
+
+\item{allow_unverified_diversity}{Experimental override allowing a marker
+panel whose disjointness from QTL could not be verified. The override is
+included in checkpoint provenance; overlap known to be present is never
+allowed.}
 
 \item{non_negative}{Whether to restrict the search to directions seeking
 improvement in every trait.}
+
+\item{desired_gain_intervals}{Optional acceptable bounds created by
+\code{\link[=define_desired_gain_intervals]{define_desired_gain_intervals()}}, or a trait-named matrix/data frame with
+\code{lower} and \code{upper} columns expressed in the favourable direction. The
+search considers only desired-gain directions whose ray intersects this
+box.}
+
+\item{desired_gain_units}{Units in which searched directions and plain
+\code{desired_gain_intervals} are expressed. The default, genetic standard
+deviations, makes relative gains comparable across traits. An object from
+\code{\link[=define_desired_gain_intervals]{define_desired_gain_intervals()}} carries its own units and overrides this
+argument.}
+
+\item{probability_level}{Credible level for interval-mode success
+probabilities. These probabilities describe simulation variation
+conditional on the supplied population and covariance parameters.}
 
 \item{stability_tolerance}{Relative tolerance defining the stability region.}
 
@@ -106,24 +136,37 @@ which is small enough to cover densely for the trait numbers breeders use.
 By default the search is restricted to the non-negative orthant, meaning
 improvement is sought in every trait; set \code{non_negative = FALSE} to admit
 directions that deliberately concede ground on a trait.
+
+When \code{desired_gain_intervals} is supplied, the search is restricted to rays
+that intersect the breeder's acceptable interval box. This lets the breeder
+say, for example, that yield improvement should lie between 0.5 and 1.5
+genetic standard deviations while disease reduction should lie between
+0.25 and 1.0, without claiming that one exact ratio is known. The intervals
+constrain the requested response pattern; they do not guarantee that the
+corresponding absolute gains are attainable.
 }
 
 \section{Ranking modes}{
 \describe{
 \item{\code{"pareto"}}{Returns the non-dominated set of multi-cycle outcomes
-and the direction generating each. This is the default, because it is
-the only mode that does not require the economic weights that breeders
-find hardest to state; choosing a point on a frontier is an easier
-judgement, and it is weight elicitation by revealed preference. The
-search uses randomised augmented-Chebyshev scalarisation, which
-converges on the frontier while needing only single-objective
-improvement.}
+and the direction generating each. This is the default because it makes
+no scalar preference assumption; choosing a point on a frontier can be
+easier than stating weights. The search uses randomised
+augmented-Chebyshev scalarisation, which converges on the frontier while
+needing only single-objective improvement.}
 \item{\code{"economic"}}{Maximises \code{sum(economic_weights * cumulative_gain)}.}
 \item{\code{"target"}}{Minimises the distance between the cumulative gain and a
 stated absolute target, reporting the per-trait shortfall.}
 \item{\code{"constrained"}}{Maximises the gain in \code{focal_trait} subject to
 \code{gain_floors} on the remaining traits, weighting improvement by the
 probability that every floor is met.}
+\item{\code{"interval"}}{Requires \code{desired_gain_intervals}. A high-gain
+replicate is one in which every favourable cumulative response reaches
+its interval's lower bound. Each evaluated vector receives a joint and
+per-trait posterior success probability. The recommendation maximises
+the lower credible bound of the joint probability, then expected
+balanced attainment, so a spectacular response in one trait cannot hide
+failure in another. No economic weights are used.}
 }
 }
 
@@ -136,14 +179,46 @@ posterior means rather than from raw replicate averages, because a frontier
 built from raw draws is populated by fortunate runs.
 }
 
-\section{Interpreting the result}{
-No single best direction is returned. The optimum is conditional on the
-supplied genetic covariance matrix, the founder germplasm and the programme
-parameters, so the result reports a stability region: every direction whose
-posterior outcome lies within \code{stability_tolerance} of the best. Choose
-within that region on other grounds.
+\section{Interval-mode probability statement}{
+Let \code{R_j} be the favourable cumulative response for trait \code{j}, expressed in
+the interval's units, and let \code{L_j} be its lower bound. A simulation
+replicate achieves high genetic gain when
+\deqn{R_j \ge L_j \quad\hbox{for every trait }j.}
+If this joint event occurs in \code{s} of \code{n} independent replicates, interval
+mode reports the Jeffreys binomial posterior
+\deqn{p \mid s,n \sim \mathrm{Beta}(s+1/2,n-s+1/2).}
+The recommended vector maximises the lower credible bound for \code{p}, with the
+posterior mean and an augmented maximin attainment score as tie-breakers.
+Consequently a direction supported by a few fortunate runs cannot outrank a
+more precisely supported direction merely through its point estimate.
+
+The probability is conditional, not universal: it integrates the stochastic
+segregation, mating and selection represented by the simulation while
+holding the supplied founders, covariance matrices and programme parameters
+fixed. Use \code{\link[=propagate_covariance_uncertainty]{propagate_covariance_uncertainty()}} to assess sensitivity to
+estimated covariance matrices.
 }
 
+\section{Interpreting the result}{
+Pareto mode returns no single best direction. Scalar modes return a
+recommendation plus a stability region rather than presenting the numerical
+maximiser as certain. Every recommendation is conditional on the supplied
+genetic covariance matrix, founder germplasm and programme parameters.
+}
+
+\references{
+Brown LD, Cai TT, DasGupta A (2001). Interval estimation for a binomial
+proportion. \emph{Statistical Science} 16:101--133.
+\doi{10.1214/ss/1009213286}
+
+Wierzbicki AP (1982). A mathematical basis for satisficing decision making.
+\emph{Mathematical Modelling} 3:391--405.
+\doi{10.1016/0270-0255(82)90038-0}
+
+Yang W-N, Nelson BL (1991). Using common random numbers and control variates
+in multiple-comparison procedures. \emph{Operations Research} 39:583--591.
+\doi{10.1287/opre.39.4.583}
+}
 \seealso{
 \code{\link[=simulate_selection_cycles]{simulate_selection_cycles()}}, \code{\link[=gain_feasibility]{gain_feasibility()}}
 }

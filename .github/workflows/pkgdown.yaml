@@ -80,15 +80,15 @@ jobs:
         # version-controlled artifacts generated from
         # inst/guide/DesiredGainR_Breeder_Guide.Rmd. pkgdown does not know
         # about them, so they are copied into docs/ under the fixed name the
-        # navbar "guide" component links to. The step warns rather than fails
-        # when the guide has not yet been generated, so that the rest of the
-        # site still publishes.
+        # navbar "guide" component links to. A missing artifact is a broken
+        # public link and therefore fails publication.
         run: |
           if [ -f inst/extdata/DesiredGainR_Breeder_Guide.html ]; then
             cp inst/extdata/DesiredGainR_Breeder_Guide.html docs/breeder-guide.html
             echo "Published breeder-guide.html"
           else
-            echo "::warning::Breeder's Guide HTML not found; the navbar link will 404."
+            echo "Breeder's Guide HTML not found; refusing to publish a 404."
+            exit 1
           fi
           if [ -f inst/extdata/DesiredGainR_Breeder_Guide.pdf ]; then
             cp inst/extdata/DesiredGainR_Breeder_Guide.pdf docs/breeder-guide.pdf

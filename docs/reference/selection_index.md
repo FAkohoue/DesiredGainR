@@ -18,9 +18,11 @@ selection_index(
   P = NULL,
   economic_weights = NULL,
   desired_gains = NULL,
+  aggregate_weights = NULL,
   lower_is_better = NULL,
   center_traits = TRUE,
   scale_traits = TRUE,
+  scale_by = c("sample", "phenotypic"),
   culling_thresholds = NULL,
   tandem_order = NULL,
   n_select = NULL,
@@ -78,6 +80,16 @@ selection_index(
   Named non-negative desired gains in the favourable-direction trait
   space. Required by `"pesek_baker"` and `"yamada"`.
 
+- aggregate_weights:
+
+  Optional named weights defining one common net merit for evaluation.
+  This is separate from `desired_gains`: when it is absent,
+  merit-dependent criteria (`R_HI` and `Delta_H`) are `NA` for the
+  desired-gain families. Implied weights can be explored explicitly with
+  [`implied_economic_weights()`](https://FAkohoue.github.io/DesiredGainR/reference/implied_economic_weights.md),
+  but are not silently substituted because a different desired-gain
+  direction would then change the definition of merit being compared.
+
 - lower_is_better:
 
   Traits for which smaller original values are favourable.
@@ -93,9 +105,30 @@ selection_index(
 
 - scale_traits:
 
-  Whether to divide traits by their population standard deviations
-  before indexing. Covarrubias-Pazaran (2021) recommends this, and a
-  desired gain of 1 then means one standard deviation of progress.
+  Whether to divide traits by their standard deviations before indexing.
+  Covarrubias-Pazaran (2021) recommends this, and a desired gain of 1
+  then means one standard deviation of progress. See `scale_by` for
+  which standard deviation is used.
+
+- scale_by:
+
+  Source of the scaling factors when `scale_traits = TRUE`.
+
+  `"sample"`, the default, divides by the standard deviations of the
+  supplied candidates. This equals the population standard deviation
+  only when the candidates are an unselected random sample of the
+  population that `G` and `P` describe. Candidates at a late trial stage
+  have already been selected, so their spread is narrower than the
+  population's, and mixing that sample scale with population covariance
+  matrices inflates the apparent heritability of every trait that
+  selection has already narrowed.
+
+  `"phenotypic"` divides by \\\sqrt{\operatorname{diag}(\mathbf{P})}\\,
+  which comes from the same upstream model as `G` and `P` themselves.
+  The scaled `P` then has a unit diagonal exactly, and the scaled `G`
+  has the narrow-sense heritabilities on its diagonal. Prefer it
+  whenever `P` is a genuine population estimate rather than a covariance
+  computed from the candidates at hand.
 
 - culling_thresholds:
 
@@ -239,14 +272,16 @@ Yamada Y, Yokouchi K, Nishida A (1975). *Japanese Journal of Genetics*
 set.seed(1)
 traits <- c("yield", "disease")
 values <- matrix(
-  c(stats::rnorm(40), stats::rnorm(40)), ncol = 2,
+  c(stats::rnorm(40), stats::rnorm(40)),
+  ncol = 2,
   dimnames = list(paste0("G", 1:40), traits)
 )
 G <- matrix(c(0.60, -0.15, -0.15, 0.40), 2, dimnames = list(traits, traits))
 P <- matrix(c(1.10, -0.20, -0.20, 0.90), 2, dimnames = list(traits, traits))
 
 fit <- selection_index(
-  values, traits, method = "smith_hazel",
+  values, traits,
+  method = "smith_hazel",
   G = G, P = P,
   economic_weights = c(yield = 1, disease = 0.5),
   lower_is_better = "disease", n_select = 4

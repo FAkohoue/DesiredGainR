@@ -43,7 +43,8 @@
   storage.mode(x) <- "integer"
   if (is.null(rownames(x)) || is.null(colnames(x))) {
     stop(name, " must have variant row names and individual column names.",
-         call. = FALSE)
+      call. = FALSE
+    )
   }
   observed <- unique(as.vector(x))
   unexpected <- setdiff(observed[!is.na(observed)], c(0L, 1L))
@@ -82,7 +83,8 @@
 #'
 #' @examples
 #' dosage <- matrix(
-#'   c(0, 2, 1, 0, 2, 0, 2, NA, 2), nrow = 3,
+#'   c(0, 2, 1, 0, 2, 0, 2, NA, 2),
+#'   nrow = 3,
 #'   dimnames = list(c("v1", "v2", "v3"), c("l1", "l2", "l3"))
 #' )
 #' dosage_diagnostics(dosage)
@@ -94,13 +96,16 @@ dosage_diagnostics <- function(dosage) {
   storage.mode(dosage) <- "integer"
   if (is.null(rownames(dosage)) || is.null(colnames(dosage))) {
     stop("dosage must have variant row names and individual column names.",
-         call. = FALSE)
+      call. = FALSE
+    )
   }
   observed <- unique(as.vector(dosage))
   unexpected <- setdiff(observed[!is.na(observed)], c(0L, 1L, 2L))
   if (length(unexpected)) {
     stop("dosage must contain only 0, 1, 2 and NA, but also contains: ",
-         paste(sort(unexpected), collapse = ", "), call. = FALSE)
+      paste(sort(unexpected), collapse = ", "),
+      call. = FALSE
+    )
   }
 
   called <- !is.na(dosage)
@@ -114,8 +119,11 @@ dosage_diagnostics <- function(dosage) {
     n_variants = nrow(dosage),
     n_individuals = ncol(dosage),
     n_calls = n_called,
-    overall_heterozygosity = if (n_called > 0) sum(heterozygous) / n_called
-      else NA_real_,
+    overall_heterozygosity = if (n_called > 0) {
+      sum(heterozygous) / n_called
+    } else {
+      NA_real_
+    },
     overall_missing = mean(!called),
     by_individual = data.table::data.table(
       individual = colnames(dosage),
@@ -195,7 +203,9 @@ print.desiredgainr_dosage_diagnostics <- function(x, ...) {
     keep <- rowSums(flagged) == 0L
     if (!any(keep)) {
       stop("Every variant carries ", label, "; none can be retained. ",
-           "Consider policy = 'drop_individual'.", call. = FALSE)
+        "Consider policy = 'drop_individual'.",
+        call. = FALSE
+      )
     }
     removed_variants <- rownames(flagged)[!keep]
     matrices <- lapply(matrices, function(m) m[keep, , drop = FALSE])
@@ -203,7 +213,9 @@ print.desiredgainr_dosage_diagnostics <- function(x, ...) {
     keep <- colSums(flagged) == 0L
     if (sum(keep) < 2L) {
       stop("Fewer than two individuals remain after dropping those carrying ",
-           label, ". Consider policy = 'drop_variant'.", call. = FALSE)
+        label, ". Consider policy = 'drop_variant'.",
+        call. = FALSE
+      )
     }
     removed_individuals <- colnames(flagged)[!keep]
     matrices <- lapply(matrices, function(m) m[, keep, drop = FALSE])
@@ -258,7 +270,8 @@ print.desiredgainr_dosage_diagnostics <- function(x, ...) {
 #'
 #' @examples
 #' dosage <- matrix(
-#'   c(0, 2, 2, 0, 2, 0), nrow = 3,
+#'   c(0, 2, 2, 0, 2, 0),
+#'   nrow = 3,
 #'   dimnames = list(c("v1", "v2", "v3"), c("line1", "line2"))
 #' )
 #' haplotypes_from_inbred_dosage(dosage)
@@ -266,13 +279,13 @@ print.desiredgainr_dosage_diagnostics <- function(x, ...) {
 #' @seealso [dosage_diagnostics()], [founder_haplotypes()]
 #' @export
 haplotypes_from_inbred_dosage <- function(
-    dosage,
-    heterozygous_policy = c(
-      "error", "drop_variant", "drop_individual", "mask"
-    ),
-    missing_policy = c(
-      "error", "drop_variant", "drop_individual", "mask"
-    )
+  dosage,
+  heterozygous_policy = c(
+    "error", "drop_variant", "drop_individual", "mask"
+  ),
+  missing_policy = c(
+    "error", "drop_variant", "drop_individual", "mask"
+  )
 ) {
   heterozygous_policy <- match.arg(heterozygous_policy)
   missing_policy <- match.arg(missing_policy)
@@ -298,7 +311,8 @@ haplotypes_from_inbred_dosage <- function(
   dosage <- heterozygous_step$matrices$dosage
 
   hap1 <- matrix(
-    NA_integer_, nrow(dosage), ncol(dosage), dimnames = dimnames(dosage)
+    NA_integer_, nrow(dosage), ncol(dosage),
+    dimnames = dimnames(dosage)
   )
   hap2 <- hap1
   homozygous_reference <- !is.na(dosage) & dosage == 0L
@@ -414,10 +428,14 @@ haplotypes_from_inbred_dosage <- function(
 #' @examples
 #' variants <- c("v1", "v2", "v3", "v4")
 #' individuals <- c("a", "b")
-#' hap1 <- matrix(c(0, 1, 0, 1, 1, 0, 1, 0), nrow = 4,
-#'                dimnames = list(variants, individuals))
-#' hap2 <- matrix(c(0, 0, 1, 1, 1, 1, 0, 0), nrow = 4,
-#'                dimnames = list(variants, individuals))
+#' hap1 <- matrix(c(0, 1, 0, 1, 1, 0, 1, 0),
+#'   nrow = 4,
+#'   dimnames = list(variants, individuals)
+#' )
+#' hap2 <- matrix(c(0, 0, 1, 1, 1, 1, 0, 0),
+#'   nrow = 4,
+#'   dimnames = list(variants, individuals)
+#' )
 #' map <- data.frame(
 #'   variant_id = variants,
 #'   chromosome = c(1, 1, 2, 2),
@@ -428,16 +446,16 @@ haplotypes_from_inbred_dosage <- function(
 #' @seealso [haplotypes_from_inbred_dosage()], [founder_population()]
 #' @export
 founder_haplotypes <- function(
-    hap1 = NULL,
-    hap2 = NULL,
-    map,
-    missing_policy = c("error", "drop_variant", "drop_individual"),
-    variant_col = "variant_id",
-    chromosome_col = "chromosome",
-    position_morgan_col = "position_morgan",
-    position_bp_col = "position_bp",
-    recombination_rate = 1e-8,
-    haplotypes = NULL
+  hap1 = NULL,
+  hap2 = NULL,
+  map,
+  missing_policy = c("error", "drop_variant", "drop_individual"),
+  variant_col = "variant_id",
+  chromosome_col = "chromosome",
+  position_morgan_col = "position_morgan",
+  position_bp_col = "position_bp",
+  recombination_rate = 1e-8,
+  haplotypes = NULL
 ) {
   missing_policy <- match.arg(missing_policy)
   if (is.null(haplotypes)) {
@@ -469,7 +487,8 @@ founder_haplotypes <- function(
   if (!identical(dimnames(haplotypes[[1L]]), dimnames(haplotypes[[2L]]))) {
     stop(
       "Both homologue matrices must have identical dimnames in identical ",
-      "order.", call. = FALSE
+      "order.",
+      call. = FALSE
     )
   }
 
@@ -523,13 +542,16 @@ founder_haplotypes <- function(
   } else {
     if (!position_bp_col %in% names(map)) {
       stop("map must supply either ", position_morgan_col, " or ",
-           position_bp_col, ".", call. = FALSE)
+        position_bp_col, ".",
+        call. = FALSE
+      )
     }
     if (!is.numeric(recombination_rate) ||
-        length(recombination_rate) != 1L ||
-        !is.finite(recombination_rate) || recombination_rate <= 0) {
+      length(recombination_rate) != 1L ||
+      !is.finite(recombination_rate) || recombination_rate <= 0) {
       stop("recombination_rate must be a positive finite scalar.",
-           call. = FALSE)
+        call. = FALSE
+      )
     }
     position <- as.numeric(map[[position_bp_col]]) * recombination_rate
     position_source <- sprintf(
@@ -543,7 +565,8 @@ founder_haplotypes <- function(
   chromosome <- as.character(map[[chromosome_col]])
   if (anyNA(chromosome) || any(!nzchar(chromosome))) {
     stop("Every variant must carry a non-missing chromosome label.",
-         call. = FALSE)
+      call. = FALSE
+    )
   }
 
   chromosomes <- unique(chromosome)
@@ -557,7 +580,9 @@ founder_haplotypes <- function(
     rows <- rows[order(position[rows])]
     if (length(rows) < 2L) {
       stop("Chromosome ", chr, " carries fewer than two variants; AlphaSimR ",
-           "requires at least two loci per chromosome.", call. = FALSE)
+        "requires at least two loci per chromosome.",
+        call. = FALSE
+      )
     }
     chromosome_position <- position[rows] - min(position[rows])
     if (anyDuplicated(chromosome_position)) {
@@ -573,7 +598,8 @@ founder_haplotypes <- function(
     # homologue 1, individual 1 homologue 2, individual 2 homologue 1, and so
     # on.
     block <- matrix(
-      0L, nrow = 2L * n_individuals, ncol = length(rows),
+      0L,
+      nrow = 2L * n_individuals, ncol = length(rows),
       dimnames = list(NULL, variant_id[rows])
     )
     block[seq(1L, 2L * n_individuals, by = 2L), ] <-
@@ -627,12 +653,16 @@ print.desiredgainr_founders <- function(x, ...) {
     100 * x$missing_data$rate_before_resolution, x$missing_data$policy
   ))
   if (length(x$missing_data$removed_variants)) {
-    cat(sprintf("  Variants removed: %d\n",
-                length(x$missing_data$removed_variants)))
+    cat(sprintf(
+      "  Variants removed: %d\n",
+      length(x$missing_data$removed_variants)
+    ))
   }
   if (length(x$missing_data$removed_individuals)) {
-    cat(sprintf("  Individuals removed: %d\n",
-                length(x$missing_data$removed_individuals)))
+    cat(sprintf(
+      "  Individuals removed: %d\n",
+      length(x$missing_data$removed_individuals)
+    ))
   }
   invisible(x)
 }
@@ -647,23 +677,84 @@ print.desiredgainr_founders <- function(x, ...) {
 #'
 #' @details
 #' Trait variances are taken from the diagonal of `G` and trait correlations
-#' from the corresponding correlation matrix. For a clonal programme, supply
-#' `dominance_degree`, and `G` should then be the **genotypic** covariance,
-#' because the unit of selection is the clone and dominance is therefore
-#' inherited intact. For a self-pollinated or cross-pollinated programme, `G`
-#' should be the additive genetic covariance.
+#' from the corresponding correlation matrix.
+#'
+#' # Additive and clonal programmes calibrate differently
+#'
+#' For a self-pollinated or cross-pollinated programme, `G` is the additive
+#' genetic covariance and is passed straight to AlphaSimR.
+#'
+#' For a clonal programme, supply `dominance_degree`. `G` is then the total
+#' **genotypic** covariance, because the unit of selection is the clone and
+#' dominance is inherited intact. This needs a calibration step that earlier
+#' versions omitted. AlphaSimR's `var` argument sets the *additive* variance,
+#' so with dominance present the dominance variance is added on top and the
+#' realised genotypic variance exceeds the supplied target. Since scaling every
+#' quantitative trait locus effect by \eqn{c} scales both the additive and the
+#' dominance variance by \eqn{c^2}, the correction is exact in one pass: the
+#' trait is built, the realised genotypic variance measured, and the additive
+#' target rescaled by the ratio.
+#'
+#' The correlations are calibrated too, by the same fixed point. Rescaling the
+#' variances alone would leave the realised genotypic correlations emergent, so
+#' the setup would accept a full covariance matrix as its target and reproduce
+#' only its diagonal. Dominance perturbs the correlation structure as well, and
+#' that perturbation is a smooth, near-identity function of the additive
+#' correlations supplied, so correcting both and projecting the correction back
+#' onto the set of valid correlation matrices recovers the whole of `G`.
+#'
+#' `setup$G_realised` records what was achieved and `setup$calibration_error`
+#' the largest remaining deviation in each of the variances and correlations.
+#' Convergence is not guaranteed for every target: a strongly antagonistic
+#' correlation structure at a high dominance degree may not be attainable by
+#' any additive-plus-dominance architecture. Failure warns and is recorded in
+#' `setup$calibration_converged` rather than passing silently.
+#'
+#' # Which heritability
+#'
+#' `heritability = "narrow"` sets the error variance so that
+#' \eqn{V_A / V_P} equals `h2`; `"broad"` targets \eqn{V_G / V_P}. They
+#' coincide without dominance and diverge with it, so a clonal programme must
+#' say which is meant. Selection in a clonal programme acts on genotypic value,
+#' making broad sense usually the relevant one.
+#'
+#' # Markers for coancestry
+#'
+#' `n_markers_per_chromosome` creates a neutral marker panel, held disjoint
+#' from the quantitative trait loci where the installed AlphaSimR supports it.
+#' Diversity should not be measured on the loci under selection: changing their
+#' frequencies is what genetic gain is, so a relationship matrix built from
+#' them rises whenever selection succeeds, and a desired-gain direction would
+#' be penalised for working.
 #'
 #' @param founders An object from [founder_haplotypes()].
-#' @param G Genetic variance-covariance matrix, named by trait.
-#' @param h2 Named narrow-sense heritabilities, or a single value applied to
-#'   every trait.
+#' @param G Genetic variance-covariance matrix, named by trait. Without
+#'   dominance this is the additive covariance. With dominance it is the total
+#'   **genotypic** covariance, because that is what a clonal programme selects
+#'   on; see Details.
+#' @param h2 Named heritabilities, or a single value applied to every trait.
+#'   Narrow- or broad-sense according to `heritability`.
+#' @param residual_covariance Optional named residual covariance matrix. When
+#'   supplied it is passed directly to AlphaSimR and takes precedence over the
+#'   marginal `h2` values. This is the route used when propagating a sampled
+#'   residual covariance; `h2` remains recorded as the nominal setup input.
 #' @param n_qtl_per_chromosome Number of quantitative trait loci simulated per
 #'   chromosome.
+#' @param n_markers_per_chromosome Optional number of neutral markers per
+#'   chromosome, used for coancestry. When supplied, the markers are held
+#'   disjoint from the quantitative trait loci where the installed AlphaSimR
+#'   supports it. Strongly recommended: without a panel, diversity is measured
+#'   on all segregating sites.
 #' @param dominance_degree Optional named mean degree of dominance per trait.
 #'   Supplying it adds dominance to the simulated traits, which the clonal
 #'   mating system requires.
-#' @param dominance_variance Optional named variance of the degree of
-#'   dominance.
+#' @param dominance_variance Optional named variance of the **degree of
+#'   dominance** across loci. This is AlphaSimR's `varDD` and is not the
+#'   dominance genetic variance; the two are different quantities.
+#' @param heritability Whether `h2` is narrow-sense (the default, a statement
+#'   about breeding values) or broad-sense (a statement about genotypic values).
+#'   They differ exactly when dominance is simulated, which is when a clonal
+#'   programme is being represented, so it must be stated rather than assumed.
 #' @param seed Random seed. The caller's random number generator state is
 #'   restored on exit.
 #'
@@ -674,13 +765,16 @@ print.desiredgainr_founders <- function(x, ...) {
 #' @seealso [founder_haplotypes()], [simulate_selection_cycles()]
 #' @export
 founder_population <- function(
-    founders,
-    G,
-    h2,
-    n_qtl_per_chromosome = 100L,
-    dominance_degree = NULL,
-    dominance_variance = NULL,
-    seed = 42L
+  founders,
+  G,
+  h2,
+  residual_covariance = NULL,
+  n_qtl_per_chromosome = 100L,
+  n_markers_per_chromosome = NULL,
+  dominance_degree = NULL,
+  dominance_variance = NULL,
+  heritability = c("narrow", "broad"),
+  seed = 42L
 ) {
   .dgr_require_alphasimr("founder_population()")
   if (!inherits(founders, "desiredgainr_founders")) {
@@ -692,6 +786,12 @@ founder_population <- function(
   }
   G <- .dgr_covariance(G, trait_cols, "G")
   .dgr_check_psd(G, "G")
+  if (!is.null(residual_covariance)) {
+    residual_covariance <- .dgr_covariance(
+      residual_covariance, trait_cols, "residual_covariance"
+    )
+    .dgr_check_psd(residual_covariance, "residual_covariance")
+  }
   n_traits <- length(trait_cols)
 
   if (length(h2) == 1L) {
@@ -704,72 +804,339 @@ founder_population <- function(
   n_qtl_per_chromosome <- .dgr_positive_integer(
     n_qtl_per_chromosome, "n_qtl_per_chromosome"
   )
+  if (!is.null(n_markers_per_chromosome)) {
+    n_markers_per_chromosome <- .dgr_positive_integer(
+      n_markers_per_chromosome, "n_markers_per_chromosome"
+    )
+  }
+  seed <- .dgr_seed(seed)
 
   if (!exists(".Random.seed", envir = globalenv(), inherits = FALSE)) {
     stats::runif(1L)
   }
   entry_seed <- get(".Random.seed", envir = globalenv(), inherits = FALSE)
   on.exit(assign(".Random.seed", entry_seed, envir = globalenv()), add = TRUE)
-  set.seed(as.integer(seed))
+  set.seed(seed)
 
-  map_pop <- AlphaSimR::newMapPop(
-    genMap = founders$gen_map,
-    haplotypes = founders$haplotypes
-  )
-  SP <- AlphaSimR::SimParam$new(map_pop)
-  SP$setTrackPed(TRUE)
+  heritability <- match.arg(heritability)
+  use_dominance <- !is.null(dominance_degree)
+  if (!use_dominance && identical(heritability, "broad")) {
+    stop("heritability = 'broad' is only meaningful when dominance is ",
+      "simulated. Without dominance the two coincide, so use 'narrow'.",
+      call. = FALSE
+    )
+  }
+
+  build <- function(additive_target, correlation_target = correlations) {
+    # The seed is reset on every call so that each build draws the SAME
+    # quantitative trait loci, positions and dominance degrees, and differs
+    # only in the additive scale. Without this the calibration below would
+    # measure one trait architecture and apply the correction to a different
+    # one, chasing a target that moves each pass.
+    set.seed(seed)
+    map_pop <- AlphaSimR::newMapPop(
+      genMap = founders$gen_map,
+      haplotypes = founders$haplotypes
+    )
+    SP <- AlphaSimR::SimParam$new(map_pop)
+    SP$setTrackPed(TRUE)
+
+    # Markers used for coancestry must not be the loci under selection, or the
+    # diversity metric rises whenever selection succeeds. Ask AlphaSimR to
+    # partition the segregating sites so that the SNP chip and the QTL are
+    # disjoint. Older versions lack the argument, in which case some overlap
+    # is possible and is recorded in the setup.
+    marker_overlap <- TRUE
+    if (!is.null(n_markers_per_chromosome)) {
+      restricted <- tryCatch(
+        {
+          SP$restrSegSites(
+            minQtlPerChr = n_qtl_per_chromosome,
+            minSnpPerChr = n_markers_per_chromosome,
+            overlap = FALSE
+          )
+          TRUE
+        },
+        error = function(e) FALSE
+      )
+      marker_overlap <- !restricted
+      tryCatch(
+        SP$addSnpChip(nSnpPerChr = n_markers_per_chromosome),
+        error = function(e) {
+          stop("Could not create a marker panel of ",
+            n_markers_per_chromosome, " markers per chromosome: ",
+            conditionMessage(e),
+            "\n  Reduce n_markers_per_chromosome or supply denser ",
+            "founder haplotypes.",
+            call. = FALSE
+          )
+        }
+      )
+    }
+
+    if (use_dominance) {
+      SP$addTraitAD(
+        nQtlPerChr = n_qtl_per_chromosome,
+        mean = rep(0, n_traits),
+        var = as.numeric(additive_target),
+        meanDD = as.numeric(dominance_degree),
+        varDD = as.numeric(dominance_variance),
+        corA = correlation_target
+      )
+    } else {
+      SP$addTraitA(
+        nQtlPerChr = n_qtl_per_chromosome,
+        mean = rep(0, n_traits),
+        var = as.numeric(additive_target),
+        corA = correlation_target
+      )
+    }
+    population <- AlphaSimR::newPop(map_pop, simParam = SP)
+    list(SP = SP, pop = population, marker_overlap = marker_overlap)
+  }
 
   variances <- diag(G)
   correlations <- stats::cov2cor(G)
-  use_dominance <- !is.null(dominance_degree)
   if (use_dominance) {
     dominance_degree <- .dgr_named_vector(
       dominance_degree, trait_cols, "dominance_degree"
     )
+    # AlphaSimR's varDD is the variance of the dominance *degree* across loci,
+    # not the dominance genetic variance. The two are different quantities and
+    # conflating them was the source of the miscalibration below.
     dominance_variance <- if (is.null(dominance_variance)) {
       stats::setNames(rep(0.2, n_traits), trait_cols)
     } else {
       .dgr_named_vector(dominance_variance, trait_cols, "dominance_variance")
     }
-    SP$addTraitAD(
-      nQtlPerChr = n_qtl_per_chromosome,
-      mean = rep(0, n_traits),
-      var = as.numeric(variances),
-      meanDD = as.numeric(dominance_degree),
-      varDD = as.numeric(dominance_variance),
-      corA = correlations
+  }
+
+  built <- build(variances)
+  realised <- stats::cov(AlphaSimR::gv(built$pop))
+  dimnames(realised) <- list(trait_cols, trait_cols)
+
+  calibration_note <- NULL
+  calibration_iterations <- 0L
+  calibration_converged <- NA
+  if (use_dominance) {
+    # AlphaSimR's `var` argument sets the ADDITIVE genetic variance. With
+    # dominance present the dominance variance is added on top, so the total
+    # genotypic variance exceeds the supplied target -- which is the matrix a
+    # clonal programme selects on.
+    #
+    # Because build() reseeds, the trait architecture is held fixed and only
+    # the additive scale varies, so the ratio correction converges quickly.
+    # It is applied iteratively rather than once because the relationship
+    # between the additive target and the realised genotypic variance is not
+    # exactly quadratic: AlphaSimR rescales to hit the requested additive
+    # variance after the dominance deviations are formed.
+    # Both the variances and the correlations are calibrated. Rescaling the
+    # additive variances alone leaves the realised genotypic CORRELATIONS
+    # emergent, so the setup would accept a full covariance matrix as its
+    # target and reproduce only its diagonal. Dominance perturbs the
+    # correlation structure as well, and that perturbation is itself a smooth,
+    # near-identity function of the additive correlations supplied, so a
+    # fixed-point iteration on both recovers the whole matrix.
+    variance_target <- variances
+    correlation_target <- correlations
+    additive_variance <- variances
+    additive_correlation <- correlations
+    tolerance <- 1e-3
+    trace <- numeric(0)
+    for (iteration in seq_len(40L)) {
+      realised_variance <- diag(realised)
+      if (any(!is.finite(realised_variance)) || any(realised_variance <= 0)) {
+        stop("A trait had non-positive realised genotypic variance, so the ",
+          "dominance calibration cannot be scaled.",
+          call. = FALSE
+        )
+      }
+      realised_correlation <- stats::cov2cor(realised)
+      variance_error <- max(
+        abs(realised_variance - variance_target) / variance_target
+      )
+      correlation_error <- max(abs(realised_correlation - correlation_target))
+      trace <- c(trace, max(variance_error, correlation_error))
+      calibration_iterations <- iteration - 1L
+      if (variance_error < tolerance && correlation_error < tolerance) break
+
+      additive_variance <- additive_variance *
+        (variance_target / realised_variance)
+      # Newton-style correction on the correlations, projected back onto the
+      # set of valid correlation matrices so the next AlphaSimR call receives
+      # an admissible corA.
+      additive_correlation <- .dgr_project_correlation(
+        additive_correlation + (correlation_target - realised_correlation)
+      )
+      built <- build(additive_variance, additive_correlation)
+      realised <- stats::cov(AlphaSimR::gv(built$pop))
+      dimnames(realised) <- list(trait_cols, trait_cols)
+    }
+    final_variance_error <- max(
+      abs(diag(realised) - variance_target) / variance_target
     )
-  } else {
-    SP$addTraitA(
-      nQtlPerChr = n_qtl_per_chromosome,
-      mean = rep(0, n_traits),
-      var = as.numeric(variances),
-      corA = correlations
+    final_correlation_error <- max(abs(
+      stats::cov2cor(realised) - correlation_target
+    ))
+    calibration_converged <- final_variance_error < tolerance &&
+      final_correlation_error < tolerance
+    if (!isTRUE(calibration_converged)) {
+      warning(
+        "The genotypic covariance could not be calibrated to G within ",
+        format(100 * tolerance, digits = 2), "%. Largest remaining deviation: ",
+        format(100 * final_variance_error, digits = 3), "% on the variances, ",
+        format(final_correlation_error, digits = 3), " on the correlations. ",
+        "The usual cause is too few quantitative trait loci for the dominance ",
+        "model to be scaled smoothly, or a target correlation structure that ",
+        "the additive-plus-dominance architecture cannot attain at this ",
+        "dominance degree. Increase n_qtl_per_chromosome, reduce ",
+        "dominance_degree, and use setup$G_realised rather than G as the ",
+        "truth for this simulation.",
+        call. = FALSE
+      )
+    }
+    calibration_note <- paste(
+      "With dominance simulated, G is interpreted as the total GENOTYPIC",
+      "covariance, because that is what a clonal programme selects on. Both",
+      "the additive variances and the additive correlations were calibrated",
+      "by fixed-point iteration over", calibration_iterations, "passes, so the",
+      "realised genotypic covariance reproduces the whole of G rather than",
+      "only its diagonal. G_realised records what was achieved."
     )
   }
-  SP$setVarE(h2 = as.numeric(h2))
 
-  population <- AlphaSimR::newPop(map_pop, simParam = SP)
+  SP <- built$SP
+  population <- built$pop
+  # Narrow-sense heritability is a statement about breeding values and broad
+  # sense about genotypic values. They differ exactly when dominance is
+  # present, which is when a clonal programme is being represented, so the
+  # caller must say which one h2 means rather than have it assumed.
+  if (!is.null(residual_covariance)) {
+    SP$setVarE(varE = residual_covariance)
+  } else if (identical(heritability, "broad")) {
+    SP$setVarE(H2 = as.numeric(h2))
+  } else {
+    SP$setVarE(h2 = as.numeric(h2))
+  }
+  # Re-phenotype the existing founders rather than creating a second
+  # population, which would duplicate the identifiers already issued and
+  # advance lastId for no reason.
+  population <- AlphaSimR::setPheno(population, simParam = SP)
+
+  marker_panel <- tryCatch(
+    colnames(AlphaSimR::pullSnpGeno(population, simParam = SP)),
+    error = function(e) NULL
+  )
 
   result <- list(
     SP = SP,
     founder_pop = population,
     trait_cols = trait_cols,
     G_target = G,
+    G_realised = realised,
+    calibration_iterations = calibration_iterations,
+    calibration_converged = calibration_converged,
+    calibration_error = if (use_dominance) {
+      list(
+        variance = max(abs(diag(realised) - variances) / variances),
+        correlation = max(abs(
+          stats::cov2cor(realised) - stats::cov2cor(G)
+        )),
+        trace = trace
+      )
+    } else {
+      NULL
+    },
     h2 = h2,
+    residual_covariance = residual_covariance,
+    heritability_type = heritability,
     ploidy = 2L,
     n_qtl_per_chromosome = n_qtl_per_chromosome,
+    n_markers_per_chromosome = n_markers_per_chromosome,
+    marker_panel = marker_panel,
+    marker_qtl_overlap = built$marker_overlap,
     dominance = use_dominance,
-    seed = as.integer(seed),
+    dominance_degree = if (use_dominance) dominance_degree else NULL,
+    dominance_degree_variance = if (use_dominance) dominance_variance else NULL,
+    seed = seed,
     founders = founders,
     calibration = paste(
-      "Trait variances and correlations were calibrated to the supplied G.",
-      "Genome structure came from the supplied phased haplotypes and was not",
-      "simulated."
+      c(
+        paste(
+          "Trait variances and correlations were calibrated to the supplied G.",
+          "Genome structure came from the supplied phased haplotypes and was",
+          "not simulated."
+        ),
+        calibration_note,
+        if (is.null(marker_panel)) {
+          paste(
+            "No marker panel was requested, so diversity will be measured on",
+            "all segregating sites. Supply n_markers_per_chromosome for a",
+            "panel disjoint from the quantitative trait loci."
+          )
+        } else {
+          paste(
+            "Diversity is measured on a panel of", length(marker_panel),
+            "markers",
+            if (isTRUE(built$marker_overlap)) {
+              "which may overlap the quantitative trait loci."
+            } else {
+              "held disjoint from the quantitative trait loci."
+            }
+          )
+        }
+      ),
+      collapse = " "
     )
   )
   class(result) <- c("desiredgainr_sim_setup", "list")
   result
+}
+
+# Project a matrix onto the set of valid correlation matrices.
+#
+# Used inside the clonal calibration, where a Newton-style correction to the
+# additive correlations can leave the matrix indefinite or off the unit
+# diagonal. AlphaSimR requires an admissible corA, so the correction is
+# projected before it is used.
+#
+# This is emphatically NOT bend_covariance(). That function repairs a user's
+# estimate and reports the repair, because the adjustment changes what the data
+# are taken to say. This one keeps an internal iterate inside its feasible set;
+# nothing about the user's inputs is altered, and the quantity that matters,
+# the realised genotypic covariance, is measured afterwards and reported as
+# G_realised.
+#
+# Written as plain comments rather than roxygen deliberately: an internal
+# helper needs no manual page, and a roxygen block placed immediately after
+# another block's @export tag merges with it, so the prose becomes export
+# names. That is how this file failed to install.
+.dgr_project_correlation <- function(x, min_eigenvalue = 1e-6) {
+  x <- (x + t(x)) / 2
+  diag(x) <- 1
+  # Alternate between flooring the eigenvalues and restoring the unit
+  # diagonal. Each step alone can undo the other, so a few passes are needed;
+  # this converges quickly because the input is already close to admissible.
+  for (pass in seq_len(20L)) {
+    decomposition <- eigen(x, symmetric = TRUE)
+    if (min(decomposition$values) >= min_eigenvalue &&
+      max(abs(diag(x) - 1)) < 1e-10) {
+      break
+    }
+    values <- pmax(decomposition$values, min_eigenvalue)
+    x <- decomposition$vectors %*% diag(values, nrow(x)) %*%
+      t(decomposition$vectors)
+    x <- (x + t(x)) / 2
+    scaling <- sqrt(diag(x))
+    scaling[!is.finite(scaling) | scaling <= 0] <- 1
+    x <- sweep(sweep(x, 1L, scaling, "/"), 2L, scaling, "/")
+    diag(x) <- 1
+  }
+  # Numerical drift can leave an entry marginally outside [-1, 1].
+  x[x > 1] <- 1
+  x[x < -1] <- -1
+  diag(x) <- 1
+  x
 }
 
 #' @export
@@ -782,5 +1149,25 @@ print.desiredgainr_sim_setup <- function(x, ...) {
   ))
   cat("  Traits:", paste(x$trait_cols, collapse = ", "), "\n")
   cat("  Dominance simulated:", if (isTRUE(x$dominance)) "yes" else "no", "\n")
+  cat("  Heritability supplied as:", x$heritability_type, "sense\n")
+  if (is.null(x$marker_panel)) {
+    cat("  Marker panel: none (diversity uses all segregating sites)\n")
+  } else {
+    cat(sprintf(
+      "  Marker panel: %d markers%s\n", length(x$marker_panel),
+      if (isTRUE(x$marker_qtl_overlap)) " (may overlap QTL)" else ", QTL-free"
+    ))
+  }
+  if (isTRUE(x$dominance)) {
+    cat(sprintf(
+      "  Genotypic covariance calibrated in %d passes (%s)\n",
+      x$calibration_iterations,
+      if (isTRUE(x$calibration_converged)) "converged" else "NOT CONVERGED"
+    ))
+    cat(sprintf(
+      "    largest deviation: %.3g on variances, %.3g on correlations\n",
+      x$calibration_error$variance, x$calibration_error$correlation
+    ))
+  }
   invisible(x)
 }

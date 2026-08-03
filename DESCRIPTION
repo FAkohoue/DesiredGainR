@@ -15,6 +15,10 @@ Description: Provides auditable multi-trait selection-index tools for plant
     breeding programs. The desired-gain selection index (DGSI) searches for
     coefficients whose realised response approaches breeder-defined targets
     and reports optimisation stability across independent searches.
+    For breeders who cannot defend a complete target vector, population-driven
+    tools search trait-specific desired-gain intervals and return independently
+    confirmed minimum-attainment and maximum-balanced recommendations with
+    feasibility, stability, uncertainty, and model-conditional support.
     The quadratic genomic selection index (QGSI) scores genomic estimated
     breeding values with explicit linear economic weights and a validated
     symmetric matrix of squared and cross-product economic weights, following
@@ -34,10 +38,14 @@ Depends:
     R (>= 4.1)
 Imports:
     data.table,
+    digest,
     stats,
     utils
 Suggests:
     AlphaSimR (>= 1.5.0),
+    ASRgenomics (>= 1.1.0),
+    MASS,
+    jsonlite,
     knitr,
     rmarkdown,
     testthat (>= 3.0.0)

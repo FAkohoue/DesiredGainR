@@ -1,0 +1,42 @@
+{
+  "title": "DesiredGainR: Desired-Gain Selection Index and Quadratic Genomic Selection Index Tools for Plant Breeding",
+  "description": "<p>An R package for multi-trait selection indices in plant breeding, built around the difficult task of defining a defensible breeding objective. When neither economic weights nor one exact desired-gain vector can be stated confidently, DesiredGainR supports trait-specific gain intervals, population-driven suggestions and feasibility analysis. It converts exactly between economic weights and desired gains, tests whether a stated objective is attainable, compares classical index families on identical data, and reports how far a recommendation depends on covariance estimates that are themselves uncertain.</p><p>Includes the Smith-Hazel, base, Pesek-Baker, Yamada, Mulamba-Mock, independent-culling and tandem families; the restricted and predetermined-proportional-gain indices of Kempthorne-Nordskog, Tallis, Mallard and Harville; the quadratic genomic selection index; multi-environment expansion with genotype-by-environment covariance; and forward simulation over breeding cycles through AlphaSimR.</p>",
+  "creators": [
+    {
+      "name": "Akohoue, Félicien",
+      "orcid": "0000-0002-2160-0182",
+      "affiliation": "CGIAR"
+    }
+  ],
+  "keywords": [
+    "plant breeding",
+    "selection index",
+    "quantitative genetics",
+    "desired gain",
+    "multi-trait selection",
+    "genomic selection",
+    "R package"
+  ],
+  "license": {
+    "id": "MIT"
+  },
+  "upload_type": "software",
+  "access_right": "open",
+  "related_identifiers": [
+    {
+      "identifier": "https://github.com/FAkohoue/DesiredGainR",
+      "relation": "isSupplementTo",
+      "resource_type": "software"
+    },
+    {
+      "identifier": "10.1038/s41598-023-46368-6",
+      "relation": "references",
+      "resource_type": "publication-article"
+    },
+    {
+      "identifier": "10.1038/s41467-026-69890-3",
+      "relation": "references",
+      "resource_type": "publication-article"
+    }
+  ]
+}

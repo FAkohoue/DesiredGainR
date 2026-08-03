@@ -24,7 +24,9 @@
 #' @noRd
 .desiredgainr_z <- function(x) {
   s <- stats::sd(x, na.rm = TRUE)
-  if (!is.finite(s) || s == 0) return(rep(0, length(x)))
+  if (!is.finite(s) || s == 0) {
+    return(rep(0, length(x)))
+  }
   (x - mean(x, na.rm = TRUE)) / s
 }
 

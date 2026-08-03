@@ -31,6 +31,9 @@ run_dgsi(
   plateau_tolerance = 1e-04,
   validation_data = NULL,
   return_all_reps = TRUE,
+  allow_incompatible_estimated_P = FALSE,
+  replicate_selection = c("holdout", "training"),
+  holdout_fraction = 0.3,
   debug = FALSE
 )
 }
@@ -101,10 +104,28 @@ trait-specific squared response deviations.}
 
 \item{plateau_tolerance}{Maximum relative improvement in the plateau window.}
 
-\item{validation_data}{Optional independent candidate values used only to
-evaluate the winning coefficients after optimisation.}
+\item{validation_data}{Optional independent candidate values. With
+\code{replicate_selection = "holdout"}, these data choose the stochastic
+replicate and are never used to fit its coefficients. When absent, an
+internal candidate holdout is split off before optimisation.}
 
 \item{return_all_reps}{Whether to retain full replicate results.}
+
+\item{allow_incompatible_estimated_P}{When \code{P} is estimated from \code{ref_data}
+and falls below \code{G} by more than sampling error explains, the two matrices
+cannot describe the same population and the call stops. Set this to \code{TRUE}
+to continue anyway; the override and the offending eigenvalue are recorded
+in \code{covariance_provenance$compatibility}.}
+
+\item{replicate_selection}{How the winning stochastic search is chosen.
+\code{"holdout"}, the default, fits every replicate without the held-out
+candidates and chooses among them on that untouched set. \code{"training"}
+reproduces the earlier
+behaviour of taking the lowest training objective, which is a minimum over
+\code{n_rep} draws and is biased downward.}
+
+\item{holdout_fraction}{Fraction of candidates reserved for choosing among
+replicates when \code{replicate_selection = "holdout"}.}
 
 \item{debug}{Whether to print progress messages.}
 }
@@ -127,6 +148,33 @@ For each trait the realised response is
 where \eqn{s_j} is the standard deviation of trait \eqn{j} across all
 candidates in the favourable-direction analysis space. Both \code{dg} and
 \code{realised_response} are therefore in candidate standard-deviation units.
+
+This holds whatever \code{scale_traits} is set to. The coefficient solve happens
+in the units of \code{G} and \code{P}, which are raw trait units when
+\code{scale_traits = FALSE}, so \code{dg} is converted from standard-deviation units
+to that space before the solve and the coefficients are invariant to the
+units the traits happen to be recorded in. Releases up to 0.5.0 passed the
+standard-deviation vector into the solve directly, which asked for
+\eqn{d_j} \emph{raw} units per trait; with candidate standard deviations of 10
+and 1 and equal requested gains, that delivered standardised response in the
+ratio 1:10 rather than 1:1.
+}
+
+\section{Empirical differential against transmitted response}{
+\code{realised_response} is a property of the candidates that were selected: the
+standardised differential between the selected group and the whole set. It
+is not what the next generation inherits.
+
+\code{theoretical_response} reports the model-based expectation
+\deqn{\Delta G = i \frac{\mathbf{G}\mathbf{b}}
+{\sqrt{\mathbf{b}^\mathsf{T}\mathbf{P}\mathbf{b}}}}{
+i * G b / sqrt(b' P b)}
+in the analysis space, in the original trait units, and standardised. This
+is the criterion on which a desired-gain index can be compared with the
+classical families, which report the same quantity through
+\code{\link[=evaluate_index]{evaluate_index()}}. Keep the two apart when reporting: a large differential
+among candidates with a small transmitted response means selection is
+acting mostly on non-heritable variation.
 }
 
 \section{Objective function}{
@@ -146,12 +194,13 @@ each proposal is mapped to coefficients by
 \eqn{b = P^{-1}G(G^\mathsf{T}P^{-1}G)^{-1}d} and accepted only if it lowers
 the objective. The objective is a step function of \eqn{b}, because it
 depends on \eqn{b} only through the identity of the selected set, so a
-derivative-free search is used. The replicate with the lowest objective is
-returned; because that choice is made on the same candidates that are then
-selected, the reported objective is optimistically biased, and the result
-depends on \code{n_rep}. Use \code{validation_data} for an unbiased evaluation of the
-winning coefficients. \code{run_dgsi()} seeds the RNG from \code{seed} and restores
-the caller's RNG state before returning.
+derivative-free search is used. With the default holdout rule, the split is
+made before optimisation and the replicate is chosen on candidates that did
+not contribute to fitting. \code{validation_data}, when supplied, is preferred
+to an internal split and can therefore select the replicate as well as
+evaluate it. The final coefficients are applied to all candidates only
+after that choice; they are not refitted. \code{run_dgsi()} seeds the RNG from
+\code{seed} and restores the caller's RNG state before returning.
 
 Ties in the index score are broken by ascending candidate identifier, so
 the selected set does not depend on input row order.
@@ -168,13 +217,15 @@ candidates <- data.frame(
 # In practice G comes from a fitted multi-trait genetic model, or from
 # estimate_genetic_covariance(); it is not the covariance of raw phenotypes.
 G <- matrix(c(1.0, -0.3, -0.3, 0.8), 2, dimnames = list(traits, traits))
+P <- G + diag(c(0.8, 0.6))
+dimnames(P) <- list(traits, traits)
 
 fit <- run_dgsi(
   init_data = candidates["GenoID"],
   cand_data = candidates,
   trait_cols = traits,
   dg = c(yield = 0.6, disease = 0.4),
-  G = G,
+  G = G, P = P,
   lower_is_better = "disease",
   n_select = 8,
   n_iter = 50,

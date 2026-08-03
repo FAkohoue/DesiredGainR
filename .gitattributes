@@ -1,2 +1,7 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+
+# pkgdown preserves console-table alignment and template padding in generated
+# site files. Those files are build artifacts, so do not treat that generated
+# padding as source-code whitespace errors.
+docs/** whitespace=-trailing-space,-blank-at-eof

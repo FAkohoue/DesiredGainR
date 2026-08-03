@@ -70,9 +70,11 @@ represented."><meta property="og:image" content="https://FAkohoue.github.io/Desi
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Deciding what to select for</h6></li>
     <li><a class="dropdown-item" href="../articles/DesiredGainR-objective.html">Defining a breeding objective</a></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-desired-gain-intervals.html">Defining desired gains and acceptable intervals</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Looking ahead</h6></li>
     <li><a class="dropdown-item" href="../articles/DesiredGainR-simulation.html">Comparing objectives over several cycles</a></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-empirical-validation.html">Empirical validation with real breeding programmes</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../breeder-guide.html">Breeder guide</a></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -108,7 +110,7 @@ represented.</p>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">optimize_desired_gains</span><span class="op">(</span></span>
 <span>  <span class="va">setup</span>,</span>
 <span>  n_cycles <span class="op">=</span> <span class="fl">5L</span>,</span>
-<span>  mode <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"pareto"</span>, <span class="st">"economic"</span>, <span class="st">"target"</span>, <span class="st">"constrained"</span><span class="op">)</span>,</span>
+<span>  mode <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"pareto"</span>, <span class="st">"interval"</span>, <span class="st">"economic"</span>, <span class="st">"target"</span>, <span class="st">"constrained"</span><span class="op">)</span>,</span>
 <span>  budget <span class="op">=</span> <span class="fl">60L</span>,</span>
 <span>  n_initial <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  n_replicates <span class="op">=</span> <span class="fl">3L</span>,</span>
@@ -116,8 +118,12 @@ represented.</p>
 <span>  target_gains <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  focal_trait <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  gain_floors <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  include_diversity <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  include_diversity <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  allow_unverified_diversity <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  non_negative <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  desired_gain_intervals <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  desired_gain_units <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"genetic_sd"</span>, <span class="st">"phenotypic_sd"</span>, <span class="st">"trait"</span><span class="op">)</span>,</span>
+<span>  probability_level <span class="op">=</span> <span class="fl">0.95</span>,</span>
 <span>  stability_tolerance <span class="op">=</span> <span class="fl">0.05</span>,</span>
 <span>  n_candidates <span class="op">=</span> <span class="fl">2000L</span>,</span>
 <span>  checkpoint <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -154,7 +160,10 @@ times the number of free parameters.</p></dd>
 
 
 <dt id="arg-n-replicates">n_replicates<a class="anchor" aria-label="anchor" href="#arg-n-replicates"></a></dt>
-<dd><p>Simulation replicates per direction.</p></dd>
+<dd><p>Simulation replicates per direction. When omitted,
+interval mode uses 50 and other modes use 3. Interval mode warns below 20;
+at least 50 are recommended when leading vectors have similar success
+probabilities.</p></dd>
 
 
 <dt id="arg-economic-weights">economic_weights<a class="anchor" aria-label="anchor" href="#arg-economic-weights"></a></dt>
@@ -174,12 +183,43 @@ times the number of free parameters.</p></dd>
 <dd><p>Whether to treat diversity, measured as the negated
 mean relationship among selected parents, as an additional Pareto
 objective. Family balancing and coancestry control can cost a large share
-of nominal gain, so the trade-off is reported rather than assumed away.</p></dd>
+of nominal gain, so the trade-off is reported rather than assumed away.
+Defaults to <code>FALSE</code> because a default founder setup has no verified marker
+panel.</p></dd>
+
+
+<dt id="arg-allow-unverified-diversity">allow_unverified_diversity<a class="anchor" aria-label="anchor" href="#arg-allow-unverified-diversity"></a></dt>
+<dd><p>Experimental override allowing a marker
+panel whose disjointness from QTL could not be verified. The override is
+included in checkpoint provenance; overlap known to be present is never
+allowed.</p></dd>
 
 
 <dt id="arg-non-negative">non_negative<a class="anchor" aria-label="anchor" href="#arg-non-negative"></a></dt>
 <dd><p>Whether to restrict the search to directions seeking
 improvement in every trait.</p></dd>
+
+
+<dt id="arg-desired-gain-intervals">desired_gain_intervals<a class="anchor" aria-label="anchor" href="#arg-desired-gain-intervals"></a></dt>
+<dd><p>Optional acceptable bounds created by
+<code><a href="define_desired_gain_intervals.html">define_desired_gain_intervals()</a></code>, or a trait-named matrix/data frame with
+<code>lower</code> and <code>upper</code> columns expressed in the favourable direction. The
+search considers only desired-gain directions whose ray intersects this
+box.</p></dd>
+
+
+<dt id="arg-desired-gain-units">desired_gain_units<a class="anchor" aria-label="anchor" href="#arg-desired-gain-units"></a></dt>
+<dd><p>Units in which searched directions and plain
+<code>desired_gain_intervals</code> are expressed. The default, genetic standard
+deviations, makes relative gains comparable across traits. An object from
+<code><a href="define_desired_gain_intervals.html">define_desired_gain_intervals()</a></code> carries its own units and overrides this
+argument.</p></dd>
+
+
+<dt id="arg-probability-level">probability_level<a class="anchor" aria-label="anchor" href="#arg-probability-level"></a></dt>
+<dd><p>Credible level for interval-mode success
+probabilities. These probabilities describe simulation variation
+conditional on the supplied population and covariance parameters.</p></dd>
 
 
 <dt id="arg-stability-tolerance">stability_tolerance<a class="anchor" aria-label="anchor" href="#arg-stability-tolerance"></a></dt>
@@ -236,19 +276,24 @@ which is small enough to cover densely for the trait numbers breeders use.
 By default the search is restricted to the non-negative orthant, meaning
 improvement is sought in every trait; set <code>non_negative = FALSE</code> to admit
 directions that deliberately concede ground on a trait.</p>
+<p>When <code>desired_gain_intervals</code> is supplied, the search is restricted to rays
+that intersect the breeder's acceptable interval box. This lets the breeder
+say, for example, that yield improvement should lie between 0.5 and 1.5
+genetic standard deviations while disease reduction should lie between
+0.25 and 1.0, without claiming that one exact ratio is known. The intervals
+constrain the requested response pattern; they do not guarantee that the
+corresponding absolute gains are attainable.</p>
     </div>
     <div class="section level2">
     <h2 id="ranking-modes">Ranking modes<a class="anchor" aria-label="anchor" href="#ranking-modes"></a></h2>
 
 <dl><dt><code>"pareto"</code></dt>
 <dd><p>Returns the non-dominated set of multi-cycle outcomes
-and the direction generating each. This is the default, because it is
-the only mode that does not require the economic weights that breeders
-find hardest to state; choosing a point on a frontier is an easier
-judgement, and it is weight elicitation by revealed preference. The
-search uses randomised augmented-Chebyshev scalarisation, which
-converges on the frontier while needing only single-objective
-improvement.</p></dd>
+and the direction generating each. This is the default because it makes
+no scalar preference assumption; choosing a point on a frontier can be
+easier than stating weights. The search uses randomised
+augmented-Chebyshev scalarisation, which converges on the frontier while
+needing only single-objective improvement.</p></dd>
 
 <dt><code>"economic"</code></dt>
 <dd><p>Maximises <code>sum(economic_weights * cumulative_gain)</code>.</p></dd>
@@ -262,6 +307,15 @@ stated absolute target, reporting the per-trait shortfall.</p></dd>
 <code>gain_floors</code> on the remaining traits, weighting improvement by the
 probability that every floor is met.</p></dd>
 
+<dt><code>"interval"</code></dt>
+<dd><p>Requires <code>desired_gain_intervals</code>. A high-gain
+replicate is one in which every favourable cumulative response reaches
+its interval's lower bound. Each evaluated vector receives a joint and
+per-trait posterior success probability. The recommendation maximises
+the lower credible bound of the joint probability, then expected
+balanced attainment, so a spectacular response in one trait cannot hide
+failure in another. No economic weights are used.</p></dd>
+
 
 </dl></div>
     <div class="section level2">
@@ -274,12 +328,42 @@ posterior means rather than from raw replicate averages, because a frontier
 built from raw draws is populated by fortunate runs.</p>
     </div>
     <div class="section level2">
+    <h2 id="interval-mode-probability-statement">Interval-mode probability statement<a class="anchor" aria-label="anchor" href="#interval-mode-probability-statement"></a></h2>
+    <p>Let <code>R_j</code> be the favourable cumulative response for trait <code>j</code>, expressed in
+the interval's units, and let <code>L_j</code> be its lower bound. A simulation
+replicate achieves high genetic gain when
+$$R_j \ge L_j \quad\hbox{for every trait }j.$$
+If this joint event occurs in <code>s</code> of <code>n</code> independent replicates, interval
+mode reports the Jeffreys binomial posterior
+$$p \mid s,n \sim \mathrm{Beta}(s+1/2,n-s+1/2).$$
+The recommended vector maximises the lower credible bound for <code>p</code>, with the
+posterior mean and an augmented maximin attainment score as tie-breakers.
+Consequently a direction supported by a few fortunate runs cannot outrank a
+more precisely supported direction merely through its point estimate.</p>
+<p>The probability is conditional, not universal: it integrates the stochastic
+segregation, mating and selection represented by the simulation while
+holding the supplied founders, covariance matrices and programme parameters
+fixed. Use <code><a href="propagate_covariance_uncertainty.html">propagate_covariance_uncertainty()</a></code> to assess sensitivity to
+estimated covariance matrices.</p>
+    </div>
+    <div class="section level2">
     <h2 id="interpreting-the-result">Interpreting the result<a class="anchor" aria-label="anchor" href="#interpreting-the-result"></a></h2>
-    <p>No single best direction is returned. The optimum is conditional on the
-supplied genetic covariance matrix, the founder germplasm and the programme
-parameters, so the result reports a stability region: every direction whose
-posterior outcome lies within <code>stability_tolerance</code> of the best. Choose
-within that region on other grounds.</p>
+    <p>Pareto mode returns no single best direction. Scalar modes return a
+recommendation plus a stability region rather than presenting the numerical
+maximiser as certain. Every recommendation is conditional on the supplied
+genetic covariance matrix, founder germplasm and programme parameters.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
+    <p>Brown LD, Cai TT, DasGupta A (2001). Interval estimation for a binomial
+proportion. <em>Statistical Science</em> 16:101–133.
+<a href="https://doi.org/10.1214/ss/1009213286" class="external-link">doi:10.1214/ss/1009213286</a></p>
+<p>Wierzbicki AP (1982). A mathematical basis for satisficing decision making.
+<em>Mathematical Modelling</em> 3:391–405.
+<a href="https://doi.org/10.1016/0270-0255%2882%2990038-0" class="external-link">doi:10.1016/0270-0255(82)90038-0</a></p>
+<p>Yang W-N, Nelson BL (1991). Using common random numbers and control variates
+in multiple-comparison procedures. <em>Operations Research</em> 39:583–591.
+<a href="https://doi.org/10.1287/opre.39.4.583" class="external-link">doi:10.1287/opre.39.4.583</a></p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

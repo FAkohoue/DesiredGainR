@@ -9,7 +9,7 @@
 ^LICENSE\.md$
 ^\.RData$
 ^\.Rhistory$
-^\.git$
+^\.git($|[/\\])
 ^\.gitattributes$
 ^\.gitignore$
 ^CITATION\.cff$
@@ -17,10 +17,15 @@
 ^CODE_OF_CONDUCT\.md$
 ^SECURITY\.md$
 ^SUPPORT\.md$
+^MATURITY\.md$
 ^data-raw$
 ^AUDIT-.*$
+^paper$
+^cran-comments\.md$
+^\.zenodo\.json$
 ^DESIGN-.*$
 ^LITERATURE-CROSSCHECK\..*$
 ^query-.*$
 ^my-writing-style-SKILL\..*$
 ^Publications$
+^Public data$

@@ -8,9 +8,13 @@ skip_if_no_data <- function() {
   skip_if_not(
     exists("dgr_G", where = asNamespace("DesiredGainR"), inherits = FALSE) ||
       requireNamespace("DesiredGainR", quietly = TRUE) &&
-        !inherits(try(utils::data("dgr_G", package = "DesiredGainR",
-                                  envir = environment()), silent = TRUE),
-                  "try-error"),
+        !inherits(
+          try(utils::data("dgr_G",
+            package = "DesiredGainR",
+            envir = environment()
+          ), silent = TRUE),
+          "try-error"
+        ),
     "Example data not yet generated; run data-raw/generate_example_data.R."
   )
 }
@@ -33,7 +37,8 @@ test_that("the covariance matrices are consistent with the declared traits", {
   )
   # The genetic standard deviations must match the declared ones.
   expect_equal(
-    as.numeric(sqrt(diag(dgr_G))), dgr_traits$genetic_sd, tolerance = 1e-8
+    as.numeric(sqrt(diag(dgr_G))), dgr_traits$genetic_sd,
+    tolerance = 1e-8
   )
 
   # Both must be invertible, since every index inverts at least one of them.

@@ -14,3 +14,8 @@
 *.Rcheck
 *.tar.gz
 *.zip
+
+# Large upstream breeding-programme deposits are analysed locally but are not
+# redistributed. Compact, reproducible validation outputs ship in
+# inst/validation/ instead.
+Public data/
