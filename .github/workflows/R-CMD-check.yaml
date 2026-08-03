@@ -114,12 +114,22 @@ jobs:
           needs: check
 
       - name: Install independent QP solvers
+        shell: bash
         run: |
+          set -euo pipefail
+
           python -m pip install --disable-pip-version-check \
-            clarabel==0.11.1 osqp==1.1.3 numpy==2.5.1 scipy==1.18.0
-          python -c "import clarabel, osqp, numpy, scipy"
-          python -c "import sys; print('DESIREDGAINR_PYTHON=' + sys.executable)" \
-            >> "$GITHUB_ENV"
+            clarabel==0.11.1 \
+            osqp==1.1.3 \
+            numpy==2.5.1 \
+            scipy==1.18.0
+
+          PYTHON_EXECUTABLE="$(command -v python)"
+
+          "$PYTHON_EXECUTABLE" -c \
+            "import sys, clarabel, osqp, numpy, scipy; print(sys.executable)"
+
+          echo "DESIREDGAINR_PYTHON=$PYTHON_EXECUTABLE" >> "$GITHUB_ENV"
 
       - name: Validate the internal QP solver independently
         shell: bash

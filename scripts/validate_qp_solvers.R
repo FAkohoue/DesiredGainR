@@ -209,6 +209,11 @@ if (!nzchar(python)) {
   )
 }
 
+# Preserve the exact executable path supplied by setup-python.
+# Do not use normalizePath(), because it dereferences the action-managed
+# Python launcher/symlink.
+python <- path.expand(python)
+
 if (!file.exists(python)) {
   stop(
     "DESIREDGAINR_PYTHON points to a nonexistent executable: ",
@@ -216,12 +221,6 @@ if (!file.exists(python)) {
     call. = FALSE
   )
 }
-
-python <- normalizePath(
-  python,
-  winslash = "/",
-  mustWork = TRUE
-)
 
 oracle <- file.path(
   "inst",
@@ -232,7 +231,7 @@ oracle <- file.path(
 if (!file.exists(oracle)) {
   stop(
     "The Python QP oracle was not found: ",
-    normalizePath(oracle, mustWork = FALSE),
+    oracle,
     call. = FALSE
   )
 }
@@ -242,11 +241,20 @@ pythonpath <- Sys.getenv(
   unset = ""
 )
 
+# Prevent an unrelated PYTHONHOME from changing this interpreter's prefix.
+Sys.unsetenv("PYTHONHOME")
+
 if (nzchar(pythonpath)) {
   Sys.setenv(PYTHONPATH = pythonpath)
 }
 
 message("QP oracle Python: ", python)
+
+link_target <- Sys.readlink(python)
+
+if (nzchar(link_target)) {
+  message("QP oracle Python link target: ", link_target)
+}
 
 required_modules <- c(
   "clarabel",
@@ -301,11 +309,11 @@ message(
 
 status <- system2(
   command = python,
-  args = shQuote(c(
-    oracle,
-    input,
-    output
-  ))
+  args = c(
+    shQuote(oracle),
+    shQuote(input),
+    shQuote(output)
+  )
 )
 
 if (!identical(as.integer(status), 0L)) {
@@ -324,6 +332,8 @@ if (!file.exists(output)) {
     call. = FALSE
   )
 }
+
+
 
 oracle_payload <- jsonlite::read_json(output, simplifyVector = FALSE)
 versions <- oracle_payload$versions
