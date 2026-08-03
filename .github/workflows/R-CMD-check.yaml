@@ -138,47 +138,114 @@ jobs:
             "import sys, clarabel, osqp, numpy, scipy; print(sys.executable)"
 
           echo "DESIREDGAINR_PYTHON=$QP_PYTHON" >> "$GITHUB_ENV"
-
+          
       - name: Validate the internal QP solver independently
         shell: bash
         env:
           DESIREDGAINR_QP_REPORT: inst/validation/qp-validation-results.csv
+          PYTHONNOUSERSITE: "1"
         run: |
           set -euo pipefail
 
           unset PYTHONHOME
           unset PYTHONPATH
           unset PYTHONUSERBASE
-          unset PYTHONNOUSERSITE
+          unset LD_PRELOAD
 
-          echo "DESIREDGAINR_PYTHON=$DESIREDGAINR_PYTHON"
+          echo "DESIREDGAINR_PYTHON=${DESIREDGAINR_PYTHON}"
 
-          "$DESIREDGAINR_PYTHON" --version
+          "${DESIREDGAINR_PYTHON}" --version
 
-          "$DESIREDGAINR_PYTHON" -c \
-            "import sys, clarabel, osqp, numpy, scipy; print(sys.executable)"
+          "${DESIREDGAINR_PYTHON}" -c '
+          import sys
+          import clarabel
+          import osqp
+          import numpy
+          import scipy
+
+          print("Bash preflight Python:", sys.executable)
+          '
 
           Rscript -e '
-            python <- Sys.getenv("DESIREDGAINR_PYTHON")
-            cat("R sees DESIREDGAINR_PYTHON=", python, "\n", sep = "")
-            status <- system2(
-              python,
-              c(
-                "-c",
-                shQuote(
-                  paste(
-                    "import sys, clarabel, osqp, numpy, scipy;",
-                    "print(sys.executable)"
-                  )
-                )
-              )
+          python <- Sys.getenv(
+            "DESIREDGAINR_PYTHON",
+            unset = ""
+          )
+
+          if (!nzchar(python)) {
+            stop(
+              "R cannot see DESIREDGAINR_PYTHON.",
+              call. = FALSE
             )
-            if (!identical(status, 0L)) {
-              stop("Python preflight failed inside R.", call. = FALSE)
-            }
+          }
+
+          cat(
+            "R sees DESIREDGAINR_PYTHON=",
+            python,
+            "\n",
+            sep = ""
+          )
+
+          cat(
+            "R inherited LD_LIBRARY_PATH=",
+            Sys.getenv("LD_LIBRARY_PATH", unset = "<unset>"),
+            "\n",
+            sep = ""
+          )
+
+          probe <- paste(
+            "import sys",
+            "import clarabel",
+            "import osqp",
+            "import numpy",
+            "import scipy",
+            "print(sys.executable)",
+            sep = "; "
+          )
+
+          python_env <- c(
+            "PYTHONNOUSERSITE=1",
+            "PYTHONHOME=",
+            "PYTHONPATH=",
+            "PYTHONUSERBASE=",
+            "LD_LIBRARY_PATH=",
+            "LD_PRELOAD="
+          )
+
+          output <- suppressWarnings(
+            system2(
+              command = python,
+              args = c(
+                "-c",
+                shQuote(probe)
+              ),
+              stdout = TRUE,
+              stderr = TRUE,
+              env = python_env
+            )
+          )
+
+          status <- attr(output, "status")
+
+          if (is.null(status)) {
+            status <- 0L
+          }
+
+          if (length(output)) {
+            cat(output, sep = "\n")
+            cat("\n")
+          }
+
+          if (!identical(as.integer(status), 0L)) {
+            stop(
+              "Python dependency preflight failed inside R.",
+              call. = FALSE
+            )
+          }
           '
 
           Rscript scripts/validate_qp_solvers.R
+          
           
       - name: Render the Breeder Guide
         run: Rscript data-raw/build_breeder_guide.R
