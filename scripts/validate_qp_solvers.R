@@ -192,13 +192,139 @@ jsonlite::write_json(list(problems = lapply(problems, function(problem) {
   problem[c("problem_id", "H", "f", "lower", "upper")]
 })), input, auto_unbox = TRUE, digits = 17, pretty = TRUE)
 
-python <- Sys.getenv("DESIREDGAINR_PYTHON", unset = Sys.which("python"))
-if (!nzchar(python)) stop("Set DESIREDGAINR_PYTHON.", call. = FALSE)
-oracle <- file.path("inst", "validation", "qp_oracle.py")
-pythonpath <- Sys.getenv("DESIREDGAINR_QP_PYTHONPATH", unset = "")
-if (nzchar(pythonpath)) Sys.setenv(PYTHONPATH = pythonpath)
-status <- system2(python, c(oracle, input, output))
-if (status != 0L) stop("The Python solver oracle failed.", call. = FALSE)
+python <- Sys.getenv("DESIREDGAINR_PYTHON", unset = "")
+
+if (!nzchar(python)) {
+  python <- Sys.which("python")
+}
+
+if (!nzchar(python)) {
+  stop(
+    paste(
+      "Python was not found.",
+      "Set DESIREDGAINR_PYTHON to the interpreter containing",
+      "clarabel, osqp, numpy and scipy."
+    ),
+    call. = FALSE
+  )
+}
+
+if (!file.exists(python)) {
+  stop(
+    "DESIREDGAINR_PYTHON points to a nonexistent executable: ",
+    python,
+    call. = FALSE
+  )
+}
+
+python <- normalizePath(
+  python,
+  winslash = "/",
+  mustWork = TRUE
+)
+
+oracle <- file.path(
+  "inst",
+  "validation",
+  "qp_oracle.py"
+)
+
+if (!file.exists(oracle)) {
+  stop(
+    "The Python QP oracle was not found: ",
+    normalizePath(oracle, mustWork = FALSE),
+    call. = FALSE
+  )
+}
+
+pythonpath <- Sys.getenv(
+  "DESIREDGAINR_QP_PYTHONPATH",
+  unset = ""
+)
+
+if (nzchar(pythonpath)) {
+  Sys.setenv(PYTHONPATH = pythonpath)
+}
+
+message("QP oracle Python: ", python)
+
+required_modules <- c(
+  "clarabel",
+  "osqp",
+  "numpy",
+  "scipy"
+)
+
+probe_code <- paste(
+  "import sys",
+  paste(
+    sprintf("import %s", required_modules),
+    collapse = "; "
+  ),
+  "print(sys.executable)",
+  sep = "; "
+)
+
+probe <- system2(
+  command = python,
+  args = c(
+    "-c",
+    shQuote(probe_code)
+  ),
+  stdout = TRUE,
+  stderr = TRUE
+)
+
+probe_status <- attr(probe, "status")
+
+if (is.null(probe_status)) {
+  probe_status <- 0L
+}
+
+if (!identical(as.integer(probe_status), 0L)) {
+  cat(probe, sep = "\n")
+  
+  stop(
+    paste0(
+      "The configured Python interpreter cannot import the ",
+      "independent QP solver dependencies. Interpreter: ",
+      python
+    ),
+    call. = FALSE
+  )
+}
+
+message(
+  "QP oracle dependencies confirmed using: ",
+  probe[[length(probe)]]
+)
+
+status <- system2(
+  command = python,
+  args = shQuote(c(
+    oracle,
+    input,
+    output
+  ))
+)
+
+if (!identical(as.integer(status), 0L)) {
+  stop(
+    "The Python solver oracle failed with exit status ",
+    status,
+    ". Interpreter: ",
+    python,
+    call. = FALSE
+  )
+}
+
+if (!file.exists(output)) {
+  stop(
+    "The Python solver oracle completed without producing its output file.",
+    call. = FALSE
+  )
+}
+
 oracle_payload <- jsonlite::read_json(output, simplifyVector = FALSE)
 versions <- oracle_payload$versions
 external <- oracle_payload$results
