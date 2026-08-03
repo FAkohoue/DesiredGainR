@@ -72,26 +72,46 @@ jobs:
         run: |
           pkgdown::build_site_github_pages(
             new_process = FALSE,
-            install     = FALSE
+            install = FALSE
           )
 
+      - name: Publish and verify website logo
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          source_logo="man/figures/logo.png"
+          deployed_logo="docs/logo.png"
+
+          if [[ ! -s "${source_logo}" ]]; then
+            echo "Source logo is missing or empty: ${source_logo}"
+            exit 1
+          fi
+
+          cp "${source_logo}" "${deployed_logo}"
+
+          if [[ ! -s "${deployed_logo}" ]]; then
+            echo "Deployed logo is missing or empty: ${deployed_logo}"
+            exit 1
+          fi
+
+          file "${deployed_logo}"
+          echo "Published website logo: ${deployed_logo}"
+
       - name: Publish the Breeder's Guide alongside the pkgdown site
-        # inst/extdata/DesiredGainR_Breeder_Guide.{html,pdf} are pre-built,
-        # version-controlled artifacts generated from
-        # inst/guide/DesiredGainR_Breeder_Guide.Rmd. pkgdown does not know
-        # about them, so they are copied into docs/ under the fixed name the
-        # navbar "guide" component links to. A missing artifact is a broken
-        # public link and therefore fails publication.
         run: |
           if [ -f inst/extdata/DesiredGainR_Breeder_Guide.html ]; then
-            cp inst/extdata/DesiredGainR_Breeder_Guide.html docs/breeder-guide.html
+            cp inst/extdata/DesiredGainR_Breeder_Guide.html \
+              docs/breeder-guide.html
             echo "Published breeder-guide.html"
           else
             echo "Breeder's Guide HTML not found; refusing to publish a 404."
             exit 1
           fi
+
           if [ -f inst/extdata/DesiredGainR_Breeder_Guide.pdf ]; then
-            cp inst/extdata/DesiredGainR_Breeder_Guide.pdf docs/breeder-guide.pdf
+            cp inst/extdata/DesiredGainR_Breeder_Guide.pdf \
+              docs/breeder-guide.pdf
             echo "Published breeder-guide.pdf"
           fi
 

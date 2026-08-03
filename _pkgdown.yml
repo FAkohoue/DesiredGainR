@@ -8,21 +8,18 @@ url: https://FAkohoue.github.io/DesiredGainR/
 template:
   bootstrap: 5
   bootswatch: flatly
-  # Renders LaTeX written as $inline$ and $$display$$ on every page of the
-  # site, including the home page generated from README.md. GitHub renders the
-  # same delimiters natively, so one notation serves both.
   math-rendering: mathjax
+
   includes:
     in_header: |
       <link rel="preconnect" href="https://fonts.googleapis.com">
       <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet">
-      <link rel="icon" href="favicon.ico">
 
       <style>
         .desiredgainr-navbar-logo-link {
           display: inline-flex;
           align-items: center;
-          flex-shrink: 0;
+          flex: 0 0 auto;
           margin-right: 0.45rem;
           text-decoration: none;
         }
@@ -48,8 +45,11 @@ template:
          aria-label="DesiredGainR home">
         <img class="desiredgainr-navbar-logo"
              src="https://FAkohoue.github.io/DesiredGainR/logo.png"
+             width="38"
+             height="38"
              alt="DesiredGainR logo">
       </a>
+      
 
 authors:
   Félicien Akohoue:
