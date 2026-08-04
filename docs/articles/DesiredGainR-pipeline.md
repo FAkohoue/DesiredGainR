@@ -18,7 +18,16 @@ Sixteen stages in four phases:
 | **Looking ahead** | 13-16 | Does this objective still hold over several cycles? |
 
 Every stage names the vignette that carries its full statistical detail.
-This document is the connective walkthrough; those are the references.
+This document is the connective walkthrough. Those are the references.
+
+The walkthrough stops before the operational crossing decision.
+Throughout this vignette, `n_select` is an analytical truncation count
+used to calculate selection intensity and response, while `n_parents`
+and `n_crosses` in the simulation are scenario settings. None of them is
+an optimised parent or mating plan. Use
+[HapBlockR](https://github.com/FAkohoue/HapBlockR) after the index has
+been built to choose parents, perform OCS, rank crosses and allocate
+matings.
 
 ------------------------------------------------------------------------
 
@@ -139,7 +148,7 @@ G_working <- estimate_genetic_covariance(
   method = "adjusted_means_surrogate"
 )
 G_working$estimand
-#> [1] "working surrogate for genetic covariance; covariance of across-environment adjusted means"
+#> [1] "working surrogate for genetic covariance. covariance of across-environment adjusted means"
 ```
 
 Four methods are available: `prediction_covariance`, `pev_corrected`,
@@ -189,7 +198,7 @@ equivalent.
 **Economic weights** \\\mathbf{w}\\ say what a unit of each trait is
 worth. **Desired gains** \\\mathbf{d}\\ say how much of each trait you
 want. The Smith-Hazel index uses the first, \\\mathbf{b} =
-\mathbf{P}^{-1}\mathbf{G}\mathbf{w}\\; the Pesek-Baker desired-gain
+\mathbf{P}^{-1}\mathbf{G}\mathbf{w}\\. the Pesek-Baker desired-gain
 index uses the second, \\\mathbf{b} =
 \mathbf{P}^{-1}\mathbf{G}(\mathbf{G}\mathbf{P}^{-1}\mathbf{G})^{-1}\mathbf{d}\\.
 
@@ -235,15 +244,14 @@ selecting hard for yield would carry both *past* the smaller gains you
 requested. To deliver the ratio you asked for, the index must hold them
 back. A negative weight never means the trait should get worse.
 
-**The desired gains are already standardised; the returned weights are
-not.** Here `desired_gains` is expressed in genetic standard deviations,
-but `dgr_G` and `dgr_P` are supplied in the original trait units.
-Therefore,
+**The desired gains are already standardised. The returned weights use a
+different scale.** Here `desired_gains` is expressed in genetic standard
+deviations, but `dgr_G` and `dgr_P` are supplied in the original trait
+units. Therefore,
 [`implied_economic_weights()`](https://FAkohoue.github.io/DesiredGainR/reference/implied_economic_weights.md)
 first converts the target to those original units and returns a weight
-per original unit of each trait. A coefficient per tonne, day or
-disease-score unit cannot be compared directly with a coefficient per
-centimetre.
+per original unit of each trait. Compare coefficients only after
+conversion to a common trait scale.
 
 The multiplication below does not standardise `desired_gains` a second
 time. It converts each returned raw-unit weight into the contribution
@@ -354,12 +362,12 @@ This interpretation has four consequences.
 
 1.  The classical desired-gain index honours the direction, or ratio, of
     \\\mathbf{d}\\. Multiplying all elements by the same positive
-    constant leaves the ranking unchanged; it changes only the intensity
+    constant leaves the ranking unchanged. It changes only the intensity
     required to attain the stated magnitude.
-2.  `feasible_at_planned_intensity = no` does not mean that the index is
-    unable to rank candidates. It means that the complete stated vector
-    cannot be reached in one cycle at the planned 10% selection
-    proportion under the supplied \\\mathbf{G}\\ and \\\mathbf{P}\\.
+2.  `feasible_at_planned_intensity = no` still allows the index to rank
+    candidates. The complete stated vector lies beyond one-cycle
+    response at the planned 10% selection proportion under the supplied
+    \\\mathbf{G}\\ and \\\mathbf{P}\\.
 3.  An exact desired-gain vector is not the same objective as a set of
     minimum gains. For example, another attainable response may exceed
     the grain-yield target and still meet every minimum without
@@ -446,6 +454,12 @@ rank_sum <- selection_index(
   method = "mulamba_mock",
   lower_is_better = lower_is_better, n_select = 20L
 )
+base_index <- selection_index(
+  dgr_candidates, traits,
+  method = "base",
+  G = dgr_G, P = dgr_P, economic_weights = economic_weights,
+  lower_is_better = lower_is_better, n_select = 20L, main_trait = "GY"
+)
 smith_hazel
 #> <desiredgainr_index>
 #>   Method: smith_hazel 
@@ -462,12 +476,16 @@ smith_hazel
 | Method | Needs weights | Needs \\\mathbf{G}\\, \\\mathbf{P}\\ | Use when |
 |----|----|----|----|
 | `smith_hazel` | yes | yes | Weights are defensible |
-| `base` | yes | no | A quick comparator; often nearly as good |
+| `base` | yes | no | A quick comparator. It is often nearly as good. |
 | `pesek_baker` | desired gains | \\\mathbf{G}\\ only | Gains easier than weights |
 | `yamada` | desired gains | yes | Same index, better conditioned route |
 | `mulamba_mock` | no | no | Weights unavailable or untrusted |
 | `independent_culling` | thresholds | no | Non-compensatory requirements |
+| `elston` | thresholds | no | Firm limits followed by balanced margins |
 | `tandem` | trait order | no | Comparator for sequential selection |
+| [`restricted_index()`](https://FAkohoue.github.io/DesiredGainR/reference/restricted_index.md) | weights and restrictions | yes | One or more responses must be controlled |
+| [`run_dgsi()`](https://FAkohoue.github.io/DesiredGainR/reference/run_dgsi.md) | desired gains | yes | Iterative selected-differential search is required |
+| [`run_qgsi()`](https://FAkohoue.github.io/DesiredGainR/reference/run_qgsi.md) | linear and quadratic values | genomic covariance | Merit is curved or interactive |
 
 ### Stage 10 — Evaluate and compare
 
@@ -480,26 +498,24 @@ different question.
 |----|----|----|
 | \\R\_{HI}\\ | Correlation between the selection index \\I\\ and aggregate genetic merit \\H\\ | It ranges from -1 to 1. Negative values select against the stated merit, zero means no linear association, and values nearer 1 indicate closer agreement. It exists only when the same aggregate-weight vector defines \\H\\ for every index compared. |
 | \\\Delta H\\ | Expected change in aggregate genetic merit | This is \\iR\_{HI}\sigma_H\\, where \\\sigma_H\\ is the genetic standard deviation of aggregate merit. Positive values improve the stated merit. Compare magnitudes only when all indices use the same merit definition, population and selection intensity. |
-| \\\Delta_j\\ | Expected genetic response of trait \\j\\ | This is the primary biological result. Check its sign, magnitude and units for every trait; an aggregate statistic can conceal an unfavourable response. |
+| \\\Delta_j\\ | Expected genetic response of trait \\j\\ | This is the primary biological result. Check its sign, magnitude and units for every trait. An aggregate statistic can conceal an unfavourable response. |
 | RE | Relative efficiency for the declared main trait | RE = 1 matches direct response, 0.80 retains 80%, a value above 1 exceeds direct response through correlated information, and a negative value moves the main trait unfavourably. It says nothing about the other traits. |
 | \\h_I^2\\ | Heritability of the index score treated as a composite trait | It ranges from 0 to 1 for compatible covariance matrices. Its square root is the accuracy with which the observed index predicts its own additive genetic component. It does not measure agreement with the breeding objective. |
-| \\CV_I\\ | Coefficient of variation of index scores | This is \\100s_I/\|\bar I\|\\. It depends on the arbitrary zero of the score and is undefined for a centred index. It must not be used to rank centred indices. |
+| \\CV_I\\ | Coefficient of variation of index scores | This is \\100s_I/\|\bar I\|\\. It depends on the arbitrary zero of the score and is undefined for a centred index. Use it only for raw, uncentred scores. |
 
 The software output name `delta_H` and the abbreviated print label `dH`
 both mean \\\Delta H\\, the expected change in aggregate genetic merit.
 They do not mean the response of an individual trait.
 
-No classical scalar is sufficiently robust on its own. For a
-desired-gain recommendation, use the following decision panel: (i)
-\\\Delta_j\\ for every trait; (ii) exact-ray feasibility or, for minimum
-floors, the worst-trait and joint-attainment probabilities; (iii) cosine
-alignment between the achieved response and the desired direction from
-[`index_uncertainty()`](https://FAkohoue.github.io/DesiredGainR/reference/index_uncertainty.md);
-(iv) rank correlation and selected-set overlap under perturbation; and
-(v) diversity or coancestry diagnostics when repeated-cycle use is
-intended. The first two test biological attainment, the next two test
-statistical stability, and the fifth guards against obtaining short-term
-gain by exhausting usable variation.
+No classical scalar is sufficiently robust on its own. Start with
+\\\Delta_j\\ for every trait. Then test exact-ray feasibility. For
+minimum floors, inspect the worst-trait and joint-attainment
+probabilities. Measure response alignment with
+[`index_uncertainty()`](https://FAkohoue.github.io/DesiredGainR/reference/index_uncertainty.md).
+Inspect rank correlation and selected-set overlap under perturbation.
+For repeated cycles, finish with diversity or coancestry diagnostics.
+This panel covers biological attainment, statistical stability, and the
+retention of usable variation.
 
 **Relative efficiency below 1 is not a failure.** It is the intended
 trade of response in the main trait for response elsewhere. Every value
@@ -507,24 +523,73 @@ reported by Rahimi and Debnath was below 1. Conversely, a high relative
 efficiency is not proof that the desired multi-trait objective was
 attained.
 
-Compare families by rank correlation *and* by overlap of the selected
-sets, because the two must be consistent with each other:
+Use
+[`compare_selection_methods()`](https://FAkohoue.github.io/DesiredGainR/reference/compare_selection_methods.md)
+to verify the common comparison conditions. Then compare responses,
+summary criteria, rankings, and selected sets.
 
 ``` r
-paired <- merge(
-  smith_hazel$ranking[, c("id", "score")],
-  rank_sum$ranking[, c("id", "score")],
-  by = "id", suffixes = c("_sh", "_mm")
+comparison <- compare_selection_methods(
+  list(
+    Smith_Hazel = smith_hazel,
+    Base = base_index,
+    Rank_sum = rank_sum
+  )
 )
-round(stats::cor(paired$score_sh, paired$score_mm, method = "spearman"), 3)
-#> [1] 0.938
-length(intersect(smith_hazel$selected$id, rank_sum$selected$id))
-#> [1] 13
+comparison$fairness
+#>                                              Condition Satisfied
+#> 1                      Same candidates and trait order      TRUE
+#> 2                Same direction, centring, and scaling      TRUE
+#> 3                                 Same number selected      TRUE
+#> 4                             Same selection intensity      TRUE
+#> 5 Common aggregate merit among merit-based comparisons      TRUE
+#>                                                             Interpretation
+#> 1                                  Required and enforced by this function.
+#> 2                                  Required and enforced by this function.
+#> 3  A culling method may select fewer candidates when few pass every limit.
+#> 4                Expected responses require one common selection pressure.
+#> 5 R_HI and Delta_H answer one common question only under one merit vector.
+comparison$summary
+#>         Method       Family Strategy N_selected Selected_fraction
+#>         <char>       <char>   <char>      <int>             <num>
+#> 1: Smith_Hazel  smith_hazel    index         20               0.1
+#> 2:        Base         base    index         20               0.1
+#> 3:    Rank_sum mulamba_mock rank_sum         20               0.1
+#>    Selection_intensity      R_HI  Delta_H        RE Index_heritability
+#>                  <num>     <num>    <num>     <num>              <num>
+#> 1:            1.754983 0.7088841 1.222814 0.7658206          0.5124609
+#> 2:            1.754983 0.6950918 1.199023 0.8431941          0.4831527
+#> 3:            1.754983        NA       NA        NA                 NA
+#>    Index_accuracy Worst_expected_attainment Mean_expected_attainment
+#>             <num>                     <num>                    <num>
+#> 1:      0.7158637                        NA                       NA
+#> 2:      0.6950918                        NA                       NA
+#> 3:             NA                        NA                       NA
+#>    Worst_observed_attainment Satoh_beta Mahalanobis_alignment
+#>                        <num>      <num>                 <num>
+#> 1:                        NA         NA                    NA
+#> 2:                        NA         NA                    NA
+#> 3:                        NA         NA                    NA
+#>    Mahalanobis_residual
+#>                   <num>
+#> 1:                   NA
+#> 2:                   NA
+#> 3:                   NA
+round(comparison$rank_correlation, 2)
+#>             Smith_Hazel Base Rank_sum
+#> Smith_Hazel        1.00 0.98     0.94
+#> Base               0.98 1.00     0.91
+#> Rank_sum           0.94 0.91     1.00
+comparison$selected_overlap
+#>             Smith_Hazel Base Rank_sum
+#> Smith_Hazel          20   16       13
+#> Base                 16   20       14
+#> Rank_sum             13   14       20
 ```
 
-A high correlation with a nearly empty intersection indicates a fault,
-not a finding. That exact check caught a row-alignment bug during
-development.
+Rank correlation uses every candidate. Selected-set overlap concerns the
+final decision. Report both because close overall rankings can diverge
+near the selection boundary.
 
 Check which traits the index is really acting on:
 
@@ -622,7 +687,7 @@ where \\\widehat{\mathbf{g}}\_i\\ is the candidate’s vector of genomic
 estimated breeding values, \\\mathbf{w}\\ the linear economic weights,
 and \\\mathbf{W}\\ a symmetric matrix of squared and cross-product
 weights. Negative diagonal curvature in \\\mathbf{W}\\ favours
-intermediate values; positive curvature favours extremes.
+intermediate values. Positive curvature favours extremes.
 
 ``` r
 quadratic_weights <- diag(c(
@@ -711,8 +776,8 @@ converted <- haplotypes_from_inbred_dosage(
 ```
 
 No threshold is imposed on residual heterozygosity, because no
-universally appropriate level exists; it is measured and reported
-instead, and heterozygous calls are never resolved silently.
+universally appropriate level exists. It is measured and reported
+instead. Heterozygous calls are never resolved silently.
 
 ### Stage 14 — Calibrate the simulation
 
@@ -764,21 +829,28 @@ simulation
     #>    1.842  -8.031  -1.226  -0.244  -0.019  -0.487
     #>   Final mean relationship among parents: 0.0913
 
-Output above is illustrative of the object’s shape; your numbers depend
+Output above is illustrative of the object’s shape. Your numbers depend
 on your founders and parameters.
 
 Three mating systems are supported, and they differ in more than naming:
 
 | System | Crops | What differs |
 |----|----|----|
-| `"self"` | Wheat, rice, bean | Advanced by selfing or doubled haploidy; recombination releases variance slowly |
-| `"outcross"` | Maize, sorghum, millet | Random mating each cycle; half the selection-induced disequilibrium decays per generation |
+| `"self"` | Wheat, rice, bean | Advanced by selfing or doubled haploidy. Recombination releases variance slowly. |
+| `"outcross"` | Maize, sorghum, millet | Random mating occurs each cycle. Half the selection-induced disequilibrium decays per generation. |
 | `"clonal"` | Cassava, sweetpotato, banana | Selection on *total* genetic value, because dominance is inherited intact |
 
 The per-cycle table records the genetic mean and variance for each
 trait, the mean relationship among selected parents, and the implied
 effective population size, so that gain and the loss of diversity can be
 read together.
+
+This is a scenario comparison, not OCS or optimum cross selection. The
+simulation asks whether one desired-gain objective remains attractive
+under a declared reproduction rule. It does not claim that its recycled
+parents or crosses are the operational optimum. Pass the index merit
+score to HapBlockR when the real parent, contribution and mating
+decisions are made.
 
 `reestimate_index = TRUE`, the default, rebuilds the index from each
 cycle’s own data, which is what a programme actually does and which
@@ -813,13 +885,13 @@ optimisation
     #>   Mode: pareto   Cycles: 5   Evaluations: 60 (3 replicates each)
     #>   Objectives: GY, PHT, AD, ASI, EPP, GLS, diversity
     #>   Non-dominated directions: 9 of 60
-    #>   No single direction is recommended; choose a point on the frontier.
+    #>   No single direction is recommended. Choose a point on the frontier.
 
 **The simulation is the objective function and is never replaced by a
 cheaper approximation.** A Gaussian process decides only where to spend
-the next simulation; it never filters or substitutes for one, and
-because the acquisition function keeps exploring, no region can be
-permanently excluded.
+the next simulation. It never filters or substitutes for one. Because
+the acquisition function keeps exploring, no region can be permanently
+excluded.
 
 Four ranking modes are available:
 
@@ -851,10 +923,11 @@ Complete this before promoting any output to a breeding recommendation.
 | Trait directions declared, not signed by hand | Stage 2 |
 | Objective feasible at the planned intensity, or knowingly not | Stage 7 |
 | Index family chosen and justified against a comparator | Stages 9-10 |
-| Effective weights inspected; no unintended trait dominance | Stage 10 |
+| Effective weights inspected. No unintended trait dominance | Stage 10 |
 | Replicate diagnostics agree | Stage 11 |
 | Traits standardised, or the warning read and accepted | Stages 3, 12 |
 | Decision robust to plausible weight perturbation | *Objective vignette* |
+| Final parents, contributions and crosses decided in HapBlockR, not inferred from `n_select` | [Working with other breeding software](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-interoperation.md) |
 | Random seed, package version and session recorded | below |
 
 ``` r
@@ -903,10 +976,11 @@ sessionInfo()
 |----|----|
 | 1-4 | [Obtaining G and P](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-covariance.md) |
 | 5-8 | [Defining a breeding objective](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-objective.md) |
-| 9-10 | [Choosing an index](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-index-families.md) |
+| 9-10 | [Multiple-trait selection](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-index-families.md) |
 | 11 | [Optimising desired gains](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-dgsi.md) |
 | 12 | [Quadratic genomic selection](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-qgsi.md) |
 | 13-16 | [Comparing objectives over several cycles](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-simulation.md) |
+| Downstream decision | [Working with other breeding software](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-interoperation.md) |
 
 ------------------------------------------------------------------------
 

@@ -64,8 +64,14 @@ selection index.
 
 - [`selection_index()`](https://FAkohoue.github.io/DesiredGainR/reference/selection_index.md)
   : Construct a classical multi-trait selection index
+- [`selection_information()`](https://FAkohoue.github.io/DesiredGainR/reference/selection_information.md)
+  : Define the information used by a selection index
+- [`generalized_index()`](https://FAkohoue.github.io/DesiredGainR/reference/generalized_index.md)
+  : Fit an index from a general information model
 - [`restricted_index()`](https://FAkohoue.github.io/DesiredGainR/reference/restricted_index.md)
   : Restricted and proportional-gain selection indices
+- [`restricted_breeding_values()`](https://FAkohoue.github.io/DesiredGainR/reference/restricted_breeding_values.md)
+  : Project breeding values into a restricted response space
 - [`run_dgsi()`](https://FAkohoue.github.io/DesiredGainR/reference/run_dgsi.md)
   : Fit an optimised desired-gain selection index
 - [`run_qgsi()`](https://FAkohoue.github.io/DesiredGainR/reference/run_qgsi.md)
@@ -88,12 +94,20 @@ matrices.
 
 - [`evaluate_index()`](https://FAkohoue.github.io/DesiredGainR/reference/evaluate_index.md)
   : Evaluate a selection index against the standard criteria
+- [`compare_selection_methods()`](https://FAkohoue.github.io/DesiredGainR/reference/compare_selection_methods.md)
+  : Compare multi-trait selection methods on one decision problem
 - [`summary(`*`<desiredgainr_index>`*`)`](https://FAkohoue.github.io/DesiredGainR/reference/summary.desiredgainr_index.md)
   : Summarise a fitted selection index
 - [`predict(`*`<desiredgainr_index>`*`)`](https://FAkohoue.github.io/DesiredGainR/reference/predict.desiredgainr_index.md)
   : Score a new candidate set with a fitted index
 - [`index_uncertainty()`](https://FAkohoue.github.io/DesiredGainR/reference/index_uncertainty.md)
   : Propagate sampling error in the covariance matrices into an index
+- [`candidate_score_uncertainty()`](https://FAkohoue.github.io/DesiredGainR/reference/candidate_score_uncertainty.md)
+  : Candidate-specific uncertainty in index scores and ranks
+- [`index_information_efficiency()`](https://FAkohoue.github.io/DesiredGainR/reference/index_information_efficiency.md)
+  : Cunningham information-deletion efficiency
+- [`evaluate_restricted_response()`](https://FAkohoue.github.io/DesiredGainR/reference/evaluate_restricted_response.md)
+  : Evaluate an achieved response against a desired-gain direction
 - [`compare_dg_and_qgsi()`](https://FAkohoue.github.io/DesiredGainR/reference/compare_dg_and_qgsi.md)
   : Compare DGSI and QGSI candidate rankings
 
@@ -152,6 +166,12 @@ disequilibrium and allele-frequency structure of the simulation are
 those of the target programme. The search treats the simulation as the
 objective function and never substitutes a cheaper approximation for it.
 
+- [`breeding_scenario()`](https://FAkohoue.github.io/DesiredGainR/reference/breeding_scenario.md)
+  : Describe a breeding simulation scenario
+- [`simulation_calibration()`](https://FAkohoue.github.io/DesiredGainR/reference/simulation_calibration.md)
+  : Audit the calibration of an AlphaSimR setup
+- [`stress_test_desired_gains()`](https://FAkohoue.github.io/DesiredGainR/reference/stress_test_desired_gains.md)
+  : Stress-test a desired-gain vector across simulation scenarios
 - [`founder_haplotypes()`](https://FAkohoue.github.io/DesiredGainR/reference/founder_haplotypes.md)
   : Validate and package phased founder haplotypes
 - [`haplotypes_from_inbred_dosage()`](https://FAkohoue.github.io/DesiredGainR/reference/haplotypes_from_inbred_dosage.md)

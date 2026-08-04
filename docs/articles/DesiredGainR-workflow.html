@@ -85,7 +85,8 @@
     <li><a class="dropdown-item" href="../articles/DesiredGainR-empirical-validation.html">Empirical validation with real breeding programmes</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Index methods</h6></li>
-    <li><a class="dropdown-item" href="../articles/DesiredGainR-index-families.html">Choosing an index</a></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-index-families.html">Multiple-trait selection and method comparison</a></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-information.html">Using predictions and prediction errors</a></li>
     <li><a class="dropdown-item" href="../articles/DesiredGainR-dgsi.html">Optimising desired gains</a></li>
     <li><a class="dropdown-item" href="../articles/DesiredGainR-qgsi.html">Quadratic genomic selection</a></li>
     <li><hr class="dropdown-divider"></li>
@@ -213,7 +214,7 @@ predictions as a genetic covariance.</p>
 <span>  method <span class="op">=</span> <span class="st">"adjusted_means_surrogate"</span></span>
 <span><span class="op">)</span></span>
 <span><span class="va">G_working</span><span class="op">$</span><span class="va">estimand</span></span>
-<span><span class="co">#&gt; [1] "working surrogate for genetic covariance; covariance of</span></span>
+<span><span class="co">#&gt; [1] "working surrogate for genetic covariance. Covariance of</span></span>
 <span><span class="co">#&gt;      across-environment adjusted means"</span></span></code></pre></div>
 <p>The example data ship a known <code>G</code>, so the rest of this
 vignette uses it directly.</p>
@@ -246,7 +247,7 @@ improve, which is correct rather than an error. In addition, the target
 values are already genetic-standard-deviation gains, whereas the
 returned weights are per original trait unit because <code>dgr_G</code>
 and <code>dgr_P</code> are in original units. The following
-multiplication expresses each weight per genetic standard deviation; it
+multiplication expresses each weight per genetic standard deviation. it
 does not standardise the target again:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">genetic_sd</span> <span class="op">&lt;-</span> <span class="fu">stats</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/stats/setNames.html" class="external-link">setNames</a></span><span class="op">(</span><span class="va">dgr_traits</span><span class="op">$</span><span class="va">genetic_sd</span>, <span class="va">dgr_traits</span><span class="op">$</span><span class="va">trait</span><span class="op">)</span></span>
@@ -283,9 +284,9 @@ exact desired-gain ray before any shortfall is interpreted.</p>
 <span><span class="co">#&gt;   Attainable fraction of the requested gain: 54.7%</span></span></code></pre></div>
 <p>The required intensity is 3.2082, equivalent under normal truncation
 to the best 0.1773%. Among 200 candidates, that proportion represents
-0.355 candidate. It cannot be rounded to one because selecting one
-retains 0.5% and gives a lower intensity. Therefore, the exact vector is
-not attainable in this finite candidate set.</p>
+0.355 candidate. Rounding to one changes the selection proportion to
+0.5% and lowers the intensity. Therefore, the exact vector lies beyond
+this finite candidate set.</p>
 <p>The planned selection of 20 candidates has intensity 1.7550. Its
 ratio to the required intensity is 0.547, so 54.7% of every target
 component is available while the requested trait proportions are
@@ -345,6 +346,12 @@ generated the historical decision.</p>
 <span>  method <span class="op">=</span> <span class="st">"mulamba_mock"</span>,</span>
 <span>  lower_is_better <span class="op">=</span> <span class="va">lower_is_better</span>, n_select <span class="op">=</span> <span class="fl">20L</span></span>
 <span><span class="op">)</span></span>
+<span><span class="va">base_index</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/selection_index.html">selection_index</a></span><span class="op">(</span></span>
+<span>  <span class="va">dgr_candidates</span>, <span class="va">traits</span>,</span>
+<span>  method <span class="op">=</span> <span class="st">"base"</span>,</span>
+<span>  G <span class="op">=</span> <span class="va">dgr_G</span>, P <span class="op">=</span> <span class="va">dgr_P</span>, economic_weights <span class="op">=</span> <span class="va">economic_weights</span>,</span>
+<span>  lower_is_better <span class="op">=</span> <span class="va">lower_is_better</span>, n_select <span class="op">=</span> <span class="fl">20L</span>, main_trait <span class="op">=</span> <span class="st">"GY"</span></span>
+<span><span class="op">)</span></span>
 <span><span class="va">smith_hazel</span></span>
 <span><span class="co">#&gt; &lt;desiredgainr_index&gt;</span></span>
 <span><span class="co">#&gt;   Method: smith_hazel </span></span>
@@ -360,24 +367,74 @@ generated the historical decision.</p>
 the main trait for response elsewhere in the objective, not a defect.
 Every value reported by Rahimi and Debnath (2023) was below one.</p>
 <p>The Mulamba-Mock rank-sum index needs neither weights nor covariance
-matrices, which is why Guimarães et al. (2021) found it competitive.
-Compare the two by rank correlation <em>and</em> by set overlap, because
-the two must be consistent:</p>
+matrices. This explains its value as a low-assumption comparator. The
+base index shows how much the covariance adjustment contributes beyond
+direct weighting.</p>
+<p>Use <code><a href="../reference/compare_selection_methods.html">compare_selection_methods()</a></code> to verify the comparison
+conditions. Then read biological responses, summary criteria, rank
+agreement, and selected-set agreement.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">paired</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/merge.html" class="external-link">merge</a></span><span class="op">(</span></span>
-<span>  <span class="va">smith_hazel</span><span class="op">$</span><span class="va">ranking</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"id"</span>, <span class="st">"score"</span><span class="op">)</span><span class="op">]</span>,</span>
-<span>  <span class="va">rank_sum</span><span class="op">$</span><span class="va">ranking</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"id"</span>, <span class="st">"score"</span><span class="op">)</span><span class="op">]</span>,</span>
-<span>  by <span class="op">=</span> <span class="st">"id"</span>, suffixes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"_sh"</span>, <span class="st">"_mm"</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">comparison</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compare_selection_methods.html">compare_selection_methods</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>    Smith_Hazel <span class="op">=</span> <span class="va">smith_hazel</span>,</span>
+<span>    Base <span class="op">=</span> <span class="va">base_index</span>,</span>
+<span>    Rank_sum <span class="op">=</span> <span class="va">rank_sum</span></span>
+<span>  <span class="op">)</span></span>
 <span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu">stats</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/stats/cor.html" class="external-link">cor</a></span><span class="op">(</span><span class="va">paired</span><span class="op">$</span><span class="va">score_sh</span>, <span class="va">paired</span><span class="op">$</span><span class="va">score_mm</span>, method <span class="op">=</span> <span class="st">"spearman"</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 0.938</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sets.html" class="external-link">intersect</a></span><span class="op">(</span><span class="va">smith_hazel</span><span class="op">$</span><span class="va">selected</span><span class="op">$</span><span class="va">id</span>, <span class="va">rank_sum</span><span class="op">$</span><span class="va">selected</span><span class="op">$</span><span class="va">id</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 13</span></span></code></pre></div>
-<p>A high correlation paired with a nearly empty intersection would
-indicate a fault rather than a finding. That check found a genuine
-row-alignment bug during development.</p>
-<p>See <a href="DesiredGainR-index-families.html">Choosing an
-index</a>.</p>
+<span><span class="va">comparison</span><span class="op">$</span><span class="va">fairness</span></span>
+<span><span class="co">#&gt;                                              Condition Satisfied</span></span>
+<span><span class="co">#&gt; 1                      Same candidates and trait order      TRUE</span></span>
+<span><span class="co">#&gt; 2                Same direction, centring, and scaling      TRUE</span></span>
+<span><span class="co">#&gt; 3                                 Same number selected      TRUE</span></span>
+<span><span class="co">#&gt; 4                             Same selection intensity      TRUE</span></span>
+<span><span class="co">#&gt; 5 Common aggregate merit among merit-based comparisons      TRUE</span></span>
+<span><span class="co">#&gt;                                                             Interpretation</span></span>
+<span><span class="co">#&gt; 1                                  Required and enforced by this function.</span></span>
+<span><span class="co">#&gt; 2                                  Required and enforced by this function.</span></span>
+<span><span class="co">#&gt; 3  A culling method may select fewer candidates when few pass every limit.</span></span>
+<span><span class="co">#&gt; 4                Expected responses require one common selection pressure.</span></span>
+<span><span class="co">#&gt; 5 R_HI and Delta_H answer one common question only under one merit vector.</span></span>
+<span><span class="va">comparison</span><span class="op">$</span><span class="va">summary</span></span>
+<span><span class="co">#&gt;         Method       Family Strategy N_selected Selected_fraction</span></span>
+<span><span class="co">#&gt;         &lt;char&gt;       &lt;char&gt;   &lt;char&gt;      &lt;int&gt;             &lt;num&gt;</span></span>
+<span><span class="co">#&gt; 1: Smith_Hazel  smith_hazel    index         20               0.1</span></span>
+<span><span class="co">#&gt; 2:        Base         base    index         20               0.1</span></span>
+<span><span class="co">#&gt; 3:    Rank_sum mulamba_mock rank_sum         20               0.1</span></span>
+<span><span class="co">#&gt;    Selection_intensity      R_HI  Delta_H        RE Index_heritability</span></span>
+<span><span class="co">#&gt;                  &lt;num&gt;     &lt;num&gt;    &lt;num&gt;     &lt;num&gt;              &lt;num&gt;</span></span>
+<span><span class="co">#&gt; 1:            1.754983 0.7088841 1.222814 0.7658206          0.5124609</span></span>
+<span><span class="co">#&gt; 2:            1.754983 0.6950918 1.199023 0.8431941          0.4831527</span></span>
+<span><span class="co">#&gt; 3:            1.754983        NA       NA        NA                 NA</span></span>
+<span><span class="co">#&gt;    Index_accuracy Worst_expected_attainment Mean_expected_attainment</span></span>
+<span><span class="co">#&gt;             &lt;num&gt;                     &lt;num&gt;                    &lt;num&gt;</span></span>
+<span><span class="co">#&gt; 1:      0.7158637                        NA                       NA</span></span>
+<span><span class="co">#&gt; 2:      0.6950918                        NA                       NA</span></span>
+<span><span class="co">#&gt; 3:             NA                        NA                       NA</span></span>
+<span><span class="co">#&gt;    Worst_observed_attainment Satoh_beta Mahalanobis_alignment</span></span>
+<span><span class="co">#&gt;                        &lt;num&gt;      &lt;num&gt;                 &lt;num&gt;</span></span>
+<span><span class="co">#&gt; 1:                        NA         NA                    NA</span></span>
+<span><span class="co">#&gt; 2:                        NA         NA                    NA</span></span>
+<span><span class="co">#&gt; 3:                        NA         NA                    NA</span></span>
+<span><span class="co">#&gt;    Mahalanobis_residual</span></span>
+<span><span class="co">#&gt;                   &lt;num&gt;</span></span>
+<span><span class="co">#&gt; 1:                   NA</span></span>
+<span><span class="co">#&gt; 2:                   NA</span></span>
+<span><span class="co">#&gt; 3:                   NA</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">comparison</span><span class="op">$</span><span class="va">rank_correlation</span>, <span class="fl">2</span><span class="op">)</span></span>
+<span><span class="co">#&gt;             Smith_Hazel Base Rank_sum</span></span>
+<span><span class="co">#&gt; Smith_Hazel        1.00 0.98     0.94</span></span>
+<span><span class="co">#&gt; Base               0.98 1.00     0.91</span></span>
+<span><span class="co">#&gt; Rank_sum           0.94 0.91     1.00</span></span>
+<span><span class="va">comparison</span><span class="op">$</span><span class="va">selected_overlap</span></span>
+<span><span class="co">#&gt;             Smith_Hazel Base Rank_sum</span></span>
+<span><span class="co">#&gt; Smith_Hazel          20   16       13</span></span>
+<span><span class="co">#&gt; Base                 16   20       14</span></span>
+<span><span class="co">#&gt; Rank_sum             13   14       20</span></span></code></pre></div>
+<p>Rank correlation uses all candidates. Selected-set overlap concerns
+the final decision. Report both because close overall rankings can still
+diverge near the selection boundary.</p>
+<p>See <a href="DesiredGainR-index-families.html">Multiple-trait
+selection</a>.</p>
 <hr>
 </div>
 <div class="section level2">
@@ -416,7 +473,7 @@ response in the selected set approaches the stated target.</p>
 <span><span class="co">#&gt;     GY    PHT     AD    ASI    EPP    GLS </span></span>
 <span><span class="co">#&gt; -1.455 -0.117 -0.738  0.566  0.007 -0.038</span></span></code></pre></div>
 <p>Read that against Stage 4. Feasibility constrains the requested
-<em>proportion</em>; the optimiser is not bound to it, and distributes
+<em>proportion</em>. the optimiser is not bound to it, and distributes
 the shortfall unevenly, overshooting grain yield while undershooting
 anthesis date. Whether that trade is acceptable is a breeding decision
 rather than a numerical one.</p>
@@ -503,8 +560,12 @@ with founders built from the breeder’s own phased marker data. See <a href="De
 cycles</a>.</p>
 <p><strong>Which candidates should actually be crossed?</strong> Parent,
 cross and mating allocation, coancestry control and operational
-feasibility are outside this package’s scope by design. See <a href="DesiredGainR-interoperation.html">Working with other breeding
-software</a>.</p>
+feasibility are outside this package’s scope by design. Use <a href="https://github.com/FAkohoue/HapBlockR" class="external-link">HapBlockR</a> for parent
+selection, OCS, optimum cross selection and mate allocation. HapBlockR’s
+<code>build_selection_index()</code> calls DesiredGainR for DGSI or
+QGSI, so the index developed here passes directly into that downstream
+decision. See <a href="DesiredGainR-interoperation.html">Working with
+other breeding software</a>.</p>
 <hr>
 </div>
 <div class="section level2">
@@ -531,8 +592,8 @@ objective</a></td>
 </tr>
 <tr class="odd">
 <td>6-7</td>
-<td><a href="DesiredGainR-index-families.html">Choosing an
-index</a></td>
+<td><a href="DesiredGainR-index-families.html">Multiple-trait
+selection</a></td>
 </tr>
 <tr class="even">
 <td>8</td>
@@ -552,8 +613,8 @@ objective</a></td>
 <td>Beyond</td>
 <td>
 <a href="DesiredGainR-simulation.html">Comparing objectives over
-several cycles</a>; <a href="DesiredGainR-interoperation.html">Working
-with other breeding software</a>
+several cycles</a> and <a href="DesiredGainR-interoperation.html">Working with other breeding
+software</a>
 </td>
 </tr>
 </tbody>

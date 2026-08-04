@@ -8,7 +8,7 @@ selection_index(
   values,
   trait_cols,
   id_col = NULL,
-  method = c("smith_hazel", "base", "pesek_baker", "yamada", "mulamba_mock",
+  method = c("smith_hazel", "base", "pesek_baker", "yamada", "mulamba_mock", "elston",
     "independent_culling", "tandem"),
   G = NULL,
   P = NULL,
@@ -43,15 +43,19 @@ happened.}
 \item{method}{Index family. See Details.}
 
 \item{G}{Genetic variance-covariance matrix, named by trait. Required by
-every method except \code{"base"}, \code{"mulamba_mock"}, \code{"independent_culling"},
-and \code{"tandem"}.}
+every method except \code{"base"}, \code{"mulamba_mock"}, \code{"elston"},
+\code{"independent_culling"}, and \code{"tandem"}.}
 
 \item{P}{Phenotypic variance-covariance matrix, named by trait. Required by
 \code{"smith_hazel"} and \code{"yamada"}.}
 
-\item{economic_weights}{Named non-negative economic weights in the
-favourable-direction trait space. Required by \code{"smith_hazel"} and
-\code{"base"}, and optionally used to weight ranks in \code{"mulamba_mock"}.}
+\item{economic_weights}{Named economic weights in the favourable-direction
+trait space. Required by \code{"smith_hazel"} and \code{"base"}, and optionally used
+to weight ranks in \code{"mulamba_mock"}. Negative values are valid for the
+economic indices. They can arise when correlated response would otherwise
+move a trait beyond its economically preferred level. Rank weights remain
+non-negative because they state relative emphasis after trait direction
+has been declared.}
 
 \item{desired_gains}{Named non-negative desired gains in the
 favourable-direction trait space. Required by \code{"pesek_baker"} and
@@ -97,8 +101,11 @@ narrow-sense heritabilities on its diagonal. Prefer it whenever \code{P} is a
 genuine population estimate rather than a covariance computed from the
 candidates at hand.}
 
-\item{culling_thresholds}{Named thresholds in the favourable-direction trait
-space, required by \code{"independent_culling"}.}
+\item{culling_thresholds}{Named acceptance limits in the original trait
+units, required by \code{"elston"} and \code{"independent_culling"}. Supply a
+minimum for traits where larger values are favourable. Supply a maximum
+for traits named in \code{lower_is_better}. The function applies direction,
+centring, and scaling to these limits internally.}
 
 \item{tandem_order}{Character vector giving the order in which traits are
 selected, required by \code{"tandem"}.}
@@ -147,6 +154,10 @@ Candidates are ranked for each trait in the favourable direction and the
 ranks are summed. It requires neither economic weights nor covariance
 matrices, and Guimaraes et al. (2021) found it to give the most balanced
 multi-trait response of the methods they compared.}
+\item{\code{"elston"}}{The Elston multiplicative index. Candidates first meet every stated
+floor. Eligible candidates are ranked by the product of their margins
+above those floors. The logarithm of the product provides numerical
+stability.}
 \item{\code{"independent_culling"}}{Not an index. Candidates must exceed a
 threshold for every trait. Included as a comparator because it is what
 most programmes actually do.}
@@ -209,6 +220,9 @@ Hayden MJ (2024). \emph{Frontiers in Plant Science} 15:1337388.
 
 Mulamba NN, Mock JJ (1978). \emph{Egyptian Journal of Genetics and Cytology}
 7:40-51.
+
+Elston RC (1963). A weight-free index for ranking or selection with respect
+to several traits at a time. \emph{Biometrics} 19:85-97.
 
 Pesek J, Baker RJ (1969). \emph{Canadian Journal of Plant Science} 49:803-804.
 \doi{10.4141/cjps69-137}

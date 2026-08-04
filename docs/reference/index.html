@@ -62,7 +62,8 @@
     <li><a class="dropdown-item" href="../articles/DesiredGainR-empirical-validation.html">Empirical validation with real breeding programmes</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Index methods</h6></li>
-    <li><a class="dropdown-item" href="../articles/DesiredGainR-index-families.html">Choosing an index</a></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-index-families.html">Multiple-trait selection and method comparison</a></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-information.html">Using predictions and prediction errors</a></li>
     <li><a class="dropdown-item" href="../articles/DesiredGainR-dgsi.html">Optimising desired gains</a></li>
     <li><a class="dropdown-item" href="../articles/DesiredGainR-qgsi.html">Quadratic genomic selection</a></li>
     <li><hr class="dropdown-divider"></li>
@@ -224,10 +225,31 @@
 
         <dt>
 
+          <code><a href="selection_information.html">selection_information()</a></code>
+
+        </dt>
+        <dd>Define the information used by a selection index</dd>
+
+        <dt>
+
+          <code><a href="generalized_index.html">generalized_index()</a></code>
+
+        </dt>
+        <dd>Fit an index from a general information model</dd>
+
+        <dt>
+
           <code><a href="restricted_index.html">restricted_index()</a></code>
 
         </dt>
         <dd>Restricted and proportional-gain selection indices</dd>
+
+        <dt>
+
+          <code><a href="restricted_breeding_values.html">restricted_breeding_values()</a></code>
+
+        </dt>
+        <dd>Project breeding values into a restricted response space</dd>
 
         <dt>
 
@@ -268,6 +290,13 @@
 
         <dt>
 
+          <code><a href="compare_selection_methods.html">compare_selection_methods()</a></code>
+
+        </dt>
+        <dd>Compare multi-trait selection methods on one decision problem</dd>
+
+        <dt>
+
           <code><a href="summary.desiredgainr_index.html">summary(<i>&lt;desiredgainr_index&gt;</i>)</a></code>
 
         </dt>
@@ -286,6 +315,27 @@
 
         </dt>
         <dd>Propagate sampling error in the covariance matrices into an index</dd>
+
+        <dt>
+
+          <code><a href="candidate_score_uncertainty.html">candidate_score_uncertainty()</a></code>
+
+        </dt>
+        <dd>Candidate-specific uncertainty in index scores and ranks</dd>
+
+        <dt>
+
+          <code><a href="index_information_efficiency.html">index_information_efficiency()</a></code>
+
+        </dt>
+        <dd>Cunningham information-deletion efficiency</dd>
+
+        <dt>
+
+          <code><a href="evaluate_restricted_response.html">evaluate_restricted_response()</a></code>
+
+        </dt>
+        <dd>Evaluate an achieved response against a desired-gain direction</dd>
 
         <dt>
 
@@ -389,6 +439,27 @@
 
 
       <dl><dt>
+
+          <code><a href="breeding_scenario.html">breeding_scenario()</a></code>
+
+        </dt>
+        <dd>Describe a breeding simulation scenario</dd>
+
+        <dt>
+
+          <code><a href="simulation_calibration.html">simulation_calibration()</a></code>
+
+        </dt>
+        <dd>Audit the calibration of an AlphaSimR setup</dd>
+
+        <dt>
+
+          <code><a href="stress_test_desired_gains.html">stress_test_desired_gains()</a></code>
+
+        </dt>
+        <dd>Stress-test a desired-gain vector across simulation scenarios</dd>
+
+        <dt>
 
           <code><a href="founder_haplotypes.html">founder_haplotypes()</a></code>
 

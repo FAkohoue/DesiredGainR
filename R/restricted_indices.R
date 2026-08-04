@@ -186,7 +186,27 @@ restricted_index <- function(
     constraint_matrix = constraint_matrix, penalty = penalty,
     selection_intensity = fitted$selection_intensity
   )
-  .dgr_refit_index(fitted, constrained$coefficients, a, constrained$constraint)
+  result <- .dgr_refit_index(
+    fitted, constrained$coefficients, a, constrained$constraint
+  )
+  proportional <- method %in% c("tallis", "mallard", "harville")
+  if (proportional && setequal(names(target_gains), trait_cols)) {
+    P_inverse <- .dgr_inverse(P_a, "P")$inverse
+    estimated_bv <- fitted$scaled_values %*% P_inverse %*% G_a
+    colnames(estimated_bv) <- trait_cols
+    result$restricted_breeding_values <- restricted_breeding_values(
+      estimated_bv, G_a, direction = target_gains
+    )
+    result$constraint$satoh_response <- evaluate_restricted_response(
+      result$evaluation$expected_response, target_gains, G_a
+    )
+    result$constraint$note <- paste(
+      result$constraint$note,
+      "Satoh's beta and restricted breeding values are reported because the",
+      "proportional direction covers every trait."
+    )
+  }
+  result
 }
 
 #' Solve for coefficients under a linear response constraint

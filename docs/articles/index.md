@@ -25,10 +25,12 @@
 - [Empirical validation with real breeding-programme
   data](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-empirical-validation.md):
 
-### Index methods
+### Multiple-trait selection and index methods
 
-- [Choosing an
-  index](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-index-families.md):
+- [Multiple-trait selection: methods, choice, and
+  comparison](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-index-families.md):
+- [Using predictions, prediction errors, and restricted
+  responses](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-information.md):
 - [Optimising desired
   gains](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-dgsi.md):
 - [Quadratic genomic

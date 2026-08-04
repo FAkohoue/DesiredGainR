@@ -219,14 +219,23 @@ test_that("independent culling retains only candidates passing every gate", {
   expect_equal(passing, "pass")
 })
 
-test_that("negative objective magnitudes are rejected", {
+test_that("economic weights may be negative but desired gains may not", {
   values <- family_values()
-  expect_error(
+  expect_silent(
     selection_index(
       values, family_traits,
       method = "smith_hazel",
       G = family_G, P = family_P,
       economic_weights = c(YLD = 1, DIS = -0.5, HT = 0.2),
+      scale_traits = FALSE
+    )
+  )
+  expect_error(
+    selection_index(
+      values, family_traits,
+      method = "pesek_baker",
+      G = family_G, P = family_P,
+      desired_gains = c(YLD = 1, DIS = -0.5, HT = 0.2),
       scale_traits = FALSE
     ),
     "non-negative"

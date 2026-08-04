@@ -53,7 +53,7 @@ These complementary questions validate different layers of DesiredGainR. They
 support its mathematical implementation, genomic-prediction foundation,
 multi-environment transport and recommendation workflow. A future prospective
 comparison assigning comparable populations to alternative vectors would add
-direct estimates of incremental field response between strategies; it is a
+direct estimates of incremental field response between strategies. It is a
 next level of evidence, not a prerequisite for using the package's current
 model-based decision support.
 
@@ -104,7 +104,7 @@ the historical index rule.
 
 The CIMMYT wheat data are an external aggregate anchor. The predicted yield
 trend from the published pedigree plus reproducing-kernel Hilbert-spaces with
-kernel averaging model (P + RKHS-KA) was 0.158 t/ha per cycle;
+kernel averaging model (P + RKHS-KA) was 0.158 t/ha per cycle.
 the trend recomputed from the published two-year cycle means was 0.265 t/ha per
 cycle. The raw yield plots and marker matrix are not in the local supplement,
 so this is deliberately labelled a published aggregate rather than an
@@ -154,7 +154,7 @@ The two-location raw-data model reproduced the published yield trajectory. It
 estimated 0.175 t/ha per cycle from C0 to C4, compared with 0.158 in the paper,
 and 0.253 t/ha per cycle from C1 to C4, compared with 0.225. C0--C3 adjusted
 means were within 0.01 t/ha of the published table. The C4 deposit contains 44
-candidate entries whereas the paper reports 43; retaining 43 rather than all
+candidate entries whereas the paper reports 43. Retaining 43 rather than all
 44 changed the adjusted mean by only about 0.001 t/ha, but the unidentified
 entry discrepancy remains recorded.
 
@@ -171,7 +171,7 @@ This computationally bounded reproduction complements the paper's full
 
 For desired-gain direction validation, each outer fold withheld one complete
 environment. Direction search occurred only within the other three environments,
-using inner environment holdouts and a worst-trait criterion; the chosen vector
+using inner environment holdouts and a worst-trait criterion. The chosen vector
 was then frozen. Across four outer folds, its average worst-trait improvement
 over an equal-gain direction was 0.005 environmental standard deviations, with fold results from
 -0.041 to 0.085. This is correctly labelled mixed. The joint high-gain event
@@ -201,7 +201,7 @@ with *et al.*:
    José Crossa and Deoclécio Garbuglio (2023). *Realized genetic gains via
    recurrent selection in a tropical maize haploid inducer population and
    optimizing simultaneous selection for the next cycles*. *Crop Science*
-   **63**:2865--2876. <https://doi.org/10.1002/csc2.21081>; data:
+   **63**:2865--2876. <https://doi.org/10.1002/csc2.21081>. Data:
    <https://doi.org/10.5061/dryad.9p8cz8wns>
 3. **CIMMYT spring wheat.** Susanne Dreisigacker, Paulino Pérez-Rodríguez,
    Leonardo Crespo-Herrera, Alison R. Bentley and José Crossa (2023).
@@ -213,7 +213,7 @@ with *et al.*:
    Gonzalo Carracelas, Ignacio Aguilar, Fernando Pérez de Vida and Juan E.
    Rosas (2023). *Consolidating 23 years of historical data from an irrigated
    subtropical rice breeding program in Uruguay*. *Crop Science*
-   **63**:1300--1315. <https://doi.org/10.1002/csc2.20955>; data:
+   **63**:1300--1315. <https://doi.org/10.1002/csc2.20955>. Data:
    <https://doi.org/10.5061/dryad.x69p8czn8>
 5. **Genomes-to-Fields maize.** Marco Lopez-Cruz, Fernando M. Aguate,
    Jacob D. Washburn, Natalia de Leon, Shawn M. Kaeppler, Dayane Cristina Lima,
@@ -221,7 +221,7 @@ with *et al.*:
    los Campos (2023). *Leveraging data from the Genomes-to-Fields Initiative
    to investigate genotype-by-environment interactions in maize in North
    America*. *Nature Communications* **14**:6904.
-   <https://doi.org/10.1038/s41467-023-42687-4>; data:
+   <https://doi.org/10.1038/s41467-023-42687-4>. Data:
    <https://doi.org/10.6084/m9.figshare.22776806.v1>
 6. **CIMMYT tropical maize rapid-cycle genomic selection.** Xuecai Zhang,
    Paulino Pérez-Rodríguez, Juan Burgueño, Michael Olsen, Jean-Luc Jannink,
@@ -237,7 +237,7 @@ with *et al.*:
 
 ## Why the results are trustworthy
 
-- Trials or genotypes are the independent units; plot rows are not treated as
+- Trials or genotypes are the independent units. Plot rows are not treated as
   independent selection cycles.
 - Every temporal index is frozen before the validation period.
 - Adjusted-mean covariance is called a working surrogate, not additive genetic

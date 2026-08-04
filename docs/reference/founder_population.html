@@ -70,7 +70,8 @@ trait variances and correlations, rather than an assumed demography."><meta prop
     <li><a class="dropdown-item" href="../articles/DesiredGainR-empirical-validation.html">Empirical validation with real breeding programmes</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Index methods</h6></li>
-    <li><a class="dropdown-item" href="../articles/DesiredGainR-index-families.html">Choosing an index</a></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-index-families.html">Multiple-trait selection and method comparison</a></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-information.html">Using predictions and prediction errors</a></li>
     <li><a class="dropdown-item" href="../articles/DesiredGainR-dgsi.html">Optimising desired gains</a></li>
     <li><a class="dropdown-item" href="../articles/DesiredGainR-qgsi.html">Quadratic genomic selection</a></li>
     <li><hr class="dropdown-divider"></li>
@@ -117,7 +118,8 @@ trait variances and correlations, rather than an assumed demography.</p>
 <span>  dominance_degree <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  dominance_variance <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  heritability <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"narrow"</span>, <span class="st">"broad"</span><span class="op">)</span>,</span>
-<span>  seed <span class="op">=</span> <span class="fl">42L</span></span>
+<span>  seed <span class="op">=</span> <span class="fl">42L</span>,</span>
+<span>  scenario <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -170,7 +172,7 @@ mating system requires.</p></dd>
 <dt id="arg-dominance-variance">dominance_variance<a class="anchor" aria-label="anchor" href="#arg-dominance-variance"></a></dt>
 <dd><p>Optional named variance of the <strong>degree of
 dominance</strong> across loci. This is AlphaSimR's <code>varDD</code> and is not the
-dominance genetic variance; the two are different quantities.</p></dd>
+dominance genetic variance. These quantities have different meanings.</p></dd>
 
 
 <dt id="arg-heritability">heritability<a class="anchor" aria-label="anchor" href="#arg-heritability"></a></dt>
@@ -183,6 +185,12 @@ programme is being represented, so it must be stated rather than assumed.</p></d
 <dt id="arg-seed">seed<a class="anchor" aria-label="anchor" href="#arg-seed"></a></dt>
 <dd><p>Random seed. The caller's random number generator state is
 restored on exit.</p></dd>
+
+
+<dt id="arg-scenario">scenario<a class="anchor" aria-label="anchor" href="#arg-scenario"></a></dt>
+<dd><p>Optional object from <code><a href="breeding_scenario.html">breeding_scenario()</a></code>. It supplies the
+quantitative trait locus count, neutral marker count, effect distribution,
+and dominance assumptions through one auditable object.</p></dd>
 
 </dl></div>
     <div class="section level2">

@@ -85,7 +85,8 @@
     <li><a class="dropdown-item" href="../articles/DesiredGainR-empirical-validation.html">Empirical validation with real breeding programmes</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Index methods</h6></li>
-    <li><a class="dropdown-item" href="../articles/DesiredGainR-index-families.html">Choosing an index</a></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-index-families.html">Multiple-trait selection and method comparison</a></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-information.html">Using predictions and prediction errors</a></li>
     <li><a class="dropdown-item" href="../articles/DesiredGainR-dgsi.html">Optimising desired gains</a></li>
     <li><a class="dropdown-item" href="../articles/DesiredGainR-qgsi.html">Quadratic genomic selection</a></li>
     <li><hr class="dropdown-divider"></li>
@@ -128,12 +129,12 @@
 <div class="section level2">
 <h2 id="the-decision-that-qgsi-represents">1. The decision that QGSI represents<a class="anchor" aria-label="anchor" href="#the-decision-that-qgsi-represents"></a>
 </h2>
-<p>The quadratic genomic selection index (QGSI) is useful when the value
-of a trait combination cannot be represented adequately by a straight
-line. Three examples are an intermediate optimum, diminishing benefit
-beyond a useful level, and complementarity between two traits. If every
-additional unit has the same value, a linear index is clearer and should
-be preferred.</p>
+<p>The quadratic genomic selection index (QGSI) is useful when a
+straight line gives an inadequate representation of a trait
+combination’s value. Three examples are an intermediate optimum,
+diminishing benefit beyond a useful level, and complementarity between
+two traits. If every additional unit has the same value, a linear index
+is clearer and should be preferred.</p>
 <p>For candidate <span class="math inline">\(i\)</span>, DesiredGainR
 calculates</p>
 <p><span class="math display">\[
@@ -248,8 +249,8 @@ has inverse cross-trait units.</p>
 </h2>
 <p>The following objective rewards improvement in all six traits,
 introduces diminishing returns, and adds complementarity between grain
-yield and disease resistance. These numbers demonstrate the mechanics;
-they are not universal recommendations.</p>
+yield and disease resistance. These numbers demonstrate the mechanics.
+They are not universal recommendations.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">linear_weights</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
 <span>  GY <span class="op">=</span> <span class="fl">1.00</span>, PHT <span class="op">=</span> <span class="fl">0.15</span>, AD <span class="op">=</span> <span class="fl">0.10</span>,</span>
@@ -328,7 +329,7 @@ predictions as the total additive genetic covariance.</p>
 <span><span class="co">#&gt; 6: CAND142   2.311149    -0.4366633 1.874486     6     TRUE</span></span></code></pre></div>
 <p>The <code>LinearPart</code> and <code>QuadraticPart</code> are
 components of the same score. Their signs do not say that a candidate is
-biologically good or bad by themselves; the selection decision follows
+biologically good or bad by themselves. the selection decision follows
 their sum, <code>QGSI</code>.</p>
 <hr>
 </div>
@@ -364,7 +365,7 @@ variance.</li>
 <li>
 <code>observed_selection_differential</code> is the difference
 between the selected candidates’ mean GEBV and the full candidate mean.
-It describes the selected group; it is not automatically the response
+It describes the selected group. It is not automatically the response
 transmitted to progeny.</li>
 </ul>
 <p>The expected-gain calculation is a linear-regression approximation. A
@@ -376,7 +377,7 @@ presenting the approximation as an observed outcome.</p>
 \widehat{\mathbf{g}}^{\mathsf T}\mathbf{W}
 \widehat{\mathbf{g}})=0\)</span> because the relevant third central
 moments are zero. Therefore, the numerator of the linear-regression gain
-is <span class="math inline">\(\mathbf{\Gamma}\mathbf{w}\)</span>; <span class="math inline">\(\mathbf{W}\)</span> enters through the total index
+is <span class="math inline">\(\mathbf{\Gamma}\mathbf{w}\)</span>. <span class="math inline">\(\mathbf{W}\)</span> enters through the total index
 variance. This is a property of that model, not proof that curvature has
 no biological effect. When curvature materially changes the selected
 set, inspect the observed GEBV differential and use simulation or
@@ -523,8 +524,9 @@ a useful, stable and biologically defensible way.</p>
 </h2>
 <ul>
 <li>
-<a href="DesiredGainR-index-families.html">Choosing an index</a>
-places QGSI beside the linear and desired-gain families.</li>
+<a href="DesiredGainR-index-families.html">Multiple-trait
+selection</a> places QGSI beside the linear and desired-gain
+families.</li>
 <li>
 <a href="DesiredGainR-dgsi.html">Optimising desired gains</a>
 explains the iterative desired-gain selection index, which solves a

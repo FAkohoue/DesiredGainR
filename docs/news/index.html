@@ -62,7 +62,8 @@
     <li><a class="dropdown-item" href="../articles/DesiredGainR-empirical-validation.html">Empirical validation with real breeding programmes</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Index methods</h6></li>
-    <li><a class="dropdown-item" href="../articles/DesiredGainR-index-families.html">Choosing an index</a></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-index-families.html">Multiple-trait selection and method comparison</a></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-information.html">Using predictions and prediction errors</a></li>
     <li><a class="dropdown-item" href="../articles/DesiredGainR-dgsi.html">Optimising desired gains</a></li>
     <li><a class="dropdown-item" href="../articles/DesiredGainR-qgsi.html">Quadratic genomic selection</a></li>
     <li><hr class="dropdown-divider"></li>
@@ -90,7 +91,8 @@
 
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.5.0" id="desiredgainr-050-in-development">DesiredGainR 0.5.0 (in development)<a class="anchor" aria-label="anchor" href="#desiredgainr-050-in-development"></a></h2>
-<div class="section level3">
+<ul><li>Added <code><a href="../reference/compare_selection_methods.html">compare_selection_methods()</a></code> for a common-condition comparison of expected response, target attainment, classical criteria, Mahalanobis alignment, rank agreement and selected-set agreement. The multiple-trait selection vignette now defines the major strategy classes, explains every implemented method, gives a method-choice framework and develops a complete worked comparison. Independent-culling and Elston limits now use original trait units. Economic indices now accept valid negative economic weights.</li>
+</ul><div class="section level3">
 <h3 id="critical-remediation-of-august-0-5-0">Critical remediation of 1 August 2026<a class="anchor" aria-label="anchor" href="#critical-remediation-of-august-0-5-0"></a></h3>
 <ul><li><p>Added a reproducible empirical validation suite using six real breeding- programme sources. It estimates common-check and year-adjusted recurrent- cycle trends, freezes a desired-gain index before later INIA rice cohorts, compares it with yield-only selection under a hierarchical temporal bootstrap, tests Genomes-to-Fields transport across non-overlapping year windows, and records the CIMMYT wheat predicted-versus-realized aggregate anchor. Every endpoint ships with its evidence tier and interpretation, making the package’s mathematical, genomic and transport evidence directly auditable. A prospective comparison of competing vectors is identified as a future opportunity to estimate incremental field response among strategies. The sixth source is the Zhang et al. CIMMYT maize RCGS programme: raw two-location cycle gains reproduce the published trend, a nested leave-one-environment-out analysis tests desired-gain directions, and a marker-subsampled repeated five-fold GBLUP reproduction includes a permuted negative control. Cross-file checks expose the 43-versus-44 C4 discrepancy and the byte-identical C3/C4 selected genotype files. Unphased bulk-family calls are explicitly rejected as actual AlphaSimR founders.</p></li>
 <li><p>The population-driven recommender now uses <code>G_target</code> for breeder-facing genetic-SD units and treats <code>G_realised</code> only as a finite-QTL calibration diagnostic. It confirms multiple finalists, applies exact simultaneous lower and upper probability bounds, reports supported/uncertain/not-supported decisions, runs independent multi-start and half-budget stability checks, and validates finalists across newly sampled genetic architectures. Optional covariance draws are integrated when genetic/residual degrees of freedom are supplied; otherwise support is explicitly conditional on the point covariance.</p></li>

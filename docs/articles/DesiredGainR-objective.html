@@ -85,7 +85,8 @@
     <li><a class="dropdown-item" href="../articles/DesiredGainR-empirical-validation.html">Empirical validation with real breeding programmes</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Index methods</h6></li>
-    <li><a class="dropdown-item" href="../articles/DesiredGainR-index-families.html">Choosing an index</a></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-index-families.html">Multiple-trait selection and method comparison</a></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-information.html">Using predictions and prediction errors</a></li>
     <li><a class="dropdown-item" href="../articles/DesiredGainR-dgsi.html">Optimising desired gains</a></li>
     <li><a class="dropdown-item" href="../articles/DesiredGainR-qgsi.html">Quadratic genomic selection</a></li>
     <li><hr class="dropdown-divider"></li>
@@ -141,10 +142,9 @@ in three of the six traits. The index machinery was identical in all
 three runs. Only the objective differed.</p>
 <p>Covarrubias-Pazaran (2021) reaches the same place from the
 operational side. The CGIAR guideline instructs breeders to state a
-desired differential and then adds, in the same paragraph, that the
-resulting coefficients should not be interpreted, because they lack
-meaning under strong genetic correlations. The desired response is the
-only decision genuinely available.</p>
+desired differential. It then advises breeders to avoid interpreting the
+resulting coefficients under strong genetic correlations. The desired
+response is the only decision genuinely available.</p>
 <p>This vignette covers the six tools DesiredGainR provides for that
 decision.</p>
 <hr>
@@ -244,7 +244,7 @@ incorrect.</p>
 <p>This conversion must be applied once. If candidate values and both
 covariance matrices have already been transformed to
 genetic-standard-deviation units, the weights are already per genetic
-standard deviation; multiplying them by the original standard deviations
+standard deviation. Multiplying them by the original standard deviations
 would standardise them twice.</p>
 <hr>
 </div>
@@ -275,7 +275,7 @@ therefore requires exactly</p>
 \mathbf{G}^{-1}\mathbf{d}},\]</span></p>
 <p>and the selected proportion delivering that intensity follows from
 the normal-truncation relationship. This is an exact result under the
-linear-index model; its application remains conditional on the estimated
+linear-index model. Its application remains conditional on the estimated
 covariance matrices and the truncation-selection assumptions.</p>
 </div>
 <div class="section level3">
@@ -332,7 +332,7 @@ planned intensity when necessary.</li>
 <li>If the values are trait-specific minimums, use
 <code><a href="../reference/suggest_desired_gains.html">suggest_desired_gains()</a></code> or interval optimisation. Read the
 worst-trait attainment and the lower confidence bound for joint
-attainment; a large response in one trait must not compensate for
+attainment. A large response in one trait must not compensate for
 failure of another minimum.</li>
 </ol>
 <p>The classical desired-gain index honours only the direction of <span class="math inline">\(\mathbf{d}\)</span>. Multiplying every desired
@@ -486,13 +486,13 @@ the set obtained from the stated objective.</p>
 <tbody>
 <tr class="odd">
 <td>High stability, high rank correlation</td>
-<td>The decision is robust; further argument about weights will not
-change it</td>
+<td>The decision is robust. Further argument about weights will not
+change it.</td>
 </tr>
 <tr class="even">
 <td>Low stability, high rank correlation</td>
-<td>The ranking is stable but the threshold is contested; consider
-selecting more candidates</td>
+<td>The ranking is stable but the threshold is contested. Consider
+selecting more candidates.</td>
 </tr>
 <tr class="odd">
 <td>Low stability, low rank correlation</td>
@@ -533,7 +533,7 @@ the candidates near the selection threshold. A trait that dominates the
 index may conversely be a weak lever, because the ranking already
 follows it.</p>
 <p>Read the two together. The first says which weights are worth arguing
-about; the second says which traits the index is acting on.</p>
+about. the second says which traits the index is acting on.</p>
 <hr>
 </div>
 </div>

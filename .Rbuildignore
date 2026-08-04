@@ -12,6 +12,8 @@
 ^\.git($|[/\\])
 ^\.gitattributes$
 ^\.gitignore$
+^\.check-test$
+^tmp$
 ^CITATION\.cff$
 ^CONTRIBUTING\.md$
 ^CODE_OF_CONDUCT\.md$

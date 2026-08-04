@@ -85,7 +85,8 @@
     <li><a class="dropdown-item" href="../articles/DesiredGainR-empirical-validation.html">Empirical validation with real breeding programmes</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Index methods</h6></li>
-    <li><a class="dropdown-item" href="../articles/DesiredGainR-index-families.html">Choosing an index</a></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-index-families.html">Multiple-trait selection and method comparison</a></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-information.html">Using predictions and prediction errors</a></li>
     <li><a class="dropdown-item" href="../articles/DesiredGainR-dgsi.html">Optimising desired gains</a></li>
     <li><a class="dropdown-item" href="../articles/DesiredGainR-qgsi.html">Quadratic genomic selection</a></li>
     <li><hr class="dropdown-divider"></li>
@@ -133,10 +134,59 @@ genomic-prediction software supplies candidate breeding values and,
 ideally, the fitted multi-trait covariance matrices. DesiredGainR then
 defines and tests the objective, builds selection indices, ranks
 candidates and reports uncertainty.</p>
-<p>It does not analyse field designs, estimate marker effects, allocate
-crosses or optimise matings. Keep those responsibilities in the
-specialised software that produced or consumes the corresponding
-objects.</p>
+<p>It does not analyse field designs, estimate marker effects, choose
+the final parent set, perform optimal contribution selection (OCS),
+perform optimum cross selection or allocate matings. Those downstream
+decisions belong to <a href="https://github.com/FAkohoue/HapBlockR" class="external-link">HapBlockR</a>.</p>
+<p>The division is intentional and one directional:</p>
+<table class="table">
+<colgroup>
+<col width="50%">
+<col width="50%">
+</colgroup>
+<thead><tr class="header">
+<th>Breeding question</th>
+<th>Package responsible</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>What traits and response direction define the objective?</td>
+<td>DesiredGainR</td>
+</tr>
+<tr class="even">
+<td>Is that objective attainable at the planned selection
+intensity?</td>
+<td>DesiredGainR</td>
+</tr>
+<tr class="odd">
+<td>What coefficients, scores and expected responses follow from the
+objective?</td>
+<td>DesiredGainR</td>
+</tr>
+<tr class="even">
+<td>How stable is the ranking to uncertain weights or covariance
+matrices?</td>
+<td>DesiredGainR</td>
+</tr>
+<tr class="odd">
+<td>Which candidates should become parents under merit and relationship
+constraints?</td>
+<td>HapBlockR</td>
+</tr>
+<tr class="even">
+<td>How much should each parent contribute under OCS?</td>
+<td>HapBlockR</td>
+</tr>
+<tr class="odd">
+<td>Which pairs should be crossed, and how should matings be allocated
+under optimum cross selection?</td>
+<td>HapBlockR</td>
+</tr>
+</tbody>
+</table>
+<p>HapBlockR calls DesiredGainR. DesiredGainR does not call HapBlockR.
+This avoids a circular dependency and keeps the scientific
+responsibilities auditable.</p>
 <hr>
 </div>
 <div class="section level2">
@@ -144,14 +194,14 @@ objects.</p>
 </h2>
 <p>Transfer the following objects explicitly:</p>
 <ol style="list-style-type: decimal">
-<li>one stable candidate identifier used by every table and matrix;</li>
-<li>one GEBV or breeding-value column per trait;</li>
-<li>trait names, units and favourable directions;</li>
-<li>additive genetic covariance <span class="math inline">\(\mathbf{G}\)</span>;</li>
-<li>phenotypic or index-variable covariance <span class="math inline">\(\mathbf{P}\)</span>;</li>
-<li>prediction-error covariance or uncertainty draws when available;
-and</li>
-<li>population, environment and model provenance.</li>
+<li>One stable candidate identifier used by every table and matrix.</li>
+<li>One GEBV or breeding-value column per trait.</li>
+<li>Trait names, units and favourable directions.</li>
+<li>Additive genetic covariance <span class="math inline">\(\mathbf{G}\)</span>.</li>
+<li>Phenotypic or index-variable covariance <span class="math inline">\(\mathbf{P}\)</span>.</li>
+<li>Prediction-error covariance or uncertainty draws when
+available.</li>
+<li>Population, environment and model provenance.</li>
 </ol>
 <p>Never match candidates or traits by position alone.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
@@ -166,7 +216,7 @@ and</li>
 </h2>
 <p><code><a href="../reference/import_covariance.html">import_covariance()</a></code> accepts matrices extracted from
 ASReml-R, <code>sommer</code>, <code>breedR</code>, BGLR or a stage-wise
-workflow. The caller extracts the scientifically correct model term;
+workflow. The caller extracts the scientifically correct model term.
 DesiredGainR validates its structure, orders the traits and records its
 origin.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
@@ -203,16 +253,74 @@ interpreting a simulated difference between objectives.</p>
 <hr>
 </div>
 <div class="section level2">
-<h2 id="hand-selected-candidates-downstream">5. Hand selected candidates downstream<a class="anchor" aria-label="anchor" href="#hand-selected-candidates-downstream"></a>
+<h2 id="hand-the-index-to-hapblockr">5. Hand the index to HapBlockR<a class="anchor" aria-label="anchor" href="#hand-the-index-to-hapblockr"></a>
 </h2>
+<p>HapBlockR’s <code>build_selection_index()</code> delegates
+<code>method = "dgsi"</code> and <code>method = "qgsi"</code> to
+DesiredGainR. It returns a directionally aligned
+<code>merit_score</code>, which HapBlockR can combine with genomic
+relationships, haplotype complementarity, family representation and
+crossing constraints. The intended flow is therefore:</p>
+<pre class="text"><code>genetic evaluation
+  -&gt; DesiredGainR objective, index, response and uncertainty
+  -&gt; HapBlockR parent selection, OCS, cross ranking and mate allocation</code></pre>
+<p>The main downstream choices are deliberately separate:</p>
+<ul>
+<li>
+<code>select_parents_ga_ts()</code> constructs a fixed-size
+shortlist while balancing genome-wide merit with complementary haplotype
+coverage.</li>
+<li>
+<code>select_parents_ocs()</code> performs OCS and mate allocation
+when a relationship matrix and a true OCS engine are supplied.</li>
+<li>
+<code>usefulness_criterion()</code> ranks candidate parent pairs by
+expected cross performance rather than parental merit alone.</li>
+</ul>
+<p>OCS and optimum cross selection are related but not synonymous. OCS
+chooses parental contributions while controlling population coancestry.
+Optimum cross selection chooses the pairs and mating allocation under
+cross-level merit, diversity and operational constraints. Both decisions
+belong to HapBlockR. Neither changes the selection-index mathematics
+owned by DesiredGainR.</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Run this stage in HapBlockR. For method = "dgsi" or "qgsi",</span></span>
+<span><span class="co"># build_selection_index() calls DesiredGainR internally.</span></span>
+<span><span class="va">index</span> <span class="op">&lt;-</span> <span class="fu">HapBlockR</span><span class="fu">::</span><span class="fu"><a href="https://FAkohoue.github.io/HapBlockR/reference/build_selection_index.html" class="external-link">build_selection_index</a></span><span class="op">(</span></span>
+<span>  trait_values <span class="op">=</span> <span class="va">candidate_gebv</span>,</span>
+<span>  genetic_cov <span class="op">=</span> <span class="va">G</span>,</span>
+<span>  phenotypic_cov <span class="op">=</span> <span class="va">P</span>,</span>
+<span>  desired_gains <span class="op">=</span> <span class="va">desired_gains</span>,</span>
+<span>  directions <span class="op">=</span> <span class="va">directions</span>,</span>
+<span>  method <span class="op">=</span> <span class="st">"dgsi"</span>,</span>
+<span>  n_select <span class="op">=</span> <span class="va">analytical_n_select</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># The returned merit score then feeds the appropriate HapBlockR decision.</span></span>
+<span><span class="va">ocs_plan</span> <span class="op">&lt;-</span> <span class="fu">HapBlockR</span><span class="fu">::</span><span class="fu"><a href="https://FAkohoue.github.io/HapBlockR/reference/select_parents_ocs.html" class="external-link">select_parents_ocs</a></span><span class="op">(</span></span>
+<span>  merit <span class="op">=</span> <span class="va">index</span><span class="op">$</span><span class="va">scores</span><span class="op">$</span><span class="va">merit_score</span>,</span>
+<span>  G <span class="op">=</span> <span class="va">relationship_matrix</span>,</span>
+<span>  n_crosses <span class="op">=</span> <span class="va">planned_crosses</span></span>
+<span><span class="op">)</span></span></code></pre></div>
 <p>Export identifiers, ranks, scores, per-trait GEBVs and the exact
-objective used. Do not send only a sorted list: mating-design software
-needs enough information to apply diversity, relationship and crossing
-constraints that are outside the selection index.</p>
+objective used. Do not send only a sorted list: HapBlockR needs enough
+information to apply diversity, relationship and crossing constraints
+that are outside the index.</p>
 <p>Also retain package versions, seeds, covariance provenance and the
 selected-set stability analysis. A reproducible hand-off allows the next
 breeding stage to distinguish a biological decision from a software
 default.</p>
+<div class="section level3">
+<h3 id="what-n_select-means-in-desiredgainr">What <code>n_select</code> means in DesiredGainR<a class="anchor" aria-label="anchor" href="#what-n_select-means-in-desiredgainr"></a>
+</h3>
+<p><code>n_select</code> is the number used for truncation-selection
+calculations. It sets the selection proportion and hence the selection
+intensity. It also defines a top-ranked set for response and stability
+diagnostics. It does <strong>not</strong> prove that these candidates
+form the best parent set. The final set can change when HapBlockR
+accounts for relatedness, contributions, haplotype complementarity,
+cross usefulness and operational constraints.</p>
+</div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

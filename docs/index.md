@@ -24,7 +24,22 @@ breeder’s own phased marker data.
 
 DesiredGainR begins **after** the genetic evaluation. It does not
 analyse field trials, fit mixed models, or estimate breeding values, and
-it does not design crossing plans.
+it does not design crossing plans. It ends with a defined objective,
+index coefficients and scores, expected response, feasibility and
+uncertainty diagnostics. Use
+[HapBlockR](https://github.com/FAkohoue/HapBlockR) for the next
+decision: choosing parents, controlling relatedness through optimal
+contribution selection (OCS), performing optimum cross selection and
+allocating matings. The dependency is deliberately one way: HapBlockR’s
+`build_selection_index()` delegates DGSI and QGSI construction to
+DesiredGainR and then carries the merit score into its parent- and
+cross-selection tools.
+
+In DesiredGainR, `n_select` is an **analytical truncation count**. It
+determines selection intensity and identifies the top-ranked set used to
+calculate or compare response. It is not a recommendation that those
+candidates should be the final parents, nor does it decide their
+contributions or pairings.
 
 ![DesiredGainR architecture: Desired-gain selection indices, feasibility
 assessment, genomic ranking and breeding-cycle
@@ -34,7 +49,7 @@ optimisation](reference/figures/DesiredGainR_schematic.png)
 
 DesiredGainR turns an uncertain breeding objective into a transparent,
 quantitative decision. It is especially useful when economic weights
-cannot be defended or when the breeder can state acceptable
+lack a defensible basis or when the breeder can state acceptable
 trait-specific gains more confidently than monetary values.
 
 - It expresses every objective in breeder-facing desired-gain units,
@@ -106,7 +121,8 @@ Full documentation is at **<https://FAkohoue.github.io/DesiredGainR/>**.
 | [Defining a breeding objective](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-objective.html) | How to state, test and defend an objective |
 | [Defining desired gains and intervals](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-desired-gain-intervals.html) | Trait-specific minima, interval elicitation and population-driven suggestions when one exact vector is not defensible |
 | [Obtaining G and P](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-covariance.html) | Covariance estimands, import, working alternatives, diagnostics and reporting |
-| [Choosing an index](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-index-families.html) | Matching the index family to the breeding objective and comparing decisions |
+| [Multiple-trait selection](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-index-families.html) | Definitions, method choice, implementation, fair comparison and decision criteria |
+| [Using predictions and prediction errors](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-information.html) | Distinct information and objective traits, GEBV uncertainty, Cunningham efficiency and Satoh restricted responses |
 | [Optimising desired gains](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-dgsi.html) | Iterative DGSI fitting, transmitted response and optimisation stability |
 | [Quadratic genomic selection](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-qgsi.html) | Complete QGSI demonstration, weight interpretation, contributions and linear comparison |
 | [Multi-cycle simulation](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-simulation.html) | Comparing objectives over several breeding cycles |

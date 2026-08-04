@@ -85,7 +85,8 @@
     <li><a class="dropdown-item" href="../articles/DesiredGainR-empirical-validation.html">Empirical validation with real breeding programmes</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Index methods</h6></li>
-    <li><a class="dropdown-item" href="../articles/DesiredGainR-index-families.html">Choosing an index</a></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-index-families.html">Multiple-trait selection and method comparison</a></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-information.html">Using predictions and prediction errors</a></li>
     <li><a class="dropdown-item" href="../articles/DesiredGainR-dgsi.html">Optimising desired gains</a></li>
     <li><a class="dropdown-item" href="../articles/DesiredGainR-qgsi.html">Quadratic genomic selection</a></li>
     <li><hr class="dropdown-divider"></li>
@@ -134,10 +135,10 @@ index coefficient, or a guarantee about the response that selection will
 deliver.</p>
 <p>For example, a breeder might describe the objective as:</p>
 <ul>
-<li>increase yield by roughly 0.5 to 1.5 genetic standard
-deviations;</li>
-<li>reduce disease severity by roughly 0.25 to 1.0 genetic standard
-deviations;</li>
+<li>Increase yield by roughly 0.5 to 1.5 genetic standard
+deviations.</li>
+<li>Reduce disease severity by roughly 0.25 to 1.0 genetic standard
+deviations.</li>
 <li>improve quality by 0.1 to 0.8 genetic standard deviations.</li>
 </ul>
 <p>The relative sizes describe the requested balance among traits. The
@@ -168,7 +169,7 @@ standard deviation of improvement. For a lower-is-better trait,
 reduction of half a genetic SD. In a simulation setup this scale is
 <code>sqrt(diag(setup$G_target))</code>. The random finite-QTL
 covariance stored as <code>G_realised</code> is a calibration
-diagnostic, never a replacement for the breeder’s estimand; otherwise
+diagnostic, never a replacement for the breeder’s estimand. Otherwise,
 the same threshold would change with a simulator seed.</p>
 <p>Genetic SD is recommended for eliciting multi-trait intervals. It
 does not make <code>1.5 SD</code> attainable. Feasibility must be
@@ -180,7 +181,7 @@ intensity.</p>
 </h2>
 <p>Sometimes even an interval is more precision than the breeder can
 defend. The breeder may know only the smallest useful response for each
-trait. Those minima need not be equal:</p>
+trait. Each trait can have its own minimum:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">suggestion</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/suggest_desired_gains.html">suggest_desired_gains</a></span><span class="op">(</span></span>
 <span>  <span class="va">setup</span>,</span>
@@ -203,7 +204,7 @@ should be negative.</p>
 <li>
 <code>minimum_recommendation</code> is the direction with the
 strongest conservative evidence of reaching <strong>all three
-trait-specific minima</strong>;</li>
+trait-specific minima</strong>.</li>
 <li>
 <code>maximum_balanced_recommendation</code> is the direction with
 the highest robust lower bound on the worst-responding trait, after
@@ -244,7 +245,7 @@ multi-start/half-budget search disagreement, inadequate reproduction of
 failure across newly sampled architectures. Covariance-estimation
 uncertainty is also propagated when defensible genetic and residual
 degrees of freedom are supplied. Without them, any supported answer is
-labelled <code>supported_conditional_on_covariance</code>; simulation
+labelled <code>supported_conditional_on_covariance</code>. Simulation
 cannot manufacture uncertainty information that the data analysis did
 not provide.</p>
 <p>Read the result as follows:</p>
@@ -257,7 +258,7 @@ not provide.</p>
 <span><span class="va">suggestion</span><span class="op">$</span><span class="va">search_stability</span></span>
 <span><span class="va">suggestion</span><span class="op">$</span><span class="va">outer_validation</span></span></code></pre></div>
 <p>The returned <code>desired_gain_direction</code> is a direction in
-favourable genetic-SD space; its length is fixed to one because
+favourable genetic-SD space. Its length is fixed to one because
 multiplying the entire vector by a constant does not change a classical
 desired-gain index. The confirmation table reports expected realised
 responses and probabilities. Do not interpret the direction entries
@@ -422,7 +423,7 @@ beginning with <code>requested_</code> in
 <span><span class="op">)</span><span class="op">]</span></span></code></pre></div>
 <p>Every row is an actually simulated desired-gain vector. The
 Gaussian-process surrogate decides only where to spend the next
-simulation; an unsimulated surrogate optimum is never recommended.
+simulation. An unsimulated surrogate optimum is never recommended.
 Common random numbers make comparisons more precise, and the paired
 bootstrap used for <code>bootstrap_selection_frequency</code> preserves
 the shared-seed dependence among vectors. It is a stability frequency
@@ -523,10 +524,10 @@ all explicit and testable.</p>
 </h2>
 <p>The selected solution is conditional on:</p>
 <ul>
-<li>the breeder-defined intervals and ranking mode;</li>
-<li>the founder germplasm and covariance matrices;</li>
-<li>selection intensity, mating system and population size;</li>
-<li>the number of simulated cycles;</li>
+<li>The breeder-defined intervals and ranking mode.</li>
+<li>The founder germplasm and covariance matrices.</li>
+<li>Selection intensity, mating system and population size.</li>
+<li>The number of simulated cycles.</li>
 <li>the assumed genetic architecture and estimation error.</li>
 </ul>
 <p>DesiredGainR therefore helps the breeder replace an unjustifiably

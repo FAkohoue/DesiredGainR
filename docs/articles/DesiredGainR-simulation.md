@@ -9,7 +9,7 @@ the package by design.
 
 The heavy chunks below are marked `eval = FALSE` because a realistic run
 takes minutes to hours. Output blocks shown as fixed text illustrate the
-shape of each object; your numbers will depend on your founders and
+shape of each object. Your numbers will depend on your founders and
 parameters.
 
 `AlphaSimR` is required and lives in `Suggests`. Every function fails
@@ -169,16 +169,53 @@ wrong results.
 
 ## 4. Calibrating the trait architecture
 
-Genome structure comes from your markers; trait variances and
+Genome structure comes from your markers. Trait variances and
 correlations are calibrated to the covariance matrix you already
 estimated.
+
+Beavis, Mahama and Suza (2023) identify three core elements of a
+breeding simulation. These are: (i) trait architecture, (ii) population
+structure, and (iii) genome organisation. DesiredGainR records these
+assumptions in a scenario object.
+
+``` r
+polygenic_scenario <- breeding_scenario(
+  label = "polygenic GEBV programme",
+  programme = "outcross",
+  architecture = list(
+    qtl_per_chromosome = 100L,
+    markers_per_chromosome = 100L,
+    effect_distribution = "normal"
+  ),
+  evaluation = list(type = "gebv")
+)
+polygenic_scenario
+```
+
+The same interface can define an oligogenic stress scenario. A gamma
+distribution allows a small number of loci to explain a larger share of
+the genetic variance.
+
+``` r
+oligogenic_scenario <- breeding_scenario(
+  label = "unequal QTL effects",
+  programme = "outcross",
+  architecture = list(
+    qtl_per_chromosome = 10L,
+    markers_per_chromosome = 100L,
+    effect_distribution = "gamma",
+    qtl_shape = 0.4
+  ),
+  evaluation = list(type = "gebv")
+)
+```
 
 ``` r
 setup <- founder_population(
   founders,
   G = dgr_G,
   h2 = stats::setNames(dgr_traits$heritability, traits),
-  n_qtl_per_chromosome = 100L,
+  scenario = polygenic_scenario,
   seed = 42L
 )
 setup
@@ -193,6 +230,28 @@ Trait variances are taken from \\\operatorname{diag}(\mathbf{G})\\ and
 correlations from the corresponding correlation matrix, so the
 simulation reproduces the observed germplasm structure *and* the
 observed trait covariances.
+
+Run a calibration audit before comparing objectives.
+
+``` r
+calibration <- simulation_calibration(setup)
+calibration
+```
+
+The report checks five elements:
+
+1.  Target and realised genetic variances.
+2.  Target and realised genetic correlations.
+3.  Target and realised heritabilities.
+4.  Availability of a neutral marker panel.
+5.  separation between neutral markers and quantitative trait loci
+    (QTL).
+
+A review status identifies an assumption that needs inspection. For
+example, an oligogenic scenario can reproduce marginal variances while
+its realised trait correlations remain unstable. Increasing the number
+of QTL can then separate an architecture effect from a numerical
+calibration effect.
 
 **For a clonal programme**, supply `dominance_degree`, and `G` should
 then be the **genotypic** rather than the additive covariance, because
@@ -245,7 +304,7 @@ simulation
 |----|----|----|
 | `"self"` | Wheat, rice, common bean, cowpea | Selected parents intercrossed, families advanced by selfing or doubled haploidy before evaluation. Recombination releases variance slowly. |
 | `"outcross"` | Maize, sorghum, pearl millet | Random mating each cycle, so half the selection-induced disequilibrium decays per generation. |
-| `"clonal"` | Cassava, sweetpotato, banana, potato | Recombination happens once per cycle, when selected parents are crossed to raise a seedling generation; every later stage is a copy, so dominance is transmitted intact and selection acts on **total genotypic value**. Requires a setup built with `dominance_degree`, and `G` is then the genotypic covariance. |
+| `"clonal"` | Cassava, sweetpotato, banana, potato | Recombination happens once per cycle. Selected parents are crossed to raise a seedling generation. Later stages contain clonal copies. Dominance is retained, and selection acts on **total genotypic value**. This mode requires a setup built with `dominance_degree`. Here, `G` is the genotypic covariance. |
 
 ### 5.2 What a cycle means
 
@@ -297,14 +356,15 @@ separately as `qtl_segregating` and `genic_variance_ratio`.
 
 Supply `n_markers_per_chromosome` to
 [`founder_population()`](https://FAkohoue.github.io/DesiredGainR/reference/founder_population.md)
-to create the panel; without it, all segregating sites are used instead.
+to create the panel. Otherwise, the simulation uses all segregating
+sites.
 
 ### 5.3 The re-estimation switch
 
 `reestimate_index = TRUE`, the default, rebuilds the covariance of the
 observed selection criterion from each cycle. It does **not** estimate
 genetic covariance from hidden simulated breeding values. Phenotypic
-selection retains the breeder-supplied `G_target`; genomic selection
+selection retains the breeder-supplied `G_target`. Genomic selection
 uses the calibrated-GEBV identity described below. Setting it `FALSE`
 reuses the cycle-one coefficients and isolates the effect of the
 desired-gain direction alone.
@@ -348,9 +408,9 @@ Every candidate is predicted by a model that excluded its fold,
 preventing training-set leakage. Earlier cycles may be retained as a
 rolling training population. The cycle table reports the correlation
 between held-out GEBV and true simulated breeding value as
-`prediction_accuracy`; truth is used only for this diagnostic, never for
-selection. `prediction_calibration_slope` additionally reports
-`Cov(A, Ahat) / Var(Ahat)`; values far from one warn that the
+`prediction_accuracy`. Truth is used only for this diagnostic. Selection
+uses the predictions. `prediction_calibration_slope` also reports
+`Cov(A, Ahat) / Var(Ahat)`. Values far from one warn that the
 calibrated- GEBV assumption used by the desired-gain index is poor.
 RR-BLUP currently supports additive, non-clonal programmes. A clonal
 dominance programme must use the phenotypic path until a validated
@@ -359,9 +419,13 @@ total-genetic-value predictor is implemented.
 ### 5.5 The selection rule is deliberately simple
 
 Truncation on the index, and nothing more. Optimal contribution
-selection, family quotas and coancestry constraints are the province of
-a mating-design tool. Duplicating them here would mean maintaining two
-simulators with different genetic engines.
+selection, optimum cross selection, family quotas and coancestry
+constraints belong to
+[HapBlockR](https://github.com/FAkohoue/HapBlockR). The simulation
+settings in this vignette define a scenario for comparing desired-gain
+objectives. HapBlockR provides the optimised parent, contribution, and
+mating plan. It calls DesiredGainR to build DGSI or QGSI merit and then
+makes those operational decisions.
 
 ------------------------------------------------------------------------
 
@@ -377,8 +441,8 @@ therefore the unit sphere,
 
 with \\p-1\\ free parameters for \\p\\ traits. For the three to eight
 traits breeders use, that is small enough to cover densely. By default
-the search is restricted to the non-negative orthant, meaning
-improvement is sought in every trait; set `non_negative = FALSE` to
+the search is restricted to the non-negative orthant. This means that
+improvement is sought in every trait. Set `non_negative = FALSE` to
 admit directions that deliberately concede ground somewhere.
 
 ### 6.2 The simulation is the objective function
@@ -405,7 +469,7 @@ optimisation
     #>   Mode: pareto   Cycles: 5   Evaluations: 60 (3 replicates each)
     #>   Objectives: GY, PHT, AD, ASI, EPP, GLS, diversity
     #>   Non-dominated directions: 9 of 60
-    #>   No single direction is recommended; choose a point on the frontier.
+    #>   No single direction is recommended. Choose a point on the frontier.
 
 A Gaussian process is fitted to the accumulated results, but **it
 decides only where the next simulation should be spent.** It never
@@ -491,6 +555,111 @@ optimisation <- optimize_desired_gains(
 )
 ```
 
+### 6.7 Stress-test the recommendation
+
+One genetic architecture gives a conditional recommendation. A breeder
+needs to know whether that recommendation remains useful under other
+plausible architectures.
+
+Build each setup from the same founders. Change one biological
+assumption at a time. Then use matched replicate seeds across scenarios.
+Exact alignment of random draws requires the same simulator call path.
+This distinction matters when architectures differ.
+
+``` r
+setup_polygenic <- founder_population(
+  founders,
+  G = dgr_G,
+  h2 = stats::setNames(dgr_traits$heritability, traits),
+  scenario = polygenic_scenario,
+  seed = 42L
+)
+
+setup_oligogenic <- founder_population(
+  founders,
+  G = dgr_G,
+  h2 = stats::setNames(dgr_traits$heritability, traits),
+  scenario = oligogenic_scenario,
+  seed = 42L
+)
+
+stress <- stress_test_desired_gains(
+  setups = list(
+    polygenic = setup_polygenic,
+    oligogenic = setup_oligogenic
+  ),
+  desired_gains = c(
+    GY = 1.0, PHT = 0.4, AD = 0.6,
+    ASI = 0.5, EPP = 0.4, GLS = 0.6
+  ),
+  options = list(
+    minimum_gains = c(
+      GY = 0.8, PHT = 0.2, AD = 0.3,
+      ASI = 0.2, EPP = 0.2, GLS = 0.3
+    ),
+    min_replicates = 30L,
+    max_replicates = 150L,
+    batch_size = 10L,
+    utility_mcse = 0.05,
+    simulation = list(
+      n_cycles = 5L,
+      mating_system = "outcross",
+      n_parents = 20L,
+      n_crosses = 50L,
+      n_progeny_per_cross = 10L,
+      lower_is_better = lower_is_better
+    ),
+    seed = 812L
+  )
+)
+stress
+```
+
+The summary reports:
+
+1.  Mean cumulative gain.
+2.  Monte Carlo standard error (MCSE).
+3.  The probability of reaching every trait minimum.
+4.  The probability of an unfavourable response.
+5.  Lower-tail and upper-tail outcomes.
+6.  Regret relative to the strongest tested scenario.
+
+Replication continues in batches. It stops when the utility MCSE reaches
+the requested precision or when the maximum replicate count is reached.
+Therefore, the computational budget follows the uncertainty in the
+answer.
+
+### 6.8 Represent true genotype-by-environment interaction
+
+Different residual variances describe different levels of field
+precision. Genotype-by-environment interaction (GxE) requires genetic
+responses that vary among environments.
+
+Use
+[`expand_environments()`](https://FAkohoue.github.io/DesiredGainR/reference/expand_environments.md)
+to represent each trait-environment combination. The between-environment
+genetic correlation then controls crossover GxE. Values near one
+indicate similar genotype rankings. Lower values indicate greater
+reranking.
+
+This formulation also supports target-population-of-environments weights
+and stability contrasts. Chapter 12 provides the mixed-model basis. The
+upstream model estimates the covariance. DesiredGainR uses that
+covariance for index construction and simulation.
+
+### 6.9 Testcross and general combining ability information
+
+A testcross programme often ranks lines through general combining
+ability (GCA). Treat the GCA values as selection information. Use
+[`selection_information()`](https://FAkohoue.github.io/DesiredGainR/reference/selection_information.md)
+when the covariance of GCA predictions differs from the covariance of
+the objective traits. Propagate prediction error with
+[`candidate_score_uncertainty()`](https://FAkohoue.github.io/DesiredGainR/reference/candidate_score_uncertainty.md).
+
+DesiredGainR then constructs and evaluates the multi-trait merit.
+HapBlockR uses that merit for parent selection, contribution control,
+and cross design.
+
 ------------------------------------------------------------------------
 
 ## 7. What the results are conditional on
@@ -519,13 +688,19 @@ reported with those assumptions attached.
 | [`haplotypes_from_inbred_dosage()`](https://FAkohoue.github.io/DesiredGainR/reference/haplotypes_from_inbred_dosage.md) | Derive phase from inbred dosage, under an explicit policy |
 | [`founder_haplotypes()`](https://FAkohoue.github.io/DesiredGainR/reference/founder_haplotypes.md) | Validate and package phased founders |
 | [`founder_population()`](https://FAkohoue.github.io/DesiredGainR/reference/founder_population.md) | Build the AlphaSimR population, calibrated to \\\mathbf{G}\\ |
+| [`breeding_scenario()`](https://FAkohoue.github.io/DesiredGainR/reference/breeding_scenario.md) | Record architecture, programme, evaluation, and environment assumptions |
+| [`simulation_calibration()`](https://FAkohoue.github.io/DesiredGainR/reference/simulation_calibration.md) | Compare the target and realised simulation properties |
 | [`simulate_selection_cycles()`](https://FAkohoue.github.io/DesiredGainR/reference/simulate_selection_cycles.md) | Run one desired-gain direction forward |
 | [`optimize_desired_gains()`](https://FAkohoue.github.io/DesiredGainR/reference/optimize_desired_gains.md) | Search directions, surrogate-assisted |
+| [`stress_test_desired_gains()`](https://FAkohoue.github.io/DesiredGainR/reference/stress_test_desired_gains.md) | Compare one direction across plausible scenarios |
 
 ------------------------------------------------------------------------
 
 ## 9. References
 
+- Beavis WD, Mahama AA, Suza W (2023). Simulation Modeling. In
+  *Quantitative Genetics for Plant Breeding*. Iowa State University
+  Digital Press.
 - Bulmer MG (1971). The effect of selection on genetic variability. *The
   American Naturalist* **105**:201-211.
 - Gaynor RC, Gorjanc G, Hickey JM (2021). AlphaSimR: an R package for

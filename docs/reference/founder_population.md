@@ -20,7 +20,8 @@ founder_population(
   dominance_degree = NULL,
   dominance_variance = NULL,
   heritability = c("narrow", "broad"),
-  seed = 42L
+  seed = 42L,
+  scenario = NULL
 )
 ```
 
@@ -71,8 +72,8 @@ founder_population(
 - dominance_variance:
 
   Optional named variance of the **degree of dominance** across loci.
-  This is AlphaSimR's `varDD` and is not the dominance genetic variance;
-  the two are different quantities.
+  This is AlphaSimR's `varDD` and is not the dominance genetic variance.
+  These quantities have different meanings.
 
 - heritability:
 
@@ -86,6 +87,14 @@ founder_population(
 
   Random seed. The caller's random number generator state is restored on
   exit.
+
+- scenario:
+
+  Optional object from
+  [`breeding_scenario()`](https://FAkohoue.github.io/DesiredGainR/reference/breeding_scenario.md).
+  It supplies the quantitative trait locus count, neutral marker count,
+  effect distribution, and dominance assumptions through one auditable
+  object.
 
 ## Value
 

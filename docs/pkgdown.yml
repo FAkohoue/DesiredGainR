@@ -7,6 +7,7 @@ articles:
   DesiredGainR-dgsi: DesiredGainR-dgsi.html
   DesiredGainR-empirical-validation: DesiredGainR-empirical-validation.html
   DesiredGainR-index-families: DesiredGainR-index-families.html
+  DesiredGainR-information: DesiredGainR-information.html
   DesiredGainR-interoperation: DesiredGainR-interoperation.html
   DesiredGainR-introduction: DesiredGainR-introduction.html
   DesiredGainR-objective: DesiredGainR-objective.html
@@ -15,7 +16,7 @@ articles:
   DesiredGainR-reproduction: DesiredGainR-reproduction.html
   DesiredGainR-simulation: DesiredGainR-simulation.html
   DesiredGainR-workflow: DesiredGainR-workflow.html
-last_built: 2026-08-03T22:14Z
+last_built: 2026-08-04T21:15Z
 urls:
   reference: https://FAkohoue.github.io/DesiredGainR/reference
   article: https://FAkohoue.github.io/DesiredGainR/articles

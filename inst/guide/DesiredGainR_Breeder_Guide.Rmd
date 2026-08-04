@@ -200,18 +200,42 @@ No R knowledge is required to read this guide. The companion vignette
 
 ## What the package does
 
-DesiredGainR sits between a fitted multi-trait model and a selection decision.
+DesiredGainR sits between a fitted multi-trait model and an index decision.
 It takes covariance matrices and candidate values as given, and returns
 coefficients, a ranking, expected responses and diagnostics.
+
+Its job ends there. The ranking is evidence for the next decision, not a final
+crossing plan. Use `HapBlockR` to choose the operational parent set, perform
+optimal contribution selection (OCS), rank candidate crosses and allocate
+matings. HapBlockR's `build_selection_index()` calls DesiredGainR when DGSI or
+QGSI is requested, then carries the resulting merit score into its parent- and
+cross-selection tools. DesiredGainR never calls HapBlockR.
+
+OCS and optimum cross selection answer different questions. OCS determines how
+much each parent should contribute while controlling coancestry. Optimum cross
+selection determines which parent pairs to make and how many matings to assign
+under cross merit, diversity and operational constraints. HapBlockR owns both;
+DesiredGainR supplies the multi-trait merit objective they can use.
 
 ## What it deliberately does not do
 
 | Task | Why not | Use instead |
 | :--- | :--- | :--- |
-| Design a mating plan | Ranking candidates and allocating crosses are different problems with different objectives | A dedicated mating-design tool; `HapBlockR` for haplotype-aware allocation |
-| Control inbreeding | Optimal contribution selection is not implemented; the simulation reports coancestry but does not optimise against it | A relationship-management tool |
-| Fit the mixed model | Estimating `G` and `P` is upstream work | ASReml-R, sommer, breedR, StageWise; import with `import_covariance()` |
+| Choose the final parent set | A top index rank does not account for relatedness, complementarity or representation | `HapBlockR::select_parents_ga_ts()` or another HapBlockR parent-selection method |
+| Control contributions and inbreeding | OCS is a population-management problem, not an index-coefficient problem | `HapBlockR::select_parents_ocs()` with a true OCS engine |
+| Perform optimum cross selection and allocate matings | Pair performance and crossing constraints are different from individual merit | `HapBlockR::usefulness_criterion()` and HapBlockR mating-plan tools |
+| Fit the mixed model | Estimating `G` and `P` is upstream work | ASReml-R, sommer, breedR, StageWise. Import with `import_covariance()`. |
 | Simulate a breeding programme | The simulation layer is narrow by design: it compares desired-gain directions, nothing more | AlphaSimR directly |
+
+## What `n_select` does - and does not do
+
+In DesiredGainR, `n_select` sets the truncation proportion. From that
+proportion the package obtains selection intensity, calculates predicted or
+realised response and identifies a top-ranked set for stability comparisons.
+It is an analytical input, not a parental-selection algorithm. Do not read
+"top 20" as "cross these 20". HapBlockR may retain a different set after it
+accounts for genomic relationships, contributions, complementary haplotypes,
+cross usefulness and programme constraints.
 
 ## Feature maturity
 
@@ -220,24 +244,69 @@ to be defended on the weakest one.
 
 | Maturity | Components |
 | :--- | :--- |
-| Stable | Objective definition and feasibility; covariance diagnostics, bending and import |
-| Beta | Classical index families; restricted and proportional-gain indices; the desired-gain index; the quadratic genomic index |
+| Stable | Objective definition, feasibility, covariance diagnostics, bending and import |
+| Beta | Classical index families, restricted and proportional-gain indices, the desired-gain index and the quadratic genomic index |
 | Experimental | Covariance uncertainty propagation |
-| Experimental, not for operational recommendation | Recurrent simulation; direction optimisation; diversity optimisation; clonal mode |
+| Experimental, not for operational recommendation | Recurrent simulation, direction optimisation, diversity optimisation and clonal mode |
 
 # Before any recommendation
 
 ## Minimum evidence
 
-An index cannot be built responsibly without all of the following.
+A responsible index requires all of the following.
 
 | Requirement | Why it matters | Failure mode if absent |
 | :--- | :--- | :--- |
-| Candidate values on a stated scale | The index is a linear combination; scale determines what it weights | Coefficients that silently favour whichever trait carries the largest variance |
+| Candidate values on a stated scale | The index is a linear combination. Scale determines what it weights. | Coefficients that silently favour whichever trait carries the largest variance |
 | A genetic covariance $\mathbf{G}$ | Determines what selection transmits | No expected response can be computed |
 | A phenotypic covariance $\mathbf{P}$ | Determines what selection acts on | Accuracy and heritability undefined |
 | Favourable direction per trait | Which way is better is not inferable from the data | An index that selects against the objective |
-| Units per trait | Needed to interpret any gain | Gains that cannot be compared with programme targets |
+| Units per trait | Needed to interpret any gain | Gains with no clear link to programme targets |
+
+## Selection information and objective traits
+
+The information used to rank candidates can differ from the genetic objective.
+This distinction matters after a multi-trait or multi-environment mixed model.
+The information can include records from relatives, environments, testcrosses,
+or correlated traits. The objective can remain a smaller set of genetic
+quantities.
+
+Let $\mathbf{x}$ contain the selection information. Let $\mathbf{g}$ contain
+the objective traits. Define
+
+$$
+\mathbf{P}=\operatorname{Var}(\mathbf{x}),\qquad
+\mathbf{C}=\operatorname{Cov}(\mathbf{x},\mathbf{g}),\qquad
+\mathbf{G}=\operatorname{Var}(\mathbf{g}).
+$$
+
+For economic weights $\mathbf{a}$,
+
+$$
+\mathbf{b}=\mathbf{P}^{-1}\mathbf{C}\mathbf{a}.
+$$
+
+For a desired-gain direction $\mathbf{d}$,
+
+$$
+\mathbf{b}=
+\mathbf{P}^{-1}\mathbf{C}
+(\mathbf{C}^{\mathsf T}\mathbf{P}^{-1}\mathbf{C})^{-1}\mathbf{d}.
+$$
+
+Use `selection_information()` to declare these matrices. It checks their joint
+covariance. Use `generalized_index()` to fit the index.
+
+A desired gain stated in genetic standard deviations requires conversion to
+the units of $\mathbf{G}$. Multiply each entry by
+$\sqrt{\operatorname{diag}(\mathbf{G})}$. Then declare lower-is-better traits
+in `generalized_index()`. This keeps units and signs explicit.
+
+A genomic estimated breeding value (GEBV) is a prediction. Its prediction
+error variance (PEV) measures uncertainty for one trait. Prediction error
+covariance (PEC) extends this quantity across traits. Candidate-specific PEC
+matrices support score intervals and selection probabilities through
+`candidate_score_uncertainty()`.
 
 ## Covariance provenance and admissibility
 
@@ -281,7 +350,7 @@ Two of that function's fixed choices matter and are surfaced in the result:
 | Setting | Consequence |
 | :--- | :--- |
 | `keepDiag = FALSE` | Trait variances are **not** preserved, so the heritabilities implied by the bent matrix are not those supplied. Read `max_variance_change`. |
-| `posd.tol = 0.01` | Eigenvalues floored at a hundredth of the largest, capping $\kappa$ near 100. Appropriate for an $n \times n$ relationship matrix; aggressive for a $p \times p$ trait covariance, where $\kappa$ of $10^3$ to $10^4$ is ordinary and genuine. |
+| `posd.tol = 0.01` | Eigenvalues floored at a hundredth of the largest, capping $\kappa$ near 100. This is appropriate for an $n \times n$ relationship matrix. It is aggressive for a $p \times p$ trait covariance, where $\kappa$ of $10^3$ to $10^4$ is ordinary and genuine. |
 
 Bending is a repair of an estimate, not an estimate. Report the adjustment
 alongside any result derived from a bent matrix.
@@ -293,9 +362,11 @@ better — disease severity, days to maturity, plant height where reduction is
 wanted — are named in `lower_is_better`, and the package reverses their sign
 internally so that larger always means better in the analysis space.
 
-Desired gains and economic weights are then stated as **non-negative
-magnitudes** in that favourable-direction space. Supplying a negative magnitude
-is an error, not a way of expressing direction.
+Desired gains are stated as **non-negative magnitudes** in that
+favourable-direction space. Economic weights can be positive, zero or negative.
+A negative economic weight can arise when correlated response would otherwise
+move a trait beyond its preferred level. Trait direction remains declared
+through `lower_is_better`.
 
 # Defining the objective
 
@@ -307,7 +378,8 @@ economic quantities. In practice almost no programme has them, and two people
 who agree entirely about the intent will write down different weights.
 
 What programmes have is an intent: *lift yield without letting the cycle get
-longer*; *hold disease resistance where it is and push everything else*. An
+longer*. Another example is *hold disease resistance where it is and push
+everything else*. An
 intent is not a weight vector.
 
 ## The two directions of conversion
@@ -340,7 +412,7 @@ If the desired gains are stated in genetic standard deviations while
 $\mathbf{G}$ and $\mathbf{P}$ remain in original trait units, the returned
 weights are per original unit. Hence, compare `weight * genetic_sd`, not the raw
 coefficients. This multiplication converts the weights to a common
-per-genetic-standard-deviation scale; it does not standardise the desired gains
+per-genetic-standard-deviation scale. It does not standardise the desired gains
 again. If the covariance matrices have already been standardised, do not apply
 the multiplication a second time.
 
@@ -377,7 +449,7 @@ retains 0.5% and gives a lower intensity. A reported attainable fraction of
 54.7% means that 54.7% of **every component** is available when the exact trait
 ratio is preserved.
 
-This exact-ray test must not be confused with a minimum-floor objective. If a
+Keep this exact-ray test separate from a minimum-floor objective. If a
 breeder accepts gains larger than the stated minimums, another response vector
 may meet all floors without preserving their ratio. Therefore: (i) scale the
 whole vector when its ratio is binding, or (ii) use population-driven or
@@ -397,7 +469,7 @@ set moves.
 | Outcome | Reading |
 | :--- | :--- |
 | Selected set stable under a 20% weight change | The recommendation is defensible in a meeting |
-| Selected set moves substantially | The data cannot distinguish your objective from a neighbouring one; decide on other grounds |
+| Selected set moves substantially | The data cannot distinguish your objective from a neighbouring one. Decide on other grounds. |
 
 ## What was the programme actually selecting for?
 
@@ -409,7 +481,77 @@ $$\mathbf{b} \;=\; \mathbf{P}^{-1}\mathbf{s}$$
 Comparing the recovered objective against the stated one is often the only way
 to discover what a programme's objective has actually been.
 
-# The index families and their variants
+# Understanding multiple-trait selection
+
+## Definition and purpose
+
+Multiple-trait selection is the choice of candidates using two or more traits.
+The traits may enter the decision together or at different breeding stages.
+The purpose is to improve overall cultivar value while respecting genetic,
+biological and commercial trade-offs.
+
+The objectives of this chapter are to: (i) define the main strategies, (ii)
+explain the index quantities, (iii) connect each breeding question to a method,
+and (iv) establish a fair comparison procedure.
+
+## The four broad strategies
+
+Beavis, Lamkey, Mahama and Suza (2023) distinguish four broad strategies.
+
+| Strategy | Meaning | Suitable situation | Main risk |
+| :--- | :--- | :--- | :--- |
+| Multistage selection | Different traits are evaluated at different stages. | Expensive traits follow inexpensive screening. | Early rejection can remove candidates with later value. |
+| Tandem selection | One trait is improved before attention moves to another. | One urgent trait dominates a specific stage. | Other traits can deteriorate during that stage. |
+| Independent culling | Every candidate must satisfy every stated limit. | Release standards or biological limits are firm. | Small failures receive no compensation from other traits. |
+| Index selection | Traits are combined into one measure of overall merit. | Simultaneous improvement and explicit trade-offs are required. | The decision depends on the stated objective and input quality. |
+
+These strategies solve different problems. Therefore, method choice starts
+with the allowed trade-offs. It does not start with the most elaborate
+algorithm.
+
+## The common index model
+
+Let $\mathbf{x}$ contain the information used for selection. Let $\mathbf{g}$
+contain the additive genetic values of the objective traits. Define
+
+$$
+\mathbf{P}=\operatorname{Var}(\mathbf{x}),\qquad
+\mathbf{C}=\operatorname{Cov}(\mathbf{x},\mathbf{g}),\qquad
+\mathbf{G}=\operatorname{Var}(\mathbf{g}).
+$$
+
+$\mathbf{P}$ describes the information variables. $\mathbf{C}$ describes how
+they predict the objective traits. $\mathbf{G}$ describes the available
+genetic variation. The selection index is
+
+$$I=\mathbf{b}^{\mathsf T}\mathbf{x}.$$
+
+Its expected response is
+
+$$
+\Delta
+=i\frac{\mathbf{C}^{\mathsf T}\mathbf{b}}
+{\sqrt{\mathbf{b}^{\mathsf T}\mathbf{P}\mathbf{b}}},
+$$
+
+where $i$ is the selection intensity. When information and objective traits
+are identical, $\mathbf{C}=\mathbf{G}$. When they differ, use
+`selection_information()` and `generalized_index()`.
+
+## From a breeding statement to a method
+
+| Breeder's statement | Starting method |
+| :--- | :--- |
+| I can defend relative economic values. | Smith-Hazel |
+| I can state a desired response direction. | Pesek-Baker or Yamada |
+| I can state acceptable desired-gain intervals. | `suggest_desired_gains()` |
+| Every selected candidate must satisfy these limits. | Independent culling |
+| Eligible candidates should have balanced margins. | Elston |
+| Some traits should remain unchanged. | Restricted index |
+| I need a simple comparator with few assumptions. | Base or Mulamba-Mock |
+| Merit is genuinely curved or interactive. | Quadratic genomic selection index |
+
+# Methods implemented in DesiredGainR
 
 Distinguish the biological question from the optimisation method. A more
 elaborate method is not automatically more appropriate. Use the simplest method
@@ -435,7 +577,7 @@ $$\mathbf{b} = \mathbf{a}$$
 The weights are applied directly to the trait values with no covariance
 adjustment. Requires no $\mathbf{P}$. Always worth computing: if the optimum index
 barely beats the base index, the covariance structure is not doing much work
-and the extra estimation risk may not be worth carrying.
+and the extra estimation risk may outweigh the small advantage.
 
 ## Desired-gain families
 
@@ -463,7 +605,7 @@ $$\Delta \;=\; i\,\frac{\mathbf{G}\mathbf{b}}{\sqrt{\mathbf{b}^{\mathsf T}\mathb
 \;=\; \frac{i}{\sqrt{\mathbf{b}^{\mathsf T}\mathbf{P}\mathbf{b}}}\,\mathbf{d}.$$
 
 This is what makes the family useful and what makes its estimation error
-measurable; see the chapter on uncertainty below.
+measurable. See the chapter on uncertainty below.
 
 ## Rank and threshold families
 
@@ -485,9 +627,27 @@ maximum, not a quota: if seven candidates pass and twenty were requested, seven
 are returned and the shortfall is reported with the gates each failure
 violated.
 
+Supply thresholds in the original trait units. Use a minimum when larger values
+are favourable. Use a maximum for every trait listed in `lower_is_better`.
+DesiredGainR applies direction, centring and scaling internally.
+
 This is deliberate. Filling the shortfall would mean trading a failed trait
 against a good one, which is what an index does — so if that is what is wanted,
 use an index.
+
+### `selection_index(method = "elston")`
+
+Question: *every candidate must pass the floors. How should the survivors be
+ranked?*
+
+The Elston index first applies every trait floor. It then multiplies each
+eligible candidate's margins above those floors. DesiredGainR uses the sum of
+log margins for numerical stability. A large margin in one trait cannot hide a
+failed floor in another trait.
+
+This method is a useful weight-light comparator. Its closed-form response
+theory is limited. Inspect the selected differential. Use simulation when the
+method changes the operational decision.
 
 ### `selection_index(method = "tandem")`
 
@@ -513,15 +673,34 @@ $$\mathbf{b} = \left[\mathbf{I} - \mathbf{P}^{-1}\mathbf{G}\mathbf{C}^{\mathsf T
 | Method | Question | Constraint |
 | :--- | :--- | :--- |
 | `kempthorne_nordskog` | Hold these traits still | Zero expected response in the restricted traits |
-| `restricted_smith_hazel` | As above, projection form | Algebraically identical; retained because most texts present this form |
-| `tallis` | Move these traits in this ratio | Responses held in the supplied proportions; magnitude free |
-| `mallard` | Move these traits by these amounts | Responses held at specified values; magnitude fixed |
-| `harville` | Weight the constraint against merit | Restriction applied as a penalty; `penalty = Inf` recovers Kempthorne–Nordskog |
+| `restricted_smith_hazel` | As above, projection form | Algebraically identical. It is retained because most texts present this form. |
+| `tallis` | Move these traits in this ratio | Responses held in the supplied proportions. Magnitude is free. |
+| `mallard` | Move these traits by these amounts | Responses held at specified values. Magnitude is fixed. |
+| `harville` | Weight the constraint against merit | Restriction applied as a penalty. `penalty = Inf` recovers Kempthorne–Nordskog. |
 
 A restriction can never raise the correlation with net merit. The question is
 whether the loss is acceptable, and that is a breeding decision rather than a
 statistical one. Compare $R_{HI}$ between the restricted and unrestricted
 indices to price it.
+
+Satoh (2024) gives the response a useful geometric interpretation. For a
+complete proportional direction $\mathbf{d}$, the restricted breeding value is
+
+$$
+\mathbf{g}_{R}
+=
+\mathbf{d}
+(\mathbf{d}^{\mathsf T}\mathbf{G}^{-1}\mathbf{d})^{-1}
+\mathbf{d}^{\mathsf T}\mathbf{G}^{-1}\mathbf{g}
+=\beta\mathbf{d}.
+$$
+
+The scalar $\beta$ measures progress along the requested direction.
+`restricted_breeding_values()` calculates it for every candidate.
+`evaluate_restricted_response()` applies the same projection to an achieved
+response. It also reports the Mahalanobis alignment and residual distance.
+Satoh showed that the Yamada proportional desired-gain index is a special case
+of restricted index theory.
 
 ## The iterative desired-gain index
 
@@ -543,10 +722,10 @@ full-sample comparison, holdout choice and stability diagnostics.
 | Selection rule | `select_mode = "top_n"` | Rank on the index alone |
 | | `select_mode = "eligible_top_n"` | Apply trait floors first, then rank |
 | Replicate choice | `replicate_selection = "holdout"` | **Default.** Chooses the winning search on candidates held out of that comparison, so the choice does not depend on the candidates finally selected |
-| | `replicate_selection = "training"` | Earlier behaviour; a minimum over `n_rep` draws and biased downward |
+| | `replicate_selection = "training"` | Earlier behaviour. This is a minimum over `n_rep` draws and is biased downward. |
 | Estimated $\mathbf{P}$ | `allow_incompatible_estimated_P` | Continue when a $\mathbf{P}$ estimated from reference candidates falls below $\mathbf{G}$ by more than sampling error explains. Recorded as an override |
 
-`run_dgsi()` reports two different quantities that must not be confused:
+`run_dgsi()` reports two different quantities. Interpret them separately:
 
 | Quantity | Meaning |
 | :--- | :--- |
@@ -579,6 +758,53 @@ prediction cannot vary more than what it predicts.
 
 # Evaluating and comparing indices
 
+## What a comprehensive comparison requires
+
+A fair comparison uses one decision problem. Keep the candidates, trait order,
+trait direction, measurement scale, covariance estimates and selected
+proportion fixed. Use one definition of aggregate genetic merit when comparing
+$R_{HI}$ or $\Delta H$. Use the same validation split and simulation scenarios
+when those layers are added.
+
+The analysis should answer four questions.
+
+1. **Biological response:** what change is expected in every trait?
+2. **Objective attainment:** how much of each target is reached, and which trait
+   limits the result?
+3. **Decision agreement:** do the methods rank and select the same candidates?
+4. **Stability:** does the decision persist under covariance, weight and
+   prediction uncertainty?
+
+`compare_selection_methods()` assembles these components for fitted objects
+returned by `selection_index()`. It reports the fairness conditions first. It
+then reports per-trait responses, target attainment, classical criteria,
+Mahalanobis alignment, rank correlations and Jaccard similarities among the
+selected sets.
+
+```r
+comparison <- compare_selection_methods(
+  list(
+    Smith_Hazel = smith_hazel,
+    Pesek_Baker = pesek_baker,
+    Base = base_index,
+    Rank_sum = rank_sum,
+    Culling = culling
+  ),
+  target_gains = desired_gains
+)
+
+comparison$fairness
+comparison$responses
+comparison$summary
+comparison$rank_correlation
+comparison$selected_jaccard
+```
+
+Read the per-trait response before any summary statistic. Then examine the
+worst target attainment. A mean can conceal failure of one critical trait.
+Finally, inspect rank and selected-set agreement. Similar average performance
+can still produce different operational decisions.
+
 ## The classical criteria
 
 Let $I=\mathbf{b}^{\mathsf T}\mathbf{x}$ denote the index score and
@@ -589,9 +815,9 @@ merit. The abbreviations below are not interchangeable measures of quality.
 | :--- | :--- | :--- |
 | $R_{HI}$ | $\dfrac{\mathbf{b}^{\mathsf T}\mathbf{G}\mathbf{a}}{\sqrt{\mathbf{b}^{\mathsf T}\mathbf{P}\mathbf{b}}\sqrt{\mathbf{a}^{\mathsf T}\mathbf{G}\mathbf{a}}}$ | Correlation between index score ($I$) and aggregate genetic merit ($H$), bounded from -1 to 1. A negative value selects against the stated merit, zero indicates no linear association, and a value nearer 1 indicates closer ranking agreement. It is comparable only when every method uses the same $\mathbf{a}$. |
 | $\Delta H$ | $i\,R_{HI}\sqrt{\mathbf{a}^{\mathsf T}\mathbf{G}\mathbf{a}}$ | Expected change in aggregate genetic merit, in the units defined by $H$. The software names it `delta_H` and abbreviates it as `dH` in compact print output. Positive values improve the stated merit. Compare magnitudes only under the same merit definition, population and intensity. |
-| $\Delta_j$ | $i\,(\mathbf{G}\mathbf{b})_j / \sqrt{\mathbf{b}^{\mathsf T}\mathbf{P}\mathbf{b}}$ | Expected genetic response of trait $j$, in trait units or standard-deviation units according to the fitted space. Check every sign, magnitude and unit; this is the primary biological output. |
+| $\Delta_j$ | $i\,(\mathbf{G}\mathbf{b})_j / \sqrt{\mathbf{b}^{\mathsf T}\mathbf{P}\mathbf{b}}$ | Expected genetic response of trait $j$, in trait units or standard-deviation units according to the fitted space. Check every sign, magnitude and unit. This is the primary biological output. |
 | Relative efficiency (RE) | $\Delta_m / (i\,\mathbf{G}_{mm}/\sqrt{\mathbf{P}_{mm}})$ | Response in the declared main trait divided by its response under direct selection at the same intensity. RE = 1 matches direct response, RE = 0.80 retains 80%, RE > 1 exceeds it through correlated information, and RE < 0 moves the main trait in the unfavourable direction. It says nothing about attainment in the other traits. |
-| $h^2_I$ | $\mathbf{b}^{\mathsf T}\mathbf{G}\mathbf{b} / \mathbf{b}^{\mathsf T}\mathbf{P}\mathbf{b}$ | Heritability of the index score treated as a composite trait, bounded from 0 to 1 when $\mathbf{P}-\mathbf{G}$ is valid. Its square root is the accuracy with which the score predicts its own additive genetic component; it is not agreement with the desired-gain objective. |
+| $h^2_I$ | $\mathbf{b}^{\mathsf T}\mathbf{G}\mathbf{b} / \mathbf{b}^{\mathsf T}\mathbf{P}\mathbf{b}$ | Heritability of the index score treated as a composite trait, bounded from 0 to 1 when $\mathbf{P}-\mathbf{G}$ is valid. Its square root is the accuracy with which the score predicts its own additive genetic component. It does not measure agreement with the desired-gain objective. |
 | Coefficient of variation of the index ($CV_I$) | $100\,s_I/\lvert\bar{I}\rvert$ | Standard deviation of the index scores as a percentage of their absolute mean. It changes when a constant is added to every score and is undefined when the index is centred. It is a descriptive legacy statistic, not a robust basis for ranking indices. |
 
 ## How each fails
@@ -605,7 +831,7 @@ one. Unless one common `aggregate_weights` vector is supplied, DesiredGainR
 returns `NA` for $R_{HI}$ and $\Delta H$ rather than changing the definition of
 merit from one desired-gain direction to another. The implied weights
 $\mathbf{w} = \mathbf{G}^{-1}\mathbf{P}\mathbf{G}^{-1}\mathbf{d}$ remain available as an
-explicit diagnostic through `implied_economic_weights()`; they are not a common
+explicit diagnostic through `implied_economic_weights()`. They are not a common
 objective for cross-method comparison.
 
 **$CV_I$ is undefined when the index is centred.** Standardising or centring
@@ -619,13 +845,17 @@ of trait responses and objective attainment.
 
 ## A stronger decision panel for desired-gain indices
 
-No classical scalar is sufficiently robust for a recommendation. Use: (i) the
-expected response $\Delta_j$ for every trait; (ii) exact-ray feasibility or,
-for minimum floors, worst-trait and joint-attainment probabilities; (iii) the
-cosine alignment between achieved and desired response from
-`index_uncertainty()`; (iv) rank correlation and selected-set overlap under
-objective and covariance perturbation; and (v) diversity or coancestry when the
-index will be applied over repeated cycles.
+No classical scalar is sufficiently robust for a recommendation. Use the
+following panel.
+
+1. Expected response $\Delta_j$ for every trait.
+2. Exact-ray feasibility.
+3. Worst-trait and joint-attainment probabilities for minimum floors.
+4. Mahalanobis alignment, Satoh's $\beta$, and residual distance.
+5. Rank correlation and selected-set overlap under perturbation.
+6. Candidate selection probabilities after PEC propagation.
+7. Cunningham information-deletion efficiency.
+8. Diversity or coancestry over repeated cycles.
 
 This panel separates biological attainment from statistical stability. A
 spectacular gain in one trait cannot conceal failure of another minimum, and a
@@ -650,8 +880,8 @@ Every criterion above treats $\mathbf{G}$ and $\mathbf{P}$ as known. They are
 estimates, usually from fewer independent families than the covariance matrix
 has free parameters, and the coefficients are a non-linear function of them.
 
-An index whose coefficients cannot be distinguished from zero is not a
-different index from one whose coefficients are sharply determined — yet the
+An index with coefficients that overlap zero differs from one whose
+coefficients are sharply determined. Yet the
 point estimate presents them identically.
 
 ## `index_uncertainty()`
@@ -727,9 +957,9 @@ where $\mathbf{C}$ is the between-environment genetic correlation matrix.
 
 | Mean off-diagonal of $\mathbf{C}$ | Reading |
 | :--- | :--- |
-| Near 1 | Environments rank genotypes almost identically; a single-environment index on trait means gives nearly the same answer at a fraction of the complexity |
+| Near 1 | Environments rank genotypes almost identically. A single-environment index on trait means gives nearly the same answer at a fraction of the complexity. |
 | Middling | Interaction is material and worth modelling |
-| Near 0 | Environments rank genotypes very differently; treating them as one target population may not be appropriate |
+| Near 0 | Environments rank genotypes very differently. Model them as distinct target environments. |
 
 Environment-specific economic weights are supported: yield in a marginal
 environment serving a small area contributes less to net merit than yield in
@@ -739,12 +969,46 @@ Setting `include_stability = TRUE` returns per-trait response contrasts measurin
 departure from a genotype's own cross-environment mean. Pass
 `expanded$stability$constraint_matrix` to `restricted_index()`. A genotype whose
 deviations are uniformly zero performs at its own mean everywhere, which is
-what stability means here. Constraining it costs response in the mean; use
+what stability means here. Constraining it costs response in the mean. Use
 `restricted_index()` to price that trade rather than assume it.
 
 The reported `interaction_share` is the heuristic one minus the mean
 environmental correlation. It is a screening summary, not a general
 interaction-variance identity.
+
+# Simulation evidence
+
+Simulation tests a recommendation under explicit biological assumptions. It
+does not discover the breeding objective. The objective still comes from the
+breeder.
+
+Chapter 13 of *Quantitative Genetics for Plant Breeding* motivates four design
+requirements. DesiredGainR implements them as follows.
+
+1. `breeding_scenario()` records the programme, genetic architecture,
+   evaluation method, and target environments.
+2. `simulation_calibration()` compares target and realised variances,
+   correlations, and heritabilities. It also checks the neutral marker panel.
+3. `stress_test_desired_gains()` compares one desired-gain direction across
+   plausible scenarios. It reports tail risks, minimum-attainment probability,
+   Monte Carlo standard error, and regret.
+4. Sequential batches stop when the requested Monte Carlo precision is
+   reached or the maximum replication budget is used.
+
+Test polygenic and oligogenic architectures. Use normal and gamma-distributed
+quantitative trait locus effects when both are plausible. Change one assumption
+at a time. Matched replicate seeds support paired comparisons. Exact alignment
+of random draws requires the same simulator call path.
+
+Use `expand_environments()` to represent genotype by environment interaction
+through environment-specific genetic values and correlations. Different
+residual variances alone describe heteroscedasticity. They do not create
+genetic rank changes across environments.
+
+A testcross scenario records general combining ability (GCA) as the source of
+selection information. `selection_information()` then links GCA records to the
+objective traits. HapBlockR remains responsible for parent choice, optimal
+contribution selection, cross choice, and mating allocation.
 
 # End-to-end pipeline walkthrough
 
@@ -754,7 +1018,7 @@ interaction-variance identity.
 | :--- | :--- | :--- | :--- |
 | 1 | Assemble candidate values, units and directions | — | Every trait has a stated direction and unit |
 | 2 | Import or estimate $\mathbf{G}$ and $\mathbf{P}$ | `import_covariance()`, `estimate_genetic_covariance()` | Trait order verified, not assumed |
-| 3 | Check conditioning | `matrix_diagnostics()` | $\kappa$ recorded; standardise if large |
+| 3 | Check conditioning | `matrix_diagnostics()` | $\kappa$ recorded. Standardise if large. |
 | 4 | Check admissibility | automatic | $\mathbf{P} - \mathbf{G}$ positive semidefinite |
 | 5 | Repair if required | `bend_covariance()` | Adjustment recorded and reported |
 
@@ -762,7 +1026,7 @@ interaction-variance identity.
 
 | Stage | Action | Function | Gate |
 | :--- | :--- | :--- | :--- |
-| 6 | State desired gains or weights | — | Non-negative magnitudes in the favourable direction |
+| 6 | State desired gains or weights | — | Desired gains are favourable magnitudes. Economic weights may have either sign. |
 | 7 | Test attainability | `gain_feasibility()` | Required intensity within programme capability |
 | 8 | Read the implied objective | `implied_economic_weights()` | No unexplained sign reversals |
 | 9 | Test sensitivity | `weight_sensitivity()` | Selected set stable under plausible perturbation |
@@ -792,7 +1056,7 @@ interaction-variance identity.
 | Symptom | Likely cause | Action |
 | :--- | :--- | :--- |
 | $\kappa(\mathbf{G}) > 10^4$ on raw scales | Trait scales differ by orders of magnitude | Standardise and refit |
-| Coefficients change sign between families | Near-singular $\mathbf{G}$ | Report conditioning; prefer the base index |
+| Coefficients change sign between families | Near-singular $\mathbf{G}$ | Report conditioning. Prefer the base index. |
 | Wide coefficient intervals | Few independent genetic units | State fewer desired gains |
 | Alignment lower bound well below 1 | Objective over-specified for the data | Reduce the number of constrained traits |
 
@@ -800,7 +1064,7 @@ interaction-variance identity.
 
 | Symptom | Meaning |
 | :--- | :--- |
-| Fewer selected than requested under culling | Correct behaviour; the gates are hard |
+| Fewer selected than requested under culling | Correct behaviour. The gates are hard. |
 | Large empirical differential, small transmitted response | Selection acting on non-heritable variation |
 | Two indices with different coefficients selecting the same lines | The choice between them does not matter here |
 
@@ -818,11 +1082,13 @@ than wrong.
 5. Was the covariance pair admissible, and was anything bent? By how much?
 6. What is the condition number, and were traits standardised?
 7. Which index family was used, and why that one?
-8. Does the selected set survive a sensitivity analysis?
-9. Was covariance uncertainty propagated, and with what $\nu_g$?
-10. Is the reported response transmitted genetic response or an observed
+8. Which benchmark methods were fitted under the same comparison conditions?
+9. Which trait had the lowest target attainment?
+10. Does the selected set survive a sensitivity analysis?
+11. Was covariance uncertainty propagated, and with what $\nu_g$?
+12. Is the reported response transmitted genetic response or an observed
     differential?
-11. Were any overrides used, such as
+13. Were any overrides used, such as
     `allow_incompatible_estimated_P`?
 
 # Complete function map
@@ -851,8 +1117,11 @@ than wrong.
 
 | Function | Purpose |
 | :--- | :--- |
-| `selection_index()` | Seven classical families through one interface |
+| `selection_index()` | Eight classical families through one interface |
+| `selection_information()` | Distinct information and objective vectors |
+| `generalized_index()` | Economic or desired-gain index from $\mathbf{P}$, $\mathbf{C}$, and $\mathbf{G}$ |
 | `restricted_index()` | Kempthorne–Nordskog, Tallis, Mallard, Harville, restricted Smith–Hazel |
+| `restricted_breeding_values()` | Satoh projection and candidate $\beta$ |
 | `run_dgsi()` | Iterative desired-gain index with replicate diagnostics |
 | `run_qgsi()` | Quadratic genomic selection index |
 | `run_dgsi_qgsi_pipeline()` | Both, with comparison |
@@ -863,6 +1132,10 @@ than wrong.
 | Function | Purpose |
 | :--- | :--- |
 | `evaluate_index()` | The standard criteria |
+| `compare_selection_methods()` | Fairness checks, response attainment, ranking agreement and selected-set agreement |
+| `evaluate_restricted_response()` | Satoh progress, alignment, and residual distance |
+| `index_information_efficiency()` | Cunningham deletion efficiency |
+| `candidate_score_uncertainty()` | Score intervals and selection probabilities from PEC |
 | `summary()`, `coef()` | Tidy tables of coefficients, response and criteria |
 | `predict()` | Apply a fitted index to a new candidate set |
 
@@ -885,6 +1158,9 @@ than wrong.
 
 | Function | Purpose |
 | :--- | :--- |
+| `breeding_scenario()` | Auditable biological and evaluation assumptions |
+| `simulation_calibration()` | Target versus realised simulation checks |
+| `stress_test_desired_gains()` | Scenario robustness, tail risk, and Monte Carlo precision |
 | `founder_haplotypes()` | Phased marker data into AlphaSimR founders |
 | `haplotypes_from_inbred_dosage()` | Dosage to haplotypes for inbred material |
 | `dosage_diagnostics()` | Residual heterozygosity and missingness |
@@ -924,6 +1200,28 @@ Kemp, C.D. and Harville, D.A. (1975) Index selection with proportionality constr
 Yamada, Y., Yokouchi, K. and Nishida, A. (1975) Selection index when genetic
 gains of individual traits are of primary concern. *Japanese Journal of
 Genetics* **50**, 33–41.
+
+Elston, R.C. (1963) A weight-free index for ranking or selection with respect
+to several traits at a time. *Biometrics* **19**, 85–97.
+
+Cunningham, E.P. (1969) The relative efficiencies of selection indexes.
+*Acta Agriculturae Scandinavica* **19**, 45–48.
+
+Satoh, M. (2024) Characteristics of restricted selection indices and
+geometrical interpretation of restricted breeding values. *Journal of Animal
+Breeding and Genetics* **141**, 353–363.
+
+Beavis, W.D., Lamkey, K., Mahama, A.A. and Suza, W. (2023) Multiple Trait
+Selection. In *Quantitative Genetics for Plant Breeding*. Iowa State
+University Digital Press.
+
+Beavis, W.D., Mahama, A.A. and Suza, W. (2023) Multi Environment Trials:
+Linear Mixed Models. In *Quantitative Genetics for Plant Breeding*. Iowa State
+University Digital Press.
+
+Beavis, W.D., Mahama, A.A. and Suza, W. (2023) Simulation Modeling. In
+*Quantitative Genetics for Plant Breeding*. Iowa State University Digital
+Press.
 
 Higham, N.J. (2002) Computing the nearest correlation matrix. *IMA Journal of
 Numerical Analysis* **22**, 329–343.

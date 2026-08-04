@@ -27,7 +27,7 @@ interchangeable.
 
 The strongest source is a fitted multi-trait genetic model that reports the
 trait covariance components and their uncertainty. DesiredGainR begins after
-that model has been fitted; it does not estimate breeding values from raw field
+that model has been fitted. It does not estimate breeding values from raw field
 records.
 
 Never use the covariance of raw phenotypes as $\mathbf{G}$. It contains
@@ -35,6 +35,57 @@ environmental, residual and design variation. Likewise, the covariance of best
 linear unbiased predictions or genomic estimated breeding values (GEBVs) is a
 covariance of predictions and is usually shrunken relative to total additive
 genetic covariance.
+
+### 1.1 When the information and objective traits differ
+
+The classical notation assumes that the same traits appear in the information
+vector and the breeding objective. Chapter 12 supports a wider formulation.
+
+Define:
+
+1. $\mathbf{P}_{x}=\operatorname{Var}(\mathbf{x})$ for the selection
+   information
+2. $\mathbf{C}=\operatorname{Cov}(\mathbf{x},\mathbf{g})$ between information
+   and objective traits
+3. $\mathbf{G}_{H}=\operatorname{Var}(\mathbf{g})$ for the objective traits
+
+The economic index is
+
+$$
+\mathbf{b}=\mathbf{P}_{x}^{-1}\mathbf{C}\mathbf{a}.
+$$
+
+The desired-gain index is
+
+$$
+\mathbf{b}
+=
+\mathbf{P}_{x}^{-1}\mathbf{C}
+\left(
+\mathbf{C}^{\mathsf T}\mathbf{P}_{x}^{-1}\mathbf{C}
+\right)^{-1}\mathbf{d}.
+$$
+
+Use `selection_information()` and `generalized_index()` for this case. This
+formulation can combine field records, family means, genomic estimated breeding
+values, and environment-specific predictions.
+
+### 1.2 Retain prediction error covariance
+
+The prediction error variance (PEV) measures uncertainty for one trait. The
+prediction error covariance (PEC) extends it across traits. Full PEC matrices
+preserve the uncertainty in trait combinations.
+
+Candidate-specific PEC matrices support:
+
+1. index score standard errors
+2. uncertainty intervals for candidate scores
+3. probabilities of entering the selected set
+4. targeted collection of further phenotypic evidence
+
+Use `candidate_score_uncertainty()` after fitting the index. A diagonal PEV
+approximation remains useful when full PEC is unavailable. State that
+approximation in the analysis report.
 
 ---
 
@@ -134,5 +185,4 @@ If only a working surrogate is available, repeat the analysis once a fitted
 multi-trait covariance becomes available and examine whether the ranking and
 selected set change.
 
-The next step is [Choosing an index](DesiredGainR-index-families.html).
-
+The next step is [Multiple-trait selection](DesiredGainR-index-families.html).

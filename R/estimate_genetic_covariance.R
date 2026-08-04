@@ -193,7 +193,7 @@ estimate_genetic_covariance <- function(
     )
   } else if (method == "adjusted_means_surrogate") {
     estimand <- paste(
-      "working surrogate for genetic covariance;",
+      "working surrogate for genetic covariance.",
       "covariance of across-environment adjusted means"
     )
     source <- paste(

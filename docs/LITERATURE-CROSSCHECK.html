@@ -62,7 +62,8 @@
     <li><a class="dropdown-item" href="articles/DesiredGainR-empirical-validation.html">Empirical validation with real breeding programmes</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Index methods</h6></li>
-    <li><a class="dropdown-item" href="articles/DesiredGainR-index-families.html">Choosing an index</a></li>
+    <li><a class="dropdown-item" href="articles/DesiredGainR-index-families.html">Multiple-trait selection and method comparison</a></li>
+    <li><a class="dropdown-item" href="articles/DesiredGainR-information.html">Using predictions and prediction errors</a></li>
     <li><a class="dropdown-item" href="articles/DesiredGainR-dgsi.html">Optimising desired gains</a></li>
     <li><a class="dropdown-item" href="articles/DesiredGainR-qgsi.html">Quadratic genomic selection</a></li>
     <li><hr class="dropdown-divider"></li>
@@ -91,6 +92,10 @@
 
 <div id="desiredgainr--cross-check-against-the-publications-folder" class="section level1">
 
+<div class="section level2">
+<h2 id="architecture-decision-added-4-august-2026">Architecture decision added 4 August 2026<a class="anchor" aria-label="anchor" href="#architecture-decision-added-4-august-2026"></a></h2>
+<p>Montesinos-López, Montesinos-López, Hernández-Suárez and Alemu (2026), <em>A selection index with minimal genetic relatedness for multi-trait data via binary quadratic programming</em> (Plant Methods 22:7, <a href="https://doi.org/10.1186/s13007-025-01484-4" class="external-link uri">https://doi.org/10.1186/s13007-025-01484-4</a>), does <strong>not</strong> define another DesiredGainR index family. Its QPMSI selects a fixed-size binary subset by combining multi-trait merit with a genomic-relatedness penalty. That is an operational parent-selection problem and belongs to HapBlockR.</p>
+<p>QPMSI is not true optimal contribution selection (OCS), because its binary selection variables do not optimise continuous parental contributions. It is also not a complete optimum-cross-selection method, because it does not choose parent pairs or allocate matings. Those distinctions remain HapBlockR’s responsibility. The intended integration is that HapBlockR obtains the multi-trait merit score from DesiredGainR, then applies parent selection, OCS or optimum cross selection as required. DesiredGainR must not import HapBlockR or reproduce those downstream optimisers.</p>
 <p>Date 2026-07-30. Sources read in full or in relevant part:</p>
 <ol style="list-style-type: decimal"><li>Covarrubias-Pazaran G. (2021) <em>Guideline: Practical implementation of selection indices.</em> CGIAR Excellence in Breeding, 18/06/2021.</li>
 <li>Covarrubias-Pazaran G. <em>Bringing a selection index into the CIMMYT-Maize programs.</em> EiB deck.</li>
@@ -100,7 +105,8 @@
 <li>Rahimi M. &amp; Debnath S. (2023) <em>Estimating optimum and base selection indices … new and simple SAS and R codes.</em> Sci. Rep. 13:18977.</li>
 <li>Vieira R.A., Nogueira A.P.O., Fritsche-Neto R. (2025) <em>Optimizing the selection of quantitative traits in plant breeding using simulation.</em> Front. Plant Sci. 16:1495662.</li>
 </ol><p>Headline: the package is <strong>faithful to Joukhadar</strong> on the mechanics it implements, and <strong>misaligned with the CGIAR guideline</strong> on the workflow its target users are told to follow. The largest single gap is that it reports none of the index-evaluation criteria that every competing tool reports.</p>
-<hr><div class="section level2">
+<hr></div>
+<div class="section level2">
 <h2 id="must-fix">MUST FIX<a class="anchor" aria-label="anchor" href="#must-fix"></a></h2>
 <div class="section level3">
 <h3 id="f1-scale_traits--false-contradicts-the-guideline-and-the-current-mix-matches-nothing">F1. <code>scale_traits = FALSE</code> contradicts the guideline, and the current mix matches nothing<a class="anchor" aria-label="anchor" href="#f1-scale_traits--false-contradicts-the-guideline-and-the-current-mix-matches-nothing"></a></h3>

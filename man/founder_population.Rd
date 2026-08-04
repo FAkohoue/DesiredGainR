@@ -14,7 +14,8 @@ founder_population(
   dominance_degree = NULL,
   dominance_variance = NULL,
   heritability = c("narrow", "broad"),
-  seed = 42L
+  seed = 42L,
+  scenario = NULL
 )
 }
 \arguments{
@@ -48,7 +49,7 @@ mating system requires.}
 
 \item{dominance_variance}{Optional named variance of the \strong{degree of
 dominance} across loci. This is AlphaSimR's \code{varDD} and is not the
-dominance genetic variance; the two are different quantities.}
+dominance genetic variance. These quantities have different meanings.}
 
 \item{heritability}{Whether \code{h2} is narrow-sense (the default, a statement
 about breeding values) or broad-sense (a statement about genotypic values).
@@ -57,6 +58,10 @@ programme is being represented, so it must be stated rather than assumed.}
 
 \item{seed}{Random seed. The caller's random number generator state is
 restored on exit.}
+
+\item{scenario}{Optional object from \code{\link[=breeding_scenario]{breeding_scenario()}}. It supplies the
+quantitative trait locus count, neutral marker count, effect distribution,
+and dominance assumptions through one auditable object.}
 }
 \value{
 A list of class \code{desiredgainr_sim_setup} holding the AlphaSimR

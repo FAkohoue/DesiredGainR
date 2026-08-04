@@ -85,7 +85,8 @@
     <li><a class="dropdown-item" href="../articles/DesiredGainR-empirical-validation.html">Empirical validation with real breeding programmes</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Index methods</h6></li>
-    <li><a class="dropdown-item" href="../articles/DesiredGainR-index-families.html">Choosing an index</a></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-index-families.html">Multiple-trait selection and method comparison</a></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-information.html">Using predictions and prediction errors</a></li>
     <li><a class="dropdown-item" href="../articles/DesiredGainR-dgsi.html">Optimising desired gains</a></li>
     <li><a class="dropdown-item" href="../articles/DesiredGainR-qgsi.html">Quadratic genomic selection</a></li>
     <li><hr class="dropdown-divider"></li>
@@ -134,7 +135,7 @@ a crossing-plan tool, and parent, cross and mating allocation are
 outside the package by design.</p>
 <p>The heavy chunks below are marked <code>eval = FALSE</code> because a
 realistic run takes minutes to hours. Output blocks shown as fixed text
-illustrate the shape of each object; your numbers will depend on your
+illustrate the shape of each object. Your numbers will depend on your
 founders and parameters.</p>
 <p><code>AlphaSimR</code> is required and lives in
 <code>Suggests</code>. Every function fails with an explicit
@@ -288,15 +289,46 @@ wrong results.</p>
 <div class="section level2">
 <h2 id="calibrating-the-trait-architecture">4. Calibrating the trait architecture<a class="anchor" aria-label="anchor" href="#calibrating-the-trait-architecture"></a>
 </h2>
-<p>Genome structure comes from your markers; trait variances and
+<p>Genome structure comes from your markers. Trait variances and
 correlations are calibrated to the covariance matrix you already
 estimated.</p>
+<p>Beavis, Mahama and Suza (2023) identify three core elements of a
+breeding simulation. These are: (i) trait architecture, (ii) population
+structure, and (iii) genome organisation. DesiredGainR records these
+assumptions in a scenario object.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">polygenic_scenario</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/breeding_scenario.html">breeding_scenario</a></span><span class="op">(</span></span>
+<span>  label <span class="op">=</span> <span class="st">"polygenic GEBV programme"</span>,</span>
+<span>  programme <span class="op">=</span> <span class="st">"outcross"</span>,</span>
+<span>  architecture <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>    qtl_per_chromosome <span class="op">=</span> <span class="fl">100L</span>,</span>
+<span>    markers_per_chromosome <span class="op">=</span> <span class="fl">100L</span>,</span>
+<span>    effect_distribution <span class="op">=</span> <span class="st">"normal"</span></span>
+<span>  <span class="op">)</span>,</span>
+<span>  evaluation <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>type <span class="op">=</span> <span class="st">"gebv"</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">polygenic_scenario</span></span></code></pre></div>
+<p>The same interface can define an oligogenic stress scenario. A gamma
+distribution allows a small number of loci to explain a larger share of
+the genetic variance.</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">oligogenic_scenario</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/breeding_scenario.html">breeding_scenario</a></span><span class="op">(</span></span>
+<span>  label <span class="op">=</span> <span class="st">"unequal QTL effects"</span>,</span>
+<span>  programme <span class="op">=</span> <span class="st">"outcross"</span>,</span>
+<span>  architecture <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>    qtl_per_chromosome <span class="op">=</span> <span class="fl">10L</span>,</span>
+<span>    markers_per_chromosome <span class="op">=</span> <span class="fl">100L</span>,</span>
+<span>    effect_distribution <span class="op">=</span> <span class="st">"gamma"</span>,</span>
+<span>    qtl_shape <span class="op">=</span> <span class="fl">0.4</span></span>
+<span>  <span class="op">)</span>,</span>
+<span>  evaluation <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>type <span class="op">=</span> <span class="st">"gebv"</span><span class="op">)</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">setup</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/founder_population.html">founder_population</a></span><span class="op">(</span></span>
 <span>  <span class="va">founders</span>,</span>
 <span>  G <span class="op">=</span> <span class="va">dgr_G</span>,</span>
 <span>  h2 <span class="op">=</span> <span class="fu">stats</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/stats/setNames.html" class="external-link">setNames</a></span><span class="op">(</span><span class="va">dgr_traits</span><span class="op">$</span><span class="va">heritability</span>, <span class="va">traits</span><span class="op">)</span>,</span>
-<span>  n_qtl_per_chromosome <span class="op">=</span> <span class="fl">100L</span>,</span>
+<span>  scenario <span class="op">=</span> <span class="va">polygenic_scenario</span>,</span>
 <span>  seed <span class="op">=</span> <span class="fl">42L</span></span>
 <span><span class="op">)</span></span>
 <span><span class="va">setup</span></span></code></pre></div>
@@ -308,12 +340,30 @@ estimated.</p>
 correlations from the corresponding correlation matrix, so the
 simulation reproduces the observed germplasm structure <em>and</em> the
 observed trait covariances.</p>
+<p>Run a calibration audit before comparing objectives.</p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">calibration</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/simulation_calibration.html">simulation_calibration</a></span><span class="op">(</span><span class="va">setup</span><span class="op">)</span></span>
+<span><span class="va">calibration</span></span></code></pre></div>
+<p>The report checks five elements:</p>
+<ol style="list-style-type: decimal">
+<li>Target and realised genetic variances.</li>
+<li>Target and realised genetic correlations.</li>
+<li>Target and realised heritabilities.</li>
+<li>Availability of a neutral marker panel.</li>
+<li>separation between neutral markers and quantitative trait loci
+(QTL).</li>
+</ol>
+<p>A review status identifies an assumption that needs inspection. For
+example, an oligogenic scenario can reproduce marginal variances while
+its realised trait correlations remain unstable. Increasing the number
+of QTL can then separate an architecture effect from a numerical
+calibration effect.</p>
 <p><strong>For a clonal programme</strong>, supply
 <code>dominance_degree</code>, and <code>G</code> should then be the
 <strong>genotypic</strong> rather than the additive covariance, because
 the unit of selection is the clone and dominance is inherited
 intact.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">setup_clonal</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/founder_population.html">founder_population</a></span><span class="op">(</span></span>
 <span>  <span class="va">founders</span>,</span>
 <span>  G <span class="op">=</span> <span class="va">dgr_G</span>, <span class="co"># genotypic covariance for a clonal crop</span></span>
@@ -326,7 +376,7 @@ intact.</p>
 <div class="section level2">
 <h2 id="simulating-one-objective">5. Simulating one objective<a class="anchor" aria-label="anchor" href="#simulating-one-objective"></a>
 </h2>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">simulation</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/simulate_selection_cycles.html">simulate_selection_cycles</a></span><span class="op">(</span></span>
 <span>  <span class="va">setup</span>,</span>
 <span>  desired_gains <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
@@ -381,11 +431,11 @@ disequilibrium decays per generation.</td>
 <tr class="odd">
 <td><code>"clonal"</code></td>
 <td>Cassava, sweetpotato, banana, potato</td>
-<td>Recombination happens once per cycle, when selected parents are
-crossed to raise a seedling generation; every later stage is a copy, so
-dominance is transmitted intact and selection acts on <strong>total
-genotypic value</strong>. Requires a setup built with
-<code>dominance_degree</code>, and <code>G</code> is then the genotypic
+<td>Recombination happens once per cycle. Selected parents are crossed
+to raise a seedling generation. Later stages contain clonal copies.
+Dominance is retained, and selection acts on <strong>total genotypic
+value</strong>. This mode requires a setup built with
+<code>dominance_degree</code>. Here, <code>G</code> is the genotypic
 covariance.</td>
 </tr>
 </tbody>
@@ -407,7 +457,7 @@ rather than their selected descendants. Because random mating does not
 shift a population mean, the cycle 1 gain was zero in expectation for
 every desired-gain direction, and a one-cycle run could not distinguish
 directions at all. Re-run any stored result.</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">simulation</span><span class="op">$</span><span class="va">cycle_table</span></span></code></pre></div>
 <pre><code><span><span class="co">#&gt;    cycle  trait genetic_mean cumulative_gain genetic_variance</span></span>
 <span><span class="co">#&gt; 1:     0     GY        0.000           0.000            0.612</span></span>
@@ -435,8 +485,8 @@ function of population size alone. QTL frequency change is reported
 separately as <code>qtl_segregating</code> and
 <code>genic_variance_ratio</code>.</p>
 <p>Supply <code>n_markers_per_chromosome</code> to
-<code><a href="../reference/founder_population.html">founder_population()</a></code> to create the panel; without it, all
-segregating sites are used instead.</p>
+<code><a href="../reference/founder_population.html">founder_population()</a></code> to create the panel. Otherwise, the
+simulation uses all segregating sites.</p>
 </div>
 <div class="section level3">
 <h3 id="the-re-estimation-switch">5.3 The re-estimation switch<a class="anchor" aria-label="anchor" href="#the-re-estimation-switch"></a>
@@ -445,7 +495,7 @@ segregating sites are used instead.</p>
 covariance of the observed selection criterion from each cycle. It does
 <strong>not</strong> estimate genetic covariance from hidden simulated
 breeding values. Phenotypic selection retains the breeder-supplied
-<code>G_target</code>; genomic selection uses the calibrated-GEBV
+<code>G_target</code>. Genomic selection uses the calibrated-GEBV
 identity described below. Setting it <code>FALSE</code> reuses the
 cycle-one coefficients and isolates the effect of the desired-gain
 direction alone.</p>
@@ -459,7 +509,7 @@ objective, and the breeder should be told so.</p>
 <p>The default is explicit phenotypic selection. To represent an
 additive genomic selection programme, create a marker panel and request
 cross-fitted RR-BLUP:</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">setup</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/founder_population.html">founder_population</a></span><span class="op">(</span></span>
 <span>  <span class="va">founders</span>,</span>
 <span>  G <span class="op">=</span> <span class="va">dgr_G</span>, h2 <span class="op">=</span> <span class="fl">0.4</span>,</span>
@@ -486,10 +536,10 @@ cross-fitted RR-BLUP:</p>
 preventing training-set leakage. Earlier cycles may be retained as a
 rolling training population. The cycle table reports the correlation
 between held-out GEBV and true simulated breeding value as
-<code>prediction_accuracy</code>; truth is used only for this
-diagnostic, never for selection.
-<code>prediction_calibration_slope</code> additionally reports
-<code>Cov(A, Ahat) / Var(Ahat)</code>; values far from one warn that the
+<code>prediction_accuracy</code>. Truth is used only for this
+diagnostic. Selection uses the predictions.
+<code>prediction_calibration_slope</code> also reports
+<code>Cov(A, Ahat) / Var(Ahat)</code>. Values far from one warn that the
 calibrated- GEBV assumption used by the desired-gain index is poor.
 RR-BLUP currently supports additive, non-clonal programmes. A clonal
 dominance programme must use the phenotypic path until a validated
@@ -499,9 +549,12 @@ total-genetic-value predictor is implemented.</p>
 <h3 id="the-selection-rule-is-deliberately-simple">5.5 The selection rule is deliberately simple<a class="anchor" aria-label="anchor" href="#the-selection-rule-is-deliberately-simple"></a>
 </h3>
 <p>Truncation on the index, and nothing more. Optimal contribution
-selection, family quotas and coancestry constraints are the province of
-a mating-design tool. Duplicating them here would mean maintaining two
-simulators with different genetic engines.</p>
+selection, optimum cross selection, family quotas and coancestry
+constraints belong to <a href="https://github.com/FAkohoue/HapBlockR" class="external-link">HapBlockR</a>. The
+simulation settings in this vignette define a scenario for comparing
+desired-gain objectives. HapBlockR provides the optimised parent,
+contribution, and mating plan. It calls DesiredGainR to build DGSI or
+QGSI merit and then makes those operational decisions.</p>
 <hr>
 </div>
 </div>
@@ -518,15 +571,15 @@ therefore the unit sphere,</p>
 <p>with <span class="math inline">\(p-1\)</span> free parameters for
 <span class="math inline">\(p\)</span> traits. For the three to eight
 traits breeders use, that is small enough to cover densely. By default
-the search is restricted to the non-negative orthant, meaning
-improvement is sought in every trait; set
+the search is restricted to the non-negative orthant. This means that
+improvement is sought in every trait. Set
 <code>non_negative = FALSE</code> to admit directions that deliberately
 concede ground somewhere.</p>
 </div>
 <div class="section level3">
 <h3 id="the-simulation-is-the-objective-function">6.2 The simulation is the objective function<a class="anchor" aria-label="anchor" href="#the-simulation-is-the-objective-function"></a>
 </h3>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">optimisation</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/optimize_desired_gains.html">optimize_desired_gains</a></span><span class="op">(</span></span>
 <span>  <span class="va">setup</span>,</span>
 <span>  n_cycles <span class="op">=</span> <span class="fl">5L</span>,</span>
@@ -546,7 +599,7 @@ concede ground somewhere.</p>
 <span><span class="co">#&gt;   Mode: pareto   Cycles: 5   Evaluations: 60 (3 replicates each)</span></span>
 <span><span class="co">#&gt;   Objectives: GY, PHT, AD, ASI, EPP, GLS, diversity</span></span>
 <span><span class="co">#&gt;   Non-dominated directions: 9 of 60</span></span>
-<span><span class="co">#&gt;   No single direction is recommended; choose a point on the frontier.</span></span></code></pre>
+<span><span class="co">#&gt;   No single direction is recommended. Choose a point on the frontier.</span></span></code></pre>
 <p>A Gaussian process is fitted to the accumulated results, but
 <strong>it decides only where the next simulation should be
 spent.</strong> It never filters, screens, or substitutes for an
@@ -629,7 +682,7 @@ increasing the replicate count.</p>
 draws.</strong> A frontier built from raw replicate averages is
 populated by fortunate runs. The reported non-dominated set is computed
 from Gaussian-process posterior means.</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">optimisation</span><span class="op">$</span><span class="va">pareto_set</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"d_GY"</span>, <span class="st">"d_ASI"</span>, <span class="st">"posterior_GY"</span>, <span class="st">"posterior_ASI"</span><span class="op">)</span><span class="op">]</span></span></code></pre></div>
 </div>
 <div class="section level3">
@@ -638,7 +691,7 @@ from Gaussian-process posterior means.</p>
 <p>For the scalar modes the result reports a <strong>stability
 region</strong>: every direction whose posterior outcome lies within
 <code>stability_tolerance</code> of the best.</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">optimisation</span><span class="op">$</span><span class="va">stability_proportion</span></span>
 <span><span class="va">optimisation</span><span class="op">$</span><span class="va">recommended_direction</span></span></code></pre></div>
 <p>The optimum is conditional on the supplied genetic covariance, the
@@ -653,13 +706,112 @@ have.</p>
 writes the accumulated evaluations after every simulation and reloads
 them automatically on a later call, so an interruption does not discard
 the work.</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Re-running the same call continues from where it stopped.</span></span>
 <span><span class="va">optimisation</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/optimize_desired_gains.html">optimize_desired_gains</a></span><span class="op">(</span></span>
 <span>  <span class="va">setup</span>,</span>
 <span>  n_cycles <span class="op">=</span> <span class="fl">5L</span>, mode <span class="op">=</span> <span class="st">"pareto"</span>, budget <span class="op">=</span> <span class="fl">120L</span>,</span>
 <span>  checkpoint <span class="op">=</span> <span class="st">"search_state.rds"</span>, seed <span class="op">=</span> <span class="fl">42L</span>, <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="stress-test-the-recommendation">6.7 Stress-test the recommendation<a class="anchor" aria-label="anchor" href="#stress-test-the-recommendation"></a>
+</h3>
+<p>One genetic architecture gives a conditional recommendation. A
+breeder needs to know whether that recommendation remains useful under
+other plausible architectures.</p>
+<p>Build each setup from the same founders. Change one biological
+assumption at a time. Then use matched replicate seeds across scenarios.
+Exact alignment of random draws requires the same simulator call path.
+This distinction matters when architectures differ.</p>
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">setup_polygenic</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/founder_population.html">founder_population</a></span><span class="op">(</span></span>
+<span>  <span class="va">founders</span>,</span>
+<span>  G <span class="op">=</span> <span class="va">dgr_G</span>,</span>
+<span>  h2 <span class="op">=</span> <span class="fu">stats</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/stats/setNames.html" class="external-link">setNames</a></span><span class="op">(</span><span class="va">dgr_traits</span><span class="op">$</span><span class="va">heritability</span>, <span class="va">traits</span><span class="op">)</span>,</span>
+<span>  scenario <span class="op">=</span> <span class="va">polygenic_scenario</span>,</span>
+<span>  seed <span class="op">=</span> <span class="fl">42L</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">setup_oligogenic</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/founder_population.html">founder_population</a></span><span class="op">(</span></span>
+<span>  <span class="va">founders</span>,</span>
+<span>  G <span class="op">=</span> <span class="va">dgr_G</span>,</span>
+<span>  h2 <span class="op">=</span> <span class="fu">stats</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/stats/setNames.html" class="external-link">setNames</a></span><span class="op">(</span><span class="va">dgr_traits</span><span class="op">$</span><span class="va">heritability</span>, <span class="va">traits</span><span class="op">)</span>,</span>
+<span>  scenario <span class="op">=</span> <span class="va">oligogenic_scenario</span>,</span>
+<span>  seed <span class="op">=</span> <span class="fl">42L</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">stress</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/stress_test_desired_gains.html">stress_test_desired_gains</a></span><span class="op">(</span></span>
+<span>  setups <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>    polygenic <span class="op">=</span> <span class="va">setup_polygenic</span>,</span>
+<span>    oligogenic <span class="op">=</span> <span class="va">setup_oligogenic</span></span>
+<span>  <span class="op">)</span>,</span>
+<span>  desired_gains <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>    GY <span class="op">=</span> <span class="fl">1.0</span>, PHT <span class="op">=</span> <span class="fl">0.4</span>, AD <span class="op">=</span> <span class="fl">0.6</span>,</span>
+<span>    ASI <span class="op">=</span> <span class="fl">0.5</span>, EPP <span class="op">=</span> <span class="fl">0.4</span>, GLS <span class="op">=</span> <span class="fl">0.6</span></span>
+<span>  <span class="op">)</span>,</span>
+<span>  options <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>    minimum_gains <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>      GY <span class="op">=</span> <span class="fl">0.8</span>, PHT <span class="op">=</span> <span class="fl">0.2</span>, AD <span class="op">=</span> <span class="fl">0.3</span>,</span>
+<span>      ASI <span class="op">=</span> <span class="fl">0.2</span>, EPP <span class="op">=</span> <span class="fl">0.2</span>, GLS <span class="op">=</span> <span class="fl">0.3</span></span>
+<span>    <span class="op">)</span>,</span>
+<span>    min_replicates <span class="op">=</span> <span class="fl">30L</span>,</span>
+<span>    max_replicates <span class="op">=</span> <span class="fl">150L</span>,</span>
+<span>    batch_size <span class="op">=</span> <span class="fl">10L</span>,</span>
+<span>    utility_mcse <span class="op">=</span> <span class="fl">0.05</span>,</span>
+<span>    simulation <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>      n_cycles <span class="op">=</span> <span class="fl">5L</span>,</span>
+<span>      mating_system <span class="op">=</span> <span class="st">"outcross"</span>,</span>
+<span>      n_parents <span class="op">=</span> <span class="fl">20L</span>,</span>
+<span>      n_crosses <span class="op">=</span> <span class="fl">50L</span>,</span>
+<span>      n_progeny_per_cross <span class="op">=</span> <span class="fl">10L</span>,</span>
+<span>      lower_is_better <span class="op">=</span> <span class="va">lower_is_better</span></span>
+<span>    <span class="op">)</span>,</span>
+<span>    seed <span class="op">=</span> <span class="fl">812L</span></span>
+<span>  <span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">stress</span></span></code></pre></div>
+<p>The summary reports:</p>
+<ol style="list-style-type: decimal">
+<li>Mean cumulative gain.</li>
+<li>Monte Carlo standard error (MCSE).</li>
+<li>The probability of reaching every trait minimum.</li>
+<li>The probability of an unfavourable response.</li>
+<li>Lower-tail and upper-tail outcomes.</li>
+<li>Regret relative to the strongest tested scenario.</li>
+</ol>
+<p>Replication continues in batches. It stops when the utility MCSE
+reaches the requested precision or when the maximum replicate count is
+reached. Therefore, the computational budget follows the uncertainty in
+the answer.</p>
+</div>
+<div class="section level3">
+<h3 id="represent-true-genotype-by-environment-interaction">6.8 Represent true genotype-by-environment interaction<a class="anchor" aria-label="anchor" href="#represent-true-genotype-by-environment-interaction"></a>
+</h3>
+<p>Different residual variances describe different levels of field
+precision. Genotype-by-environment interaction (GxE) requires genetic
+responses that vary among environments.</p>
+<p>Use <code><a href="../reference/expand_environments.html">expand_environments()</a></code> to represent each
+trait-environment combination. The between-environment genetic
+correlation then controls crossover GxE. Values near one indicate
+similar genotype rankings. Lower values indicate greater reranking.</p>
+<p>This formulation also supports target-population-of-environments
+weights and stability contrasts. Chapter 12 provides the mixed-model
+basis. The upstream model estimates the covariance. DesiredGainR uses
+that covariance for index construction and simulation.</p>
+</div>
+<div class="section level3">
+<h3 id="testcross-and-general-combining-ability-information">6.9 Testcross and general combining ability information<a class="anchor" aria-label="anchor" href="#testcross-and-general-combining-ability-information"></a>
+</h3>
+<p>A testcross programme often ranks lines through general combining
+ability (GCA). Treat the GCA values as selection information. Use
+<code><a href="../reference/selection_information.html">selection_information()</a></code> when the covariance of GCA
+predictions differs from the covariance of the objective traits.
+Propagate prediction error with
+<code><a href="../reference/candidate_score_uncertainty.html">candidate_score_uncertainty()</a></code>.</p>
+<p>DesiredGainR then constructs and evaluates the multi-trait merit.
+HapBlockR uses that merit for parent selection, contribution control,
+and cross design.</p>
 <hr>
 </div>
 </div>
@@ -737,12 +889,25 @@ be reported with those assumptions attached.</p>
 </td>
 </tr>
 <tr class="odd">
+<td><code><a href="../reference/breeding_scenario.html">breeding_scenario()</a></code></td>
+<td>Record architecture, programme, evaluation, and environment
+assumptions</td>
+</tr>
+<tr class="even">
+<td><code><a href="../reference/simulation_calibration.html">simulation_calibration()</a></code></td>
+<td>Compare the target and realised simulation properties</td>
+</tr>
+<tr class="odd">
 <td><code><a href="../reference/simulate_selection_cycles.html">simulate_selection_cycles()</a></code></td>
 <td>Run one desired-gain direction forward</td>
 </tr>
 <tr class="even">
 <td><code><a href="../reference/optimize_desired_gains.html">optimize_desired_gains()</a></code></td>
 <td>Search directions, surrogate-assisted</td>
+</tr>
+<tr class="odd">
+<td><code><a href="../reference/stress_test_desired_gains.html">stress_test_desired_gains()</a></code></td>
+<td>Compare one direction across plausible scenarios</td>
 </tr>
 </tbody>
 </table>
@@ -752,6 +917,9 @@ be reported with those assumptions attached.</p>
 <h2 id="references">9. References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h2>
 <ul>
+<li>Beavis WD, Mahama AA, Suza W (2023). Simulation Modeling. In
+<em>Quantitative Genetics for Plant Breeding</em>. Iowa State University
+Digital Press.</li>
 <li>Bulmer MG (1971). The effect of selection on genetic variability.
 <em>The American Naturalist</em> <strong>105</strong>:201-211.</li>
 <li>Gaynor RC, Gorjanc G, Hickey JM (2021). AlphaSimR: an R package for

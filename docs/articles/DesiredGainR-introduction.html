@@ -85,7 +85,8 @@
     <li><a class="dropdown-item" href="../articles/DesiredGainR-empirical-validation.html">Empirical validation with real breeding programmes</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Index methods</h6></li>
-    <li><a class="dropdown-item" href="../articles/DesiredGainR-index-families.html">Choosing an index</a></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-index-families.html">Multiple-trait selection and method comparison</a></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-information.html">Using predictions and prediction errors</a></li>
     <li><a class="dropdown-item" href="../articles/DesiredGainR-dgsi.html">Optimising desired gains</a></li>
     <li><a class="dropdown-item" href="../articles/DesiredGainR-qgsi.html">Quadratic genomic selection</a></li>
     <li><hr class="dropdown-divider"></li>
@@ -182,22 +183,26 @@ provides labelled approximations that record what they actually are.</p>
 </tr>
 <tr class="odd">
 <td>Build and compare classical index families</td>
-<td>Design a crossing plan or allocate matings</td>
+<td>Select the operational parent set</td>
 </tr>
 <tr class="even">
 <td>Report the standard index-evaluation criteria</td>
 <td>Analyse field trials or adjust for design</td>
 </tr>
 <tr class="odd">
-<td>Simulate desired-gain directions over cycles</td>
-<td>Recommend which candidates to cross</td>
+<td>Simulate desired-gain directions over declared scenarios</td>
+<td>Perform OCS, rank crosses or allocate matings</td>
 </tr>
 </tbody>
 </table>
 <p>The last exclusion matters for anyone using both of the author’s
-packages. Parent, cross and mating decisions belong to a dedicated
-mating-design tool; see <a href="DesiredGainR-interoperation.html">Working with other
-packages</a>.</p>
+packages. Parent selection, optimal contribution selection (OCS),
+optimum cross selection and mating allocation belong to <a href="https://github.com/FAkohoue/HapBlockR" class="external-link">HapBlockR</a>. HapBlockR
+calls DesiredGainR through <code>build_selection_index()</code> when
+DGSI or QGSI is requested, then uses the resulting merit score for the
+operational breeding decision. DesiredGainR does not call HapBlockR. See
+<a href="DesiredGainR-interoperation.html">Working with other breeding
+software</a>.</p>
 <hr>
 </div>
 <div class="section level2">
@@ -220,10 +225,16 @@ all.</p>
 <div class="section level3">
 <h3 id="building-an-index">3.2 Building an index<a class="anchor" aria-label="anchor" href="#building-an-index"></a>
 </h3>
+<p>Multiple-trait selection includes multistage selection, tandem
+selection, independent culling, and index selection. These strategies
+allow different types of trade-off. The breeder must define those
+trade-offs before choosing a method.</p>
 <p><code><a href="../reference/selection_index.html">selection_index()</a></code> provides Smith-Hazel, the base index,
-both desired-gain formulations, the Mulamba-Mock rank-sum index, and
-independent culling and tandem selection as comparators, through one
-interface so that alternatives can be compared on identical data.
+both desired-gain formulations, the Mulamba-Mock rank-sum index,
+Elston’s multiplicative index, independent culling, and tandem
+selection. One interface allows alternatives to use identical data and
+settings. <code><a href="../reference/compare_selection_methods.html">compare_selection_methods()</a></code> then checks fairness
+and compares responses, target attainment, rankings, and selected sets.
 <code><a href="../reference/run_dgsi.html">run_dgsi()</a></code> implements the iterative desired-gain method of
 Joukhadar et al. (2024), and <code><a href="../reference/run_qgsi.html">run_qgsi()</a></code> the quadratic
 genomic index of Cerón-Rojas et al. (2026).</p>
@@ -231,13 +242,12 @@ genomic index of Cerón-Rojas et al. (2026).</p>
 <div class="section level3">
 <h3 id="evaluating-an-index">3.3 Evaluating an index<a class="anchor" aria-label="anchor" href="#evaluating-an-index"></a>
 </h3>
-<p><code><a href="../reference/evaluate_index.html">evaluate_index()</a></code> reports: (i) the correlation between
-the index and one fixed definition of aggregate genetic merit, <span class="math inline">\(R_{HI}\)</span>; (ii) expected change in that
-merit, <span class="math inline">\(\Delta H\)</span>; (iii) expected
-response for every trait, <span class="math inline">\(\Delta_j\)</span>;
-(iv) relative efficiency (RE) for one declared main trait; (v) index
-heritability; and (vi) the coefficient of variation of index scores,
-<span class="math inline">\(CV_I\)</span>, when the score has a
+<p><code><a href="../reference/evaluate_index.html">evaluate_index()</a></code> reports the correlation between the
+index and one fixed definition of aggregate genetic merit, <span class="math inline">\(R_{HI}\)</span>. It also gives expected change in
+that merit, <span class="math inline">\(\Delta H\)</span>. Expected
+response is shown for every trait as <span class="math inline">\(\Delta_j\)</span>. Relative efficiency (RE) refers
+to one declared main trait. Index heritability describes the composite
+score. The coefficient of variation of index scores, <span class="math inline">\(CV_I\)</span>, is available when the score has a
 meaningful non-zero mean.</p>
 <p>These quantities are not interchangeable measures of index quality.
 In particular, <span class="math inline">\(R_{HI}\)</span> and <span class="math inline">\(\Delta H\)</span> require the same aggregate-merit
@@ -245,8 +255,8 @@ definition for every index, RE describes only the main trait, and <span class="m
 Therefore, DesiredGainR also directs the breeder to per-trait
 attainment, response-direction alignment, selected-set stability,
 covariance uncertainty and, for repeated cycles, diversity. The detailed
-interpretation is given in <a href="DesiredGainR-index-families.html">Choosing an index</a> and the
-breeder guide.</p>
+interpretation is given in <a href="DesiredGainR-index-families.html">Multiple-trait selection</a> and
+the breeder guide.</p>
 </div>
 <div class="section level3">
 <h3 id="looking-ahead">3.4 Looking ahead<a class="anchor" aria-label="anchor" href="#looking-ahead"></a>
@@ -420,30 +430,35 @@ gains and acceptable intervals</a></td>
 <td><a href="DesiredGainR-covariance.html">Obtaining G and P</a></td>
 </tr>
 <tr class="odd">
-<td>Choose among index families</td>
-<td><a href="DesiredGainR-index-families.html">Choosing an
-index</a></td>
+<td>Choose and compare multiple-trait methods</td>
+<td><a href="DesiredGainR-index-families.html">Multiple-trait
+selection</a></td>
 </tr>
 <tr class="even">
+<td>Use GEBVs, prediction errors, or distinct information traits</td>
+<td><a href="DesiredGainR-information.html">Using predictions,
+prediction errors, and restricted responses</a></td>
+</tr>
+<tr class="odd">
 <td>Understand the iterative desired-gain method</td>
 <td><a href="DesiredGainR-dgsi.html">Optimising desired gains</a></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Use the quadratic genomic index</td>
 <td><a href="DesiredGainR-qgsi.html">Quadratic genomic
 selection</a></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Compare objectives over several cycles</td>
 <td><a href="DesiredGainR-simulation.html">Multi-cycle
 simulation</a></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Inspect validation with real programmes</td>
 <td><a href="DesiredGainR-empirical-validation.html">Empirical
 validation</a></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Combine this with other breeding software</td>
 <td><a href="DesiredGainR-interoperation.html">Working with other
 packages</a></td>

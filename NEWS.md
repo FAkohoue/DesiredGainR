@@ -1,5 +1,13 @@
 # DesiredGainR 0.5.0 (in development)
 
+- Added `compare_selection_methods()` for a common-condition comparison of
+  expected response, target attainment, classical criteria, Mahalanobis
+  alignment, rank agreement and selected-set agreement. The multiple-trait
+  selection vignette now defines the major strategy classes, explains every
+  implemented method, gives a method-choice framework and develops a complete
+  worked comparison. Independent-culling and Elston limits now use original
+  trait units. Economic indices now accept valid negative economic weights.
+
 ## Critical remediation of 1 August 2026
 
 - Added a reproducible empirical validation suite using six real breeding-

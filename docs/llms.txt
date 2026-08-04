@@ -24,7 +24,22 @@ breeder’s own phased marker data.
 
 DesiredGainR begins **after** the genetic evaluation. It does not
 analyse field trials, fit mixed models, or estimate breeding values, and
-it does not design crossing plans.
+it does not design crossing plans. It ends with a defined objective,
+index coefficients and scores, expected response, feasibility and
+uncertainty diagnostics. Use
+[HapBlockR](https://github.com/FAkohoue/HapBlockR) for the next
+decision: choosing parents, controlling relatedness through optimal
+contribution selection (OCS), performing optimum cross selection and
+allocating matings. The dependency is deliberately one way: HapBlockR’s
+`build_selection_index()` delegates DGSI and QGSI construction to
+DesiredGainR and then carries the merit score into its parent- and
+cross-selection tools.
+
+In DesiredGainR, `n_select` is an **analytical truncation count**. It
+determines selection intensity and identifies the top-ranked set used to
+calculate or compare response. It is not a recommendation that those
+candidates should be the final parents, nor does it decide their
+contributions or pairings.
 
 ![DesiredGainR architecture: Desired-gain selection indices, feasibility
 assessment, genomic ranking and breeding-cycle
@@ -34,7 +49,7 @@ optimisation](reference/figures/DesiredGainR_schematic.png)
 
 DesiredGainR turns an uncertain breeding objective into a transparent,
 quantitative decision. It is especially useful when economic weights
-cannot be defended or when the breeder can state acceptable
+lack a defensible basis or when the breeder can state acceptable
 trait-specific gains more confidently than monetary values.
 
 - It expresses every objective in breeder-facing desired-gain units,
@@ -106,7 +121,8 @@ Full documentation is at **<https://FAkohoue.github.io/DesiredGainR/>**.
 | [Defining a breeding objective](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-objective.html) | How to state, test and defend an objective |
 | [Defining desired gains and intervals](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-desired-gain-intervals.html) | Trait-specific minima, interval elicitation and population-driven suggestions when one exact vector is not defensible |
 | [Obtaining G and P](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-covariance.html) | Covariance estimands, import, working alternatives, diagnostics and reporting |
-| [Choosing an index](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-index-families.html) | Matching the index family to the breeding objective and comparing decisions |
+| [Multiple-trait selection](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-index-families.html) | Definitions, method choice, implementation, fair comparison and decision criteria |
+| [Using predictions and prediction errors](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-information.html) | Distinct information and objective traits, GEBV uncertainty, Cunningham efficiency and Satoh restricted responses |
 | [Optimising desired gains](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-dgsi.html) | Iterative DGSI fitting, transmitted response and optimisation stability |
 | [Quadratic genomic selection](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-qgsi.html) | Complete QGSI demonstration, weight interpretation, contributions and linear comparison |
 | [Multi-cycle simulation](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-simulation.html) | Comparing objectives over several breeding cycles |
@@ -259,8 +275,14 @@ selection index.
 
 - [`selection_index()`](https://FAkohoue.github.io/DesiredGainR/reference/selection_index.md)
   : Construct a classical multi-trait selection index
+- [`selection_information()`](https://FAkohoue.github.io/DesiredGainR/reference/selection_information.md)
+  : Define the information used by a selection index
+- [`generalized_index()`](https://FAkohoue.github.io/DesiredGainR/reference/generalized_index.md)
+  : Fit an index from a general information model
 - [`restricted_index()`](https://FAkohoue.github.io/DesiredGainR/reference/restricted_index.md)
   : Restricted and proportional-gain selection indices
+- [`restricted_breeding_values()`](https://FAkohoue.github.io/DesiredGainR/reference/restricted_breeding_values.md)
+  : Project breeding values into a restricted response space
 - [`run_dgsi()`](https://FAkohoue.github.io/DesiredGainR/reference/run_dgsi.md)
   : Fit an optimised desired-gain selection index
 - [`run_qgsi()`](https://FAkohoue.github.io/DesiredGainR/reference/run_qgsi.md)
@@ -283,12 +305,20 @@ matrices.
 
 - [`evaluate_index()`](https://FAkohoue.github.io/DesiredGainR/reference/evaluate_index.md)
   : Evaluate a selection index against the standard criteria
+- [`compare_selection_methods()`](https://FAkohoue.github.io/DesiredGainR/reference/compare_selection_methods.md)
+  : Compare multi-trait selection methods on one decision problem
 - [`summary(`*`<desiredgainr_index>`*`)`](https://FAkohoue.github.io/DesiredGainR/reference/summary.desiredgainr_index.md)
   : Summarise a fitted selection index
 - [`predict(`*`<desiredgainr_index>`*`)`](https://FAkohoue.github.io/DesiredGainR/reference/predict.desiredgainr_index.md)
   : Score a new candidate set with a fitted index
 - [`index_uncertainty()`](https://FAkohoue.github.io/DesiredGainR/reference/index_uncertainty.md)
   : Propagate sampling error in the covariance matrices into an index
+- [`candidate_score_uncertainty()`](https://FAkohoue.github.io/DesiredGainR/reference/candidate_score_uncertainty.md)
+  : Candidate-specific uncertainty in index scores and ranks
+- [`index_information_efficiency()`](https://FAkohoue.github.io/DesiredGainR/reference/index_information_efficiency.md)
+  : Cunningham information-deletion efficiency
+- [`evaluate_restricted_response()`](https://FAkohoue.github.io/DesiredGainR/reference/evaluate_restricted_response.md)
+  : Evaluate an achieved response against a desired-gain direction
 - [`compare_dg_and_qgsi()`](https://FAkohoue.github.io/DesiredGainR/reference/compare_dg_and_qgsi.md)
   : Compare DGSI and QGSI candidate rankings
 
@@ -347,6 +377,12 @@ disequilibrium and allele-frequency structure of the simulation are
 those of the target programme. The search treats the simulation as the
 objective function and never substitutes a cheaper approximation for it.
 
+- [`breeding_scenario()`](https://FAkohoue.github.io/DesiredGainR/reference/breeding_scenario.md)
+  : Describe a breeding simulation scenario
+- [`simulation_calibration()`](https://FAkohoue.github.io/DesiredGainR/reference/simulation_calibration.md)
+  : Audit the calibration of an AlphaSimR setup
+- [`stress_test_desired_gains()`](https://FAkohoue.github.io/DesiredGainR/reference/stress_test_desired_gains.md)
+  : Stress-test a desired-gain vector across simulation scenarios
 - [`founder_haplotypes()`](https://FAkohoue.github.io/DesiredGainR/reference/founder_haplotypes.md)
   : Validate and package phased founder haplotypes
 - [`haplotypes_from_inbred_dosage()`](https://FAkohoue.github.io/DesiredGainR/reference/haplotypes_from_inbred_dosage.md)
@@ -408,10 +444,12 @@ anything.
 - [Empirical validation with real breeding-programme
   data](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-empirical-validation.md):
 
-### Index methods
+### Multiple-trait selection and index methods
 
-- [Choosing an
-  index](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-index-families.md):
+- [Multiple-trait selection: methods, choice, and
+  comparison](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-index-families.md):
+- [Using predictions, prediction errors, and restricted
+  responses](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-information.md):
 - [Optimising desired
   gains](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-dgsi.md):
 - [Quadratic genomic

@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Choosing an index • DesiredGainR</title>
+<title>Multiple-trait selection: methods, choice, and comparison • DesiredGainR</title>
 <!-- favicons --><link rel="icon" type="image/png" sizes="96x96" href="../favicon-96x96.png">
 <link rel="icon" type="”image/svg+xml”" href="../favicon.svg">
 <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
@@ -21,7 +21,7 @@
 <link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Choosing an index">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Multiple-trait selection: methods, choice, and comparison">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;600&amp;display=swap" rel="stylesheet">
 <style>
@@ -85,7 +85,8 @@
     <li><a class="dropdown-item" href="../articles/DesiredGainR-empirical-validation.html">Empirical validation with real breeding programmes</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Index methods</h6></li>
-    <li><a class="dropdown-item" href="../articles/DesiredGainR-index-families.html">Choosing an index</a></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-index-families.html">Multiple-trait selection and method comparison</a></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-information.html">Using predictions and prediction errors</a></li>
     <li><a class="dropdown-item" href="../articles/DesiredGainR-dgsi.html">Optimising desired gains</a></li>
     <li><a class="dropdown-item" href="../articles/DesiredGainR-qgsi.html">Quadratic genomic selection</a></li>
     <li><hr class="dropdown-divider"></li>
@@ -116,7 +117,7 @@
 
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
-      <img src="../logo.svg" class="logo" alt=""><h1>Choosing an index</h1>
+      <img src="../logo.svg" class="logo" alt=""><h1>Multiple-trait selection: methods, choice, and comparison</h1>
             
       
       <small class="dont-index">Source: <a href="https://github.com/FAkohoue/DesiredGainR/blob/HEAD/vignettes/DesiredGainR-index-families.Rmd" class="external-link"><code>vignettes/DesiredGainR-index-families.Rmd</code></a></small>
@@ -126,209 +127,959 @@
     
     
 <div class="section level2">
-<h2 id="begin-with-the-objective-not-the-method">1. Begin with the objective, not the method<a class="anchor" aria-label="anchor" href="#begin-with-the-objective-not-the-method"></a>
+<h2 id="learning-objectives">1. Learning objectives<a class="anchor" aria-label="anchor" href="#learning-objectives"></a>
 </h2>
-<p>An index family is appropriate only relative to a stated breeding
-objective. Economic value, a desired response, hard eligibility limits
-and non-linear value judgements are different objectives. They should
-not be made to look equivalent by applying the same function name to all
-of them.</p>
+<p>Plant breeding programmes usually improve several traits at the same
+time. Yield, quality, adaptation, maturity, and disease resistance may
+all influence the release decision. Progress in one trait can also
+reduce progress in another. Therefore, the method must represent both
+the breeding objective and the genetic relationships among traits.</p>
+<p>This vignette has four objectives. They are to: (i) define
+multiple-trait selection, (ii) explain its main methods, (iii) show when
+each method is appropriate, and (iv) provide a comprehensive comparison
+analysis.</p>
+<p>At the end, the breeder should be able to justify the selected
+method. The justification should refer to the objective, the available
+information, the expected responses, and the stability of the final
+ranking.</p>
+</div>
+<div class="section level2">
+<h2 id="what-is-multiple-trait-selection">2. What is multiple-trait selection?<a class="anchor" aria-label="anchor" href="#what-is-multiple-trait-selection"></a>
+</h2>
+<p>Multiple-trait selection is the choice of candidates using two or
+more traits. The traits can enter the decision at the same stage or at
+different stages. The breeder must first decide how trade-offs are
+allowed.</p>
+<p>Four broad strategies are recognised by Beavis, Lamkey, Mahama, and
+Suza (2023).</p>
+<table class="table">
+<colgroup>
+<col width="25%">
+<col width="25%">
+<col width="25%">
+<col width="25%">
+</colgroup>
+<thead><tr class="header">
+<th>Strategy</th>
+<th>Definition</th>
+<th>Suitable situation</th>
+<th>Main limitation</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>Multistage selection</td>
+<td>Different traits are evaluated at different stages.</td>
+<td>Expensive traits are measured after inexpensive screening.</td>
+<td>Early rejection can remove candidates that would perform well
+later.</td>
+</tr>
+<tr class="even">
+<td>Tandem selection</td>
+<td>One trait is improved first. Another trait becomes the focus
+later.</td>
+<td>One urgent trait dominates a specific breeding stage.</td>
+<td>Other traits can deteriorate while attention is placed
+elsewhere.</td>
+</tr>
+<tr class="odd">
+<td>Independent culling</td>
+<td>Every candidate must satisfy a limit for every required trait.</td>
+<td>Release standards or biological limits are firm.</td>
+<td>Excellence elsewhere gives no compensation for a failed limit.</td>
+</tr>
+<tr class="even">
+<td>Index selection</td>
+<td>Traits are combined into one score of overall merit.</td>
+<td>Trade-offs are allowed and simultaneous improvement is
+required.</td>
+<td>The score is useful only when its objective and inputs are
+defensible.</td>
+</tr>
+</tbody>
+</table>
+<p>These strategies answer different questions. Hence, a comparison
+should never treat them as interchangeable algorithms. The breeder’s
+decision rule comes first. The statistical method follows.</p>
+</div>
+<div class="section level2">
+<h2 id="the-quantities-used-by-an-index">3. The quantities used by an index<a class="anchor" aria-label="anchor" href="#the-quantities-used-by-an-index"></a>
+</h2>
+<p>Let <span class="math inline">\(\mathbf{x}\)</span> contain the
+information recorded for a candidate. Let <span class="math inline">\(\mathbf{g}\)</span> contain the additive genetic
+values of the objective traits. The two vectors can contain the same
+traits. They can also differ. For example, records from relatives,
+testcrosses, environments, or correlated traits can help predict a
+smaller set of objective traits.</p>
+<p>Three covariance matrices describe this problem.</p>
+<table class="table">
+<colgroup>
+<col width="33%">
+<col width="33%">
+<col width="33%">
+</colgroup>
+<thead><tr class="header">
+<th>Symbol</th>
+<th>Definition</th>
+<th>Breeding meaning</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(\mathbf{P}=\operatorname{Var}(\mathbf{x})\)</span></td>
+<td>Covariance among information variables</td>
+<td>Describes the variation and redundancy in the evidence used for
+selection.</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\mathbf{C}=\operatorname{Cov}(\mathbf{x},\mathbf{g})\)</span></td>
+<td>Covariance between information and objective traits</td>
+<td>Describes how strongly each information source predicts genetic
+value.</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\mathbf{G}=\operatorname{Var}(\mathbf{g})\)</span></td>
+<td>Genetic covariance among objective traits</td>
+<td>Describes available genetic variation and correlated response.</td>
+</tr>
+</tbody>
+</table>
+<p>The aggregate genetic merit is</p>
+<p><span class="math display">\[
+H=\mathbf{a}^{\mathsf T}\mathbf{g},
+\]</span></p>
+<p>where <span class="math inline">\(\mathbf{a}\)</span> contains
+economic weights. A linear selection index is</p>
+<p><span class="math display">\[
+I=\mathbf{b}^{\mathsf T}\mathbf{x},
+\]</span></p>
+<p>where <span class="math inline">\(\mathbf{b}\)</span> contains index
+coefficients. Under truncation selection, the expected response vector
+is</p>
+<p><span class="math display">\[
+\Delta
+=i\frac{\mathbf{C}^{\mathsf T}\mathbf{b}}
+{\sqrt{\mathbf{b}^{\mathsf T}\mathbf{P}\mathbf{b}}}.
+\]</span></p>
+<p>The term <span class="math inline">\(i\)</span> is the selection
+intensity. It increases when a smaller proportion of candidates is
+selected. When information and objective traits are identical, <span class="math inline">\(\mathbf{C}=\mathbf{G}\)</span>. This gives the
+familiar expression used throughout classical selection-index
+theory.</p>
+<p>Use <code><a href="../reference/selection_information.html">selection_information()</a></code> and
+<code><a href="../reference/generalized_index.html">generalized_index()</a></code> when the information and objective
+traits differ. Read <a href="DesiredGainR-information.html">Using
+predictions, prediction errors, and restricted responses</a> for the
+complete formulation.</p>
+</div>
+<div class="section level2">
+<h2 id="the-methods-available-in-desiredgainr">4. The methods available in DesiredGainR<a class="anchor" aria-label="anchor" href="#the-methods-available-in-desiredgainr"></a>
+</h2>
+<div class="section level3">
+<h3 id="economic-value-methods">4.1 Economic-value methods<a class="anchor" aria-label="anchor" href="#economic-value-methods"></a>
+</h3>
+<p>The Smith-Hazel index maximises expected response in aggregate
+genetic merit. Its coefficients are</p>
+<p><span class="math display">\[
+\mathbf{b}=\mathbf{P}^{-1}\mathbf{G}\mathbf{a}.
+\]</span></p>
+<p>Choose this method when the relative economic values are credible. It
+is also the correct reference when every method is compared against one
+fixed definition of merit.</p>
+<p>The base index uses <span class="math inline">\(\mathbf{b}=\mathbf{a}\)</span>. It applies the
+economic weights directly. It provides a useful benchmark because it
+avoids covariance inversion. A small advantage for Smith-Hazel over the
+base index suggests that the estimated covariance structure contributes
+little to the decision.</p>
+</div>
+<div class="section level3">
+<h3 id="desired-gain-methods">4.2 Desired-gain methods<a class="anchor" aria-label="anchor" href="#desired-gain-methods"></a>
+</h3>
+<p>The Pesek-Baker and Yamada formulations use a desired response
+direction <span class="math inline">\(\mathbf{d}\)</span>. Their
+coefficient expressions are</p>
+<p><span class="math display">\[
+\mathbf{b}=\mathbf{G}^{-1}\mathbf{d}
+\]</span></p>
+<p>and</p>
+<p><span class="math display">\[
+\mathbf{b}=\mathbf{P}^{-1}\mathbf{G}
+(\mathbf{G}\mathbf{P}^{-1}\mathbf{G})^{-1}\mathbf{d}.
+\]</span></p>
+<p>They give the same coefficient direction when <span class="math inline">\(\mathbf{G}\)</span> is square and invertible.
+Therefore, they are two computational routes to the same linear index. A
+material difference between their answers indicates numerical
+instability or a rank-deficient matrix.</p>
+<p>Choose this family when the breeder can state relative desired gains
+more confidently than economic weights. The vector fixes response
+proportions. The selection intensity fixes the attainable magnitude.
+Multiplying every desired gain by the same positive constant leaves the
+ranking unchanged.</p>
+<p><code><a href="../reference/run_dgsi.html">run_dgsi()</a></code> implements the iterative desired-gain
+selection index (DGSI). It searches for a candidate ranking whose
+selected differential is close to the requested vector. The closed-form
+desired-gain index remains its mathematical reference. Read <a href="DesiredGainR-dgsi.html">Optimising desired gains</a> before using
+the iterative method.</p>
+</div>
+<div class="section level3">
+<h3 id="rank-and-threshold-methods">4.3 Rank and threshold methods<a class="anchor" aria-label="anchor" href="#rank-and-threshold-methods"></a>
+</h3>
+<p>The Mulamba-Mock rank-sum method ranks candidates within traits and
+combines the ranks. It requires neither economic weights nor covariance
+matrices when equal rank weights are used. It is valuable as a simple
+comparator. Its score does not provide a closed-form predicted genetic
+response in DesiredGainR.</p>
+<p>Independent culling applies firm acceptance limits. Supply each limit
+in the original trait units. Use a minimum for traits where larger
+values are favourable. Use a maximum for traits listed in
+<code>lower_is_better</code>.</p>
+<p>The Elston multiplicative index also applies firm limits. It then
+ranks the eligible candidates using their joint margins above those
+limits. It is useful when balanced superiority among eligible candidates
+matters.</p>
+<p>Tandem selection focuses on one trait at each stage. DesiredGainR
+includes it as a historical and operational comparator.</p>
+</div>
+<div class="section level3">
+<h3 id="restricted-methods">4.4 Restricted methods<a class="anchor" aria-label="anchor" href="#restricted-methods"></a>
+</h3>
+<p>A restricted index maximises merit while controlling response in
+specified traits. DesiredGainR provides five forms.</p>
 <table class="table">
 <colgroup>
 <col width="50%">
 <col width="50%">
 </colgroup>
 <thead><tr class="header">
-<th>Breeder’s statement</th>
-<th>Appropriate starting point</th>
+<th>Method</th>
+<th>Breeding question</th>
 </tr></thead>
 <tbody>
 <tr class="odd">
-<td>“I can defend the relative economic value of each trait.”</td>
-<td>Smith–Hazel</td>
+<td>Kempthorne-Nordskog</td>
+<td>Which index holds specified traits at zero expected change?</td>
 </tr>
 <tr class="even">
-<td>“The measurements themselves already form the score.”</td>
-<td>Base index</td>
+<td>Restricted Smith-Hazel</td>
+<td>Which projection form gives the same zero-response restriction?</td>
 </tr>
 <tr class="odd">
-<td>“I can defend a desired response direction.”</td>
-<td>Pesek–Baker or Yamada</td>
+<td>Tallis</td>
+<td>Which index preserves stated response proportions?</td>
 </tr>
 <tr class="even">
-<td>“I know acceptable gain intervals, but not one exact vector.”</td>
-<td>Population-driven desired-gain suggestions</td>
+<td>Mallard</td>
+<td>Which index targets stated response amounts?</td>
 </tr>
 <tr class="odd">
-<td>“Every selected candidate must pass these limits.”</td>
-<td>Independent culling or a restricted index</td>
-</tr>
-<tr class="even">
-<td>“I need a simple, weight-light comparator.”</td>
-<td>Mulamba–Mock rank sum</td>
-</tr>
-<tr class="odd">
-<td>“Trait value is genuinely curved or interactive.”</td>
-<td>Quadratic genomic selection index</td>
+<td>Harville</td>
+<td>Which index balances merit against a finite restriction
+penalty?</td>
 </tr>
 </tbody>
 </table>
-<p>Tandem selection is included as a comparator, but it postpones the
-other traits rather than balancing them in the same decision.</p>
-<hr>
+<p>Restrictions usually reduce response in unconstrained net merit. That
+loss is the cost of respecting the biological or commercial condition.
+Report both the restricted response and the loss relative to the
+unrestricted index.</p>
+<p>Satoh (2024) gives a geometric interpretation of proportional
+restriction. The scalar <span class="math inline">\(\beta\)</span>
+measures progress along the desired direction. The Mahalanobis residual
+measures departure from that direction after accounting for genetic
+covariance. DesiredGainR reports both quantities through
+<code><a href="../reference/evaluate_restricted_response.html">evaluate_restricted_response()</a></code>.</p>
+</div>
+<div class="section level3">
+<h3 id="non-linear-economic-value">4.5 Non-linear economic value<a class="anchor" aria-label="anchor" href="#non-linear-economic-value"></a>
+</h3>
+<p>The quadratic genomic selection index (QGSI) represents linear,
+squared, and cross-product economic values. Choose it when biological or
+economic merit is genuinely curved. A desired gain is a response target.
+It is a different quantity from a quadratic weight. Read <a href="DesiredGainR-qgsi.html">Quadratic genomic selection</a> for the
+full demonstration.</p>
+</div>
 </div>
 <div class="section level2">
-<h2 id="fit-comparable-linear-families">2. Fit comparable linear families<a class="anchor" aria-label="anchor" href="#fit-comparable-linear-families"></a>
+<h2 id="how-to-choose-a-method">5. How to choose a method<a class="anchor" aria-label="anchor" href="#how-to-choose-a-method"></a>
 </h2>
-<p>All traits are oriented so that larger values are favourable. The
-objective below is expressed in genetic standard-deviation units.</p>
+<p>Begin with the breeder’s statement. Then choose the simplest method
+that represents it accurately.</p>
+<table class="table">
+<colgroup>
+<col width="33%">
+<col width="33%">
+<col width="33%">
+</colgroup>
+<thead><tr class="header">
+<th>Breeder’s statement</th>
+<th>Starting method</th>
+<th>Required evidence</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>“I can defend relative economic values.”</td>
+<td>Smith-Hazel</td>
+<td>
+<span class="math inline">\(\mathbf{G}\)</span>, <span class="math inline">\(\mathbf{P}\)</span>, and economic weights</td>
+</tr>
+<tr class="even">
+<td>“I can state the response direction.”</td>
+<td>Pesek-Baker or Yamada</td>
+<td>
+<span class="math inline">\(\mathbf{G}\)</span>, and <span class="math inline">\(\mathbf{P}\)</span> for Yamada</td>
+</tr>
+<tr class="odd">
+<td>“I can state acceptable gain intervals.”</td>
+<td><code><a href="../reference/suggest_desired_gains.html">suggest_desired_gains()</a></code></td>
+<td>
+<span class="math inline">\(\mathbf{G}\)</span>, <span class="math inline">\(\mathbf{P}\)</span>, intervals, and
+candidates</td>
+</tr>
+<tr class="even">
+<td>“Every candidate must satisfy these limits.”</td>
+<td>Independent culling</td>
+<td>Candidate values and limits</td>
+</tr>
+<tr class="odd">
+<td>“Eligible candidates should have balanced margins.”</td>
+<td>Elston</td>
+<td>Candidate values and limits</td>
+</tr>
+<tr class="even">
+<td>“Some traits should remain unchanged.”</td>
+<td>Restricted index</td>
+<td>
+<span class="math inline">\(\mathbf{G}\)</span>, <span class="math inline">\(\mathbf{P}\)</span>, merit weights, and
+restrictions</td>
+</tr>
+<tr class="odd">
+<td>“One trait is screened at each stage.”</td>
+<td>Tandem or multistage selection</td>
+<td>Stage order and stage-specific evidence</td>
+</tr>
+<tr class="even">
+<td>“I need a simple comparator with few assumptions.”</td>
+<td>Base or Mulamba-Mock</td>
+<td>Weights for the base index, or candidate ranks</td>
+</tr>
+<tr class="odd">
+<td>“Merit contains curvature or trait interactions.”</td>
+<td>QGSI</td>
+<td>Genomic estimated breeding values and quadratic economic values</td>
+</tr>
+</tbody>
+</table>
+<p>Use the following decision sequence.</p>
+<ol style="list-style-type: decimal">
+<li>Define the objective traits and their favourable directions.</li>
+<li>Identify firm limits that allow no trade-off.</li>
+<li>Decide whether the remaining objective is economic, desired-gain, or
+non-linear.</li>
+<li>Confirm the covariance matrices and units required by that
+method.</li>
+<li>Fit one simple benchmark and one objective-matched method.</li>
+<li>Compare biological response before comparing scalar criteria.</li>
+<li>Examine ranking stability and uncertainty.</li>
+<li>Use simulation when repeated cycles or non-linear decisions
+matter.</li>
+</ol>
+</div>
+<div class="section level2">
+<h2 id="conditions-for-a-fair-comparison">6. Conditions for a fair comparison<a class="anchor" aria-label="anchor" href="#conditions-for-a-fair-comparison"></a>
+</h2>
+<p>A comprehensive comparison requires common conditions. Otherwise, a
+numerical difference can reflect the setup rather than the method.</p>
+<p>Use the same:</p>
+<ol style="list-style-type: decimal">
+<li>candidates and trait records;</li>
+<li>trait directions and units;</li>
+<li>genetic and phenotypic covariance estimates;</li>
+<li>selected proportion or selection intensity;</li>
+<li>aggregate-merit definition when comparing <span class="math inline">\(R_{HI}\)</span> or <span class="math inline">\(\Delta H\)</span>;</li>
+<li>training, validation, and test partitions;</li>
+<li>simulation scenarios, replicate seeds, and computational
+budget.</li>
+</ol>
+<p>The comparison also needs several outcomes. No single statistic is
+sufficient.</p>
+<table class="table">
+<colgroup>
+<col width="50%">
+<col width="50%">
+</colgroup>
+<thead><tr class="header">
+<th>Outcome</th>
+<th>Question answered</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>Expected response for every trait</td>
+<td>What genetic change is predicted?</td>
+</tr>
+<tr class="even">
+<td>Target attainment</td>
+<td>How much of each requested gain is reached?</td>
+</tr>
+<tr class="odd">
+<td>Feasibility</td>
+<td>Can the complete target be reached at the planned intensity?</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(R_{HI}\)</span></td>
+<td>How closely does the index rank one fixed aggregate merit?</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\Delta H\)</span></td>
+<td>How much change in that fixed merit is expected?</td>
+</tr>
+<tr class="even">
+<td>Relative efficiency (RE)</td>
+<td>How much response in the declared main trait remains relative to
+direct selection?</td>
+</tr>
+<tr class="odd">
+<td>Index heritability</td>
+<td>How repeatable is the composite score under the fitted covariance
+model?</td>
+</tr>
+<tr class="even">
+<td>Mahalanobis alignment</td>
+<td>Does the response follow the requested multivariate direction?</td>
+</tr>
+<tr class="odd">
+<td>Selected-set overlap</td>
+<td>Do two methods choose the same candidates?</td>
+</tr>
+<tr class="even">
+<td>Rank correlation</td>
+<td>Do two methods order all candidates similarly?</td>
+</tr>
+<tr class="odd">
+<td>Selection probability</td>
+<td>Does candidate choice remain stable after prediction uncertainty is
+propagated?</td>
+</tr>
+<tr class="even">
+<td>Information-deletion efficiency</td>
+<td>Which records contribute useful selection information?</td>
+</tr>
+<tr class="odd">
+<td>Multi-cycle response and diversity</td>
+<td>Does the apparent advantage persist across breeding cycles?</td>
+</tr>
+</tbody>
+</table>
+<p>The coefficient of variation of the index, <span class="math inline">\(CV_I\)</span>, is retained for reproduction of
+published analyses. It depends on the score origin and becomes undefined
+after centring. Therefore, it should never decide the preferred
+method.</p>
+</div>
+<div class="section level2">
+<h2 id="a-comprehensive-comparison-analysis">7. A comprehensive comparison analysis<a class="anchor" aria-label="anchor" href="#a-comprehensive-comparison-analysis"></a>
+</h2>
+<div class="section level3">
+<h3 id="state-the-objective">7.1 State the objective<a class="anchor" aria-label="anchor" href="#state-the-objective"></a>
+</h3>
+<p>The example seeks gains in grain yield (GY), ears per plant (EPP),
+and lower values for plant height (PHT), anthesis date (AD),
+anthesis-silking interval (ASI), and grey leaf spot score (GLS). The
+target is expressed in genetic standard deviations.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">desired_gains</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
-<span>  GY <span class="op">=</span> <span class="fl">1.0</span>, PHT <span class="op">=</span> <span class="fl">0.4</span>, AD <span class="op">=</span> <span class="fl">0.6</span>,</span>
-<span>  ASI <span class="op">=</span> <span class="fl">0.5</span>, EPP <span class="op">=</span> <span class="fl">0.4</span>, GLS <span class="op">=</span> <span class="fl">0.6</span></span>
-<span><span class="op">)</span></span>
-<span><span class="va">economic_weights</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
-<span>  GY <span class="op">=</span> <span class="fl">1.0</span>, PHT <span class="op">=</span> <span class="fl">0.2</span>, AD <span class="op">=</span> <span class="fl">0.5</span>,</span>
-<span>  ASI <span class="op">=</span> <span class="fl">0.4</span>, EPP <span class="op">=</span> <span class="fl">0.3</span>, GLS <span class="op">=</span> <span class="fl">0.5</span></span>
+<code class="sourceCode R"><span><span class="va">desired_gains_sd</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>  GY <span class="op">=</span> <span class="fl">1.0</span>,</span>
+<span>  PHT <span class="op">=</span> <span class="fl">0.4</span>,</span>
+<span>  AD <span class="op">=</span> <span class="fl">0.6</span>,</span>
+<span>  ASI <span class="op">=</span> <span class="fl">0.5</span>,</span>
+<span>  EPP <span class="op">=</span> <span class="fl">0.4</span>,</span>
+<span>  GLS <span class="op">=</span> <span class="fl">0.6</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p>The two vectors are separate statements. <code>desired_gains</code>
-defines a response direction, whereas <code>economic_weights</code>
-defines one common aggregate merit for the merit-based comparison
-below.</p>
+<p>First test feasibility. This separates an unrealistic target from a
+poor method.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">smith_hazel</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/selection_index.html">selection_index</a></span><span class="op">(</span></span>
-<span>  <span class="va">dgr_candidates</span>, <span class="va">traits</span>,</span>
-<span>  method <span class="op">=</span> <span class="st">"smith_hazel"</span>, G <span class="op">=</span> <span class="va">dgr_G</span>, P <span class="op">=</span> <span class="va">dgr_P</span>,</span>
-<span>  economic_weights <span class="op">=</span> <span class="va">economic_weights</span>,</span>
+<code class="sourceCode R"><span><span class="va">feasibility</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gain_feasibility.html">gain_feasibility</a></span><span class="op">(</span></span>
+<span>  <span class="va">desired_gains_sd</span>,</span>
+<span>  <span class="va">dgr_G</span>,</span>
+<span>  <span class="va">dgr_P</span>,</span>
+<span>  n_candidates <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">dgr_candidates</span><span class="op">)</span>,</span>
+<span>  n_select <span class="op">=</span> <span class="fl">20L</span>,</span>
 <span>  lower_is_better <span class="op">=</span> <span class="va">lower_is_better</span>,</span>
-<span>  scale_traits <span class="op">=</span> <span class="cn">TRUE</span>, scale_by <span class="op">=</span> <span class="st">"phenotypic"</span>,</span>
-<span>  n_select <span class="op">=</span> <span class="fl">20L</span>, main_trait <span class="op">=</span> <span class="st">"GY"</span></span>
+<span>  gain_units <span class="op">=</span> <span class="st">"genetic_sd"</span></span>
 <span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">pesek_baker</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/selection_index.html">selection_index</a></span><span class="op">(</span></span>
-<span>  <span class="va">dgr_candidates</span>, <span class="va">traits</span>,</span>
-<span>  method <span class="op">=</span> <span class="st">"pesek_baker"</span>, G <span class="op">=</span> <span class="va">dgr_G</span>, P <span class="op">=</span> <span class="va">dgr_P</span>,</span>
-<span>  desired_gains <span class="op">=</span> <span class="va">desired_gains</span>,</span>
-<span>  aggregate_weights <span class="op">=</span> <span class="va">economic_weights</span>,</span>
-<span>  lower_is_better <span class="op">=</span> <span class="va">lower_is_better</span>,</span>
-<span>  scale_traits <span class="op">=</span> <span class="cn">TRUE</span>, scale_by <span class="op">=</span> <span class="st">"phenotypic"</span>,</span>
-<span>  n_select <span class="op">=</span> <span class="fl">20L</span>, main_trait <span class="op">=</span> <span class="st">"GY"</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">base_index</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/selection_index.html">selection_index</a></span><span class="op">(</span></span>
-<span>  <span class="va">dgr_candidates</span>, <span class="va">traits</span>,</span>
-<span>  method <span class="op">=</span> <span class="st">"base"</span>, G <span class="op">=</span> <span class="va">dgr_G</span>, P <span class="op">=</span> <span class="va">dgr_P</span>,</span>
-<span>  economic_weights <span class="op">=</span> <span class="va">economic_weights</span>,</span>
-<span>  lower_is_better <span class="op">=</span> <span class="va">lower_is_better</span>,</span>
-<span>  scale_traits <span class="op">=</span> <span class="cn">TRUE</span>, scale_by <span class="op">=</span> <span class="st">"phenotypic"</span>,</span>
-<span>  n_select <span class="op">=</span> <span class="fl">20L</span>, main_trait <span class="op">=</span> <span class="st">"GY"</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">rank_sum</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/selection_index.html">selection_index</a></span><span class="op">(</span></span>
-<span>  <span class="va">dgr_candidates</span>, <span class="va">traits</span>,</span>
-<span>  method <span class="op">=</span> <span class="st">"mulamba_mock"</span>,</span>
-<span>  G <span class="op">=</span> <span class="va">dgr_G</span>, P <span class="op">=</span> <span class="va">dgr_P</span>,</span>
-<span>  lower_is_better <span class="op">=</span> <span class="va">lower_is_better</span>,</span>
-<span>  scale_traits <span class="op">=</span> <span class="cn">TRUE</span>, scale_by <span class="op">=</span> <span class="st">"phenotypic"</span>,</span>
-<span>  n_select <span class="op">=</span> <span class="fl">20L</span>, main_trait <span class="op">=</span> <span class="st">"GY"</span></span>
-<span><span class="op">)</span></span></code></pre></div>
-<p>Smith–Hazel and Pesek–Baker are compared here under one common
-definition of aggregate merit. Without that common definition, their
-index–merit correlation and aggregate-merit response would not answer
-the same question.</p>
-<hr>
+<span><span class="va">feasibility</span></span>
+<span><span class="co">#&gt; &lt;desiredgainr_feasibility&gt;</span></span>
+<span><span class="co">#&gt;   Required selection intensity: 3.2082</span></span>
+<span><span class="co">#&gt;   Requires the top 0.1773%, which is fewer than one of 200 candidates</span></span>
+<span><span class="co">#&gt;   Planned intensity: 1.7550 (top 10.0%)</span></span>
+<span><span class="co">#&gt;   Feasible at planned intensity: no</span></span>
+<span><span class="co">#&gt;   Feasible anywhere in this population: no</span></span>
+<span><span class="co">#&gt;   Attainable fraction of the requested gain: 54.7%</span></span></code></pre></div>
 </div>
-<div class="section level2">
-<h2 id="compare-biological-responses-before-summary-criteria">3. Compare biological responses before summary criteria<a class="anchor" aria-label="anchor" href="#compare-biological-responses-before-summary-criteria"></a>
-</h2>
+<div class="section level3">
+<h3 id="put-every-method-on-one-explicit-scale">7.2 Put every method on one explicit scale<a class="anchor" aria-label="anchor" href="#put-every-method-on-one-explicit-scale"></a>
+</h3>
+<p>The following transformation expresses candidates and covariance
+matrices in genetic-standard-deviation units.
+<code><a href="../reference/selection_index.html">selection_index()</a></code> then receives
+<code>scale_traits = FALSE</code>. Hence, the desired-gain vector and
+every reported response use the same units.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">response_table</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
-<span>  Trait <span class="op">=</span> <span class="va">traits</span>,</span>
-<span>  Smith_Hazel <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/unname.html" class="external-link">unname</a></span><span class="op">(</span><span class="va">smith_hazel</span><span class="op">$</span><span class="va">evaluation</span><span class="op">$</span><span class="va">expected_response</span><span class="op">[</span><span class="va">traits</span><span class="op">]</span><span class="op">)</span>,</span>
-<span>  Pesek_Baker <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/unname.html" class="external-link">unname</a></span><span class="op">(</span><span class="va">pesek_baker</span><span class="op">$</span><span class="va">evaluation</span><span class="op">$</span><span class="va">expected_response</span><span class="op">[</span><span class="va">traits</span><span class="op">]</span><span class="op">)</span>,</span>
-<span>  Base <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/unname.html" class="external-link">unname</a></span><span class="op">(</span><span class="va">base_index</span><span class="op">$</span><span class="va">evaluation</span><span class="op">$</span><span class="va">expected_response</span><span class="op">[</span><span class="va">traits</span><span class="op">]</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">genetic_sd</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/diag.html" class="external-link">diag</a></span><span class="op">(</span><span class="va">dgr_G</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="va">traits</span><span class="op">]</span></span>
+<span><span class="va">inverse_sd</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/diag.html" class="external-link">diag</a></span><span class="op">(</span><span class="fl">1</span> <span class="op">/</span> <span class="va">genetic_sd</span>, nrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">traits</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/dimnames.html" class="external-link">dimnames</a></span><span class="op">(</span><span class="va">inverse_sd</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">traits</span>, <span class="va">traits</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">G_sd</span> <span class="op">&lt;-</span> <span class="va">inverse_sd</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html" class="external-link">%*%</a></span> <span class="va">dgr_G</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html" class="external-link">%*%</a></span> <span class="va">inverse_sd</span></span>
+<span><span class="va">P_sd</span> <span class="op">&lt;-</span> <span class="va">inverse_sd</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html" class="external-link">%*%</a></span> <span class="va">dgr_P</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html" class="external-link">%*%</a></span> <span class="va">inverse_sd</span></span>
+<span></span>
+<span><span class="va">candidates_sd</span> <span class="op">&lt;-</span> <span class="va">dgr_candidates</span></span>
+<span><span class="va">centred</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sweep.html" class="external-link">sweep</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="va">dgr_candidates</span><span class="op">[</span>, <span class="va">traits</span><span class="op">]</span><span class="op">)</span>,</span>
+<span>  <span class="fl">2L</span>,</span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">colMeans</a></span><span class="op">(</span><span class="va">dgr_candidates</span><span class="op">[</span>, <span class="va">traits</span><span class="op">]</span><span class="op">)</span>,</span>
+<span>  <span class="st">"-"</span></span>
 <span><span class="op">)</span></span>
-<span><span class="va">response_table</span><span class="op">[</span><span class="op">-</span><span class="fl">1</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">response_table</span><span class="op">[</span><span class="op">-</span><span class="fl">1</span><span class="op">]</span>, <span class="fl">3</span><span class="op">)</span></span>
-<span><span class="va">response_table</span></span>
-<span><span class="co">#&gt;   Trait Smith_Hazel Pesek_Baker  Base</span></span>
-<span><span class="co">#&gt; 1    GY       0.489       0.372 0.532</span></span>
-<span><span class="co">#&gt; 2   PHT       0.009       0.149 0.033</span></span>
-<span><span class="co">#&gt; 3    AD       0.345       0.223 0.280</span></span>
-<span><span class="co">#&gt; 4   ASI       0.523       0.186 0.495</span></span>
-<span><span class="co">#&gt; 5   EPP       0.445       0.149 0.413</span></span>
-<span><span class="co">#&gt; 6   GLS       0.485       0.223 0.435</span></span></code></pre></div>
-<p>This table is the primary comparison. It shows what is expected to
-change in every trait. A high aggregate statistic cannot rescue an index
-that moves a critical trait in the wrong direction or misses its minimum
-requirement.</p>
-<p>Then inspect the summary criteria.</p>
+<span><span class="va">candidates_sd</span><span class="op">[</span>, <span class="va">traits</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sweep.html" class="external-link">sweep</a></span><span class="op">(</span><span class="va">centred</span>, <span class="fl">2L</span>, <span class="va">genetic_sd</span>, <span class="st">"/"</span><span class="op">)</span></span></code></pre></div>
+<p>The economic weights below are implied by the desired-gain direction.
+This creates one common merit definition for the mathematical
+comparison.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">criteria</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/with.html" class="external-link">with</a></span><span class="op">(</span><span class="va">x</span><span class="op">$</span><span class="va">evaluation</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
-<span>    index_merit_correlation <span class="op">=</span> <span class="va">R_HI</span>,</span>
-<span>    aggregate_merit_response <span class="op">=</span> <span class="va">delta_H</span>,</span>
-<span>    relative_efficiency_GY <span class="op">=</span> <span class="va">RE</span>,</span>
-<span>    index_heritability <span class="op">=</span> <span class="va">h2_index</span></span>
-<span>  <span class="op">)</span><span class="op">)</span></span>
-<span><span class="op">}</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span></span>
-<span>  Smith_Hazel <span class="op">=</span> <span class="fu">criteria</span><span class="op">(</span><span class="va">smith_hazel</span><span class="op">)</span>,</span>
-<span>  Pesek_Baker <span class="op">=</span> <span class="fu">criteria</span><span class="op">(</span><span class="va">pesek_baker</span><span class="op">)</span>,</span>
-<span>  Base <span class="op">=</span> <span class="fu">criteria</span><span class="op">(</span><span class="va">base_index</span><span class="op">)</span></span>
-<span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span></span>
-<span><span class="co">#&gt;             index_merit_correlation aggregate_merit_response</span></span>
-<span><span class="co">#&gt; Smith_Hazel                   0.706                    1.249</span></span>
-<span><span class="co">#&gt; Pesek_Baker                   0.420                    0.743</span></span>
-<span><span class="co">#&gt; Base                          0.689                    1.218</span></span>
-<span><span class="co">#&gt;             relative_efficiency_GY index_heritability</span></span>
-<span><span class="co">#&gt; Smith_Hazel                  0.796              0.510</span></span>
-<span><span class="co">#&gt; Pesek_Baker                  0.605              0.251</span></span>
-<span><span class="co">#&gt; Base                         0.867              0.474</span></span></code></pre></div>
-<p>Interpret these criteria with their limits: the index–merit
-correlation and aggregate-merit response require one common merit
-definition; relative efficiency describes only the declared main trait;
-index heritability describes repeatability of the score, not attainment
-of the complete breeding objective.</p>
-<hr>
+<code class="sourceCode R"><span><span class="va">common_weights</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/implied_economic_weights.html">implied_economic_weights</a></span><span class="op">(</span></span>
+<span>  <span class="va">desired_gains_sd</span>,</span>
+<span>  <span class="va">G_sd</span>,</span>
+<span>  <span class="va">P_sd</span>,</span>
+<span>  lower_is_better <span class="op">=</span> <span class="va">lower_is_better</span>,</span>
+<span>  gain_units <span class="op">=</span> <span class="st">"trait"</span></span>
+<span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">common_weights</span>, <span class="fl">3</span><span class="op">)</span></span>
+<span><span class="co">#&gt;     GY    PHT     AD    ASI    EPP    GLS </span></span>
+<span><span class="co">#&gt; 10.887  0.362  5.808 -7.928 -1.515  0.576 </span></span>
+<span><span class="co">#&gt; attr(,"provenance")</span></span>
+<span><span class="co">#&gt; [1] "Implied by the supplied desired gains through w = G^-1 P G^-1 d; not an independently estimated economic value. Expressed in the favourable-direction space, so a positive weight always means the trait matters."</span></span></code></pre></div>
+<p>Negative implied weights can occur. They are mathematically valid
+under correlated response. The desired response remains the biological
+statement to interpret.</p>
 </div>
-<div class="section level2">
-<h2 id="compare-the-actual-decision">4. Compare the actual decision<a class="anchor" aria-label="anchor" href="#compare-the-actual-decision"></a>
-</h2>
-<p>Two indices can have similar expected responses while selecting
-different parents. Compare ranks and selected-set overlap, then repeat
-under covariance or weight uncertainty.</p>
+<div class="section level3">
+<h3 id="fit-objective-matched-methods-and-benchmarks">7.3 Fit objective-matched methods and benchmarks<a class="anchor" aria-label="anchor" href="#fit-objective-matched-methods-and-benchmarks"></a>
+</h3>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">selected_ids</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="va">x</span><span class="op">$</span><span class="va">ranking</span><span class="op">$</span><span class="va">id</span><span class="op">[</span><span class="va">x</span><span class="op">$</span><span class="va">ranking</span><span class="op">$</span><span class="va">selected</span><span class="op">]</span></span>
-<span><span class="op">}</span></span>
-<span></span>
-<span><span class="va">sets</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
-<span>  Smith_Hazel <span class="op">=</span> <span class="fu">selected_ids</span><span class="op">(</span><span class="va">smith_hazel</span><span class="op">)</span>,</span>
-<span>  Pesek_Baker <span class="op">=</span> <span class="fu">selected_ids</span><span class="op">(</span><span class="va">pesek_baker</span><span class="op">)</span>,</span>
-<span>  Base <span class="op">=</span> <span class="fu">selected_ids</span><span class="op">(</span><span class="va">base_index</span><span class="op">)</span>,</span>
-<span>  Rank_sum <span class="op">=</span> <span class="fu">selected_ids</span><span class="op">(</span><span class="va">rank_sum</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">common_arguments</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>  values <span class="op">=</span> <span class="va">candidates_sd</span>,</span>
+<span>  trait_cols <span class="op">=</span> <span class="va">traits</span>,</span>
+<span>  id_col <span class="op">=</span> <span class="st">"GenoID"</span>,</span>
+<span>  G <span class="op">=</span> <span class="va">G_sd</span>,</span>
+<span>  P <span class="op">=</span> <span class="va">P_sd</span>,</span>
+<span>  lower_is_better <span class="op">=</span> <span class="va">lower_is_better</span>,</span>
+<span>  center_traits <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  scale_traits <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  n_select <span class="op">=</span> <span class="fl">20L</span>,</span>
+<span>  main_trait <span class="op">=</span> <span class="st">"GY"</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/funprog.html" class="external-link">Reduce</a></span><span class="op">(</span><span class="va">intersect</span>, <span class="va">sets</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 9</span></span></code></pre></div>
-<p>Use <a href="../reference/index_uncertainty.html"><code>index_uncertainty()</code></a>
-for covariance resampling and <a href="../reference/weight_sensitivity.html"><code>weight_sensitivity()</code></a>
-when economic weights are uncertain. For minimum gain floors, inspect
-the worst-trait and joint-attainment probabilities supplied by the
-population-driven tools.</p>
-<hr>
+<span><span class="va">smith_hazel</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="va">selection_index</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>  <span class="va">common_arguments</span>,</span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>method <span class="op">=</span> <span class="st">"smith_hazel"</span>, economic_weights <span class="op">=</span> <span class="va">common_weights</span><span class="op">)</span></span>
+<span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">pesek_baker</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="va">selection_index</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>  <span class="va">common_arguments</span>,</span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>    method <span class="op">=</span> <span class="st">"pesek_baker"</span>,</span>
+<span>    desired_gains <span class="op">=</span> <span class="va">desired_gains_sd</span>,</span>
+<span>    aggregate_weights <span class="op">=</span> <span class="va">common_weights</span></span>
+<span>  <span class="op">)</span></span>
+<span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">base_index</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="va">selection_index</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>  <span class="va">common_arguments</span>,</span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>method <span class="op">=</span> <span class="st">"base"</span>, economic_weights <span class="op">=</span> <span class="va">common_weights</span><span class="op">)</span></span>
+<span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">rank_sum</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="va">selection_index</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>  <span class="va">common_arguments</span>,</span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>method <span class="op">=</span> <span class="st">"mulamba_mock"</span><span class="op">)</span></span>
+<span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p>The first two methods should agree because the economic weights were
+derived from the desired gains. This is a mathematical verification. The
+base and rank-sum methods provide simpler benchmarks.</p>
+<p>Threshold methods require limits rather than a response vector. These
+limits use the units of <code>candidates_sd</code>. A maximum is
+supplied for each trait listed in <code>lower_is_better</code>.</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">limits_sd</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>  GY <span class="op">=</span> <span class="op">-</span><span class="fl">0.50</span>,</span>
+<span>  PHT <span class="op">=</span> <span class="fl">0.75</span>,</span>
+<span>  AD <span class="op">=</span> <span class="fl">0.75</span>,</span>
+<span>  ASI <span class="op">=</span> <span class="fl">0.75</span>,</span>
+<span>  EPP <span class="op">=</span> <span class="op">-</span><span class="fl">0.75</span>,</span>
+<span>  GLS <span class="op">=</span> <span class="fl">0.75</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">culling</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="va">selection_index</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>  <span class="va">common_arguments</span>,</span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>    method <span class="op">=</span> <span class="st">"independent_culling"</span>,</span>
+<span>    culling_thresholds <span class="op">=</span> <span class="va">limits_sd</span></span>
+<span>  <span class="op">)</span></span>
+<span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">elston</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="va">selection_index</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>  <span class="va">common_arguments</span>,</span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>method <span class="op">=</span> <span class="st">"elston"</span>, culling_thresholds <span class="op">=</span> <span class="va">limits_sd</span><span class="op">)</span></span>
+<span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">tandem</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="va">selection_index</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>  <span class="va">common_arguments</span>,</span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>method <span class="op">=</span> <span class="st">"tandem"</span>, tandem_order <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"GY"</span>, <span class="st">"GLS"</span>, <span class="st">"AD"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="assemble-the-comparison">7.4 Assemble the comparison<a class="anchor" aria-label="anchor" href="#assemble-the-comparison"></a>
+</h3>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">comparison</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compare_selection_methods.html">compare_selection_methods</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>    Smith_Hazel <span class="op">=</span> <span class="va">smith_hazel</span>,</span>
+<span>    Pesek_Baker <span class="op">=</span> <span class="va">pesek_baker</span>,</span>
+<span>    Base <span class="op">=</span> <span class="va">base_index</span>,</span>
+<span>    Rank_sum <span class="op">=</span> <span class="va">rank_sum</span>,</span>
+<span>    Culling <span class="op">=</span> <span class="va">culling</span>,</span>
+<span>    Elston <span class="op">=</span> <span class="va">elston</span>,</span>
+<span>    Tandem <span class="op">=</span> <span class="va">tandem</span></span>
+<span>  <span class="op">)</span>,</span>
+<span>  target_gains <span class="op">=</span> <span class="va">desired_gains_sd</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">comparison</span></span>
+<span><span class="co">#&gt; &lt;desiredgainr_method_comparison&gt;</span></span>
+<span><span class="co">#&gt;   Methods: Smith_Hazel, Pesek_Baker, Base, Rank_sum, Culling, Elston, Tandem </span></span>
+<span><span class="co">#&gt;   All recorded comparison conditions are satisfied.</span></span>
+<span><span class="co">#&gt;       Method N_selected      R_HI  Delta_H        RE Worst_expected_attainment</span></span>
+<span><span class="co">#&gt;  Smith_Hazel         20 0.4117023 5.630275 0.5268772                 0.5470366</span></span>
+<span><span class="co">#&gt;  Pesek_Baker         20 0.4117023 5.630275 0.5268772                 0.5470366</span></span>
+<span><span class="co">#&gt;         Base         20 0.3779319 5.168444 0.3454239                -0.1915515</span></span>
+<span><span class="co">#&gt;     Rank_sum         20        NA       NA        NA                        NA</span></span>
+<span><span class="co">#&gt;      Culling         20        NA       NA        NA                        NA</span></span>
+<span><span class="co">#&gt;       Elston         20        NA       NA        NA                        NA</span></span>
+<span><span class="co">#&gt;       Tandem         20        NA       NA        NA                        NA</span></span>
+<span><span class="co">#&gt;  Mahalanobis_alignment</span></span>
+<span><span class="co">#&gt;                1.00000</span></span>
+<span><span class="co">#&gt;                1.00000</span></span>
+<span><span class="co">#&gt;                0.83361</span></span>
+<span><span class="co">#&gt;                     NA</span></span>
+<span><span class="co">#&gt;                     NA</span></span>
+<span><span class="co">#&gt;                     NA</span></span>
+<span><span class="co">#&gt;                     NA</span></span></code></pre></div>
+<p>Read the fairness table first.</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">comparison</span><span class="op">$</span><span class="va">fairness</span></span>
+<span><span class="co">#&gt;                                              Condition Satisfied</span></span>
+<span><span class="co">#&gt; 1                      Same candidates and trait order      TRUE</span></span>
+<span><span class="co">#&gt; 2                Same direction, centring, and scaling      TRUE</span></span>
+<span><span class="co">#&gt; 3                                 Same number selected      TRUE</span></span>
+<span><span class="co">#&gt; 4                             Same selection intensity      TRUE</span></span>
+<span><span class="co">#&gt; 5 Common aggregate merit among merit-based comparisons      TRUE</span></span>
+<span><span class="co">#&gt;                                                             Interpretation</span></span>
+<span><span class="co">#&gt; 1                                  Required and enforced by this function.</span></span>
+<span><span class="co">#&gt; 2                                  Required and enforced by this function.</span></span>
+<span><span class="co">#&gt; 3  A culling method may select fewer candidates when few pass every limit.</span></span>
+<span><span class="co">#&gt; 4                Expected responses require one common selection pressure.</span></span>
+<span><span class="co">#&gt; 5 R_HI and Delta_H answer one common question only under one merit vector.</span></span></code></pre></div>
+<p>A culling method may select fewer than 20 candidates. That result is
+useful. It shows that the limits and the requested selection quota
+conflict.</p>
+</div>
+<div class="section level3">
+<h3 id="compare-biological-response">7.5 Compare biological response<a class="anchor" aria-label="anchor" href="#compare-biological-response"></a>
+</h3>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">comparison</span><span class="op">$</span><span class="va">responses</span><span class="op">[</span></span>
+<span>  , <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>    <span class="st">"Method"</span>, <span class="st">"Trait"</span>, <span class="st">"Expected_response"</span>,</span>
+<span>    <span class="st">"Observed_differential"</span>, <span class="st">"Expected_attainment"</span></span>
+<span>  <span class="op">)</span></span>
+<span><span class="op">]</span></span>
+<span><span class="co">#&gt;          Method  Trait Expected_response Observed_differential</span></span>
+<span><span class="co">#&gt;          &lt;char&gt; &lt;char&gt;             &lt;num&gt;                 &lt;num&gt;</span></span>
+<span><span class="co">#&gt;  1: Smith_Hazel     GY        0.54703663            2.71839267</span></span>
+<span><span class="co">#&gt;  2: Smith_Hazel    PHT        0.21881465            0.51969887</span></span>
+<span><span class="co">#&gt;  3: Smith_Hazel     AD        0.32822198            0.64456380</span></span>
+<span><span class="co">#&gt;  4: Smith_Hazel    ASI        0.27351832           -0.30315333</span></span>
+<span><span class="co">#&gt;  5: Smith_Hazel    EPP        0.21881465            1.05538000</span></span>
+<span><span class="co">#&gt;  6: Smith_Hazel    GLS        0.32822198            0.69842471</span></span>
+<span><span class="co">#&gt;  7: Pesek_Baker     GY        0.54703663            2.71839267</span></span>
+<span><span class="co">#&gt;  8: Pesek_Baker    PHT        0.21881465            0.51969887</span></span>
+<span><span class="co">#&gt;  9: Pesek_Baker     AD        0.32822198            0.64456380</span></span>
+<span><span class="co">#&gt; 10: Pesek_Baker    ASI        0.27351832           -0.30315333</span></span>
+<span><span class="co">#&gt; 11: Pesek_Baker    EPP        0.21881465            1.05538000</span></span>
+<span><span class="co">#&gt; 12: Pesek_Baker    GLS        0.32822198            0.69842471</span></span>
+<span><span class="co">#&gt; 13:        Base     GY        0.35864060            2.68933267</span></span>
+<span><span class="co">#&gt; 14:        Base    PHT        0.04922368            0.30407054</span></span>
+<span><span class="co">#&gt; 15:        Base     AD        0.09127695            0.62602380</span></span>
+<span><span class="co">#&gt; 16:        Base    ASI       -0.09577576           -0.58177000</span></span>
+<span><span class="co">#&gt; 17:        Base    EPP        0.06607095            0.77743000</span></span>
+<span><span class="co">#&gt; 18:        Base    GLS        0.09854367            0.13686588</span></span>
+<span><span class="co">#&gt; 19:    Rank_sum     GY                NA            1.91381933</span></span>
+<span><span class="co">#&gt; 20:    Rank_sum    PHT                NA            0.66151429</span></span>
+<span><span class="co">#&gt; 21:    Rank_sum     AD                NA            0.80376780</span></span>
+<span><span class="co">#&gt; 22:    Rank_sum    ASI                NA            1.14847167</span></span>
+<span><span class="co">#&gt; 23:    Rank_sum    EPP                NA            1.24483000</span></span>
+<span><span class="co">#&gt; 24:    Rank_sum    GLS                NA            1.10650706</span></span>
+<span><span class="co">#&gt; 25:     Culling     GY                NA            1.48661267</span></span>
+<span><span class="co">#&gt; 26:     Culling    PHT                NA            0.59683721</span></span>
+<span><span class="co">#&gt; 27:     Culling     AD                NA            0.60975580</span></span>
+<span><span class="co">#&gt; 28:     Culling    ASI                NA            1.07222167</span></span>
+<span><span class="co">#&gt; 29:     Culling    EPP                NA            0.60343000</span></span>
+<span><span class="co">#&gt; 30:     Culling    GLS                NA            0.62050118</span></span>
+<span><span class="co">#&gt; 31:      Elston     GY                NA            1.37939933</span></span>
+<span><span class="co">#&gt; 32:      Elston    PHT                NA            0.69501637</span></span>
+<span><span class="co">#&gt; 33:      Elston     AD                NA            0.50001980</span></span>
+<span><span class="co">#&gt; 34:      Elston    ASI                NA            1.07734667</span></span>
+<span><span class="co">#&gt; 35:      Elston    EPP                NA            0.67248000</span></span>
+<span><span class="co">#&gt; 36:      Elston    GLS                NA            0.84341294</span></span>
+<span><span class="co">#&gt; 37:      Tandem     GY                NA            1.66673933</span></span>
+<span><span class="co">#&gt; 38:      Tandem    PHT                NA           -0.03648821</span></span>
+<span><span class="co">#&gt; 39:      Tandem     AD                NA            0.91060980</span></span>
+<span><span class="co">#&gt; 40:      Tandem    ASI                NA            0.13530500</span></span>
+<span><span class="co">#&gt; 41:      Tandem    EPP                NA            0.55378000</span></span>
+<span><span class="co">#&gt; 42:      Tandem    GLS                NA            1.55563059</span></span>
+<span><span class="co">#&gt;          Method  Trait Expected_response Observed_differential</span></span>
+<span><span class="co">#&gt;          &lt;char&gt; &lt;char&gt;             &lt;num&gt;                 &lt;num&gt;</span></span>
+<span><span class="co">#&gt;     Expected_attainment</span></span>
+<span><span class="co">#&gt;                   &lt;num&gt;</span></span>
+<span><span class="co">#&gt;  1:           0.5470366</span></span>
+<span><span class="co">#&gt;  2:           0.5470366</span></span>
+<span><span class="co">#&gt;  3:           0.5470366</span></span>
+<span><span class="co">#&gt;  4:           0.5470366</span></span>
+<span><span class="co">#&gt;  5:           0.5470366</span></span>
+<span><span class="co">#&gt;  6:           0.5470366</span></span>
+<span><span class="co">#&gt;  7:           0.5470366</span></span>
+<span><span class="co">#&gt;  8:           0.5470366</span></span>
+<span><span class="co">#&gt;  9:           0.5470366</span></span>
+<span><span class="co">#&gt; 10:           0.5470366</span></span>
+<span><span class="co">#&gt; 11:           0.5470366</span></span>
+<span><span class="co">#&gt; 12:           0.5470366</span></span>
+<span><span class="co">#&gt; 13:           0.3586406</span></span>
+<span><span class="co">#&gt; 14:           0.1230592</span></span>
+<span><span class="co">#&gt; 15:           0.1521282</span></span>
+<span><span class="co">#&gt; 16:          -0.1915515</span></span>
+<span><span class="co">#&gt; 17:           0.1651774</span></span>
+<span><span class="co">#&gt; 18:           0.1642395</span></span>
+<span><span class="co">#&gt; 19:                  NA</span></span>
+<span><span class="co">#&gt; 20:                  NA</span></span>
+<span><span class="co">#&gt; 21:                  NA</span></span>
+<span><span class="co">#&gt; 22:                  NA</span></span>
+<span><span class="co">#&gt; 23:                  NA</span></span>
+<span><span class="co">#&gt; 24:                  NA</span></span>
+<span><span class="co">#&gt; 25:                  NA</span></span>
+<span><span class="co">#&gt; 26:                  NA</span></span>
+<span><span class="co">#&gt; 27:                  NA</span></span>
+<span><span class="co">#&gt; 28:                  NA</span></span>
+<span><span class="co">#&gt; 29:                  NA</span></span>
+<span><span class="co">#&gt; 30:                  NA</span></span>
+<span><span class="co">#&gt; 31:                  NA</span></span>
+<span><span class="co">#&gt; 32:                  NA</span></span>
+<span><span class="co">#&gt; 33:                  NA</span></span>
+<span><span class="co">#&gt; 34:                  NA</span></span>
+<span><span class="co">#&gt; 35:                  NA</span></span>
+<span><span class="co">#&gt; 36:                  NA</span></span>
+<span><span class="co">#&gt; 37:                  NA</span></span>
+<span><span class="co">#&gt; 38:                  NA</span></span>
+<span><span class="co">#&gt; 39:                  NA</span></span>
+<span><span class="co">#&gt; 40:                  NA</span></span>
+<span><span class="co">#&gt; 41:                  NA</span></span>
+<span><span class="co">#&gt; 42:                  NA</span></span>
+<span><span class="co">#&gt;     Expected_attainment</span></span>
+<span><span class="co">#&gt;                   &lt;num&gt;</span></span></code></pre></div>
+<p>Expected response and observed differential answer different
+questions. Expected response predicts transmitted change under the
+covariance model. Observed differential describes the candidates
+selected from this data set. Rank, threshold, and tandem methods retain
+the second quantity because a closed-form expected response is
+unavailable here.</p>
+<p>Target attainment equals expected response divided by the requested
+gain. A value of 1 reaches the target for that trait. A value of 0.70
+reaches 70%. Negative values move in an unfavourable direction. Read the
+worst trait before the mean because one severe failure can be hidden by
+strong gains elsewhere.</p>
+</div>
+<div class="section level3">
+<h3 id="compare-summary-criteria">7.6 Compare summary criteria<a class="anchor" aria-label="anchor" href="#compare-summary-criteria"></a>
+</h3>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">comparison</span><span class="op">$</span><span class="va">summary</span><span class="op">[</span></span>
+<span>  , <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>    <span class="st">"Method"</span>, <span class="st">"N_selected"</span>, <span class="st">"R_HI"</span>, <span class="st">"Delta_H"</span>, <span class="st">"RE"</span>,</span>
+<span>    <span class="st">"Index_heritability"</span>, <span class="st">"Worst_expected_attainment"</span>,</span>
+<span>    <span class="st">"Mahalanobis_alignment"</span>, <span class="st">"Mahalanobis_residual"</span></span>
+<span>  <span class="op">)</span></span>
+<span><span class="op">]</span></span>
+<span><span class="co">#&gt;         Method N_selected      R_HI  Delta_H        RE Index_heritability</span></span>
+<span><span class="co">#&gt;         &lt;char&gt;      &lt;int&gt;     &lt;num&gt;    &lt;num&gt;     &lt;num&gt;              &lt;num&gt;</span></span>
+<span><span class="co">#&gt; 1: Smith_Hazel         20 0.4117023 5.630275 0.5268772          0.2439162</span></span>
+<span><span class="co">#&gt; 2: Pesek_Baker         20 0.4117023 5.630275 0.5268772          0.2439162</span></span>
+<span><span class="co">#&gt; 3:        Base         20 0.3779319 5.168444 0.3454239          0.1428325</span></span>
+<span><span class="co">#&gt; 4:    Rank_sum         20        NA       NA        NA                 NA</span></span>
+<span><span class="co">#&gt; 5:     Culling         20        NA       NA        NA                 NA</span></span>
+<span><span class="co">#&gt; 6:      Elston         20        NA       NA        NA                 NA</span></span>
+<span><span class="co">#&gt; 7:      Tandem         20        NA       NA        NA                 NA</span></span>
+<span><span class="co">#&gt;    Worst_expected_attainment Mahalanobis_alignment Mahalanobis_residual</span></span>
+<span><span class="co">#&gt;                        &lt;num&gt;                 &lt;num&gt;                &lt;num&gt;</span></span>
+<span><span class="co">#&gt; 1:                 0.5470366               1.00000         2.087841e-15</span></span>
+<span><span class="co">#&gt; 2:                 0.5470366               1.00000         1.064591e-15</span></span>
+<span><span class="co">#&gt; 3:                -0.1915515               0.83361         3.663562e-01</span></span>
+<span><span class="co">#&gt; 4:                        NA                    NA                   NA</span></span>
+<span><span class="co">#&gt; 5:                        NA                    NA                   NA</span></span>
+<span><span class="co">#&gt; 6:                        NA                    NA                   NA</span></span>
+<span><span class="co">#&gt; 7:                        NA                    NA                   NA</span></span></code></pre></div>
+<p>Use each quantity for its defined purpose.</p>
+<ol style="list-style-type: decimal">
+<li>Read <code>R_HI</code> and <code>Delta_H</code> only where the same
+aggregate merit was supplied.</li>
+<li>Read <code>RE</code> as efficiency for GY alone.</li>
+<li>Read index heritability as repeatability of the composite
+score.</li>
+<li>Read worst attainment as protection against hidden trait
+failure.</li>
+<li>Read Mahalanobis alignment as agreement with the complete desired
+direction.</li>
+<li>Read the residual as departure from the requested proportions.</li>
+</ol>
+</div>
+<div class="section level3">
+<h3 id="compare-rankings-and-selected-candidates">7.7 Compare rankings and selected candidates<a class="anchor" aria-label="anchor" href="#compare-rankings-and-selected-candidates"></a>
+</h3>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">comparison</span><span class="op">$</span><span class="va">rank_correlation</span>, <span class="fl">2</span><span class="op">)</span></span>
+<span><span class="co">#&gt;             Smith_Hazel Pesek_Baker Base Rank_sum Culling Elston Tandem</span></span>
+<span><span class="co">#&gt; Smith_Hazel        1.00        1.00 0.92     0.63    0.31   0.31   0.41</span></span>
+<span><span class="co">#&gt; Pesek_Baker        1.00        1.00 0.92     0.63    0.31   0.31   0.41</span></span>
+<span><span class="co">#&gt; Base               0.92        0.92 1.00     0.33    0.17   0.17   0.35</span></span>
+<span><span class="co">#&gt; Rank_sum           0.63        0.63 0.33     1.00    0.43   0.44   0.40</span></span>
+<span><span class="co">#&gt; Culling            0.31        0.31 0.17     0.43    1.00   1.00   0.24</span></span>
+<span><span class="co">#&gt; Elston             0.31        0.31 0.17     0.44    1.00   1.00   0.24</span></span>
+<span><span class="co">#&gt; Tandem             0.41        0.41 0.35     0.40    0.24   0.24   1.00</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">comparison</span><span class="op">$</span><span class="va">selected_jaccard</span>, <span class="fl">2</span><span class="op">)</span></span>
+<span><span class="co">#&gt;             Smith_Hazel Pesek_Baker Base Rank_sum Culling Elston Tandem</span></span>
+<span><span class="co">#&gt; Smith_Hazel        1.00        1.00 0.74     0.33    0.18   0.18   0.25</span></span>
+<span><span class="co">#&gt; Pesek_Baker        1.00        1.00 0.74     0.33    0.18   0.18   0.25</span></span>
+<span><span class="co">#&gt; Base               0.74        0.74 1.00     0.21    0.11   0.11   0.21</span></span>
+<span><span class="co">#&gt; Rank_sum           0.33        0.33 0.21     1.00    0.21   0.25   0.33</span></span>
+<span><span class="co">#&gt; Culling            0.18        0.18 0.11     0.21    1.00   0.74   0.21</span></span>
+<span><span class="co">#&gt; Elston             0.18        0.18 0.11     0.25    0.74   1.00   0.21</span></span>
+<span><span class="co">#&gt; Tandem             0.25        0.25 0.21     0.33    0.21   0.21   1.00</span></span>
+<span><span class="va">comparison</span><span class="op">$</span><span class="va">selected_overlap</span></span>
+<span><span class="co">#&gt;             Smith_Hazel Pesek_Baker Base Rank_sum Culling Elston Tandem</span></span>
+<span><span class="co">#&gt; Smith_Hazel          20          20   17       10       6      6      8</span></span>
+<span><span class="co">#&gt; Pesek_Baker          20          20   17       10       6      6      8</span></span>
+<span><span class="co">#&gt; Base                 17          17   20        7       4      4      7</span></span>
+<span><span class="co">#&gt; Rank_sum             10          10    7       20       7      8     10</span></span>
+<span><span class="co">#&gt; Culling               6           6    4        7      20     17      7</span></span>
+<span><span class="co">#&gt; Elston                6           6    4        8      17     20      7</span></span>
+<span><span class="co">#&gt; Tandem                8           8    7       10       7      7     20</span></span></code></pre></div>
+<p>Rank correlation uses every candidate. Jaccard similarity uses the
+selected sets. A high rank correlation can coexist with a different
+parent list near the selection boundary. Therefore, report both.</p>
+</div>
 </div>
 <div class="section level2">
-<h2 id="where-dgsi-and-qgsi-belong">5. Where DGSI and QGSI belong<a class="anchor" aria-label="anchor" href="#where-dgsi-and-qgsi-belong"></a>
+<h2 id="add-uncertainty-and-validation">8. Add uncertainty and validation<a class="anchor" aria-label="anchor" href="#add-uncertainty-and-validation"></a>
 </h2>
-<p>The iterative desired-gain selection index (DGSI) searches for a
-selected-group differential close to a desired vector. Read <a href="DesiredGainR-dgsi.html">Optimising desired gains</a>.</p>
-<p>The quadratic genomic selection index (QGSI) ranks GEBVs under
-explicit linear, squared and cross-product economic values. It does not
-accept desired gains as quadratic weights. Read <a href="DesiredGainR-qgsi.html">Quadratic genomic selection</a>.</p>
-<p>Choose the simplest family that represents the programme’s real
-objective and changes the decision in a stable, biologically defensible
-way.</p>
+<p>The point comparison above is the beginning of the analysis. A
+breeding recommendation also needs stability evidence.</p>
+<div class="section level3">
+<h3 id="covariance-and-weight-uncertainty">8.1 Covariance and weight uncertainty<a class="anchor" aria-label="anchor" href="#covariance-and-weight-uncertainty"></a>
+</h3>
+<p>Use <code><a href="../reference/index_uncertainty.html">index_uncertainty()</a></code> to resample the genetic and
+phenotypic covariance matrices. Use <code><a href="../reference/weight_sensitivity.html">weight_sensitivity()</a></code>
+when economic weights are uncertain. Report coefficient intervals,
+response intervals, rank stability, and selected-set stability.</p>
+</div>
+<div class="section level3">
+<h3 id="candidate-prediction-uncertainty">8.2 Candidate prediction uncertainty<a class="anchor" aria-label="anchor" href="#candidate-prediction-uncertainty"></a>
+</h3>
+<p>Genomic estimated breeding values (GEBVs) have prediction error. When
+candidate-specific prediction error covariance (PEC) is available, use
+<code><a href="../reference/candidate_score_uncertainty.html">candidate_score_uncertainty()</a></code>. Report each candidate’s
+score interval and selection probability. Give particular attention to
+candidates near the selection boundary.</p>
+</div>
+<div class="section level3">
+<h3 id="value-of-each-information-source">8.3 Value of each information source<a class="anchor" aria-label="anchor" href="#value-of-each-information-source"></a>
+</h3>
+<p>Use <code><a href="../reference/index_information_efficiency.html">index_information_efficiency()</a></code> for a Smith-Hazel or
+general economic index. It applies Cunningham’s deletion-efficiency
+principle. A trait with little information value can then be removed
+from future phenotyping plans if the saving is operationally
+important.</p>
+</div>
+<div class="section level3">
+<h3 id="out-of-sample-validation">8.4 Out-of-sample validation<a class="anchor" aria-label="anchor" href="#out-of-sample-validation"></a>
+</h3>
+<p>Fit the index with training data. Fix its coefficients and
+transformations. Apply <code><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict()</a></code> to a later cohort or a
+held-out set. Compare predicted responses with realised breeding values,
+progeny means, or later-stage trial performance. This separates genuine
+prediction from reuse of the fitting data.</p>
+</div>
+<div class="section level3">
+<h3 id="multi-cycle-validation">8.5 Multi-cycle validation<a class="anchor" aria-label="anchor" href="#multi-cycle-validation"></a>
+</h3>
+<p>Use <code><a href="../reference/simulate_selection_cycles.html">simulate_selection_cycles()</a></code> when the decision
+concerns several cycles. Compare cumulative response, joint target
+attainment, genetic variance, and diversity. Use matched scenarios and
+replicate seeds. Read <a href="DesiredGainR-simulation.html">Multi-cycle
+simulation</a> for calibration and stress testing.</p>
+</div>
+</div>
+<div class="section level2">
+<h2 id="choosing-the-preferred-method">9. Choosing the preferred method<a class="anchor" aria-label="anchor" href="#choosing-the-preferred-method"></a>
+</h2>
+<p>A method is preferred when five conditions are satisfied.</p>
+<ol style="list-style-type: decimal">
+<li>It represents the breeder’s actual objective.</li>
+<li>Its required inputs have adequate quality.</li>
+<li>Its expected response respects every critical trait.</li>
+<li>Its ranking remains stable under credible uncertainty.</li>
+<li>Its advantage persists in validation or relevant multi-cycle
+scenarios.</li>
+</ol>
+<p>The method with the largest single statistic can fail this standard.
+For example, a high aggregate-merit response can hide failure of a
+disease limit. A stable rank can also follow the wrong biological
+direction. Therefore, the final recommendation should report the
+complete decision panel.</p>
+<p>Close the analysis with a practical statement. Name the selected
+method. State why it matches the objective. Report the expected response
+for every trait. State the main uncertainty. Then describe how the
+decision will be validated in the breeding programme.</p>
+</div>
+<div class="section level2">
+<h2 id="references">10. References<a class="anchor" aria-label="anchor" href="#references"></a>
+</h2>
+<ul>
+<li>Beavis W, Lamkey K, Mahama AA, Suza W (2023). Multiple Trait
+Selection. In Suza WP and Lamkey KR, editors, <em>Quantitative Genetics
+for Plant Breeding</em>. Iowa State University Digital Press.</li>
+<li>Cunningham EP (1969). The relative efficiencies of selection
+indexes. <em>Acta Agriculturae Scandinavica</em>
+<strong>19</strong>:45-48.</li>
+<li>Elston RC (1963). A weight-free index for the purpose of ranking or
+selection with respect to several traits at a time. <em>Biometrics</em>
+<strong>19</strong>:85-97.</li>
+<li>Kempthorne O, Nordskog AW (1959). Restricted selection indices.
+<em>Biometrics</em> <strong>15</strong>:10-19.</li>
+<li>Mulamba NN, Mock JJ (1978). Improvement of yield potential of the
+Eto Blanco maize population by breeding for plant traits. <em>Egyptian
+Journal of Genetics and Cytology</em> <strong>7</strong>:40-51.</li>
+<li>Pesek J, Baker RJ (1969). Desired improvement in relation to
+selection indices. <em>Canadian Journal of Plant Science</em>
+<strong>49</strong>:803-804.</li>
+<li>Satoh M (2024). Characteristics of restricted selection indices and
+geometrical interpretation of restricted breeding values. <em>Journal of
+Animal Breeding and Genetics</em> <strong>141</strong>:353-363.</li>
+<li>Smith HF (1936). A discriminant function for plant selection.
+<em>Annals of Eugenics</em> <strong>7</strong>:240-250.</li>
+<li>Yamada Y, Yokouchi K, Nishida A (1975). Selection index when genetic
+gains of individual traits are of primary concern. <em>Japanese Journal
+of Genetics</em> <strong>50</strong>:33-41.</li>
+</ul>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

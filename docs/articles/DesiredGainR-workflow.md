@@ -75,7 +75,7 @@ G_working <- estimate_genetic_covariance(
   method = "adjusted_means_surrogate"
 )
 G_working$estimand
-#> [1] "working surrogate for genetic covariance; covariance of
+#> [1] "working surrogate for genetic covariance. Covariance of
 #>      across-environment adjusted means"
 ```
 
@@ -112,7 +112,7 @@ improve, which is correct rather than an error. In addition, the target
 values are already genetic-standard-deviation gains, whereas the
 returned weights are per original trait unit because `dgr_G` and `dgr_P`
 are in original units. The following multiplication expresses each
-weight per genetic standard deviation; it does not standardise the
+weight per genetic standard deviation. it does not standardise the
 target again:
 
 ``` r
@@ -157,9 +157,9 @@ feasibility
 
 The required intensity is 3.2082, equivalent under normal truncation to
 the best 0.1773%. Among 200 candidates, that proportion represents 0.355
-candidate. It cannot be rounded to one because selecting one retains
-0.5% and gives a lower intensity. Therefore, the exact vector is not
-attainable in this finite candidate set.
+candidate. Rounding to one changes the selection proportion to 0.5% and
+lowers the intensity. Therefore, the exact vector lies beyond this
+finite candidate set.
 
 The planned selection of 20 candidates has intensity 1.7550. Its ratio
 to the required intensity is 0.547, so 54.7% of every target component
@@ -226,6 +226,12 @@ rank_sum <- selection_index(
   method = "mulamba_mock",
   lower_is_better = lower_is_better, n_select = 20L
 )
+base_index <- selection_index(
+  dgr_candidates, traits,
+  method = "base",
+  G = dgr_G, P = dgr_P, economic_weights = economic_weights,
+  lower_is_better = lower_is_better, n_select = 20L, main_trait = "GY"
+)
 smith_hazel
 #> <desiredgainr_index>
 #>   Method: smith_hazel 
@@ -244,28 +250,80 @@ main trait for response elsewhere in the objective, not a defect. Every
 value reported by Rahimi and Debnath (2023) was below one.
 
 The Mulamba-Mock rank-sum index needs neither weights nor covariance
-matrices, which is why Guimarães et al. (2021) found it competitive.
-Compare the two by rank correlation *and* by set overlap, because the
-two must be consistent:
+matrices. This explains its value as a low-assumption comparator. The
+base index shows how much the covariance adjustment contributes beyond
+direct weighting.
+
+Use
+[`compare_selection_methods()`](https://FAkohoue.github.io/DesiredGainR/reference/compare_selection_methods.md)
+to verify the comparison conditions. Then read biological responses,
+summary criteria, rank agreement, and selected-set agreement.
 
 ``` r
-paired <- merge(
-  smith_hazel$ranking[, c("id", "score")],
-  rank_sum$ranking[, c("id", "score")],
-  by = "id", suffixes = c("_sh", "_mm")
+comparison <- compare_selection_methods(
+  list(
+    Smith_Hazel = smith_hazel,
+    Base = base_index,
+    Rank_sum = rank_sum
+  )
 )
-round(stats::cor(paired$score_sh, paired$score_mm, method = "spearman"), 3)
-#> [1] 0.938
-length(intersect(smith_hazel$selected$id, rank_sum$selected$id))
-#> [1] 13
+comparison$fairness
+#>                                              Condition Satisfied
+#> 1                      Same candidates and trait order      TRUE
+#> 2                Same direction, centring, and scaling      TRUE
+#> 3                                 Same number selected      TRUE
+#> 4                             Same selection intensity      TRUE
+#> 5 Common aggregate merit among merit-based comparisons      TRUE
+#>                                                             Interpretation
+#> 1                                  Required and enforced by this function.
+#> 2                                  Required and enforced by this function.
+#> 3  A culling method may select fewer candidates when few pass every limit.
+#> 4                Expected responses require one common selection pressure.
+#> 5 R_HI and Delta_H answer one common question only under one merit vector.
+comparison$summary
+#>         Method       Family Strategy N_selected Selected_fraction
+#>         <char>       <char>   <char>      <int>             <num>
+#> 1: Smith_Hazel  smith_hazel    index         20               0.1
+#> 2:        Base         base    index         20               0.1
+#> 3:    Rank_sum mulamba_mock rank_sum         20               0.1
+#>    Selection_intensity      R_HI  Delta_H        RE Index_heritability
+#>                  <num>     <num>    <num>     <num>              <num>
+#> 1:            1.754983 0.7088841 1.222814 0.7658206          0.5124609
+#> 2:            1.754983 0.6950918 1.199023 0.8431941          0.4831527
+#> 3:            1.754983        NA       NA        NA                 NA
+#>    Index_accuracy Worst_expected_attainment Mean_expected_attainment
+#>             <num>                     <num>                    <num>
+#> 1:      0.7158637                        NA                       NA
+#> 2:      0.6950918                        NA                       NA
+#> 3:             NA                        NA                       NA
+#>    Worst_observed_attainment Satoh_beta Mahalanobis_alignment
+#>                        <num>      <num>                 <num>
+#> 1:                        NA         NA                    NA
+#> 2:                        NA         NA                    NA
+#> 3:                        NA         NA                    NA
+#>    Mahalanobis_residual
+#>                   <num>
+#> 1:                   NA
+#> 2:                   NA
+#> 3:                   NA
+round(comparison$rank_correlation, 2)
+#>             Smith_Hazel Base Rank_sum
+#> Smith_Hazel        1.00 0.98     0.94
+#> Base               0.98 1.00     0.91
+#> Rank_sum           0.94 0.91     1.00
+comparison$selected_overlap
+#>             Smith_Hazel Base Rank_sum
+#> Smith_Hazel          20   16       13
+#> Base                 16   20       14
+#> Rank_sum             13   14       20
 ```
 
-A high correlation paired with a nearly empty intersection would
-indicate a fault rather than a finding. That check found a genuine
-row-alignment bug during development.
+Rank correlation uses all candidates. Selected-set overlap concerns the
+final decision. Report both because close overall rankings can still
+diverge near the selection boundary.
 
-See [Choosing an
-index](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-index-families.md).
+See [Multiple-trait
+selection](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-index-families.md).
 
 ------------------------------------------------------------------------
 
@@ -309,7 +367,7 @@ round(dgsi$realised_response - desired_gains, 3)
 ```
 
 Read that against Stage 4. Feasibility constrains the requested
-*proportion*; the optimiser is not bound to it, and distributes the
+*proportion*. the optimiser is not bound to it, and distributes the
 shortfall unevenly, overshooting grain yield while undershooting
 anthesis date. Whether that trade is acceptable is a breeding decision
 rather than a numerical one.
@@ -408,7 +466,12 @@ cycles](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-simulation
 
 **Which candidates should actually be crossed?** Parent, cross and
 mating allocation, coancestry control and operational feasibility are
-outside this package’s scope by design. See [Working with other breeding
+outside this package’s scope by design. Use
+[HapBlockR](https://github.com/FAkohoue/HapBlockR) for parent selection,
+OCS, optimum cross selection and mate allocation. HapBlockR’s
+`build_selection_index()` calls DesiredGainR for DGSI or QGSI, so the
+index developed here passes directly into that downstream decision. See
+[Working with other breeding
 software](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-interoperation.md).
 
 ------------------------------------------------------------------------
@@ -419,11 +482,11 @@ software](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-interope
 |----|----|
 | 1-2 | [Obtaining G and P](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-covariance.md) |
 | 3-5 | [Defining a breeding objective](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-objective.md) |
-| 6-7 | [Choosing an index](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-index-families.md) |
+| 6-7 | [Multiple-trait selection](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-index-families.md) |
 | 8 | [Optimising desired gains](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-dgsi.md) |
 | 9 | [Quadratic genomic selection](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-qgsi.md) |
 | 10 | [Defining a breeding objective](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-objective.md) |
-| Beyond | [Comparing objectives over several cycles](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-simulation.md); [Working with other breeding software](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-interoperation.md) |
+| Beyond | [Comparing objectives over several cycles](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-simulation.md) and [Working with other breeding software](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-interoperation.md) |
 
 ``` r
 sessionInfo()

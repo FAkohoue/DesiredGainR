@@ -68,7 +68,8 @@ oriented so that larger values are favourable."><meta property="og:image" conten
     <li><a class="dropdown-item" href="../articles/DesiredGainR-empirical-validation.html">Empirical validation with real breeding programmes</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Index methods</h6></li>
-    <li><a class="dropdown-item" href="../articles/DesiredGainR-index-families.html">Choosing an index</a></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-index-families.html">Multiple-trait selection and method comparison</a></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-information.html">Using predictions and prediction errors</a></li>
     <li><a class="dropdown-item" href="../articles/DesiredGainR-dgsi.html">Optimising desired gains</a></li>
     <li><a class="dropdown-item" href="../articles/DesiredGainR-qgsi.html">Quadratic genomic selection</a></li>
     <li><hr class="dropdown-divider"></li>
@@ -108,7 +109,7 @@ oriented so that larger values are favourable.</p>
 <span>  <span class="va">values</span>,</span>
 <span>  <span class="va">trait_cols</span>,</span>
 <span>  id_col <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"smith_hazel"</span>, <span class="st">"base"</span>, <span class="st">"pesek_baker"</span>, <span class="st">"yamada"</span>, <span class="st">"mulamba_mock"</span>,</span>
+<span>  method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"smith_hazel"</span>, <span class="st">"base"</span>, <span class="st">"pesek_baker"</span>, <span class="st">"yamada"</span>, <span class="st">"mulamba_mock"</span>, <span class="st">"elston"</span>,</span>
 <span>    <span class="st">"independent_culling"</span>, <span class="st">"tandem"</span><span class="op">)</span>,</span>
 <span>  G <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  P <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -156,8 +157,8 @@ happened.</p></dd>
 
 <dt id="arg-g">G<a class="anchor" aria-label="anchor" href="#arg-g"></a></dt>
 <dd><p>Genetic variance-covariance matrix, named by trait. Required by
-every method except <code>"base"</code>, <code>"mulamba_mock"</code>, <code>"independent_culling"</code>,
-and <code>"tandem"</code>.</p></dd>
+every method except <code>"base"</code>, <code>"mulamba_mock"</code>, <code>"elston"</code>,
+<code>"independent_culling"</code>, and <code>"tandem"</code>.</p></dd>
 
 
 <dt id="arg-p">P<a class="anchor" aria-label="anchor" href="#arg-p"></a></dt>
@@ -166,9 +167,13 @@ and <code>"tandem"</code>.</p></dd>
 
 
 <dt id="arg-economic-weights">economic_weights<a class="anchor" aria-label="anchor" href="#arg-economic-weights"></a></dt>
-<dd><p>Named non-negative economic weights in the
-favourable-direction trait space. Required by <code>"smith_hazel"</code> and
-<code>"base"</code>, and optionally used to weight ranks in <code>"mulamba_mock"</code>.</p></dd>
+<dd><p>Named economic weights in the favourable-direction
+trait space. Required by <code>"smith_hazel"</code> and <code>"base"</code>, and optionally used
+to weight ranks in <code>"mulamba_mock"</code>. Negative values are valid for the
+economic indices. They can arise when correlated response would otherwise
+move a trait beyond its economically preferred level. Rank weights remain
+non-negative because they state relative emphasis after trait direction
+has been declared.</p></dd>
 
 
 <dt id="arg-desired-gains">desired_gains<a class="anchor" aria-label="anchor" href="#arg-desired-gains"></a></dt>
@@ -226,8 +231,11 @@ candidates at hand.</p></dd>
 
 
 <dt id="arg-culling-thresholds">culling_thresholds<a class="anchor" aria-label="anchor" href="#arg-culling-thresholds"></a></dt>
-<dd><p>Named thresholds in the favourable-direction trait
-space, required by <code>"independent_culling"</code>.</p></dd>
+<dd><p>Named acceptance limits in the original trait
+units, required by <code>"elston"</code> and <code>"independent_culling"</code>. Supply a
+minimum for traits where larger values are favourable. Supply a maximum
+for traits named in <code>lower_is_better</code>. The function applies direction,
+centring, and scaling to these limits internally.</p></dd>
 
 
 <dt id="arg-tandem-order">tandem_order<a class="anchor" aria-label="anchor" href="#arg-tandem-order"></a></dt>
@@ -291,6 +299,12 @@ ranks are summed. It requires neither economic weights nor covariance
 matrices, and Guimaraes et al. (2021) found it to give the most balanced
 multi-trait response of the methods they compared.</p></dd>
 
+<dt><code>"elston"</code></dt>
+<dd><p>The Elston multiplicative index. Candidates first meet every stated
+floor. Eligible candidates are ranked by the product of their margins
+above those floors. The logarithm of the product provides numerical
+stability.</p></dd>
+
 <dt><code>"independent_culling"</code></dt>
 <dd><p>Not an index. Candidates must exceed a
 threshold for every trait. Included as a comparator because it is what
@@ -331,6 +345,8 @@ Hayden MJ (2024). <em>Frontiers in Plant Science</em> 15:1337388.
 <a href="https://doi.org/10.3389/fpls.2024.1337388" class="external-link">doi:10.3389/fpls.2024.1337388</a></p>
 <p>Mulamba NN, Mock JJ (1978). <em>Egyptian Journal of Genetics and Cytology</em>
 7:40-51.</p>
+<p>Elston RC (1963). A weight-free index for ranking or selection with respect
+to several traits at a time. <em>Biometrics</em> 19:85-97.</p>
 <p>Pesek J, Baker RJ (1969). <em>Canadian Journal of Plant Science</em> 49:803-804.
 <a href="https://doi.org/10.4141/cjps69-137" class="external-link">doi:10.4141/cjps69-137</a></p>
 <p>Rahimi M, Debnath S (2023). <em>Scientific Reports</em> 13:18977.

@@ -2,8 +2,8 @@
 
 ## 1. The decision that QGSI represents
 
-The quadratic genomic selection index (QGSI) is useful when the value of
-a trait combination cannot be represented adequately by a straight line.
+The quadratic genomic selection index (QGSI) is useful when a straight
+line gives an inadequate representation of a trait combination’s value.
 Three examples are an intermediate optimum, diminishing benefit beyond a
 useful level, and complementarity between two traits. If every
 additional unit has the same value, a linear index is clearer and should
@@ -100,8 +100,8 @@ units, and \\W\_{jk}\\ has inverse cross-trait units.
 
 The following objective rewards improvement in all six traits,
 introduces diminishing returns, and adds complementarity between grain
-yield and disease resistance. These numbers demonstrate the mechanics;
-they are not universal recommendations.
+yield and disease resistance. These numbers demonstrate the mechanics.
+They are not universal recommendations.
 
 ``` r
 linear_weights <- c(
@@ -189,7 +189,7 @@ head(qgsi$ranked_geno[, c(
 
 The `LinearPart` and `QuadraticPart` are components of the same score.
 Their signs do not say that a candidate is biologically good or bad by
-themselves; the selection decision follows their sum, `QGSI`.
+themselves. the selection decision follows their sum, `QGSI`.
 
 ------------------------------------------------------------------------
 
@@ -223,7 +223,7 @@ These two tables answer different questions.
   deviation of the complete index, including its quadratic variance.
 - `observed_selection_differential` is the difference between the
   selected candidates’ mean GEBV and the full candidate mean. It
-  describes the selected group; it is not automatically the response
+  describes the selected group. It is not automatically the response
   transmitted to progeny.
 
 The expected-gain calculation is a linear-regression approximation. A
@@ -236,7 +236,7 @@ Under the centred multivariate-normal model,
 \\\operatorname{Cov}(\widehat{\mathbf{g}}, \widehat{\mathbf{g}}^{\mathsf
 T}\mathbf{W} \widehat{\mathbf{g}})=0\\ because the relevant third
 central moments are zero. Therefore, the numerator of the
-linear-regression gain is \\\mathbf{\Gamma}\mathbf{w}\\; \\\mathbf{W}\\
+linear-regression gain is \\\mathbf{\Gamma}\mathbf{w}\\. \\\mathbf{W}\\
 enters through the total index variance. This is a property of that
 model, not proof that curvature has no biological effect. When curvature
 materially changes the selected set, inspect the observed GEBV
@@ -388,8 +388,8 @@ a useful, stable and biologically defensible way.
 
 ## 10. Related documentation
 
-- [Choosing an
-  index](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-index-families.md)
+- [Multiple-trait
+  selection](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-index-families.md)
   places QGSI beside the linear and desired-gain families.
 - [Optimising desired
   gains](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-dgsi.md)

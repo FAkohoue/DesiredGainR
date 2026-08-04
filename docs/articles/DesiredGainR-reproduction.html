@@ -85,7 +85,8 @@
     <li><a class="dropdown-item" href="../articles/DesiredGainR-empirical-validation.html">Empirical validation with real breeding programmes</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Index methods</h6></li>
-    <li><a class="dropdown-item" href="../articles/DesiredGainR-index-families.html">Choosing an index</a></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-index-families.html">Multiple-trait selection and method comparison</a></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-information.html">Using predictions and prediction errors</a></li>
     <li><a class="dropdown-item" href="../articles/DesiredGainR-dgsi.html">Optimising desired gains</a></li>
     <li><a class="dropdown-item" href="../articles/DesiredGainR-qgsi.html">Quadratic genomic selection</a></li>
     <li><hr class="dropdown-divider"></li>
@@ -136,9 +137,10 @@ the wrong formula.</p>
 people, with other software, on data this package has never seen: Rahimi
 and Debnath (2023), <em>Scientific Reports</em> <strong>13</strong>,
 18977, computed in SAS PROC IML and published in tables.</p>
-<p>The reference values are frozen in <code><a href="../reference/rahimi_debnath_2023.html">rahimi_debnath_2023()</a></code>
-and must not be recomputed here. The moment they are derived from this
-package they stop being an external check.</p>
+<p>The reference values are frozen in
+<code><a href="../reference/rahimi_debnath_2023.html">rahimi_debnath_2023()</a></code>. Preserve them exactly. The moment
+they are derived from this package they stop being an external
+check.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">reference</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/rahimi_debnath_2023.html">rahimi_debnath_2023</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">reference</span><span class="op">$</span><span class="va">traits</span></span>
@@ -147,13 +149,12 @@ package they stop being an external check.</p>
 <span><span class="co">#&gt; [7] "yield"</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="what-can-and-cannot-be-reproduced">What can and cannot be reproduced<a class="anchor" aria-label="anchor" href="#what-can-and-cannot-be-reproduced"></a>
+<h2 id="scope-of-the-reproduction">Scope of the reproduction<a class="anchor" aria-label="anchor" href="#scope-of-the-reproduction"></a>
 </h2>
 <p>The article’s genetic and phenotypic covariance matrices are in
-supplementary data files that are not distributed with it, so the index
-<strong>coefficients</strong> cannot be recomputed. That limits what is
-checkable, and it would be easy to stop there and claim the reproduction
-was impossible.</p>
+supplementary data files that are absent from the publication. The index
+<strong>coefficients</strong> therefore remain unavailable for direct
+recomputation. This limits the quantities that can be checked.</p>
 <p>It is not, because the Pesek–Baker index has an exact algebraic
 property that the published table either satisfies or does not.</p>
 <div class="section level3">
@@ -217,8 +218,8 @@ fail if either party had the method wrong.</p>
 <tr class="odd">
 <td>Relative spread of the seven ratios</td>
 <td><span class="math inline">\(2\times10^{-3}\)</span></td>
-<td>Table values are printed to four significant figures; the smallest,
-<code>row_length</code> = 0.224, carries the most rounding</td>
+<td>Table values are printed to four significant figures. The smallest,
+<code>row_length</code> = 0.224, carries the most rounding.</td>
 </tr>
 <tr class="even">
 <td>Common ratio against 0.33585</td>
@@ -315,11 +316,11 @@ than a number near zero.</p>
 implements a different paper — Cerón-Rojas et al. (2026) — and needs its
 own anchor.</p>
 <p>That paper’s replication deposit contains the authors’ own R scripts.
-The intermediate data files those scripts read were not deposited, so
-their published numbers cannot be recomputed. The
-<strong>algorithm</strong> can be, and a reference implementation is a
-stronger comparison than a table anyway: it can be run on any input
-rather than only on theirs.</p>
+The intermediate data files those scripts read were absent from the
+deposit. Their published numbers therefore remain unavailable for direct
+recomputation. The <strong>algorithm</strong> can still be reproduced. A
+reference implementation provides a stronger comparison than a table
+because it can be run on any input rather than only on theirs.</p>
 <p><code>tests/testthat/test-reference-implementation.R</code>
 transcribes their code verbatim and runs both implementations on
 identical inputs. The quantities compared are:</p>
@@ -360,7 +361,7 @@ coefficients</td>
 </table>
 <p>The second row is worth noting because the two expressions do not
 look alike. The reference computes accuracy as a ratio of standard
-deviations; this package computes a correlation. For the optimum index
+deviations. This package computes a correlation. For the optimum index
 <span class="math inline">\(\mathbf{b} =
 \mathbf{P}^{-1}\mathbf{G}\mathbf{w}\)</span> we have <span class="math inline">\(\mathbf{b}'\mathbf{G}\mathbf{w} =
 \mathbf{b}'\mathbf{P}\mathbf{b}\)</span>, so they are the same
@@ -392,7 +393,7 @@ simulation over breeding cycles is checked only against its own internal
 consistency.</li>
 <li>
 <strong>The Monte Carlo tests remain the primary evidence</strong>
-for the rest of the package. This vignette adds two external anchors; it
+for the rest of the package. This vignette adds two external anchors. It
 does not replace them.</li>
 </ul>
 <p>The qualitative orderings that <em>are</em> checkable, and hold:</p>

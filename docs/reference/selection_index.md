@@ -12,7 +12,7 @@ selection_index(
   values,
   trait_cols,
   id_col = NULL,
-  method = c("smith_hazel", "base", "pesek_baker", "yamada", "mulamba_mock",
+  method = c("smith_hazel", "base", "pesek_baker", "yamada", "mulamba_mock", "elston",
     "independent_culling", "tandem"),
   G = NULL,
   P = NULL,
@@ -61,8 +61,8 @@ selection_index(
 - G:
 
   Genetic variance-covariance matrix, named by trait. Required by every
-  method except `"base"`, `"mulamba_mock"`, `"independent_culling"`, and
-  `"tandem"`.
+  method except `"base"`, `"mulamba_mock"`, `"elston"`,
+  `"independent_culling"`, and `"tandem"`.
 
 - P:
 
@@ -71,9 +71,13 @@ selection_index(
 
 - economic_weights:
 
-  Named non-negative economic weights in the favourable-direction trait
-  space. Required by `"smith_hazel"` and `"base"`, and optionally used
-  to weight ranks in `"mulamba_mock"`.
+  Named economic weights in the favourable-direction trait space.
+  Required by `"smith_hazel"` and `"base"`, and optionally used to
+  weight ranks in `"mulamba_mock"`. Negative values are valid for the
+  economic indices. They can arise when correlated response would
+  otherwise move a trait beyond its economically preferred level. Rank
+  weights remain non-negative because they state relative emphasis after
+  trait direction has been declared.
 
 - desired_gains:
 
@@ -132,8 +136,11 @@ selection_index(
 
 - culling_thresholds:
 
-  Named thresholds in the favourable-direction trait space, required by
-  `"independent_culling"`.
+  Named acceptance limits in the original trait units, required by
+  `"elston"` and `"independent_culling"`. Supply a minimum for traits
+  where larger values are favourable. Supply a maximum for traits named
+  in `lower_is_better`. The function applies direction, centring, and
+  scaling to these limits internally.
 
 - tandem_order:
 
@@ -198,6 +205,13 @@ the effective weights, and the provenance of every input.
   Guimaraes et al. (2021) found it to give the most balanced multi-trait
   response of the methods they compared.
 
+- `"elston"`:
+
+  The Elston multiplicative index. Candidates first meet every stated
+  floor. Eligible candidates are ranked by the product of their margins
+  above those floors. The logarithm of the product provides numerical
+  stability.
+
 - `"independent_culling"`:
 
   Not an index. Candidates must exceed a threshold for every trait.
@@ -248,6 +262,9 @@ R, Hayden MJ (2024). *Frontiers in Plant Science* 15:1337388.
 
 Mulamba NN, Mock JJ (1978). *Egyptian Journal of Genetics and Cytology*
 7:40-51.
+
+Elston RC (1963). A weight-free index for ranking or selection with
+respect to several traits at a time. *Biometrics* 19:85-97.
 
 Pesek J, Baker RJ (1969). *Canadian Journal of Plant Science*
 49:803-804. [doi:10.4141/cjps69-137](https://doi.org/10.4141/cjps69-137)

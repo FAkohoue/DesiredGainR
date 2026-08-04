@@ -17,10 +17,9 @@ runs. Only the objective differed.
 
 Covarrubias-Pazaran (2021) reaches the same place from the operational
 side. The CGIAR guideline instructs breeders to state a desired
-differential and then adds, in the same paragraph, that the resulting
-coefficients should not be interpreted, because they lack meaning under
-strong genetic correlations. The desired response is the only decision
-genuinely available.
+differential. It then advises breeders to avoid interpreting the
+resulting coefficients under strong genetic correlations. The desired
+response is the only decision genuinely available.
 
 This vignette covers the six tools DesiredGainR provides for that
 decision.
@@ -131,7 +130,7 @@ incorrect.
 This conversion must be applied once. If candidate values and both
 covariance matrices have already been transformed to
 genetic-standard-deviation units, the weights are already per genetic
-standard deviation; multiplying them by the original standard deviations
+standard deviation. Multiplying them by the original standard deviations
 would standardise them twice.
 
 ------------------------------------------------------------------------
@@ -164,7 +163,7 @@ A specified target \\\mathbf{d}\\ therefore requires exactly
 
 and the selected proportion delivering that intensity follows from the
 normal-truncation relationship. This is an exact result under the
-linear-index model; its application remains conditional on the estimated
+linear-index model. Its application remains conditional on the estimated
 covariance matrices and the truncation-selection assumptions.
 
 ### 3.2 Read the feasibility output without ambiguity
@@ -226,7 +225,7 @@ Therefore, interpret the two cases separately:
 2.  If the values are trait-specific minimums, use
     [`suggest_desired_gains()`](https://FAkohoue.github.io/DesiredGainR/reference/suggest_desired_gains.md)
     or interval optimisation. Read the worst-trait attainment and the
-    lower confidence bound for joint attainment; a large response in one
+    lower confidence bound for joint attainment. A large response in one
     trait must not compensate for failure of another minimum.
 
 The classical desired-gain index honours only the direction of
@@ -374,8 +373,8 @@ the set obtained from the stated objective.
 
 | Observation | Interpretation |
 |----|----|
-| High stability, high rank correlation | The decision is robust; further argument about weights will not change it |
-| Low stability, high rank correlation | The ranking is stable but the threshold is contested; consider selecting more candidates |
+| High stability, high rank correlation | The decision is robust. Further argument about weights will not change it. |
+| Low stability, high rank correlation | The ranking is stable but the threshold is contested. Consider selecting more candidates. |
 | Low stability, low rank correlation | The objective, not the index, is the binding uncertainty |
 
 ### 5.3 Influence is not contribution
@@ -413,7 +412,7 @@ index may conversely be a weak lever, because the ranking already
 follows it.
 
 Read the two together. The first says which weights are worth arguing
-about; the second says which traits the index is acting on.
+about. the second says which traits the index is acting on.
 
 ------------------------------------------------------------------------
 

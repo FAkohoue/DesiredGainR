@@ -1,0 +1,1638 @@
+<!DOCTYPE html>
+<!-- saved from url=(0080)https://iastate.pressbooks.pub/quantitativegenetics/chapter/simulation-modeling/ -->
+<html lang="en-US"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	
+	<meta http-equiv="x-ua-compatible" content="ie=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<!-- Open Graph meta tags -->
+	
+	<meta property="og:title" content="Chapter 13: Simulation Modeling – Quantitative Genetics for Plant Breeding">
+	<meta property="og:description" content="This open textbook is intended to expose students to the application of quantitative genetic models to plant breeding populations. Specific topics include conducting and interpreting multi-environment trials, resource allocation using engineering principles, genetic modeling of quantitative traits, simulation modeling, variance, covariance and heritability, prediction, selection, and genetic gain.">
+	<meta property="og:type" content="article">
+	<meta property="og:url" content="https://iastate.pressbooks.pub/quantitativegenetics/chapter/simulation-modeling/">
+	<meta property="og:image" content="https://iastate.pressbooks.pub/app/uploads/sites/102/2023/10/quantiativegenetics-cover-1.png">
+	<meta property="og:image:alt" content="Cover image for Quantitative Genetics for Plant Breeding">
+	<meta property="og:site_name" content="Quantitative Genetics for Plant Breeding">
+
+		<link rel="manifest" href="https://iastate.pressbooks.pub/app/themes/pressbooks-book/site.webmanifest">
+	<meta name="application-name" content="Pressbooks">
+	<meta name="msapplication-TileColor" content="#b01109">
+	<meta name="msapplication-config" content="https://iastate.pressbooks.pub/app/themes/pressbooks-book/browserconfig.xml">
+	<meta name="theme-color" content="#ffffff">
+	<link rel="pingback" href="https://iastate.pressbooks.pub/quantitativegenetics/xmlrpc.php">	<title>Chapter 13: Simulation Modeling – Quantitative Genetics for Plant Breeding</title>
+<script type="text/javascript">
+/* <![CDATA[ */
+window.koko_analytics = {"url":"https:\/\/iastate.pressbooks.pub\/quantitativegenetics\/wp-admin\/admin-ajax.php?action=koko_analytics_collect","site_url":"https:\/\/iastate.pressbooks.pub\/quantitativegenetics","post_id":159,"method":"cookie","use_cookie":true};
+/* ]]> */
+</script>
+<meta name="robots" content="max-image-preview:large, noai, noimageai">
+<link rel="dns-prefetch" href="https://cdn.jsdelivr.net/">
+<link rel="dns-prefetch" href="https://fonts.googleapis.com/">
+<link rel="alternate" type="application/rss+xml" title="Quantitative Genetics for Plant Breeding » Feed" href="https://iastate.pressbooks.pub/quantitativegenetics/feed/">
+<link rel="alternate" title="oEmbed (JSON)" type="application/json+oembed" href="https://iastate.pressbooks.pub/quantitativegenetics/wp-json/oembed/1.0/embed?url=https%3A%2F%2Fiastate.pressbooks.pub%2Fquantitativegenetics%2Fchapter%2Fsimulation-modeling%2F">
+<link rel="alternate" title="oEmbed (XML)" type="text/xml+oembed" href="https://iastate.pressbooks.pub/quantitativegenetics/wp-json/oembed/1.0/embed?url=https%3A%2F%2Fiastate.pressbooks.pub%2Fquantitativegenetics%2Fchapter%2Fsimulation-modeling%2F&amp;format=xml">
+<style id="wp-img-auto-sizes-contain-inline-css" type="text/css">
+img:is([sizes=auto i],[sizes^="auto," i]){contain-intrinsic-size:3000px 1500px}
+/*# sourceURL=wp-img-auto-sizes-contain-inline-css */
+</style>
+<link rel="stylesheet" id="glossary-definition-glossary-definition-dcwduygb-css" href="./Chapter 13_ Simulation Modeling – Quantitative Genetics for Plant Breeding_files/glossary-definition-DcwduYgB.css" type="text/css" media="all">
+<style id="wp-emoji-styles-inline-css" type="text/css">
+
+	img.wp-smiley, img.emoji {
+		display: inline !important;
+		border: none !important;
+		box-shadow: none !important;
+		height: 1em !important;
+		width: 1em !important;
+		margin: 0 0.07em !important;
+		vertical-align: -0.1em !important;
+		background: none !important;
+		padding: 0 !important;
+	}
+/*# sourceURL=wp-emoji-styles-inline-css */
+</style>
+<style id="classic-theme-styles-inline-css" type="text/css">
+/*! This file is auto-generated */
+.wp-block-button__link{color:#fff;background-color:#32373c;border-radius:9999px;box-shadow:none;text-decoration:none;padding:calc(.667em + 2px) calc(1.333em + 2px);font-size:1.125em}.wp-block-file__button{background:#32373c;color:#fff;text-decoration:none}
+/*# sourceURL=/wp-includes/css/classic-themes.min.css */
+</style>
+<style id="global-styles-inline-css" type="text/css">
+:root{--wp--preset--aspect-ratio--square: 1;--wp--preset--aspect-ratio--4-3: 4/3;--wp--preset--aspect-ratio--3-4: 3/4;--wp--preset--aspect-ratio--3-2: 3/2;--wp--preset--aspect-ratio--2-3: 2/3;--wp--preset--aspect-ratio--16-9: 16/9;--wp--preset--aspect-ratio--9-16: 9/16;--wp--preset--color--black: #000000;--wp--preset--color--cyan-bluish-gray: #abb8c3;--wp--preset--color--white: #ffffff;--wp--preset--color--pale-pink: #f78da7;--wp--preset--color--vivid-red: #cf2e2e;--wp--preset--color--luminous-vivid-orange: #ff6900;--wp--preset--color--luminous-vivid-amber: #fcb900;--wp--preset--color--light-green-cyan: #7bdcb5;--wp--preset--color--vivid-green-cyan: #00d084;--wp--preset--color--pale-cyan-blue: #8ed1fc;--wp--preset--color--vivid-cyan-blue: #0693e3;--wp--preset--color--vivid-purple: #9b51e0;--wp--preset--gradient--vivid-cyan-blue-to-vivid-purple: linear-gradient(135deg,rgb(6,147,227) 0%,rgb(155,81,224) 100%);--wp--preset--gradient--light-green-cyan-to-vivid-green-cyan: linear-gradient(135deg,rgb(122,220,180) 0%,rgb(0,208,130) 100%);--wp--preset--gradient--luminous-vivid-amber-to-luminous-vivid-orange: linear-gradient(135deg,rgb(252,185,0) 0%,rgb(255,105,0) 100%);--wp--preset--gradient--luminous-vivid-orange-to-vivid-red: linear-gradient(135deg,rgb(255,105,0) 0%,rgb(207,46,46) 100%);--wp--preset--gradient--very-light-gray-to-cyan-bluish-gray: linear-gradient(135deg,rgb(238,238,238) 0%,rgb(169,184,195) 100%);--wp--preset--gradient--cool-to-warm-spectrum: linear-gradient(135deg,rgb(74,234,220) 0%,rgb(151,120,209) 20%,rgb(207,42,186) 40%,rgb(238,44,130) 60%,rgb(251,105,98) 80%,rgb(254,248,76) 100%);--wp--preset--gradient--blush-light-purple: linear-gradient(135deg,rgb(255,206,236) 0%,rgb(152,150,240) 100%);--wp--preset--gradient--blush-bordeaux: linear-gradient(135deg,rgb(254,205,165) 0%,rgb(254,45,45) 50%,rgb(107,0,62) 100%);--wp--preset--gradient--luminous-dusk: linear-gradient(135deg,rgb(255,203,112) 0%,rgb(199,81,192) 50%,rgb(65,88,208) 100%);--wp--preset--gradient--pale-ocean: linear-gradient(135deg,rgb(255,245,203) 0%,rgb(182,227,212) 50%,rgb(51,167,181) 100%);--wp--preset--gradient--electric-grass: linear-gradient(135deg,rgb(202,248,128) 0%,rgb(113,206,126) 100%);--wp--preset--gradient--midnight: linear-gradient(135deg,rgb(2,3,129) 0%,rgb(40,116,252) 100%);--wp--preset--font-size--small: 13px;--wp--preset--font-size--medium: 20px;--wp--preset--font-size--large: 36px;--wp--preset--font-size--x-large: 42px;--wp--preset--spacing--20: 0.44rem;--wp--preset--spacing--30: 0.67rem;--wp--preset--spacing--40: 1rem;--wp--preset--spacing--50: 1.5rem;--wp--preset--spacing--60: 2.25rem;--wp--preset--spacing--70: 3.38rem;--wp--preset--spacing--80: 5.06rem;--wp--preset--shadow--natural: 6px 6px 9px rgba(0, 0, 0, 0.2);--wp--preset--shadow--deep: 12px 12px 50px rgba(0, 0, 0, 0.4);--wp--preset--shadow--sharp: 6px 6px 0px rgba(0, 0, 0, 0.2);--wp--preset--shadow--outlined: 6px 6px 0px -3px rgb(255, 255, 255), 6px 6px rgb(0, 0, 0);--wp--preset--shadow--crisp: 6px 6px 0px rgb(0, 0, 0);}:where(.is-layout-flex){gap: 0.5em;}:where(.is-layout-grid){gap: 0.5em;}body .is-layout-flex{display: flex;}.is-layout-flex{flex-wrap: wrap;align-items: center;}.is-layout-flex > :is(*, div){margin: 0;}body .is-layout-grid{display: grid;}.is-layout-grid > :is(*, div){margin: 0;}:where(.wp-block-columns.is-layout-flex){gap: 2em;}:where(.wp-block-columns.is-layout-grid){gap: 2em;}:where(.wp-block-post-template.is-layout-flex){gap: 1.25em;}:where(.wp-block-post-template.is-layout-grid){gap: 1.25em;}.has-black-color{color: var(--wp--preset--color--black) !important;}.has-cyan-bluish-gray-color{color: var(--wp--preset--color--cyan-bluish-gray) !important;}.has-white-color{color: var(--wp--preset--color--white) !important;}.has-pale-pink-color{color: var(--wp--preset--color--pale-pink) !important;}.has-vivid-red-color{color: var(--wp--preset--color--vivid-red) !important;}.has-luminous-vivid-orange-color{color: var(--wp--preset--color--luminous-vivid-orange) !important;}.has-luminous-vivid-amber-color{color: var(--wp--preset--color--luminous-vivid-amber) !important;}.has-light-green-cyan-color{color: var(--wp--preset--color--light-green-cyan) !important;}.has-vivid-green-cyan-color{color: var(--wp--preset--color--vivid-green-cyan) !important;}.has-pale-cyan-blue-color{color: var(--wp--preset--color--pale-cyan-blue) !important;}.has-vivid-cyan-blue-color{color: var(--wp--preset--color--vivid-cyan-blue) !important;}.has-vivid-purple-color{color: var(--wp--preset--color--vivid-purple) !important;}.has-black-background-color{background-color: var(--wp--preset--color--black) !important;}.has-cyan-bluish-gray-background-color{background-color: var(--wp--preset--color--cyan-bluish-gray) !important;}.has-white-background-color{background-color: var(--wp--preset--color--white) !important;}.has-pale-pink-background-color{background-color: var(--wp--preset--color--pale-pink) !important;}.has-vivid-red-background-color{background-color: var(--wp--preset--color--vivid-red) !important;}.has-luminous-vivid-orange-background-color{background-color: var(--wp--preset--color--luminous-vivid-orange) !important;}.has-luminous-vivid-amber-background-color{background-color: var(--wp--preset--color--luminous-vivid-amber) !important;}.has-light-green-cyan-background-color{background-color: var(--wp--preset--color--light-green-cyan) !important;}.has-vivid-green-cyan-background-color{background-color: var(--wp--preset--color--vivid-green-cyan) !important;}.has-pale-cyan-blue-background-color{background-color: var(--wp--preset--color--pale-cyan-blue) !important;}.has-vivid-cyan-blue-background-color{background-color: var(--wp--preset--color--vivid-cyan-blue) !important;}.has-vivid-purple-background-color{background-color: var(--wp--preset--color--vivid-purple) !important;}.has-black-border-color{border-color: var(--wp--preset--color--black) !important;}.has-cyan-bluish-gray-border-color{border-color: var(--wp--preset--color--cyan-bluish-gray) !important;}.has-white-border-color{border-color: var(--wp--preset--color--white) !important;}.has-pale-pink-border-color{border-color: var(--wp--preset--color--pale-pink) !important;}.has-vivid-red-border-color{border-color: var(--wp--preset--color--vivid-red) !important;}.has-luminous-vivid-orange-border-color{border-color: var(--wp--preset--color--luminous-vivid-orange) !important;}.has-luminous-vivid-amber-border-color{border-color: var(--wp--preset--color--luminous-vivid-amber) !important;}.has-light-green-cyan-border-color{border-color: var(--wp--preset--color--light-green-cyan) !important;}.has-vivid-green-cyan-border-color{border-color: var(--wp--preset--color--vivid-green-cyan) !important;}.has-pale-cyan-blue-border-color{border-color: var(--wp--preset--color--pale-cyan-blue) !important;}.has-vivid-cyan-blue-border-color{border-color: var(--wp--preset--color--vivid-cyan-blue) !important;}.has-vivid-purple-border-color{border-color: var(--wp--preset--color--vivid-purple) !important;}.has-vivid-cyan-blue-to-vivid-purple-gradient-background{background: var(--wp--preset--gradient--vivid-cyan-blue-to-vivid-purple) !important;}.has-light-green-cyan-to-vivid-green-cyan-gradient-background{background: var(--wp--preset--gradient--light-green-cyan-to-vivid-green-cyan) !important;}.has-luminous-vivid-amber-to-luminous-vivid-orange-gradient-background{background: var(--wp--preset--gradient--luminous-vivid-amber-to-luminous-vivid-orange) !important;}.has-luminous-vivid-orange-to-vivid-red-gradient-background{background: var(--wp--preset--gradient--luminous-vivid-orange-to-vivid-red) !important;}.has-very-light-gray-to-cyan-bluish-gray-gradient-background{background: var(--wp--preset--gradient--very-light-gray-to-cyan-bluish-gray) !important;}.has-cool-to-warm-spectrum-gradient-background{background: var(--wp--preset--gradient--cool-to-warm-spectrum) !important;}.has-blush-light-purple-gradient-background{background: var(--wp--preset--gradient--blush-light-purple) !important;}.has-blush-bordeaux-gradient-background{background: var(--wp--preset--gradient--blush-bordeaux) !important;}.has-luminous-dusk-gradient-background{background: var(--wp--preset--gradient--luminous-dusk) !important;}.has-pale-ocean-gradient-background{background: var(--wp--preset--gradient--pale-ocean) !important;}.has-electric-grass-gradient-background{background: var(--wp--preset--gradient--electric-grass) !important;}.has-midnight-gradient-background{background: var(--wp--preset--gradient--midnight) !important;}.has-small-font-size{font-size: var(--wp--preset--font-size--small) !important;}.has-medium-font-size{font-size: var(--wp--preset--font-size--medium) !important;}.has-large-font-size{font-size: var(--wp--preset--font-size--large) !important;}.has-x-large-font-size{font-size: var(--wp--preset--font-size--x-large) !important;}
+/*# sourceURL=global-styles-inline-css */
+</style>
+
+<link rel="stylesheet" id="h5p-plugin-fonts-css" href="./Chapter 13_ Simulation Modeling – Quantitative Genetics for Plant Breeding_files/h5p-fonts.css" type="text/css" media="all">
+<link rel="stylesheet" id="h5p-plugin-styles-css" href="./Chapter 13_ Simulation Modeling – Quantitative Genetics for Plant Breeding_files/h5p.css" type="text/css" media="all">
+<link rel="stylesheet" id="pressbooks/book-book-cidua1kk-css" href="./Chapter 13_ Simulation Modeling – Quantitative Genetics for Plant Breeding_files/book-CIDUA1kK.css" type="text/css" media="all">
+<link rel="stylesheet" id="book/webfonts-css" href="./Chapter 13_ Simulation Modeling – Quantitative Genetics for Plant Breeding_files/css" type="text/css" media="all">
+<link rel="stylesheet" id="pressbooks/theme-css" href="./Chapter 13_ Simulation Modeling – Quantitative Genetics for Plant Breeding_files/style.css" type="text/css" media="screen, print">
+<script type="module" src="./Chapter 13_ Simulation Modeling – Quantitative Genetics for Plant Breeding_files/glossary-definition-BDVUgK8G.js.download" id="glossary-definition-js"></script>
+<script type="text/javascript" src="./Chapter 13_ Simulation Modeling – Quantitative Genetics for Plant Breeding_files/jquery.min.js.download" id="jquery-core-js"></script>
+<script type="text/javascript" src="./Chapter 13_ Simulation Modeling – Quantitative Genetics for Plant Breeding_files/jquery-migrate.min.js.download" id="jquery-migrate-js"></script>
+<script type="text/javascript" id="pressbooks/book-js-extra">
+/* <![CDATA[ */
+var pressbooksBook = {"home_path":"/quantitativegenetics/","comparison_loading":"Comparison loading\u2026","comparison_loaded":"Comparison loaded.","chapter_not_loaded":"The original chapter could not be loaded.","toggle_contents":"Toggle contents of","ajaxurl":"https://iastate.pressbooks.pub/quantitativegenetics/wp-admin/admin-ajax.php","text_diff_nonce":"11a97c8846"};
+var pbAccessibility = {"opensNewWindow":"opens in new tab"};
+//# sourceURL=pressbooks%2Fbook-js-extra
+/* ]]> */
+</script>
+<script async="" type="module" src="./Chapter 13_ Simulation Modeling – Quantitative Genetics for Plant Breeding_files/book-CM6ibgXc.js.download"></script>
+<script type="module" src="./Chapter 13_ Simulation Modeling – Quantitative Genetics for Plant Breeding_files/ed11yWeb-DdI-W7DR.js.download" id="pressbooks-ed11y-tweaks-js"></script>
+<link rel="https://api.w.org/" href="https://iastate.pressbooks.pub/quantitativegenetics/wp-json/"><link rel="alternate" title="JSON" type="application/json" href="https://iastate.pressbooks.pub/quantitativegenetics/wp-json/pressbooks/v2/chapters/159"><link rel="canonical" href="https://iastate.pressbooks.pub/quantitativegenetics/chapter/simulation-modeling/">
+<link rel="shortlink" href="https://iastate.pressbooks.pub/quantitativegenetics/?p=159">
+<script type="application/ld+json">{"@context":"http:\/\/schema.org","@type":"Chapter","name":"Chapter 13: Simulation Modeling","isBasedOn":"https:\/\/iastate.pressbooks.pub\/pbeaopen\/chapter\/simulation-modeling\/","showTitle":"on","inLanguage":"en","isPartOf":"Quantitative Genetics for Plant Breeding","editor":[{"contributor_first_name":"Walter","contributor_last_name":"Suza","name":"Walter Suza","slug":"wpsuza","@type":"Person"},{"contributor_first_name":"Kendall","contributor_last_name":"Lamkey","name":"Kendall Lamkey","slug":"krlamkey","@type":"Person"}],"author":[{"contributor_first_name":"William","contributor_last_name":"Beavis","name":"William Beavis","slug":"wbeavis","@type":"Person"},{"contributor_first_name":"Anthony A.","contributor_last_name":"Mahama","name":"Anthony Assibi Mahama","slug":"aamahama","@type":"Person"},{"contributor_first_name":"Walter","contributor_last_name":"Suza","name":"Walter Suza","slug":"wpsuza","@type":"Person"}],"contributor":[],"translator":[],"reviewedBy":[],"illustrator":[],"publisher":{"@type":"Organization","name":"Iowa State University Digital Press","address":{"@type":"PostalAddress","addressLocality":"Ames, Iowa"}},"datePublished":"2023-10-18","copyrightYear":"2023","license":{"@type":"CreativeWork","url":"https:\/\/creativecommons.org\/licenses\/by-nc\/4.0\/","name":"CC BY-NC (Attribution NonCommercial)"}}</script><meta name="citation_book_title" content="Quantitative Genetics for Plant Breeding">
+<meta name="citation_title" content="Chapter 13: Simulation Modeling">
+<meta name="citation_year" content="2023">
+<meta name="citation_publication_date" content="2023-10-18">
+<meta name="citation_language" content="en">
+<meta name="citation_publisher" content="Iowa State University Digital Press">
+<meta name="citation_author" content="William Beavis">
+<meta name="citation_author" content="Anthony Assibi Mahama">
+<meta name="citation_author" content="Walter Suza"><style>:root{--header-bg:#ffffff;--header-links:#7c2529;--primary:#7c2529;--accent:#c8102e;--accent-fg:#ffffff;--primary-dark:#c8102e;--accent-dark:#7c2529;--primary-alpha:rgba(124,37,41,0.25);}</style><style type="text/css">:root{--reading-width:48em;}</style><!-- Google Analytics -->
+<script async="" src="./Chapter 13_ Simulation Modeling – Quantitative Genetics for Plant Breeding_files/js"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-61KW6RBW32');
+</script>
+<!-- End Google Analytics --><script>
+window.MathJax = {
+	versionWarnings: false,
+    loader: {
+        load: [
+			'input/asciimath',
+			'output/chtml',
+            '[tex]/ams',
+            '[tex]/bbox',
+            '[tex]/boldsymbol',
+            '[tex]/braket',
+            '[tex]/cancel',
+            '[tex]/color',
+            '[tex]/enclose',
+            '[tex]/gensymb',
+            '[tex]/mathtools',
+            '[tex]/mhchem',
+            '[tex]/textmacros',
+            '[tex]/newcommand',
+            '[tex]/noerrors',
+            '[tex]/unicode'
+        ]
+    },
+	asciimath: {
+			delimiters: [['`','`'],['[asciimath]','[/asciimath]']]
+		},
+    tex: {
+        inlineMath: [['\\(', '\\)'], ['[latex]','[/latex]']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']],
+        packages: {
+            '[+]': [
+                'ams',
+                'bbox',
+                'boldsymbol',
+                'braket',
+                'cancel',
+                'color',
+                'enclose',
+                'gensymb',
+                'mathtools',
+                'mhchem',
+                'textmacros',
+                'newcommand',
+                'noerrors',
+                'unicode'
+            ]
+        },
+        tags: 'ams',
+            formatError: function (message) {
+				return '\\color{red}{\\text{MathJax error: ' + message + '}}';
+			}
+    },
+    svg: {
+        fontCache: 'global'
+    }
+};
+</script><style>
+.MathJax {
+    color: #000000 !important;
+}
+</style><script src="./Chapter 13_ Simulation Modeling – Quantitative Genetics for Plant Breeding_files/asciimath.js.download" charset="UTF-8"></script><script src="./Chapter 13_ Simulation Modeling – Quantitative Genetics for Plant Breeding_files/bbox.js.download" charset="UTF-8"></script><script src="./Chapter 13_ Simulation Modeling – Quantitative Genetics for Plant Breeding_files/boldsymbol.js.download" charset="UTF-8"></script><script src="./Chapter 13_ Simulation Modeling – Quantitative Genetics for Plant Breeding_files/braket.js.download" charset="UTF-8"></script><script src="./Chapter 13_ Simulation Modeling – Quantitative Genetics for Plant Breeding_files/enclose.js.download" charset="UTF-8"></script><script src="./Chapter 13_ Simulation Modeling – Quantitative Genetics for Plant Breeding_files/color.js.download" charset="UTF-8"></script><script src="./Chapter 13_ Simulation Modeling – Quantitative Genetics for Plant Breeding_files/gensymb.js.download" charset="UTF-8"></script><script src="./Chapter 13_ Simulation Modeling – Quantitative Genetics for Plant Breeding_files/mathtools.js.download" charset="UTF-8"></script><script src="./Chapter 13_ Simulation Modeling – Quantitative Genetics for Plant Breeding_files/mhchem.js.download" charset="UTF-8"></script><script src="./Chapter 13_ Simulation Modeling – Quantitative Genetics for Plant Breeding_files/textmacros.js.download" charset="UTF-8"></script><script src="./Chapter 13_ Simulation Modeling – Quantitative Genetics for Plant Breeding_files/noerrors.js.download" charset="UTF-8"></script><script src="./Chapter 13_ Simulation Modeling – Quantitative Genetics for Plant Breeding_files/unicode.js.download" charset="UTF-8"></script><script src="./Chapter 13_ Simulation Modeling – Quantitative Genetics for Plant Breeding_files/wp-emoji-release.min.js.download" defer=""></script><script src="./Chapter 13_ Simulation Modeling – Quantitative Genetics for Plant Breeding_files/cancel.js.download" charset="UTF-8"></script><style type="text/css">.CtxtMenu_InfoClose {  top:.2em; right:.2em;}
+.CtxtMenu_InfoContent {  overflow:auto; text-align:left; font-size:80%;  padding:.4em .6em; border:1px inset; margin:1em 0px;  max-height:20em; max-width:30em; background-color:#EEEEEE;  white-space:normal;}
+.CtxtMenu_Info.CtxtMenu_MousePost {outline:none;}
+.CtxtMenu_Info {  position:fixed; left:50%; width:auto; text-align:center;  border:3px outset; padding:1em 2em; background-color:#DDDDDD;  color:black;  cursor:default; font-family:message-box; font-size:120%;  font-style:normal; text-indent:0; text-transform:none;  line-height:normal; letter-spacing:normal; word-spacing:normal;  word-wrap:normal; white-space:nowrap; float:none; z-index:201;  border-radius: 15px;                     /* Opera 10.5 and IE9 */  -webkit-border-radius:15px;               /* Safari and Chrome */  -moz-border-radius:15px;                  /* Firefox */  -khtml-border-radius:15px;                /* Konqueror */  box-shadow:0px 10px 20px #808080;         /* Opera 10.5 and IE9 */  -webkit-box-shadow:0px 10px 20px #808080; /* Safari 3 & Chrome */  -moz-box-shadow:0px 10px 20px #808080;    /* Forefox 3.5 */  -khtml-box-shadow:0px 10px 20px #808080;  /* Konqueror */  filter:progid:DXImageTransform.Microsoft.dropshadow(OffX=2, OffY=2, Color="gray", Positive="true"); /* IE */}
+</style><style type="text/css">.CtxtMenu_MenuClose {  position:absolute;  cursor:pointer;  display:inline-block;  border:2px solid #AAA;  border-radius:18px;  -webkit-border-radius: 18px;             /* Safari and Chrome */  -moz-border-radius: 18px;                /* Firefox */  -khtml-border-radius: 18px;              /* Konqueror */  font-family: "Courier New", Courier;  font-size:24px;  color:#F0F0F0}
+.CtxtMenu_MenuClose span {  display:block; background-color:#AAA; border:1.5px solid;  border-radius:18px;  -webkit-border-radius: 18px;             /* Safari and Chrome */  -moz-border-radius: 18px;                /* Firefox */  -khtml-border-radius: 18px;              /* Konqueror */  line-height:0;  padding:8px 0 6px     /* may need to be browser-specific */}
+.CtxtMenu_MenuClose:hover {  color:white!important;  border:2px solid #CCC!important}
+.CtxtMenu_MenuClose:hover span {  background-color:#CCC!important}
+.CtxtMenu_MenuClose:hover:focus {  outline:none}
+</style><style type="text/css">.CtxtMenu_Menu {  position:absolute;  background-color:white;  color:black;  width:auto; padding:5px 0px;  border:1px solid #CCCCCC; margin:0; cursor:default;  font: menu; text-align:left; text-indent:0; text-transform:none;  line-height:normal; letter-spacing:normal; word-spacing:normal;  word-wrap:normal; white-space:nowrap; float:none; z-index:201;  border-radius: 5px;                     /* Opera 10.5 and IE9 */  -webkit-border-radius: 5px;             /* Safari and Chrome */  -moz-border-radius: 5px;                /* Firefox */  -khtml-border-radius: 5px;              /* Konqueror */  box-shadow:0px 10px 20px #808080;         /* Opera 10.5 and IE9 */  -webkit-box-shadow:0px 10px 20px #808080; /* Safari 3 & Chrome */  -moz-box-shadow:0px 10px 20px #808080;    /* Forefox 3.5 */  -khtml-box-shadow:0px 10px 20px #808080;  /* Konqueror */}
+.CtxtMenu_MenuItem {  padding: 1px 2em;  background:transparent;}
+.CtxtMenu_MenuArrow {  position:absolute; right:.5em; padding-top:.25em; color:#666666;  font-family: null; font-size: .75em}
+.CtxtMenu_MenuActive .CtxtMenu_MenuArrow {color:white}
+.CtxtMenu_MenuArrow.CtxtMenu_RTL {left:.5em; right:auto}
+.CtxtMenu_MenuCheck {  position:absolute; left:.7em;  font-family: null}
+.CtxtMenu_MenuCheck.CtxtMenu_RTL { right:.7em; left:auto }
+.CtxtMenu_MenuRadioCheck {  position:absolute; left: .7em;}
+.CtxtMenu_MenuRadioCheck.CtxtMenu_RTL {  right: .7em; left:auto}
+.CtxtMenu_MenuInputBox {  padding-left: 1em; right:.5em; color:#666666;  font-family: null;}
+.CtxtMenu_MenuInputBox.CtxtMenu_RTL {  left: .1em;}
+.CtxtMenu_MenuComboBox {  left:.1em; padding-bottom:.5em;}
+.CtxtMenu_MenuSlider {  left: .1em;}
+.CtxtMenu_SliderValue {  position:absolute; right:.1em; padding-top:.25em; color:#333333;  font-size: .75em}
+.CtxtMenu_SliderBar {  outline: none; background: #d3d3d3}
+.CtxtMenu_MenuLabel {  padding: 1px 2em 3px 1.33em;  font-style:italic}
+.CtxtMenu_MenuRule {  border-top: 1px solid #DDDDDD;  margin: 4px 3px;}
+.CtxtMenu_MenuDisabled {  color:GrayText}
+.CtxtMenu_MenuActive {  background-color: #606872;  color: white;}
+.CtxtMenu_MenuDisabled:focus {  background-color: #E8E8E8}
+.CtxtMenu_MenuLabel:focus {  background-color: #E8E8E8}
+.CtxtMenu_ContextMenu:focus {  outline:none}
+.CtxtMenu_ContextMenu .CtxtMenu_MenuItem:focus {  outline:none}
+.CtxtMenu_SelectionMenu {  position:relative; float:left;  border-bottom: none; -webkit-box-shadow:none; -webkit-border-radius:0px; }
+.CtxtMenu_SelectionItem {  padding-right: 1em;}
+.CtxtMenu_Selection {  right: 40%; width:50%; }
+.CtxtMenu_SelectionBox {  padding: 0em; max-height:20em; max-width: none;  background-color:#FFFFFF;}
+.CtxtMenu_SelectionDivider {  clear: both; border-top: 2px solid #000000;}
+.CtxtMenu_Menu .CtxtMenu_MenuClose {  top:-10px; left:-10px}
+</style><style id="MJX-CHTML-styles">
+mjx-container[jax="CHTML"] {
+  line-height: 0;
+}
+
+mjx-container [space="1"] {
+  margin-left: .111em;
+}
+
+mjx-container [space="2"] {
+  margin-left: .167em;
+}
+
+mjx-container [space="3"] {
+  margin-left: .222em;
+}
+
+mjx-container [space="4"] {
+  margin-left: .278em;
+}
+
+mjx-container [space="5"] {
+  margin-left: .333em;
+}
+
+mjx-container [rspace="1"] {
+  margin-right: .111em;
+}
+
+mjx-container [rspace="2"] {
+  margin-right: .167em;
+}
+
+mjx-container [rspace="3"] {
+  margin-right: .222em;
+}
+
+mjx-container [rspace="4"] {
+  margin-right: .278em;
+}
+
+mjx-container [rspace="5"] {
+  margin-right: .333em;
+}
+
+mjx-container [size="s"] {
+  font-size: 70.7%;
+}
+
+mjx-container [size="ss"] {
+  font-size: 50%;
+}
+
+mjx-container [size="Tn"] {
+  font-size: 60%;
+}
+
+mjx-container [size="sm"] {
+  font-size: 85%;
+}
+
+mjx-container [size="lg"] {
+  font-size: 120%;
+}
+
+mjx-container [size="Lg"] {
+  font-size: 144%;
+}
+
+mjx-container [size="LG"] {
+  font-size: 173%;
+}
+
+mjx-container [size="hg"] {
+  font-size: 207%;
+}
+
+mjx-container [size="HG"] {
+  font-size: 249%;
+}
+
+mjx-container [width="full"] {
+  width: 100%;
+}
+
+mjx-box {
+  display: inline-block;
+}
+
+mjx-block {
+  display: block;
+}
+
+mjx-itable {
+  display: inline-table;
+}
+
+mjx-row {
+  display: table-row;
+}
+
+mjx-row > * {
+  display: table-cell;
+}
+
+mjx-mtext {
+  display: inline-block;
+  text-align: left;
+}
+
+mjx-mstyle {
+  display: inline-block;
+}
+
+mjx-merror {
+  display: inline-block;
+  color: red;
+  background-color: yellow;
+}
+
+mjx-mphantom {
+  visibility: hidden;
+}
+
+_::-webkit-full-page-media, _:future, :root mjx-container {
+  will-change: opacity;
+}
+
+mjx-assistive-mml {
+  position: absolute !important;
+  top: 0px;
+  left: 0px;
+  clip: rect(1px, 1px, 1px, 1px);
+  padding: 1px 0px 0px 0px !important;
+  border: 0px !important;
+  display: block !important;
+  width: auto !important;
+  overflow: hidden !important;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+mjx-assistive-mml[display="block"] {
+  width: 100% !important;
+}
+
+mjx-math {
+  display: inline-block;
+  text-align: left;
+  line-height: 0;
+  text-indent: 0;
+  font-style: normal;
+  font-weight: normal;
+  font-size: 100%;
+  font-size-adjust: none;
+  letter-spacing: normal;
+  border-collapse: collapse;
+  word-wrap: normal;
+  word-spacing: normal;
+  white-space: nowrap;
+  direction: ltr;
+  padding: 1px 0;
+}
+
+mjx-container[jax="CHTML"][display="true"] {
+  display: block;
+  text-align: center;
+  margin: 1em 0;
+}
+
+mjx-container[jax="CHTML"][display="true"][width="full"] {
+  display: flex;
+}
+
+mjx-container[jax="CHTML"][display="true"] mjx-math {
+  padding: 0;
+}
+
+mjx-container[jax="CHTML"][justify="left"] {
+  text-align: left;
+}
+
+mjx-container[jax="CHTML"][justify="right"] {
+  text-align: right;
+}
+
+mjx-msub {
+  display: inline-block;
+  text-align: left;
+}
+
+mjx-mi {
+  display: inline-block;
+  text-align: left;
+}
+
+mjx-c {
+  display: inline-block;
+}
+
+mjx-utext {
+  display: inline-block;
+  padding: .75em 0 .2em 0;
+}
+
+mjx-TeXAtom {
+  display: inline-block;
+  text-align: left;
+}
+
+mjx-mo {
+  display: inline-block;
+  text-align: left;
+}
+
+mjx-stretchy-h {
+  display: inline-table;
+  width: 100%;
+}
+
+mjx-stretchy-h > * {
+  display: table-cell;
+  width: 0;
+}
+
+mjx-stretchy-h > * > mjx-c {
+  display: inline-block;
+  transform: scalex(1.0000001);
+}
+
+mjx-stretchy-h > * > mjx-c::before {
+  display: inline-block;
+  width: initial;
+}
+
+mjx-stretchy-h > mjx-ext {
+  /* IE */ overflow: hidden;
+  /* others */ overflow: clip visible;
+  width: 100%;
+}
+
+mjx-stretchy-h > mjx-ext > mjx-c::before {
+  transform: scalex(500);
+}
+
+mjx-stretchy-h > mjx-ext > mjx-c {
+  width: 0;
+}
+
+mjx-stretchy-h > mjx-beg > mjx-c {
+  margin-right: -.1em;
+}
+
+mjx-stretchy-h > mjx-end > mjx-c {
+  margin-left: -.1em;
+}
+
+mjx-stretchy-v {
+  display: inline-block;
+}
+
+mjx-stretchy-v > * {
+  display: block;
+}
+
+mjx-stretchy-v > mjx-beg {
+  height: 0;
+}
+
+mjx-stretchy-v > mjx-end > mjx-c {
+  display: block;
+}
+
+mjx-stretchy-v > * > mjx-c {
+  transform: scaley(1.0000001);
+  transform-origin: left center;
+  overflow: hidden;
+}
+
+mjx-stretchy-v > mjx-ext {
+  display: block;
+  height: 100%;
+  box-sizing: border-box;
+  border: 0px solid transparent;
+  /* IE */ overflow: hidden;
+  /* others */ overflow: visible clip;
+}
+
+mjx-stretchy-v > mjx-ext > mjx-c::before {
+  width: initial;
+  box-sizing: border-box;
+}
+
+mjx-stretchy-v > mjx-ext > mjx-c {
+  transform: scaleY(500) translateY(.075em);
+  overflow: visible;
+}
+
+mjx-mark {
+  display: inline-block;
+  height: 0px;
+}
+
+mjx-msubsup {
+  display: inline-block;
+  text-align: left;
+}
+
+mjx-script {
+  display: inline-block;
+  padding-right: .05em;
+  padding-left: .033em;
+}
+
+mjx-script > mjx-spacer {
+  display: block;
+}
+
+mjx-mn {
+  display: inline-block;
+  text-align: left;
+}
+
+mjx-msup {
+  display: inline-block;
+  text-align: left;
+}
+
+mjx-mspace {
+  display: inline-block;
+  text-align: left;
+}
+
+mjx-msqrt {
+  display: inline-block;
+  text-align: left;
+}
+
+mjx-root {
+  display: inline-block;
+  white-space: nowrap;
+}
+
+mjx-surd {
+  display: inline-block;
+  vertical-align: top;
+}
+
+mjx-sqrt {
+  display: inline-block;
+  padding-top: .07em;
+}
+
+mjx-sqrt > mjx-box {
+  border-top: .07em solid;
+}
+
+mjx-sqrt.mjx-tall > mjx-box {
+  padding-left: .3em;
+  margin-left: -.3em;
+}
+
+mjx-mfrac {
+  display: inline-block;
+  text-align: left;
+}
+
+mjx-frac {
+  display: inline-block;
+  vertical-align: 0.17em;
+  padding: 0 .22em;
+}
+
+mjx-frac[type="d"] {
+  vertical-align: .04em;
+}
+
+mjx-frac[delims] {
+  padding: 0 .1em;
+}
+
+mjx-frac[atop] {
+  padding: 0 .12em;
+}
+
+mjx-frac[atop][delims] {
+  padding: 0;
+}
+
+mjx-dtable {
+  display: inline-table;
+  width: 100%;
+}
+
+mjx-dtable > * {
+  font-size: 2000%;
+}
+
+mjx-dbox {
+  display: block;
+  font-size: 5%;
+}
+
+mjx-num {
+  display: block;
+  text-align: center;
+}
+
+mjx-den {
+  display: block;
+  text-align: center;
+}
+
+mjx-mfrac[bevelled] > mjx-num {
+  display: inline-block;
+}
+
+mjx-mfrac[bevelled] > mjx-den {
+  display: inline-block;
+}
+
+mjx-den[align="right"], mjx-num[align="right"] {
+  text-align: right;
+}
+
+mjx-den[align="left"], mjx-num[align="left"] {
+  text-align: left;
+}
+
+mjx-nstrut {
+  display: inline-block;
+  height: .054em;
+  width: 0;
+  vertical-align: -.054em;
+}
+
+mjx-nstrut[type="d"] {
+  height: .217em;
+  vertical-align: -.217em;
+}
+
+mjx-dstrut {
+  display: inline-block;
+  height: .505em;
+  width: 0;
+}
+
+mjx-dstrut[type="d"] {
+  height: .726em;
+}
+
+mjx-line {
+  display: block;
+  box-sizing: border-box;
+  min-height: 1px;
+  height: .06em;
+  border-top: .06em solid;
+  margin: .06em -.1em;
+  overflow: hidden;
+}
+
+mjx-line[type="d"] {
+  margin: .18em -.1em;
+}
+
+mjx-mrow {
+  display: inline-block;
+  text-align: left;
+}
+
+mjx-mover {
+  display: inline-block;
+  text-align: left;
+}
+
+mjx-mover:not([limits="false"]) {
+  padding-top: .1em;
+}
+
+mjx-mover:not([limits="false"]) > * {
+  display: block;
+  text-align: left;
+}
+
+mjx-c::before {
+  display: block;
+  width: 0;
+}
+
+.MJX-TEX {
+  font-family: MJXZERO, MJXTEX;
+}
+
+.TEX-B {
+  font-family: MJXZERO, MJXTEX-B;
+}
+
+.TEX-I {
+  font-family: MJXZERO, MJXTEX-I;
+}
+
+.TEX-MI {
+  font-family: MJXZERO, MJXTEX-MI;
+}
+
+.TEX-BI {
+  font-family: MJXZERO, MJXTEX-BI;
+}
+
+.TEX-S1 {
+  font-family: MJXZERO, MJXTEX-S1;
+}
+
+.TEX-S2 {
+  font-family: MJXZERO, MJXTEX-S2;
+}
+
+.TEX-S3 {
+  font-family: MJXZERO, MJXTEX-S3;
+}
+
+.TEX-S4 {
+  font-family: MJXZERO, MJXTEX-S4;
+}
+
+.TEX-A {
+  font-family: MJXZERO, MJXTEX-A;
+}
+
+.TEX-C {
+  font-family: MJXZERO, MJXTEX-C;
+}
+
+.TEX-CB {
+  font-family: MJXZERO, MJXTEX-CB;
+}
+
+.TEX-FR {
+  font-family: MJXZERO, MJXTEX-FR;
+}
+
+.TEX-FRB {
+  font-family: MJXZERO, MJXTEX-FRB;
+}
+
+.TEX-SS {
+  font-family: MJXZERO, MJXTEX-SS;
+}
+
+.TEX-SSB {
+  font-family: MJXZERO, MJXTEX-SSB;
+}
+
+.TEX-SSI {
+  font-family: MJXZERO, MJXTEX-SSI;
+}
+
+.TEX-SC {
+  font-family: MJXZERO, MJXTEX-SC;
+}
+
+.TEX-T {
+  font-family: MJXZERO, MJXTEX-T;
+}
+
+.TEX-V {
+  font-family: MJXZERO, MJXTEX-V;
+}
+
+.TEX-VB {
+  font-family: MJXZERO, MJXTEX-VB;
+}
+
+mjx-stretchy-v mjx-c, mjx-stretchy-h mjx-c {
+  font-family: MJXZERO, MJXTEX-S1, MJXTEX-S4, MJXTEX, MJXTEX-A ! important;
+}
+
+@font-face /* 0 */ {
+  font-family: MJXZERO;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Zero.woff") format("woff");
+}
+
+@font-face /* 1 */ {
+  font-family: MJXTEX;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Main-Regular.woff") format("woff");
+}
+
+@font-face /* 2 */ {
+  font-family: MJXTEX-B;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Main-Bold.woff") format("woff");
+}
+
+@font-face /* 3 */ {
+  font-family: MJXTEX-I;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Math-Italic.woff") format("woff");
+}
+
+@font-face /* 4 */ {
+  font-family: MJXTEX-MI;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Main-Italic.woff") format("woff");
+}
+
+@font-face /* 5 */ {
+  font-family: MJXTEX-BI;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Math-BoldItalic.woff") format("woff");
+}
+
+@font-face /* 6 */ {
+  font-family: MJXTEX-S1;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Size1-Regular.woff") format("woff");
+}
+
+@font-face /* 7 */ {
+  font-family: MJXTEX-S2;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Size2-Regular.woff") format("woff");
+}
+
+@font-face /* 8 */ {
+  font-family: MJXTEX-S3;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Size3-Regular.woff") format("woff");
+}
+
+@font-face /* 9 */ {
+  font-family: MJXTEX-S4;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Size4-Regular.woff") format("woff");
+}
+
+@font-face /* 10 */ {
+  font-family: MJXTEX-A;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_AMS-Regular.woff") format("woff");
+}
+
+@font-face /* 11 */ {
+  font-family: MJXTEX-C;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Calligraphic-Regular.woff") format("woff");
+}
+
+@font-face /* 12 */ {
+  font-family: MJXTEX-CB;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Calligraphic-Bold.woff") format("woff");
+}
+
+@font-face /* 13 */ {
+  font-family: MJXTEX-FR;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Fraktur-Regular.woff") format("woff");
+}
+
+@font-face /* 14 */ {
+  font-family: MJXTEX-FRB;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Fraktur-Bold.woff") format("woff");
+}
+
+@font-face /* 15 */ {
+  font-family: MJXTEX-SS;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_SansSerif-Regular.woff") format("woff");
+}
+
+@font-face /* 16 */ {
+  font-family: MJXTEX-SSB;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_SansSerif-Bold.woff") format("woff");
+}
+
+@font-face /* 17 */ {
+  font-family: MJXTEX-SSI;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_SansSerif-Italic.woff") format("woff");
+}
+
+@font-face /* 18 */ {
+  font-family: MJXTEX-SC;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Script-Regular.woff") format("woff");
+}
+
+@font-face /* 19 */ {
+  font-family: MJXTEX-T;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Typewriter-Regular.woff") format("woff");
+}
+
+@font-face /* 20 */ {
+  font-family: MJXTEX-V;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Vector-Regular.woff") format("woff");
+}
+
+@font-face /* 21 */ {
+  font-family: MJXTEX-VB;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Vector-Bold.woff") format("woff");
+}
+
+mjx-c.mjx-c1D443.TEX-I::before {
+  padding: 0.683em 0.751em 0 0;
+  content: "P";
+}
+
+mjx-c.mjx-c1D456.TEX-I::before {
+  padding: 0.661em 0.345em 0.011em 0;
+  content: "i";
+}
+
+mjx-c.mjx-c1D457.TEX-I::before {
+  padding: 0.661em 0.412em 0.204em 0;
+  content: "j";
+}
+
+mjx-c.mjx-c3D::before {
+  padding: 0.583em 0.778em 0.082em 0;
+  content: "=";
+}
+
+mjx-c.mjx-c1D707.TEX-I::before {
+  padding: 0.442em 0.603em 0.216em 0;
+  content: "\3BC";
+}
+
+mjx-c.mjx-c2B::before {
+  padding: 0.583em 0.778em 0.082em 0;
+  content: "+";
+}
+
+mjx-c.mjx-c1D43A.TEX-I::before {
+  padding: 0.705em 0.786em 0.022em 0;
+  content: "G";
+}
+
+mjx-c.mjx-c1D700.TEX-I::before {
+  padding: 0.452em 0.466em 0.022em 0;
+  content: "\3B5";
+}
+
+mjx-c.mjx-c45::before {
+  padding: 0.68em 0.681em 0 0;
+  content: "E";
+}
+
+mjx-c.mjx-c71::before {
+  padding: 0.442em 0.528em 0.194em 0;
+  content: "q";
+}
+
+mjx-c.mjx-c75::before {
+  padding: 0.442em 0.556em 0.011em 0;
+  content: "u";
+}
+
+mjx-c.mjx-c61::before {
+  padding: 0.448em 0.5em 0.011em 0;
+  content: "a";
+}
+
+mjx-c.mjx-c74::before {
+  padding: 0.615em 0.389em 0.01em 0;
+  content: "t";
+}
+
+mjx-c.mjx-c69::before {
+  padding: 0.669em 0.278em 0 0;
+  content: "i";
+}
+
+mjx-c.mjx-c6F::before {
+  padding: 0.448em 0.5em 0.01em 0;
+  content: "o";
+}
+
+mjx-c.mjx-c6E::before {
+  padding: 0.442em 0.556em 0 0;
+  content: "n";
+}
+
+mjx-c.mjx-c20::before {
+  padding: 0 0.25em 0 0;
+  content: " ";
+}
+
+mjx-c.mjx-c31::before {
+  padding: 0.666em 0.5em 0 0;
+  content: "1";
+}
+
+mjx-c.mjx-c1D70E.TEX-I::before {
+  padding: 0.431em 0.571em 0.011em 0;
+  content: "\3C3";
+}
+
+mjx-c.mjx-c32::before {
+  padding: 0.666em 0.5em 0 0;
+  content: "2";
+}
+
+mjx-c.mjx-c1D434.TEX-I::before {
+  padding: 0.716em 0.75em 0 0;
+  content: "A";
+}
+
+mjx-c.mjx-c1D45D.TEX-I::before {
+  padding: 0.442em 0.503em 0.194em 0;
+  content: "p";
+}
+
+mjx-c.mjx-c1D45E.TEX-I::before {
+  padding: 0.442em 0.46em 0.194em 0;
+  content: "q";
+}
+
+mjx-c.mjx-c5B::before {
+  padding: 0.75em 0.278em 0.25em 0;
+  content: "[";
+}
+
+mjx-c.mjx-c1D44E.TEX-I::before {
+  padding: 0.441em 0.529em 0.01em 0;
+  content: "a";
+}
+
+mjx-c.mjx-c1D451.TEX-I::before {
+  padding: 0.694em 0.52em 0.01em 0;
+  content: "d";
+}
+
+mjx-c.mjx-c28::before {
+  padding: 0.75em 0.389em 0.25em 0;
+  content: "(";
+}
+
+mjx-c.mjx-c2212::before {
+  padding: 0.583em 0.778em 0.082em 0;
+  content: "\2212";
+}
+
+mjx-c.mjx-c29::before {
+  padding: 0.75em 0.389em 0.25em 0;
+  content: ")";
+}
+
+mjx-c.mjx-c5D::before {
+  padding: 0.75em 0.278em 0.25em 0;
+  content: "]";
+}
+
+mjx-c.mjx-c2C::before {
+  padding: 0.121em 0.278em 0.194em 0;
+  content: ",";
+}
+
+mjx-c.mjx-c1D45B.TEX-I::before {
+  padding: 0.442em 0.6em 0.011em 0;
+  content: "n";
+}
+
+mjx-c.mjx-c1D437.TEX-I::before {
+  padding: 0.683em 0.828em 0 0;
+  content: "D";
+}
+
+mjx-c.mjx-c33::before {
+  padding: 0.665em 0.5em 0.022em 0;
+  content: "3";
+}
+
+mjx-c.mjx-c70::before {
+  padding: 0.442em 0.556em 0.194em 0;
+  content: "p";
+}
+
+mjx-c.mjx-c64::before {
+  padding: 0.694em 0.556em 0.011em 0;
+  content: "d";
+}
+
+mjx-c.mjx-c34::before {
+  padding: 0.677em 0.5em 0 0;
+  content: "4";
+}
+
+mjx-c.mjx-c41::before {
+  padding: 0.716em 0.75em 0 0;
+  content: "A";
+}
+
+mjx-c.mjx-c6C::before {
+  padding: 0.694em 0.278em 0 0;
+  content: "l";
+}
+
+mjx-c.mjx-c65::before {
+  padding: 0.448em 0.444em 0.011em 0;
+  content: "e";
+}
+
+mjx-c.mjx-c72::before {
+  padding: 0.442em 0.392em 0 0;
+  content: "r";
+}
+
+mjx-c.mjx-c6D::before {
+  padding: 0.442em 0.833em 0 0;
+  content: "m";
+}
+
+mjx-c.mjx-c73::before {
+  padding: 0.448em 0.394em 0.011em 0;
+  content: "s";
+}
+
+mjx-c.mjx-c221A.TEX-S2::before {
+  padding: 1.15em 1.02em 0.65em 0;
+  content: "\221A";
+}
+
+mjx-c.mjx-c39::before {
+  padding: 0.666em 0.5em 0.022em 0;
+  content: "9";
+}
+
+mjx-c.mjx-c2E::before {
+  padding: 0.12em 0.278em 0 0;
+  content: ".";
+}
+
+mjx-c.mjx-c7E::before {
+  padding: 0.318em 0.5em 0 0;
+  content: "~";
+}
+
+mjx-c.mjx-c38::before {
+  padding: 0.666em 0.5em 0.022em 0;
+  content: "8";
+}
+
+mjx-c.mjx-c30::before {
+  padding: 0.666em 0.5em 0.022em 0;
+  content: "0";
+}
+
+mjx-c.mjx-c35::before {
+  padding: 0.666em 0.5em 0.022em 0;
+  content: "5";
+}
+
+mjx-c.mjx-c1D439.TEX-I::before {
+  padding: 0.68em 0.749em 0 0;
+  content: "F";
+}
+
+mjx-c.mjx-c2245::before {
+  padding: 0.589em 0.778em 0 0;
+  content: "\2245";
+}
+
+mjx-c.mjx-c37::before {
+  padding: 0.676em 0.5em 0.022em 0;
+  content: "7";
+}
+
+mjx-c.mjx-c221A.TEX-S3::before {
+  padding: 1.45em 1.02em 0.95em 0;
+  content: "\221A";
+}
+
+mjx-c.mjx-c1D444.TEX-I::before {
+  padding: 0.704em 0.791em 0.194em 0;
+  content: "Q";
+}
+
+mjx-c.mjx-c1D447.TEX-I::before {
+  padding: 0.677em 0.704em 0 0;
+  content: "T";
+}
+
+mjx-c.mjx-c1D43F.TEX-I::before {
+  padding: 0.683em 0.681em 0 0;
+  content: "L";
+}
+
+mjx-c.mjx-c36::before {
+  padding: 0.666em 0.5em 0.022em 0;
+  content: "6";
+}
+
+mjx-c.mjx-c1D6FC.TEX-I::before {
+  padding: 0.442em 0.64em 0.011em 0;
+  content: "\3B1";
+}
+</style></head>
+<body class="wp-singular chapter-template-default single single-chapter postid-159 wp-theme-pressbooks-book wp-child-theme-pressbooks-malala js">
+<svg style="position: absolute; width: 0; height: 0;" width="0" height="0" xmlns="http://www.w3.org/2000/svg">
+	<defs>
+		<symbol id="icon-pressbooks" fill="currentColor" viewBox="0 0 45 44">
+			<path d="M44.195 41.872c0 .745-.618 1.346-1.377 1.346H1.377C.617 43.219 0 42.617 0 41.872V1.347C0 .604.618 0 1.377 0h41.44c.76 0 1.378.604 1.378 1.347v40.525zM15.282 10.643h-5.21v21.43h3.304V24h1.906c1.435 0 2.656-.5 3.665-1.504 1.008-1.004 1.513-2.213 1.513-3.626v-3.113c0-1.47-.444-2.678-1.33-3.625-.956-.993-2.24-1.489-3.848-1.489zm1.977 5.165h-.001v3.131c0 .513-.184.952-.55 1.318a1.826 1.826 0 0 1-1.338.547h-1.994v-6.86h1.995c.571 0 1.029.171 1.372.513.344.342.516.792.516 1.35zm5.84 16.265h6.118c.828 0 1.662-.25 2.502-.752a4.642 4.642 0 0 0 1.73-1.779c.526-.945.788-2.097.788-3.455 0-.545-.04-1.043-.122-1.486-.163-.868-.414-1.575-.751-2.122-.513-.81-1.137-1.352-1.871-1.625a3.325 3.325 0 0 0 1.154-.839c.78-.866 1.173-2.018 1.173-3.455 0-.876-.105-1.635-.315-2.274-.386-1.198-1.027-2.08-1.925-2.652-1.049-.672-2.225-1.008-3.531-1.008h-4.95v21.447zm3.568-12.69v-5.475h1.382c.652 0 1.184.212 1.592.634.443.456.665 1.13.665 2.018 0 .537-.065.987-.193 1.352-.35.982-1.039 1.471-2.064 1.471h-1.382zm0 9.493v-6.397h1.382c.815 0 1.433.25 1.853.751.466.549.7 1.42.7 2.617 0 .502-.075.948-.227 1.335-.432 1.13-1.208 1.694-2.326 1.694h-1.382z"></path>
+		</symbol>
+		<symbol id="logo-pressbooks" viewBox="0 0 265 40">
+			<path fill="#000" d="M51.979 1.754c2.75 0 4.942.868 6.579 2.602 1.514 1.656 2.272 3.768 2.272 6.34v5.442c0 2.472-.862 4.586-2.587 6.34-1.724 1.754-3.813 2.631-6.264 2.631H48.72v14.114h-5.651V1.754h8.91zm3.38 9.03c0-.977-.296-1.764-.882-2.364-.588-.597-1.371-.896-2.348-.896H48.72v11.99h3.409c.897 0 1.66-.32 2.287-.957a3.163 3.163 0 0 0 .942-2.303v-5.47zM74.255 1.754c3.149 0 5.462.868 6.937 2.602 1.295 1.516 1.943 3.63 1.943 6.34v5.442c0 2.652-1.006 4.893-3.02 6.727L84.3 39.222h-6.112l-3.425-14.114h-3.767v14.114h-5.651V1.754h8.91zm3.379 9.03c0-2.173-1.076-3.259-3.23-3.259h-3.408v11.99h3.409c.897 0 1.66-.32 2.287-.957a3.163 3.163 0 0 0 .942-2.302v-5.472zM89.145 39.22V1.724h16.087v5.681H94.796v10.227h7.625v5.682h-7.625V33.54h10.436v5.68zM127.808 29.892c.04 2.61-.639 4.843-2.034 6.697-.917 1.256-2.213 2.143-3.887 2.661-.897.278-1.944.418-3.14.418-2.212 0-4.047-.548-5.5-1.645-1.217-.896-2.179-2.117-2.886-3.661-.707-1.544-1.121-3.315-1.24-5.308l5.381-.388c.239 2.185.817 3.768 1.735 4.749.676.74 1.455 1.092 2.332 1.052 1.237-.039 2.223-.648 2.96-1.826.38-.578.569-1.407.569-2.485 0-1.555-.708-3.103-2.124-4.64l-5.024-4.758c-1.873-1.815-3.2-3.442-3.976-4.879-.837-1.615-1.257-3.37-1.257-5.267 0-3.411 1.146-5.995 3.438-7.75 1.415-1.057 3.17-1.586 5.263-1.586 2.014 0 3.739.447 5.173 1.346 1.116.697 2.018 1.672 2.706 2.93.687 1.256 1.101 2.701 1.24 4.335l-5.411.987c-.16-1.536-.598-2.73-1.317-3.589-.519-.616-1.266-.926-2.242-.926-1.037 0-1.823.459-2.362 1.374-.438.738-.658 1.656-.658 2.752 0 1.715.736 3.458 2.213 5.233.557.678 1.395 1.476 2.512 2.391 1.316 1.096 2.182 1.865 2.602 2.303 1.395 1.397 2.471 2.772 3.229 4.126.358.639.647 1.227.867 1.766.54 1.334.818 2.531.838 3.588zM150.383 29.892c.04 2.61-.637 4.843-2.032 6.697-.917 1.256-2.213 2.143-3.889 2.661-.897.278-1.944.418-3.138.418-2.213 0-4.049-.548-5.503-1.645-1.215-.896-2.178-2.117-2.885-3.661-.707-1.544-1.121-3.315-1.24-5.308l5.383-.388c.238 2.185.817 3.768 1.733 4.749.676.74 1.454 1.092 2.331 1.052 1.236-.039 2.223-.648 2.96-1.826.38-.578.57-1.407.57-2.485 0-1.555-.71-3.103-2.125-4.64l-5.024-4.758c-1.872-1.815-3.199-3.442-3.976-4.879-.838-1.616-1.256-3.372-1.256-5.268 0-3.412 1.146-5.995 3.44-7.75 1.414-1.058 3.168-1.587 5.262-1.587 2.013 0 3.737.448 5.173 1.346 1.116.698 2.018 1.673 2.706 2.93.688 1.257 1.102 2.702 1.242 4.336l-5.412.986c-.16-1.535-.599-2.73-1.316-3.588-.52-.616-1.266-.927-2.244-.927-1.036 0-1.823.46-2.362 1.374-.438.739-.658 1.656-.658 2.752 0 1.715.737 3.458 2.213 5.234.556.677 1.395 1.476 2.51 2.391 1.317 1.096 2.184 1.865 2.603 2.303 1.395 1.396 2.472 2.772 3.23 4.126.358.638.649 1.226.867 1.765.538 1.336.817 2.533.837 3.59zM155.077 39.22V1.724h8.463c2.231 0 4.245.588 6.04 1.764 1.535.998 2.631 2.543 3.29 4.636.359 1.117.538 2.442.538 3.977 0 2.512-.67 4.526-2.004 6.04a5.674 5.674 0 0 1-1.973 1.465c1.256.479 2.321 1.426 3.198 2.84.579.958 1.008 2.193 1.286 3.709.14.778.21 1.644.21 2.601 0 2.372-.449 4.386-1.345 6.04a8.075 8.075 0 0 1-2.96 3.11c-1.436.878-2.862 1.317-4.276 1.317h-10.467v-.001zm6.1-22.186h2.363c1.754 0 2.93-.856 3.528-2.57.219-.64.328-1.426.328-2.364 0-1.555-.379-2.73-1.137-3.53-.697-.736-1.605-1.105-2.72-1.105h-2.363v9.57zm0 16.595h2.363c1.912 0 3.239-.986 3.977-2.96.258-.676.387-1.455.387-2.332 0-2.092-.398-3.618-1.197-4.575-.717-.877-1.774-1.316-3.169-1.316h-2.363v11.183h.001zM187.88 1.276c2.491 0 4.607.877 6.353 2.631 1.743 1.754 2.616 3.868 2.616 6.34v20.452c0 2.491-.878 4.61-2.631 6.353-1.756 1.745-3.87 2.616-6.34 2.616-2.492 0-4.604-.877-6.34-2.631-1.734-1.753-2.602-3.866-2.602-6.34v-20.45c0-2.492.877-4.61 2.632-6.354 1.754-1.744 3.859-2.617 6.312-2.617zm3.078 8.85c0-.897-.313-1.66-.94-2.287a3.12 3.12 0 0 0-2.29-.941c-.896 0-1.664.314-2.302.941a3.085 3.085 0 0 0-.958 2.288v20.512c0 .898.319 1.66.958 2.287a3.17 3.17 0 0 0 2.302.943 3.12 3.12 0 0 0 2.29-.943c.627-.627.94-1.389.94-2.287V10.127zM210.663 1.276c2.49 0 4.61.877 6.353 2.631 1.746 1.754 2.617 3.868 2.617 6.34v20.452c0 2.491-.877 4.61-2.631 6.353-1.754 1.745-3.868 2.616-6.34 2.616-2.492 0-4.605-.877-6.34-2.631-1.733-1.753-2.602-3.866-2.602-6.34v-20.45c0-2.492.877-4.61 2.632-6.354 1.754-1.744 3.859-2.617 6.31-2.617zm3.08 8.85c0-.897-.316-1.66-.943-2.287s-1.39-.941-2.288-.941c-.898 0-1.665.314-2.302.941a3.09 3.09 0 0 0-.958 2.288v20.512c0 .898.32 1.66.958 2.287a3.166 3.166 0 0 0 2.302.943c.899 0 1.66-.315 2.288-.943.627-.627.943-1.389.943-2.287V10.127zM230.247 27.334V39.22h-5.652V1.723h5.652V15.09l6.907-13.366h6.025l-7.735 15.295 9.073 22.201h-6.644l-5.935-15.224zM264.784 29.892c.041 2.61-.637 4.843-2.032 6.697-.916 1.256-2.213 2.143-3.889 2.661-.896.278-1.943.418-3.138.418-2.213 0-4.048-.548-5.502-1.645-1.216-.896-2.178-2.117-2.886-3.661-.708-1.545-1.12-3.315-1.242-5.308l5.384-.388c.238 2.185.817 3.768 1.733 4.749.676.74 1.454 1.092 2.331 1.052 1.236-.039 2.223-.648 2.96-1.826.38-.578.57-1.407.57-2.485 0-1.555-.71-3.103-2.125-4.64l-5.024-4.758c-1.872-1.815-3.199-3.442-3.976-4.879-.838-1.616-1.258-3.372-1.258-5.268 0-3.412 1.147-5.995 3.44-7.75 1.415-1.058 3.169-1.587 5.263-1.587 2.012 0 3.737.448 5.173 1.346 1.115.698 2.018 1.673 2.705 2.93.688 1.257 1.102 2.702 1.242 4.336l-5.411.986c-.16-1.535-.6-2.73-1.316-3.588-.52-.616-1.266-.927-2.244-.927-1.036 0-1.823.46-2.362 1.374-.438.739-.658 1.656-.658 2.752 0 1.715.736 3.458 2.213 5.234.555.677 1.395 1.476 2.51 2.391 1.317 1.096 2.184 1.865 2.602 2.303 1.395 1.396 2.473 2.772 3.23 4.126.359.638.65 1.226.868 1.765.54 1.336.82 2.533.84 3.59z"></path>
+			<path fill="#B01109" d="M39.549 37.515c0 .667-.553 1.205-1.232 1.205H1.232A1.217 1.217 0 0 1 0 37.515V1.25C0 .585.553.045 1.232.045h37.083c.681 0 1.234.54 1.234 1.205v36.265z"></path>
+			<path fill="#EDEDED" d="M13.648 10.504c1.44 0 2.588.444 3.444 1.332.793.848 1.19 1.93 1.19 3.245v2.786c0 1.264-.452 2.346-1.354 3.244-.903.898-1.996 1.346-3.28 1.346h-1.705v7.225H8.986V10.504h4.662zm1.77 4.622c0-.5-.155-.903-.462-1.209-.307-.305-.717-.458-1.228-.458h-1.785v6.138h1.784c.468 0 .868-.163 1.197-.49.328-.327.492-.72.492-1.179v-2.802h.002zM20.644 29.682V10.489h4.429c1.169 0 2.222.3 3.16.902.803.511 1.377 1.301 1.722 2.374.188.57.282 1.25.282 2.034 0 1.286-.35 2.317-1.05 3.092a2.976 2.976 0 0 1-1.032.75c.657.245 1.215.73 1.674 1.455.302.49.526 1.123.672 1.899.073.397.11.842.11 1.33 0 1.215-.235 2.245-.705 3.092a4.154 4.154 0 0 1-1.55 1.591c-.75.45-1.497.674-2.238.674h-5.474zm3.193-11.356h1.236c.918 0 1.534-.438 1.847-1.317.115-.327.172-.73.172-1.21 0-.795-.197-1.397-.595-1.806-.365-.377-.84-.567-1.424-.567h-1.236v4.9zm0 8.494h1.236c1 0 1.695-.505 2.081-1.515.136-.347.204-.746.204-1.195 0-1.072-.21-1.85-.626-2.342-.376-.45-.93-.672-1.66-.672h-1.235v5.724z"></path>
+		</symbol>
+		<symbol id="arrow-down" fill="currentColor" viewBox="0 0 512 512"><path d="M424 259c-6 0-11 2-16 6L278 393V1c0-12-10-22-23-22-12 0-22 10-22 22v392L103 265c-5-4-11-6-16-6-6 0-12 2-16 6-9 9-9 23 0 32l168 166c10 9 23 9 32 0l170-166c9-9 9-23 0-32-4-4-10-6-17-6"></path></symbol>
+		<symbol id="arrow-left" fill="currentColor" viewBox="0 10 512 420"><path d="M220 45c0 6-3 12-7 17L79 200h410c12 0 23 11 23 25 0 13-11 24-23 24H79l134 138c4 5 7 11 7 17 0 7-3 13-7 18-10 9-24 9-33 0L7 242c-9-10-9-25 0-34L180 26c9-9 23-9 33 0 4 5 7 11 7 19"></path></symbol>
+		<symbol id="arrow-right" fill="currentColor" viewBox="0 0 512 410"><path d="M291 32c0 6 3 12 7 17l133 135H23c-13 0-23 11-23 24s10 24 23 24h408L298 367c-4 4-7 10-7 16s3 12 7 17c10 9 24 9 33 0l173-176c9-9 9-23 0-33L331 15c-9-10-23-10-33 0-4 4-7 10-7 17"></path></symbol>
+		<symbol id="arrow-up" fill="currentColor" viewBox="20 0 430 492"><path d="M424 189c-6 0-11-2-16-6L278 55v392c0 12-10 22-23 22-12 0-22-10-22-22V55L103 183c-5 4-11 6-16 6-6 0-12-2-16-6-9-9-9-23 0-32L239-15c10-9 23-9 32 0l170 166c9 9 9 23 0 32-4 4-10 6-17 6"></path></symbol>
+		<symbol id="book" fill="currentColor" viewBox="0 0 512 512"><path d="M484 437H284c-7 0-14 7-14 15h-28c0-8-7-15-14-15H28V110h15v285c0 8 6 14 14 14h52c24 0 47-4 69-11 6-2 12-3 19-3 16 0 31 6 42 17l7 7c5 5 15 5 20 0l7-7c11-11 26-17 42-17 7 0 13 1 19 3 22 7 45 11 69 11h52c8 0 14-6 14-14V110h15zM71 82h29v227c0 8 6 15 14 15 39 0 75 16 101 44-15-3-31-2-46 3-19 6-39 9-60 9H71zm57-85c51 6 95 39 114 88v271c-28-34-69-56-114-60zm142 91l3-3c11-11 26-17 42-17 7 0 13 1 19 3 22 7 45 11 69 11h38v298h-38c-21 0-41-3-60-9-9-3-18-5-28-5-16 0-31 4-45 12zm228-6h-29V68c0-8-6-15-14-15h-52c-21 0-41-3-60-9-9-3-18-5-28-5-20 0-39 7-54 19-28-55-85-90-147-90-8 0-14 6-14 14v71H57c-8 0-14 7-14 15v14H14C6 82 0 88 0 96v356c0 7 6 14 14 14h199c0 8 7 14 15 14h56c8 0 15-6 15-14h199c8 0 14-7 14-14V96c0-8-6-14-14-14z"></path></symbol>
+		<symbol id="cc-by" fill="currentColor" viewBox="0 0 512 512"><path d="M256 134c-23 0-34-12-34-35s11-35 34-35 35 12 35 35-12 35-35 35m50 13c5 0 9 2 11 4 4 4 6 7 6 12v100h-29v120h-76V263h-29V163c0-5 2-8 6-12 2-2 6-4 11-4h100M256-22c68 0 126 24 174 72s72 106 72 174-24 125-72 174c-48 48-106 72-174 72s-125-24-174-72c-48-49-72-106-72-174S34 98 82 50c49-48 106-72 174-72m0 447c55 0 103-20 142-59s59-87 59-142c0-56-20-103-59-142s-87-59-142-59-103 20-142 59-59 86-59 142c0 55 20 103 59 142s87 59 142 59"></path></symbol>
+		<symbol id="cc-nc-eu" fill="currentColor" viewBox="0 0 512 512"><path d="M256-22c68 0 126 24 174 72s72 106 72 174-24 125-72 174c-48 48-106 72-174 72s-125-24-174-72c-48-49-72-106-72-174S34 98 82 50c49-48 106-72 174-72M67 158c-8 22-12 43-12 66 0 55 20 103 59 142s87 59 142 59c38 0 72-10 103-28 31-19 55-45 73-77l-126-55h-89c4 12 8 22 13 29 13 13 31 20 54 20 15 0 31-3 47-10l9 46c-19 10-40 15-64 15-43 0-77-15-100-47-11-15-19-33-23-53h-27v-30h22v-7c0-1 1-3 1-6s1-5 1-6h-24v-29h5l-64-29m249 58l135 59c4-16 6-33 6-51 0-56-20-103-59-142s-87-59-142-59c-35 0-67 8-97 25-29 16-54 38-72 66l81 36c3-5 7-11 14-19 25-28 56-42 94-42 24 0 45 4 63 12l-12 47c-14-7-29-10-45-10-22 0-39 7-52 23-3 3-6 8-8 14l29 12h70v29h-5"></path></symbol>
+		<symbol id="cc-nc-jp" fill="currentColor" viewBox="0 0 512 512"><path d="M256-22c68 0 126 24 174 72s72 106 72 174-24 125-72 174c-48 48-106 72-174 72s-125-24-174-72c-48-49-72-106-72-174S34 98 82 50c49-48 106-72 174-72M65 165c-7 18-10 38-10 59 0 55 20 103 59 142s87 59 142 59c36 0 69-9 100-27 30-18 54-42 72-72l-78-34v34h-64v56h-61v-56h-63v-37h63v-19l-6-12h-57v-38h27L65 165m221 124h57l-54-25-3 6v19m64-52l99 44c5-19 8-39 8-57 0-56-20-103-59-142s-87-59-142-59c-36 0-69 9-99 26-30 18-54 41-72 71l81 35-28-50h66l39 85 23 10 42-95h66l-63 115h39v17"></path></symbol>
+		<symbol id="cc-nc" fill="currentColor" viewBox="0 0 512 512"><path d="M256-22c68 0 126 24 174 72s72 106 72 174-24 125-72 174c-48 48-106 72-174 72s-125-24-174-72c-48-49-72-106-72-174S34 98 82 50c49-48 106-72 174-72M67 157c-8 22-12 44-12 67 0 55 20 103 59 142s87 59 142 59c38 0 72-10 103-29 32-19 56-44 73-76l-91-41c-3 16-11 29-24 38-13 10-27 16-44 18v37h-28v-37c-27 0-52-10-75-30l34-34c17 15 35 23 55 23 8 0 15-2 22-7 6-4 9-10 9-18 0-6-3-11-7-15l-24-11-29-13-39-16-124-57m259 63l124 55c4-15 7-32 7-51 0-56-20-103-59-142s-87-59-142-59c-35 0-67 8-96 25-30 16-54 38-72 66l93 42c4-12 12-22 24-31 11-8 24-12 40-13V74h28v38c24 2 44 9 62 23l-32 33c-15-10-29-15-43-15-8 0-15 2-19 4-7 4-10 9-10 16 0 3 1 5 2 6l31 14 22 9 40 18"></path></symbol>
+		<symbol id="cc-nd" fill="currentColor" viewBox="0 0 512 512"><path d="M167 208v-42h178v42H167m0 78v-42h178v42H167m89-308c68 0 126 24 174 72s72 106 72 174-24 125-72 174c-48 48-106 72-174 72s-125-24-174-72c-48-49-72-106-72-174S34 98 82 50c49-48 106-72 174-72m0 447c55 0 103-20 142-59s59-87 59-142c0-56-20-103-59-142s-87-59-142-59-103 20-142 59-59 86-59 142c0 55 20 103 59 142s87 59 142 59"></path></symbol>
+		<symbol id="cc-pd" fill="currentColor" viewBox="0 0 512 512"><path d="M256-22c68 0 126 24 174 72s72 106 72 174-24 125-72 174c-48 48-106 72-174 72s-125-24-174-72c-48-49-72-106-72-174S34 98 82 50c49-48 106-72 174-72M67 158c-8 22-12 43-12 66 0 55 20 103 59 142s87 59 142 59c38 0 72-10 103-28 31-19 55-45 73-77l-217-96c1 18 6 35 14 49 9 14 22 22 39 22 13 0 24-5 33-14l3-3 36 43c-1 1-3 2-5 4s-4 3-4 4c-21 15-45 22-70 22-29 0-56-10-81-30s-38-52-38-96c0-11 1-21 3-32l-78-35m158 18l226 99c4-16 6-33 6-51 0-56-20-103-59-142s-87-59-142-59c-35 0-67 8-97 25-29 16-54 38-72 66l76 34c22-35 55-52 100-52 30 0 56 9 77 28l-40 41-7-7c-8-5-17-8-27-8-18 0-31 9-41 26"></path></symbol>
+		<symbol id="cc-remix" fill="currentColor" viewBox="0 0 512 512"><path d="M417 228l5 2v70l-5 2-60 25-2 1-3-1-129-53-4-2-63 27-64-28v-62l60-25-1-1v-70l66-28 151 62v61l49 20m-70 81v-44h-1v-1l-113-46v44l113 47v-1l1 1m7-57l40-17-37-15-39 16 36 16m53 38v-43l-45 18v43l45-18M256-22c68 0 126 24 174 72s72 106 72 174-24 125-72 174c-48 48-106 72-174 72s-125-24-174-72c-48-49-72-106-72-174S34 98 82 50c49-48 106-72 174-72m0 447c55 0 103-20 142-59s59-87 59-142c0-56-20-103-59-142s-87-59-142-59-103 20-142 59-59 86-59 142c0 55 20 103 59 142s87 59 142 59"></path></symbol>
+		<symbol id="cc-sa" fill="currentColor" viewBox="0 0 512 512"><path d="M255 94c39 0 70 13 92 38 23 24 34 56 34 95 0 38-12 69-35 94-25 26-56 38-92 38-27 0-52-8-73-25-20-17-31-40-36-71h62c2 29 20 44 54 44 17 0 31-7 42-22 10-15 15-35 15-60 0-26-4-46-14-59-10-14-24-21-42-21-33 0-51 15-55 44h18l-49 48-48-48h18c5-31 18-54 37-70 20-17 44-25 72-25m1-116c68 0 126 24 174 72s72 106 72 174-24 125-72 174c-48 48-106 72-174 72s-125-24-174-72c-48-49-72-106-72-174S34 98 82 50c49-48 106-72 174-72m0 447c55 0 103-20 142-59s59-87 59-142c0-56-20-103-59-142s-87-59-142-59-103 20-142 59-59 86-59 142c0 55 20 103 59 142s87 59 142 59"></path></symbol>
+		<symbol id="cc-share" fill="currentColor" viewBox="0 0 512 512"><path d="M356 153c4 0 8 2 11 4 2 3 4 6 4 10v181c0 3-2 6-4 9-3 3-7 4-11 4H223c-4 0-7-1-10-4s-4-6-4-9v-53h-53c-4 0-7-2-10-4-2-3-4-7-4-11V100c0-4 1-7 3-9s5-4 10-5h135c3 0 6 1 9 4s4 6 4 10v53h53m-135 0h55v-40H169v154h40V167c0-4 1-7 4-10 1-1 4-2 8-4m122 182V180H236v155h107M256-22c68 0 126 24 174 72s72 106 72 174-24 125-72 174c-48 48-106 72-174 72s-125-24-174-72c-48-49-72-106-72-174S34 98 82 50c49-48 106-72 174-72m0 447c55 0 103-20 142-59s59-87 59-142c0-56-20-103-59-142s-87-59-142-59-103 20-142 59-59 86-59 142c0 55 20 103 59 142s87 59 142 59"></path></symbol>
+		<symbol id="cc-zero" fill="currentColor" viewBox="0 0 512 512"><path d="M256 82c37 0 63 13 78 41 16 28 23 61 23 101 0 39-7 72-23 100-15 27-41 41-78 41s-63-14-78-41c-16-28-23-61-23-100 0-40 7-73 23-101 15-28 41-41 78-41m-44 142c0 6 1 17 2 34l54-100c5-8 4-15-3-21-4-1-7-2-9-2-29 0-44 30-44 89m44 88c29 0 44-29 44-88 0-14-1-28-3-43l-60 104c-8 11-6 19 6 24 0 1 1 1 3 1 0 0 1 0 1 1 0 0 2 0 4 1h5m0-334c68 0 126 24 174 72s72 106 72 174-24 125-72 174c-48 48-106 72-174 72s-125-24-174-72c-48-49-72-106-72-174S34 98 82 50c49-48 106-72 174-72m0 447c55 0 103-20 142-59s59-87 59-142c0-56-20-103-59-142s-87-59-142-59-103 20-142 59-59 86-59 142c0 55 20 103 59 142s87 59 142 59"></path></symbol>
+		<symbol id="cc" fill="currentColor" viewBox="0 0 512 512"><path d="M253-22c68 0 126 23 174 70s73 104 75 172c0 68-23 127-70 175s-105 73-173 75c-68 0-126-23-175-70-48-48-73-105-74-173S32 100 79 52c48-48 106-73 174-74m6 440c53-1 99-21 136-59 38-38 56-84 56-138-1-54-21-100-59-137-39-37-85-55-138-55-54 1-100 21-137 59s-55 84-55 138c1 54 21 100 59 137s84 55 138 55m-63-153c13 0 23-7 29-21l29 16c-7 12-15 21-26 26-11 7-23 11-35 11-22 0-39-7-52-20-13-12-19-30-19-53s6-41 19-54 30-20 49-20c30 0 51 12 64 34l-32 16c-3-6-7-11-12-14s-10-4-14-4c-21 0-31 14-31 42 0 13 2 23 7 30 6 7 14 11 24 11m136 0c14 0 24-7 28-21l30 16c-6 11-15 20-25 26-11 7-23 11-36 11-22 0-39-7-51-20-13-12-20-30-20-53 0-22 7-40 20-54 12-13 29-20 50-20 28 0 49 12 61 34l-31 16c-3-6-7-11-12-14s-9-4-14-4c-21 0-32 14-32 42 0 12 3 22 8 30 6 7 14 11 24 11"></path></symbol>
+		<symbol id="graph" fill="currentColor" viewBox="0 0 512 512"><path d="M130 446c10 0 18-9 18-18V260c0-11-9-19-18-19H20c-10 0-17 9-17 19v167c0 10 8 18 17 18h110zM38 279h73v129H38zm163 167h110c10 0 18-9 18-18V11c0-11-9-19-18-19H201c-10 0-18 9-18 19v417c0 9 8 18 18 18zm18-417h73v379h-73zm273 60H382c-10 0-18 9-18 19v319c0 10 9 18 18 18h110c10 0 17-9 17-18V108c0-11-7-19-17-19zm-18 319h-73V126h73z"></path></symbol>
+		<symbol id="like" fill="currentColor" viewBox="0 0 512 512"><path d="M132 11c-34 0-68 12-93 38-52 51-52 135 0 186l198 197c6 7 18 7 25 0 66-65 132-131 198-197 51-51 51-134 0-186-52-51-135-51-187 0l-24 24-24-24c-26-26-59-38-93-38zm68 63l37 37c6 6 18 6 25 0l36-36c38-38 99-38 137 0 37 37 37 97 0 135-62 62-124 123-186 185L64 210c-38-38-38-98 0-136 40-36 99-38 136 0z"></path></symbol>
+		<symbol id="search" fill="currentColor" viewBox="0 0 512 512"><path d="M493 384L368 259c18-29 29-62 29-99 0-106-86-192-192-192S13 54 13 160s86 192 192 192c36 0 70-11 99-28l125 124c9 9 23 9 32 0l32-32c9-9 9-23 0-32zm-288-96c-71 0-128-57-128-128S134 32 205 32c70 0 128 57 128 128s-58 128-128 128z"></path></symbol>
+		<symbol id="share-books" fill="currentColor" viewBox="0 0 512 512"><path d="M240 188v36h36zm56-28h36l-36-36zM256-32C115-32 0 83 0 224s115 256 256 256 256-115 256-256S397-32 256-32zm40 256v104c0 9-7 16-16 16h-96c-9 0-16-7-16-16V184c0-9 7-16 16-16h56v3l4-3 52 52-3 4zm56-64v104c0 9-7 16-16 16h-24v-16h24v-88h-40c-9 0-16-7-16-16v-40h-40v32h-16v-32c0-9 7-16 16-16h56v3l4-3 52 52-3 4zm-128 64v-40h-40v144h96v-88h-40c-9 0-16-7-16-16z"></path></symbol>
+		<symbol id="speechbubble" fill="currentColor" viewBox="0 0 512 512"><path d="M375 169H123c-7 0-12-7-12-14 0-8 5-14 12-14h252c7 0 12 6 12 14 0 7-5 14-12 14zm-29 55c0-8-6-14-13-14H123c-7 0-12 6-12 14s5 14 12 14h210c7 0 13-6 13-14zm99 125h18c27 0 49-22 49-48V78c0-27-22-48-49-48H49C22 30 0 52 0 78v223c0 26 22 47 49 47h305l45 70zm16-291c13 0 23 10 23 23v224c0 13-10 23-23 23h-32l-31 48-31-48H51c-13 0-23-10-23-23V81c0-13 10-23 23-23z"></path></symbol>
+		<symbol id="twitter" fill="currentColor" viewBox="0 0 16 16"><path d="M12.6.75h2.454l-5.36 6.142L16 15.25h-4.937l-3.867-5.07-4.425 5.07H.316l5.733-6.57L0 .75h5.063l3.495 4.633L12.601.75Zm-.86 13.028h1.36L4.323 2.145H2.865z"></path></symbol>
+		<symbol id="twitter-icon" fill="currentColor" viewBox="0 0 1792 1792"><path d="M1408 610q-56 25-121 34 68-40 93-117-65 38-134 51-61-66-153-66-87 0-148.5 61.5t-61.5 148.5q0 29 5 48-129-7-242-65t-192-155q-29 50-29 106 0 114 91 175-47-1-100-26v2q0 75 50 133.5t123 72.5q-29 8-51 8-13 0-39-4 21 63 74.5 104t121.5 42q-116 90-261 90-26 0-50-3 148 94 322 94 112 0 210-35.5t168-95 120.5-137 75-162 24.5-168.5q0-18-1-27 63-45 105-109zm256-194v960q0 119-84.5 203.5t-203.5 84.5h-960q-119 0-203.5-84.5t-84.5-203.5v-960q0-119 84.5-203.5t203.5-84.5h960q119 0 203.5 84.5t84.5 203.5z"></path></symbol>
+		<symbol id="linkedin-icon" fill="currentColor" viewBox="0 0 16 16"><path d="M0 1.146C0 .513.526 0 1.175 0h13.65C15.474 0 16 .513 16 1.146v13.708c0 .633-.526 1.146-1.175 1.146H1.175C.526 16 0 15.487 0 14.854zm4.943 12.248V6.169H2.542v7.225zm-1.2-8.212c.837 0 1.358-.554 1.358-1.248-.015-.709-.52-1.248-1.342-1.248S2.4 3.226 2.4 3.934c0 .694.521 1.248 1.327 1.248zm4.908 8.212V9.359c0-.216.016-.432.08-.586.173-.431.568-.878 1.232-.878.869 0 1.216.662 1.216 1.634v3.865h2.401V9.25c0-2.22-1.184-3.252-2.764-3.252-1.274 0-1.845.7-2.165 1.193v.025h-.016l.016-.025V6.169h-2.4c.03.678 0 7.225 0 7.225z"></path></symbol>
+		<symbol id="youtube-icon" fill="currentColor" viewBox="0 0 16 16"><path d="M8.051 1.999h.089c.822.003 4.987.033 6.11.335a2.01 2.01 0 0 1 1.415 1.42c.101.38.172.883.22 1.402l.01.104.022.26.008.104c.065.914.073 1.77.074 1.957v.075c-.001.194-.01 1.108-.082 2.06l-.008.105-.009.104c-.05.572-.124 1.14-.235 1.558a2.01 2.01 0 0 1-1.415 1.42c-1.16.312-5.569.334-6.18.335h-.142c-.309 0-1.587-.006-2.927-.052l-.17-.006-.087-.004-.171-.007-.171-.007c-1.11-.049-2.167-.128-2.654-.26a2.01 2.01 0 0 1-1.415-1.419c-.111-.417-.185-.986-.235-1.558L.09 9.82l-.008-.104A31 31 0 0 1 0 7.68v-.123c.002-.215.01-.958.064-1.778l.007-.103.003-.052.008-.104.022-.26.01-.104c.048-.519.119-1.023.22-1.402a2.01 2.01 0 0 1 1.415-1.42c.487-.13 1.544-.21 2.654-.26l.17-.007.172-.006.086-.003.171-.007A100 100 0 0 1 7.858 2zM6.4 5.209v4.818l4.157-2.408z"></path></symbol>
+		<symbol id="github-icon" fill="currentColor" viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8"></path></symbol>
+		<symbol id="email" fill="currentColor" viewBox="0 0 16 16"><path d="M0 4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v.217l7 4.2 7-4.2V4a1 1 0 0 0-1-1zm13 2.383-4.708 2.825L15 11.105zm-.034 6.876-5.64-3.471L8 9.583l-1.326-.795-5.64 3.47A1 1 0 0 0 2 13h12a1 1 0 0 0 .966-.741M1 11.105l4.708-2.897L1 5.383z"></path></symbol>
+	</defs>
+</svg>
+<div id="page" class="site">
+		<a class="skip-link screen-reader-text" href="https://iastate.pressbooks.pub/quantitativegenetics/chapter/simulation-modeling/#content">Skip to content</a>
+		
+	<header class="header" role="banner">
+		<div class="header__container">
+			<div class="header__inside">
+				<div class="header__brand">
+										<a aria-label="Iowa State University Digital Press" href="https://iastate.pressbooks.pub/">
+						<img class="header__logo--img" src="./Chapter 13_ Simulation Modeling – Quantitative Genetics for Plant Breeding_files/ISU-Digital-Press_Left_Red.png" srcset="https://iastate.pressbooks.pub/app/uploads/2024/08/ISU-Digital-Press_Left_Red.png 300w, https://iastate.pressbooks.pub/app/uploads/2024/08/ISU-Digital-Press_Left_Red-65x12.png 65w, https://iastate.pressbooks.pub/app/uploads/2024/08/ISU-Digital-Press_Left_Red-225x41.png 225w" alt="Iowa State University Digital Press home">					</a>
+				</div>
+				<div class="header__nav">
+					<button class="header__nav-icon js-header-nav-toggle" aria-expanded="false" aria-controls="navigation">Menu<span class="header__nav-icon__icon"></span></button>
+					<nav aria-labelledby="primary-nav" class="js-header-nav" id="navigation">
+						<p id="primary-nav" class="screen-reader-text">Primary Navigation</p>
+						<ul id="nav-primary-menu" class="nav--primary">
+							<li class="nav--primary-item nav--primary-item-home"><a href="https://iastate.pressbooks.pub/quantitativegenetics">Home</a></li><li class="nav--primary-item nav--primary-item-read"><a href="https://iastate.pressbooks.pub/quantitativegenetics/front-matter/about/">Read</a></li><li class="nav--primary-item nav--primary-item-sign-in"><a href="https://iastate.pressbooks.pub/quantitativegenetics/wp-login.php?redirect_to=https%3A%2F%2Fiastate.pressbooks.pub%2Fquantitativegenetics%2Fchapter%2Fsimulation-modeling%2F">Sign in</a></li><li class="header__search js-search nav--primary-item nav--primary-item-search"><div class="header__search__form"><form role="search" method="get" class="search-form" action="https://iastate.pressbooks.pub/quantitativegenetics/">
+	<label>
+		<span class="screen-reader-text">Search in book:</span>
+		<input type="search" class="search-field" placeholder="Search in book …" value="" name="s">
+	</label>
+	<button type="submit" class="search-submit">
+		<svg class="icon--svg"><use href="#search"></use></svg>
+		<span class="screen-reader-text">Search</span>
+	</button>
+</form>
+</div></li>						</ul>
+					</nav>
+				</div>
+			</div>
+		</div>
+
+									<div class="reading-header">
+				<nav aria-labelledby="book-toc" class="reading-header__inside">
+					<p id="book-toc" class="screen-reader-text">Book Contents Navigation</p>
+											<div class="reading-header__toc dropdown">
+							<div class="reading-header__toc__title">
+				<button type="button" aria-expanded="false">
+					Contents
+					<svg role="presentation" focusable="false" class="arrow" width="13" height="8" viewBox="0 0 13 8" xmlns="http://www.w3.org/2000/svg"><path d="M6.255 8L0 0h12.51z" fill="currentColor" fill-rule="evenodd"></path></svg>
+				</button>
+				</div>
+							<div class="block-reading-toc" hidden="">
+								<ol class="toc">
+	<li id="toc-front-matter-22" class="toc__front-matter preface toc__front-matter--empty"><div class="toc__title__container"><p class="toc__title"><a href="https://iastate.pressbooks.pub/quantitativegenetics/front-matter/about/">About the PBEA Series</a></p></div></li>	<li id="toc-part-49" class="toc__part toc__part--full toc__parent"><ol class="toc__chapters"><li id="toc-chapter-54" class="toc__chapter standard toc__chapter--full"><div class="toc__title__container">
+				<span><p class="toc__title"><a href="https://iastate.pressbooks.pub/quantitativegenetics/chapter/gene-frequencies/">Chapter 1: Gene Frequencies</a></p><p class="toc__author">William Beavis; Kendall Lamkey; Anthony Assibi Mahama; and Walter Suza</p></span>
+				<button type="button" aria-expanded="false" aria-label="Toggle contents of &#39;Chapter 1: Gene FrequenciesWilliam Beavis; Kendall Lamkey; Anthony Assibi Mahama; and Walter Suza&#39;">
+					<svg viewBox="0 0 9 9" aria-hidden="true" focusable="false">
+						<rect class="vert" height="7" width="1" y="1" x="4"></rect>
+						<rect height="1" width="7" y="4" x="1"></rect>
+					</svg>
+				</button>
+				</div><ol class="toc__subsections" hidden=""><li class="toc__subsection"><a href="https://iastate.pressbooks.pub/quantitativegenetics/chapter/gene-frequencies/#chapter-54-section-1">Allelic and Genotypic Variation</a></li><li class="toc__subsection"><a href="https://iastate.pressbooks.pub/quantitativegenetics/chapter/gene-frequencies/#chapter-54-section-2">Hardy-Weinberg Equilibrium</a></li><li class="toc__subsection"><a href="https://iastate.pressbooks.pub/quantitativegenetics/chapter/gene-frequencies/#chapter-54-section-3">Factors Affecting Allele Frequency</a></li><li class="toc__subsection"><a href="https://iastate.pressbooks.pub/quantitativegenetics/chapter/gene-frequencies/#chapter-54-section-4">Selection</a></li><li class="toc__subsection"><a href="https://iastate.pressbooks.pub/quantitativegenetics/chapter/gene-frequencies/#chapter-54-section-5">References</a></li></ol></li><li id="toc-chapter-58" class="toc__chapter standard toc__chapter--full"><div class="toc__title__container">
+				<span><p class="toc__title"><a href="https://iastate.pressbooks.pub/quantitativegenetics/chapter/linkage-2/">Chapter 2: Linkage</a></p><p class="toc__author">William Beavis; Anthony Assibi Mahama; and Walter Suza</p></span>
+				<button type="button" aria-expanded="false" aria-label="Toggle contents of &#39;Chapter 2: LinkageWilliam Beavis; Anthony Assibi Mahama; and Walter Suza&#39;">
+					<svg viewBox="0 0 9 9" aria-hidden="true" focusable="false">
+						<rect class="vert" height="7" width="1" y="1" x="4"></rect>
+						<rect height="1" width="7" y="4" x="1"></rect>
+					</svg>
+				</button>
+				</div><ol class="toc__subsections" hidden=""><li class="toc__subsection"><a href="https://iastate.pressbooks.pub/quantitativegenetics/chapter/linkage-2/#chapter-58-section-1">Disequilibrium</a></li><li class="toc__subsection"><a href="https://iastate.pressbooks.pub/quantitativegenetics/chapter/linkage-2/#chapter-58-section-2">Dissipation of Disequilibrium</a></li><li class="toc__subsection"><a href="https://iastate.pressbooks.pub/quantitativegenetics/chapter/linkage-2/#chapter-58-section-3">Chi-Square Statistic</a></li><li class="toc__subsection"><a href="https://iastate.pressbooks.pub/quantitativegenetics/chapter/linkage-2/#chapter-58-section-4">References</a></li></ol></li><li id="toc-chapter-64" class="toc__chapter standard toc__chapter--full"><div class="toc__title__container">
+				<span><p class="toc__title"><a href="https://iastate.pressbooks.pub/quantitativegenetics/chapter/resemblance-between-relatives/">Chapter 3: Resemblance Between Relatives</a></p><p class="toc__author">William Beavis; Kendall Lamkey; Anthony Assibi Mahama; and Walter Suza</p></span>
+				<button type="button" aria-expanded="false" aria-label="Toggle contents of &#39;Chapter 3: Resemblance Between RelativesWilliam Beavis; Kendall Lamkey; Anthony Assibi Mahama; and Walter Suza&#39;">
+					<svg viewBox="0 0 9 9" aria-hidden="true" focusable="false">
+						<rect class="vert" height="7" width="1" y="1" x="4"></rect>
+						<rect height="1" width="7" y="4" x="1"></rect>
+					</svg>
+				</button>
+				</div><ol class="toc__subsections" hidden=""><li class="toc__subsection"><a href="https://iastate.pressbooks.pub/quantitativegenetics/chapter/resemblance-between-relatives/#chapter-64-section-1">Background</a></li><li class="toc__subsection"><a href="https://iastate.pressbooks.pub/quantitativegenetics/chapter/resemblance-between-relatives/#chapter-64-section-2">Coefficient of Inbreeding</a></li><li class="toc__subsection"><a href="https://iastate.pressbooks.pub/quantitativegenetics/chapter/resemblance-between-relatives/#chapter-64-section-3">Coefficient of Parentage</a></li><li class="toc__subsection"><a href="https://iastate.pressbooks.pub/quantitativegenetics/chapter/resemblance-between-relatives/#chapter-64-section-4">Self Pollination</a></li><li class="toc__subsection"><a href="https://iastate.pressbooks.pub/quantitativegenetics/chapter/resemblance-between-relatives/#chapter-64-section-5">Full-Sibing</a></li><li class="toc__subsection"><a href="https://iastate.pressbooks.pub/quantitativegenetics/chapter/resemblance-between-relatives/#chapter-64-section-6">References</a></li></ol></li><li id="toc-chapter-72" class="toc__chapter standard toc__chapter--full"><div class="toc__title__container">
+				<span><p class="toc__title"><a href="https://iastate.pressbooks.pub/quantitativegenetics/chapter/measures-of-similarity/">Chapter 4: Measures of Similarity</a></p><p class="toc__author">William Beavis; Mark Newell; Anthony Assibi Mahama; and Walter Suza</p></span>
+				<button type="button" aria-expanded="false" aria-label="Toggle contents of &#39;Chapter 4: Measures of SimilarityWilliam Beavis; Mark Newell; Anthony Assibi Mahama; and Walter Suza&#39;">
+					<svg viewBox="0 0 9 9" aria-hidden="true" focusable="false">
+						<rect class="vert" height="7" width="1" y="1" x="4"></rect>
+						<rect height="1" width="7" y="4" x="1"></rect>
+					</svg>
+				</button>
+				</div><ol class="toc__subsections" hidden=""><li class="toc__subsection"><a href="https://iastate.pressbooks.pub/quantitativegenetics/chapter/measures-of-similarity/#chapter-72-section-1">Population Structure Based on Pedigree Information</a></li><li class="toc__subsection"><a href="https://iastate.pressbooks.pub/quantitativegenetics/chapter/measures-of-similarity/#chapter-72-section-2">Population Structure Based on Markers</a></li><li class="toc__subsection"><a href="https://iastate.pressbooks.pub/quantitativegenetics/chapter/measures-of-similarity/#chapter-72-section-3">Measures of Distance</a></li><li class="toc__subsection"><a href="https://iastate.pressbooks.pub/quantitativegenetics/chapter/measures-of-similarity/#chapter-72-section-4">Principal Component Analysis</a></li><li class="toc__subsection"><a href="https://iastate.pressbooks.pub/quantitativegenetics/chapter/measures-of-similarity/#chapter-72-section-5">Cluster Analysis</a></li><li class="toc__subsection"><a href="https://iastate.pressbooks.pub/quantitativegenetics/chapter/measures-of-similarity/#chapter-72-section-6">Hierarchical Clustering</a></li></ol></li><li id="toc-chapter-83" class="toc__chapter standard toc__chapter--full"><div class="toc__title__container">
+				<span><p class="toc__title"><a href="https://iastate.pressbooks.pub/quantitativegenetics/chapter/gene-effects/">Chapter 5: Gene Effects</a></p><p class="toc__author">William Beavis; Kendall Lamkey; Katherine Espinosa; Anthony Assibi Mahama; and Walter Suza</p></span>
+				<button type="button" aria-expanded="false" aria-label="Toggle contents of &#39;Chapter 5: Gene EffectsWilliam Beavis; Kendall Lamkey; Katherine Espinosa; Anthony Assibi Mahama; and Walter Suza&#39;">
+					<svg viewBox="0 0 9 9" aria-hidden="true" focusable="false">
+						<rect class="vert" height="7" width="1" y="1" x="4"></rect>
+						<rect height="1" width="7" y="4" x="1"></rect>
+					</svg>
+				</button>
+				</div><ol class="toc__subsections" hidden=""><li class="toc__subsection"><a href="https://iastate.pressbooks.pub/quantitativegenetics/chapter/gene-effects/#chapter-83-section-1">Linear Models for Phenotypic Values</a></li><li class="toc__subsection"><a href="https://iastate.pressbooks.pub/quantitativegenetics/chapter/gene-effects/#chapter-83-section-2">Average Genetic (Allelic) Effects</a></li><li class="toc__subsection"><a href="https://iastate.pressbooks.pub/quantitativegenetics/chapter/gene-effects/#chapter-83-section-3">Breeding Value</a></li><li class="toc__subsection"><a href="https://iastate.pressbooks.pub/quantitativegenetics/chapter/gene-effects/#chapter-83-section-4">Epistasis</a></li><li class="toc__subsection"><a href="https://iastate.pressbooks.pub/quantitativegenetics/chapter/gene-effects/#chapter-83-section-5">Single Locus Genotype</a></li><li class="toc__subsection"><a href="https://iastate.pressbooks.pub/quantitativegenetics/chapter/gene-effects/#chapter-83-section-6">References</a></li></ol></li><li id="toc-chapter-91" class="toc__chapter standard toc__chapter--full"><div class="toc__title__container">
+				<span><p class="toc__title"><a href="https://iastate.pressbooks.pub/quantitativegenetics/chapter/components-of-variance/">Chapter 6: Components of Variance</a></p><p class="toc__author">William Beavis; Kendall Lamkey; Katherine Espinosa; Anthony Assibi Mahama; and Walter Suza</p></span>
+				<button type="button" aria-expanded="false" aria-label="Toggle contents of &#39;Chapter 6: Components of VarianceWilliam Beavis; Kendall Lamkey; Katherine Espinosa; Anthony Assibi Mahama; and Walter Suza&#39;">
+					<svg viewBox="0 0 9 9" aria-hidden="true" focusable="false">
+						<rect class="vert" height="7" width="1" y="1" x="4"></rect>
+						<rect height="1" width="7" y="4" x="1"></rect>
+					</svg>
+				</button>
+				</div><ol class="toc__subsections" hidden=""><li class="toc__subsection"><a href="https://iastate.pressbooks.pub/quantitativegenetics/chapter/components-of-variance/#chapter-91-section-1">Phenotypic Components of Variance</a></li><li class="toc__subsection"><a href="https://iastate.pressbooks.pub/quantitativegenetics/chapter/components-of-variance/#chapter-91-section-2">Genetic Components of Variance</a></li><li class="toc__subsection"><a href="https://iastate.pressbooks.pub/quantitativegenetics/chapter/components-of-variance/#chapter-91-section-3">Deriving Variance Components</a></li><li class="toc__subsection"><a href="https://iastate.pressbooks.pub/quantitativegenetics/chapter/components-of-variance/#chapter-91-section-4">Influence of Epistasis</a></li><li class="toc__subsection"><a href="https://iastate.pressbooks.pub/quantitativegenetics/chapter/components-of-variance/#chapter-91-section-5">References</a></li></ol></li><li id="toc-chapter-93" class="toc__chapter standard toc__chapter--full"><div class="toc__title__container">
+				<span><p class="toc__title"><a href="https://iastate.pressbooks.pub/quantitativegenetics/chapter/estimates-of-variance/">Chapter 7: Estimates of Variance</a></p><p class="toc__author">William Beavis; Kendall Lamkey; Katherine Espinosa; Anthony Assibi Mahama; and Walter Suza</p></span>
+				<button type="button" aria-expanded="false" aria-label="Toggle contents of &#39;Chapter 7: Estimates of VarianceWilliam Beavis; Kendall Lamkey; Katherine Espinosa; Anthony Assibi Mahama; and Walter Suza&#39;">
+					<svg viewBox="0 0 9 9" aria-hidden="true" focusable="false">
+						<rect class="vert" height="7" width="1" y="1" x="4"></rect>
+						<rect height="1" width="7" y="4" x="1"></rect>
+					</svg>
+				</button>
+				</div><ol class="toc__subsections" hidden=""><li class="toc__subsection"><a href="https://iastate.pressbooks.pub/quantitativegenetics/chapter/estimates-of-variance/#chapter-93-section-1">Covariance of Relatives</a></li><li class="toc__subsection"><a href="https://iastate.pressbooks.pub/quantitativegenetics/chapter/estimates-of-variance/#chapter-93-section-2">F2 and F3 Progenies</a></li><li class="toc__subsection"><a href="https://iastate.pressbooks.pub/quantitativegenetics/chapter/estimates-of-variance/#chapter-93-section-3">Bi-Parental Progenies</a></li><li class="toc__subsection"><a href="https://iastate.pressbooks.pub/quantitativegenetics/chapter/estimates-of-variance/#chapter-93-section-4">Using the Algorithm</a></li><li class="toc__subsection"><a href="https://iastate.pressbooks.pub/quantitativegenetics/chapter/estimates-of-variance/#chapter-93-section-5">References</a></li></ol></li><li id="toc-chapter-104" class="toc__chapter standard toc__chapter--full"><div class="toc__title__container">
+				<span><p class="toc__title"><a href="https://iastate.pressbooks.pub/quantitativegenetics/chapter/mating-designs/">Chapter 8: Mating Designs</a></p><p class="toc__author">William Beavis; Kendall Lamkey; Anthony Assibi Mahama; and Walter Suza</p></span>
+				<button type="button" aria-expanded="false" aria-label="Toggle contents of &#39;Chapter 8: Mating DesignsWilliam Beavis; Kendall Lamkey; Anthony Assibi Mahama; and Walter Suza&#39;">
+					<svg viewBox="0 0 9 9" aria-hidden="true" focusable="false">
+						<rect class="vert" height="7" width="1" y="1" x="4"></rect>
+						<rect height="1" width="7" y="4" x="1"></rect>
+					</svg>
+				</button>
+				</div><ol class="toc__subsections" hidden=""><li class="toc__subsection"><a href="https://iastate.pressbooks.pub/quantitativegenetics/chapter/mating-designs/#chapter-104-section-1">Design Setup</a></li><li class="toc__subsection"><a href="https://iastate.pressbooks.pub/quantitativegenetics/chapter/mating-designs/#chapter-104-section-2">Diallel Crosses</a></li><li class="toc__subsection"><a href="https://iastate.pressbooks.pub/quantitativegenetics/chapter/mating-designs/#chapter-104-section-3">F-Tests</a></li><li class="toc__subsection"><a href="https://iastate.pressbooks.pub/quantitativegenetics/chapter/mating-designs/#chapter-104-section-4">Gardner and Eberhart Diallel Analysis II</a></li><li class="toc__subsection"><a href="https://iastate.pressbooks.pub/quantitativegenetics/chapter/mating-designs/#chapter-104-section-5">North Carolina Design I</a></li><li class="toc__subsection"><a href="https://iastate.pressbooks.pub/quantitativegenetics/chapter/mating-designs/#chapter-104-section-6">North Carolina Design II</a></li><li class="toc__subsection"><a href="https://iastate.pressbooks.pub/quantitativegenetics/chapter/mating-designs/#chapter-104-section-7">North Carolina Design III</a></li><li class="toc__subsection"><a href="https://iastate.pressbooks.pub/quantitativegenetics/chapter/mating-designs/#chapter-104-section-8">F-Tests</a></li><li class="toc__subsection"><a href="https://iastate.pressbooks.pub/quantitativegenetics/chapter/mating-designs/#chapter-104-section-9">References</a></li></ol></li><li id="toc-chapter-108" class="toc__chapter standard toc__chapter--full"><div class="toc__title__container">
+				<span><p class="toc__title"><a href="https://iastate.pressbooks.pub/quantitativegenetics/chapter/selection-response/">Chapter 9: Selection Response</a></p><p class="toc__author">William Beavis; Kendall Lamkey; Anthony Assibi Mahama; and Walter Suza</p></span>
+				<button type="button" aria-expanded="false" aria-label="Toggle contents of &#39;Chapter 9: Selection ResponseWilliam Beavis; Kendall Lamkey; Anthony Assibi Mahama; and Walter Suza&#39;">
+					<svg viewBox="0 0 9 9" aria-hidden="true" focusable="false">
+						<rect class="vert" height="7" width="1" y="1" x="4"></rect>
+						<rect height="1" width="7" y="4" x="1"></rect>
+					</svg>
+				</button>
+				</div><ol class="toc__subsections" hidden=""><li class="toc__subsection"><a href="https://iastate.pressbooks.pub/quantitativegenetics/chapter/selection-response/#chapter-108-section-1">Underlying Theory of Selection</a></li><li class="toc__subsection"><a href="https://iastate.pressbooks.pub/quantitativegenetics/chapter/selection-response/#chapter-108-section-2">Heritability on an Entry-Mean Basis</a></li><li class="toc__subsection"><a href="https://iastate.pressbooks.pub/quantitativegenetics/chapter/selection-response/#chapter-108-section-3">Family Structure</a></li><li class="toc__subsection"><a href="https://iastate.pressbooks.pub/quantitativegenetics/chapter/selection-response/#chapter-108-section-4">Method of Moments</a></li><li class="toc__subsection"><a href="https://iastate.pressbooks.pub/quantitativegenetics/chapter/selection-response/#chapter-108-section-5">References</a></li></ol></li><li id="toc-chapter-125" class="toc__chapter standard toc__chapter--full"><div class="toc__title__container">
+				<span><p class="toc__title"><a href="https://iastate.pressbooks.pub/quantitativegenetics/chapter/g-x-e/">Chapter 10: G x E</a></p><p class="toc__author">William Beavis; Kendall Lamkey; Katherine Espinosa; Anthony Assibi Mahama; and Walter Suza</p></span>
+				<button type="button" aria-expanded="false" aria-label="Toggle contents of &#39;Chapter 10: G x EWilliam Beavis; Kendall Lamkey; Katherine Espinosa; Anthony Assibi Mahama; and Walter Suza&#39;">
+					<svg viewBox="0 0 9 9" aria-hidden="true" focusable="false">
+						<rect class="vert" height="7" width="1" y="1" x="4"></rect>
+						<rect height="1" width="7" y="4" x="1"></rect>
+					</svg>
+				</button>
+				</div><ol class="toc__subsections" hidden=""><li class="toc__subsection"><a href="https://iastate.pressbooks.pub/quantitativegenetics/chapter/g-x-e/#chapter-125-section-1">Environmental Components of Variance</a></li><li class="toc__subsection"><a href="https://iastate.pressbooks.pub/quantitativegenetics/chapter/g-x-e/#chapter-125-section-2">Simple Types of GxE Interactions</a></li><li class="toc__subsection"><a href="https://iastate.pressbooks.pub/quantitativegenetics/chapter/g-x-e/#chapter-125-section-3">Complex Types of GxE Interactions</a></li><li class="toc__subsection"><a href="https://iastate.pressbooks.pub/quantitativegenetics/chapter/g-x-e/#chapter-125-section-4">Partition of GxE Variances</a></li><li class="toc__subsection"><a href="https://iastate.pressbooks.pub/quantitativegenetics/chapter/g-x-e/#chapter-125-section-5">Interaction Components</a></li><li class="toc__subsection"><a href="https://iastate.pressbooks.pub/quantitativegenetics/chapter/g-x-e/#chapter-125-section-6">Flux between Genotypic Variance and GE Interaction Variance</a></li><li class="toc__subsection"><a href="https://iastate.pressbooks.pub/quantitativegenetics/chapter/g-x-e/#chapter-125-section-7">References</a></li></ol></li><li id="toc-chapter-129" class="toc__chapter standard toc__chapter--full"><div class="toc__title__container">
+				<span><p class="toc__title"><a href="https://iastate.pressbooks.pub/quantitativegenetics/chapter/multiple-trait-selection/">Chapter 11: Multiple Trait Selection</a></p><p class="toc__author">William Beavis; Kendall Lamkey; Anthony Assibi Mahama; and Walter Suza</p></span>
+				<button type="button" aria-expanded="false" aria-label="Toggle contents of &#39;Chapter 11: Multiple Trait SelectionWilliam Beavis; Kendall Lamkey; Anthony Assibi Mahama; and Walter Suza&#39;">
+					<svg viewBox="0 0 9 9" aria-hidden="true" focusable="false">
+						<rect class="vert" height="7" width="1" y="1" x="4"></rect>
+						<rect height="1" width="7" y="4" x="1"></rect>
+					</svg>
+				</button>
+				</div><ol class="toc__subsections" hidden=""><li class="toc__subsection"><a href="https://iastate.pressbooks.pub/quantitativegenetics/chapter/multiple-trait-selection/#chapter-129-section-1">Index Selection</a></li><li class="toc__subsection"><a href="https://iastate.pressbooks.pub/quantitativegenetics/chapter/multiple-trait-selection/#chapter-129-section-2">Expected Genetic Gains</a></li><li class="toc__subsection"><a href="https://iastate.pressbooks.pub/quantitativegenetics/chapter/multiple-trait-selection/#chapter-129-section-3">Construction of a Selection Index</a></li><li class="toc__subsection"><a href="https://iastate.pressbooks.pub/quantitativegenetics/chapter/multiple-trait-selection/#chapter-129-section-4">Selection Index Efficiency</a></li><li class="toc__subsection"><a href="https://iastate.pressbooks.pub/quantitativegenetics/chapter/multiple-trait-selection/#chapter-129-section-5">References</a></li></ol></li><li id="toc-chapter-150" class="toc__chapter standard toc__chapter--full"><div class="toc__title__container">
+				<span><p class="toc__title"><a href="https://iastate.pressbooks.pub/quantitativegenetics/chapter/multi-environment-trials-linear-mixed-models/">Chapter 12: Multi Environment Trials: Linear Mixed Models</a></p><p class="toc__author">William Beavis; Anthony Assibi Mahama; and Walter Suza</p></span>
+				<button type="button" aria-expanded="false" aria-label="Toggle contents of &#39;Chapter 12: Multi Environment Trials: Linear Mixed ModelsWilliam Beavis; Anthony Assibi Mahama; and Walter Suza&#39;">
+					<svg viewBox="0 0 9 9" aria-hidden="true" focusable="false">
+						<rect class="vert" height="7" width="1" y="1" x="4"></rect>
+						<rect height="1" width="7" y="4" x="1"></rect>
+					</svg>
+				</button>
+				</div><ol class="toc__subsections" hidden=""><li class="toc__subsection"><a href="https://iastate.pressbooks.pub/quantitativegenetics/chapter/multi-environment-trials-linear-mixed-models/#chapter-150-section-1">Henderson’s Concept</a></li><li class="toc__subsection"><a href="https://iastate.pressbooks.pub/quantitativegenetics/chapter/multi-environment-trials-linear-mixed-models/#chapter-150-section-2">BLUEs and BLUPs</a></li><li class="toc__subsection"><a href="https://iastate.pressbooks.pub/quantitativegenetics/chapter/multi-environment-trials-linear-mixed-models/#chapter-150-section-3">Linear Mixed Model Solution</a></li><li class="toc__subsection"><a href="https://iastate.pressbooks.pub/quantitativegenetics/chapter/multi-environment-trials-linear-mixed-models/#chapter-150-section-4">Reference</a></li></ol></li><li id="toc-chapter-159" class="toc__chapter standard toc__chapter--full toc__selected"><div class="toc__title__container">
+				<span><p class="toc__title"><a href="https://iastate.pressbooks.pub/quantitativegenetics/chapter/simulation-modeling/">Chapter 13: Simulation Modeling</a></p><p class="toc__author">William Beavis; Anthony Assibi Mahama; and Walter Suza</p></span>
+				<button type="button" aria-expanded="false" aria-label="Toggle contents of &#39;Chapter 13: Simulation ModelingWilliam Beavis; Anthony Assibi Mahama; and Walter Suza&#39;">
+					<svg viewBox="0 0 9 9" aria-hidden="true" focusable="false">
+						<rect class="vert" height="7" width="1" y="1" x="4"></rect>
+						<rect height="1" width="7" y="4" x="1"></rect>
+					</svg>
+				</button>
+				</div><ol class="toc__subsections" hidden=""><li class="toc__subsection"><a href="https://iastate.pressbooks.pub/quantitativegenetics/chapter/simulation-modeling/#chapter-159-section-1">History of Simulations</a></li><li class="toc__subsection"><a href="https://iastate.pressbooks.pub/quantitativegenetics/chapter/simulation-modeling/#chapter-159-section-2">Genetic Architecture of the Trait</a></li><li class="toc__subsection"><a href="https://iastate.pressbooks.pub/quantitativegenetics/chapter/simulation-modeling/#chapter-159-section-3">Polygenic Trait Simulation</a></li><li class="toc__subsection"><a href="https://iastate.pressbooks.pub/quantitativegenetics/chapter/simulation-modeling/#chapter-159-section-4">QTL Simulations</a></li><li class="toc__subsection"><a href="https://iastate.pressbooks.pub/quantitativegenetics/chapter/simulation-modeling/#chapter-159-section-5">References</a></li></ol></li></ol></li>	<li id="toc-back-matter-740" class="toc__back-matter resources toc__back-matter--full"><div class="toc__title__container">
+				<span><p class="toc__title"><a href="https://iastate.pressbooks.pub/quantitativegenetics/back-matter/plant-breeding-basics/">Plant Breeding Basics</a></p><p class="toc__author">William Beavis; Anthony Assibi Mahama; and Walter Suza</p></span>
+				<button type="button" aria-expanded="false" aria-label="Toggle contents of &#39;Plant Breeding BasicsWilliam Beavis; Anthony Assibi Mahama; and Walter Suza&#39;">
+					<svg viewBox="0 0 9 9" aria-hidden="true" focusable="false">
+						<rect class="vert" height="7" width="1" y="1" x="4"></rect>
+						<rect height="1" width="7" y="4" x="1"></rect>
+					</svg>
+				</button>
+				</div><ol class="toc__subsections" hidden=""><li class="toc__subsection"><a href="https://iastate.pressbooks.pub/quantitativegenetics/back-matter/plant-breeding-basics/#back-matter-740-section-1">Defining Plant Breeding</a></li><li class="toc__subsection"><a href="https://iastate.pressbooks.pub/quantitativegenetics/back-matter/plant-breeding-basics/#back-matter-740-section-2">A Brief History of Quantitative Genetics</a></li><li class="toc__subsection"><a href="https://iastate.pressbooks.pub/quantitativegenetics/back-matter/plant-breeding-basics/#back-matter-740-section-3">Trait Measures</a></li><li class="toc__subsection"><a href="https://iastate.pressbooks.pub/quantitativegenetics/back-matter/plant-breeding-basics/#back-matter-740-section-4">Types of Models</a></li><li class="toc__subsection"><a href="https://iastate.pressbooks.pub/quantitativegenetics/back-matter/plant-breeding-basics/#back-matter-740-section-5">Installation of R</a></li><li class="toc__subsection"><a href="https://iastate.pressbooks.pub/quantitativegenetics/back-matter/plant-breeding-basics/#back-matter-740-section-6">Analysis of Covariance</a></li><li class="toc__subsection"><a href="https://iastate.pressbooks.pub/quantitativegenetics/back-matter/plant-breeding-basics/#back-matter-740-section-7">Computational Considerations</a></li><li class="toc__subsection"><a href="https://iastate.pressbooks.pub/quantitativegenetics/back-matter/plant-breeding-basics/#back-matter-740-section-8">Matrix Algebra</a></li><li class="toc__subsection"><a href="https://iastate.pressbooks.pub/quantitativegenetics/back-matter/plant-breeding-basics/#back-matter-740-section-9">References</a></li></ol></li><li id="toc-back-matter-738" class="toc__back-matter miscellaneous toc__back-matter--full"><div class="toc__title__container">
+				<span><p class="toc__title"><a href="https://iastate.pressbooks.pub/quantitativegenetics/back-matter/applied-learning-activities/">Applied Learning Activities</a></p></span>
+				<button type="button" aria-expanded="false" aria-label="Toggle contents of &#39;Applied Learning Activities&#39;">
+					<svg viewBox="0 0 9 9" aria-hidden="true" focusable="false">
+						<rect class="vert" height="7" width="1" y="1" x="4"></rect>
+						<rect height="1" width="7" y="4" x="1"></rect>
+					</svg>
+				</button>
+				</div><ol class="toc__subsections" hidden=""><li class="toc__subsection"><a href="https://iastate.pressbooks.pub/quantitativegenetics/back-matter/applied-learning-activities/#back-matter-738-section-1">Chapter 1</a></li><li class="toc__subsection"><a href="https://iastate.pressbooks.pub/quantitativegenetics/back-matter/applied-learning-activities/#back-matter-738-section-2">Chapter 2</a></li><li class="toc__subsection"><a href="https://iastate.pressbooks.pub/quantitativegenetics/back-matter/applied-learning-activities/#back-matter-738-section-3">Chapter 3</a></li><li class="toc__subsection"><a href="https://iastate.pressbooks.pub/quantitativegenetics/back-matter/applied-learning-activities/#back-matter-738-section-4">Chapter 4</a></li><li class="toc__subsection"><a href="https://iastate.pressbooks.pub/quantitativegenetics/back-matter/applied-learning-activities/#back-matter-738-section-5">Chapter 5</a></li><li class="toc__subsection"><a href="https://iastate.pressbooks.pub/quantitativegenetics/back-matter/applied-learning-activities/#back-matter-738-section-6">Chapter 6</a></li><li class="toc__subsection"><a href="https://iastate.pressbooks.pub/quantitativegenetics/back-matter/applied-learning-activities/#back-matter-738-section-7">Chapter 7</a></li><li class="toc__subsection"><a href="https://iastate.pressbooks.pub/quantitativegenetics/back-matter/applied-learning-activities/#back-matter-738-section-8">Chapter 8</a></li><li class="toc__subsection"><a href="https://iastate.pressbooks.pub/quantitativegenetics/back-matter/applied-learning-activities/#back-matter-738-section-9">Chapter 9</a></li><li class="toc__subsection"><a href="https://iastate.pressbooks.pub/quantitativegenetics/back-matter/applied-learning-activities/#back-matter-738-section-10">Chapter 10</a></li><li class="toc__subsection"><a href="https://iastate.pressbooks.pub/quantitativegenetics/back-matter/applied-learning-activities/#back-matter-738-section-11">Chapter 11</a></li><li class="toc__subsection"><a href="https://iastate.pressbooks.pub/quantitativegenetics/back-matter/applied-learning-activities/#back-matter-738-section-12">Chapter 12</a></li><li class="toc__subsection"><a href="https://iastate.pressbooks.pub/quantitativegenetics/back-matter/applied-learning-activities/#back-matter-738-section-13">Chapter 13</a></li><li class="toc__subsection"><a href="https://iastate.pressbooks.pub/quantitativegenetics/back-matter/applied-learning-activities/#back-matter-738-section-14">Plant Breeding Basics</a></li></ol></li><li id="toc-back-matter-6" class="toc__back-matter appendix toc__back-matter--empty"><div class="toc__title__container"><p class="toc__title"><a href="https://iastate.pressbooks.pub/quantitativegenetics/back-matter/contributors/">Contributors</a></p></div></li></ol> <!-- end #toc -->
+							</div>
+						</div>
+															<h1 class="reading-header__title"><a href="https://iastate.pressbooks.pub/quantitativegenetics/" aria-label="Go to the cover page of Quantitative Genetics for Plant Breeding" rel="home">Quantitative Genetics for Plant Breeding</a></h1>
+
+					<div class="reading-header__end-container">
+											</div>
+				</nav>
+			</div>
+			</header>
+	<main id="main">
+		<div id="content" class="site-content" tabindex="-1">
+						<section data-type="chapter" class="standard post-159 chapter type-chapter status-publish hentry contributor-aamahama contributor-wpsuza contributor-wbeavis focusable" tabindex="-1">
+		<header>
+				<h1 class="entry-title">
+			Chapter 13: Simulation Modeling		</h1>
+											<p data-type="author">William Beavis; Anthony Assibi Mahama; and Walter Suza</p>
+							</header>
+		
+<p>Quantitative genetic models are used to represent, describe, and quantify the genetic contributions to natural phenomena. These models can be arbitrarily simple, e.g., additive linear models, or complex, e.g., non-additive, non-linear models. R.A. Fisher and Sewell Wright had a decades-long debate about which type of model should be considered in the study of natural and artificial selection. Fisher and his disciples argued that the more complex models were not needed. Sewell Wright and his students argued that biology was inherently complex and needed non-linear non-additive models to accurately understand adaptation and evolution. Of course, both were correct, and both were wrong. As George Box reminds us, all models are wrong; some are useful. The choice of an appropriate model depends upon the purpose of the research.</p>
+<p>Prior to this chapter, we investigated the development of theoretical quantitative genetic models for the purposes of conducting and interpreting analyses of plant breeding experiments. As noted, without the theoretical models, there would be no genetic understanding of the results. Theory provides predictions, and predictions are the basis for generating testable hypotheses. In this chapter, we introduce a far more practical justification for theoretical models: With a theoretical model, it is possible to simulate many different data analysis techniques and breeding strategies prior to conducting expensive experiments. In other words, natural and artificial systems can be modeled <em>in silico</em> for purposes of predicting unknown outcomes. Many <em>in silico</em> experiments can be compared, and the most promising can be used to compare methods or processes. If comparisons are based on objective criteria, such as accuracy, power, precision, efficacy, and efficiency, and if the model used for data analyses is the same as the model used for simulating data sets, we can make rational decisions about which methods to implement in plant breeding experiments.</p>
+<div class="textbox textbox--learning-objectives">
+<header class="textbox__header">Learning Objectives</header>
+<div class="textbox__content">
+<ul>
+<li>Recognize limitations of experimental research</li>
+<li>Translate QG models to simulation models</li>
+<li>Translate simulation models to EXCEL software functions</li>
+<li>Build confidence in the use of simulation models</li>
+</ul>
+</div>
+</div>
+<h1 id="chapter-159-section-1" class="section-header">History of Simulations</h1>
+<p>Geneticists first used computers to implement simulation models to evaluate limits to artificial selection (Hill and Robertson, 1968; Bulmer, 1976) in closed breeding populations. By 1988, Oscar Kempthorne, one of R.A. Fisher’s disciples, pointed out that the classical experimental and algebraic approaches were limited to unrealistic assumptions in breeding and evolutionary systems. Since 1988, plant and animal geneticists and breeders have used simulation models to evaluate the limits to emerging statistical methods (Beavis, 1994) and to choose among selection methods because experimental evaluation of breeding methods is time and resource-limited (Podlich and Cooper, 1998). To date, there have been over 15,000 publications in which the terms simulation and breeding occur in the title. Currently, there are numerous simulation software packages that have been developed and implemented for public and private research enterprises. Some are quite simple, while others are very flexible and complex. Generally, as the flexibility of the package increases, the learning curve associated with the complexity of the package also increases. Thus, some of these simulation packages require entire courses and years to master. While it is beyond the scope of this chapter to either advocate or teach any particular simulation package, we will learn how to implement the core quantitative and population genetic models that are part of every useful simulation package.</p>
+<h2>Core Elements</h2>
+<p>The core elements of simulation modeling include the genetic architecture of the trait(s), the structure of segregating generations derived from breeding populations, and the organization of the segregating genomes.</p>
+<p>Before we decide on the genetic architecture of the trait, we need to know the <strong>structure of the segregating generation derived from the breeding population</strong>. In diploid organisms, there are usually three genotypes at a SNP locus: {aa, ac, cc} or {tt, tg, gg}. Let us consider a locus with the second triplet, {tt, tg, gg}. If we decide to simulate a random mated population, then each of the three genotypes {tt, tg, gg} will occur at a frequency of <em>p<sup>2</sup></em>, <em>2pq,</em> and <em>q<sup>2</sup></em>. To decide which genotype is going to be assigned to an individual, we should obtain a random sample of a number from the Uniform[0,1] distribution. If the random number is in the interval [0,p<sup>2</sup>], then we will assign the genotype ‘gg’ to individual <em>i</em>. If the random number is in the interval [p<sup>2</sup>, p<sup>2</sup>+2pq], then we will assign the genotype ‘tg’ to individual <em>i; otherwise</em>, we will assign the genotype ‘tt’ to individual <em>i</em>.</p>
+<p>Obtaining a random sample from any distribution will depend on the syntax of the software system we decide to use for simulating the data. Since most students have experience with spreadsheet types of software, we will first learn how to use Excel for simulating SNP genotypes at a single locus in a random mating population, where p (frequency of g) = 0.3. The frequency of ‘gg’ genotypes at this locus will be 0.09, the frequency of ‘tt’ genotypes will be 0.49, and the frequency of heterozygous genotypes will be 0.42. Thus, if we sample a random number from the uniform distribution in the interval [0, 0.09], then we will assign the genotype ‘gg’ to individual <em>i</em>; in the interval from (0.09, 0.51], we will assign the genotype ‘gt’ to individual <em>i</em>; otherwise, we will assign the genotype ‘tt’ to individual <em>i</em>.</p>
+<h2>Excel-Based Simulation</h2>
+<h3>Step 1</h3>
+<p>With these parameters, we will use the Excel functions “IF” and “RAND” in the following steps:</p>
+<ol>
+<li><strong>Assign a sampleid designator to the first column.</strong></li>
+</ol>
+<p><img fetchpriority="high" decoding="async" class="aligncenter" src="./Chapter 13_ Simulation Modeling – Quantitative Genetics for Plant Breeding_files/sm_af_6_15_0.png" alt="Spreadsheet with sampleid designators P1, P2, ..., P6 in column A" width="480" height="153"></p>
+<h3>Step 2</h3>
+<p>With these parameters, we will use the Excel functions “IF” and “RAND” in the following steps:</p>
+<ol start="2">
+<li><strong>Obtain a random number from the Uniform Distribution for each of the sampleid’s. Syntax: type =</strong>RAND()<strong> in cell B2, then drag across all cells in column B.</strong></li>
+</ol>
+<p><img decoding="async" class="aligncenter" src="./Chapter 13_ Simulation Modeling – Quantitative Genetics for Plant Breeding_files/sm_af_7_18_0.png" alt="Spreadsheet with Random sample number added in column B" width="480" height="160"></p>
+<h3>Step 3</h3>
+<p>With these parameters, we will use the Excel functions “IF” and “RAND” in the following steps:</p>
+<ol start="3">
+<li><strong>Based on the random number assigned to each sampleid, assign a genotype to the locus. Syntax: type </strong>=IF(B2&lt;=0.09,”gg”,IF(B2&gt;0.51,”tt”,”gt”))<strong> in cell C1, then drag across all relevant cells. Note that values in columns B and C will likely differ from those in the example below.</strong></li>
+</ol>
+<p><img decoding="async" class="aligncenter" src="./Chapter 13_ Simulation Modeling – Quantitative Genetics for Plant Breeding_files/sm_af_8_21_0.png" alt="Spreadsheet with locus1 genotypes (gt, tt, gg) added in column C." width="480" height="160"></p>
+<h3>Step 4</h3>
+<p>If we do not want the values generated by the RAND function to change as we add functions to the spreadsheet, we should plan to cut and paste a set of the actual values from one of the sampling events into new columns:</p>
+<p><img loading="lazy" decoding="async" class="aligncenter" src="./Chapter 13_ Simulation Modeling – Quantitative Genetics for Plant Breeding_files/sm_af_9_24_0.png" alt="Spreadsheet with sampleid, Random sample number, locus1 genotype, fixed values, and fixed genotype after adding last two headers in columns D and E." width="480" height="160"></p>
+<h2>Other Population Structures</h2>
+<p>There are many other possible breeding population structures; some are the result of designed crosses (see Chapter 8 on mating designs), but most population structures emerge from long-term breeding programs in which elite homozygous cultivars are crossed to promising homozygous lines through opportunistic networks of crosses. Simulating genotypes at segregating loci from any mating design or breeding program can be obtained in a manner described in the previous paragraph. We need only decide on the frequencies of the genotypes in the segregating populations. For example, in the specific case of an F<sub>2</sub> generation derived from a cross of two inbred lines, <em>p </em>= <em>q </em>= 0.5, and if a random number obtained from a uniform distribution, U[0,1], is greater than ¼ and less than ¾ then the genotype of individual plant <em>i</em>, will be ‘gt’. We could be interested in the case of recombinant inbred lines derived in the F<sub>5</sub> generation of a cross of two inbred lines. In this case, the frequency of homozygotes is now <em>p<sup>2</sup></em>+<em>pq</em>F and <em>q<sup>2</sup></em>+<em>pq</em>F, and the frequency of heterozygous lines is 2<em>pq</em>(1-F), where F = 0.875. Thus, if a random number obtained from U[0,1] is less than 0.4687, then RIL. <em>i</em> will be assigned the genotype ‘gg’. It should be obvious that it should be possible to generate mixtures of segregating families from multiple independent or related crosses and simulate genotypes for any particular locus to all individuals in all families, regardless of how the families are derived.</p>
+<h1 id="chapter-159-section-2" class="section-header">Genetic Architecture of the Trait</h1>
+<p>Next, we need to decide how many loci will influence a trait and whether the alleles at the loci will interact. Let us begin with a single-locus additive quantitative trait, designated P. Further, consider a trait with an average phenotypic expression of 50 units and phenotypic variability in a diploid species that is due to additive genetic variability at a single locus and non-genetic variability. Initially, let us plan to let half of the phenotypic variability be due to segregation at the locus and half due to non-genetic sources of variability. The first step is to translate this brief description into a quantitative genetic model (Equation 1), preferably the same model that will be used in the eventual analysis of the phenotypic trait:</p>
+<p style="text-align: center;"><mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="0" style="font-size: 119.8%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mstyle size="lg"><mjx-msub><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D443 TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em; margin-left: -0.109em;"><mjx-texatom size="s" texclass="ORD"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D456 TEX-I"></mjx-c></mjx-mi><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D457 TEX-I"></mjx-c></mjx-mi></mjx-texatom></mjx-script></mjx-msub><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c3D"></mjx-c></mjx-mo><mjx-mi class="mjx-i" space="4"><mjx-c class="mjx-c1D707 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n" space="3"><mjx-c class="mjx-c2B"></mjx-c></mjx-mo><mjx-msub space="3"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D43A TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D456 TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msub><mjx-mo class="mjx-n" space="3"><mjx-c class="mjx-c2B"></mjx-c></mjx-mo><mjx-msub space="3"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D700 TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-texatom size="s" texclass="ORD"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D456 TEX-I"></mjx-c></mjx-mi><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D457 TEX-I"></mjx-c></mjx-mi></mjx-texatom></mjx-script></mjx-msub></mjx-mstyle></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mstyle mathsize="1.2em"><msub><mi>P</mi><mrow data-mjx-texclass="ORD"><mi>i</mi><mi>j</mi></mrow></msub><mo>=</mo><mi>μ</mi><mo>+</mo><msub><mi>G</mi><mi>i</mi></msub><mo>+</mo><msub><mi>ε</mi><mrow data-mjx-texclass="ORD"><mi>i</mi><mi>j</mi></mrow></msub></mstyle></math></mjx-assistive-mml></mjx-container></p>
+<p style="text-align: center;"><mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="1" style="font-size: 119.8%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mtext class="mjx-n"><mjx-c class="mjx-c45"></mjx-c><mjx-c class="mjx-c71"></mjx-c><mjx-c class="mjx-c75"></mjx-c><mjx-c class="mjx-c61"></mjx-c><mjx-c class="mjx-c74"></mjx-c><mjx-c class="mjx-c69"></mjx-c><mjx-c class="mjx-c6F"></mjx-c><mjx-c class="mjx-c6E"></mjx-c><mjx-c class="mjx-c20"></mjx-c><mjx-c class="mjx-c31"></mjx-c></mjx-mtext></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mtext>Equation 1</mtext></math></mjx-assistive-mml></mjx-container> Quantitative genetic model for phenotypic trait,</p>
+<p style="padding-left: 80px;"><strong>where:<br>
+</strong><mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="2" style="font-size: 119.8%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-msub><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D443 TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em; margin-left: -0.109em;"><mjx-texatom size="s" texclass="ORD"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D456 TEX-I"></mjx-c></mjx-mi><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D457 TEX-I"></mjx-c></mjx-mi></mjx-texatom></mjx-script></mjx-msub></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><msub><mi>P</mi><mrow data-mjx-texclass="ORD"><mi>i</mi><mi>j</mi></mrow></msub></math></mjx-assistive-mml></mjx-container> = the phenotype,<br>
+<mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="3" style="font-size: 119.8%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-msub><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D43A TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D456 TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msub></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><msub><mi>G</mi><mi>i</mi></msub></math></mjx-assistive-mml></mjx-container> = the genotype effect,<br>
+<mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="4" style="font-size: 119.8%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D456 TEX-I"></mjx-c></mjx-mi></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mi>i</mi></math></mjx-assistive-mml></mjx-container> = one of three possible genotypes conferred by two alleles,<br>
+<mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="5" style="font-size: 119.8%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D457 TEX-I"></mjx-c></mjx-mi></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mi>j</mi></math></mjx-assistive-mml></mjx-container> = one of the repeated samples of the <em>i</em><sup>th</sup> genotypes,<br>
+<mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="6" style="font-size: 119.8%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-msub><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D700 TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-texatom size="s" texclass="ORD"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D456 TEX-I"></mjx-c></mjx-mi><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D457 TEX-I"></mjx-c></mjx-mi></mjx-texatom></mjx-script></mjx-msub></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><msub><mi>ε</mi><mrow data-mjx-texclass="ORD"><mi>i</mi><mi>j</mi></mrow></msub></math></mjx-assistive-mml></mjx-container> = non-genetic source of variability and is ~ i.id N(0,σ<sub>ε</sub>).</p>
+<p>Thus, the variance model of Equation 1 is as written in Equation 2:</p>
+<p style="text-align: center;"><mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="7" style="font-size: 119.8%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mstyle size="lg"><mjx-msubsup><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D70E TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.3em; margin-left: 0px;"><mjx-mn class="mjx-n" size="s"><mjx-c class="mjx-c32"></mjx-c></mjx-mn><mjx-spacer style="margin-top: 0.18em;"></mjx-spacer><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D443 TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msubsup><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c3D"></mjx-c></mjx-mo><mjx-msubsup space="4"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D70E TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.316em; margin-left: 0px;"><mjx-mn class="mjx-n" size="s"><mjx-c class="mjx-c32"></mjx-c></mjx-mn><mjx-spacer style="margin-top: 0.18em;"></mjx-spacer><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D43A TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msubsup><mjx-mo class="mjx-n" space="3"><mjx-c class="mjx-c2B"></mjx-c></mjx-mo><mjx-msubsup space="3"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D70E TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.247em; margin-left: 0px;"><mjx-mn class="mjx-n" size="s"><mjx-c class="mjx-c32"></mjx-c></mjx-mn><mjx-spacer style="margin-top: 0.29em;"></mjx-spacer><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D700 TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msubsup></mjx-mstyle></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mstyle mathsize="1.2em"><msubsup><mi>σ</mi><mi>P</mi><mn>2</mn></msubsup><mo>=</mo><msubsup><mi>σ</mi><mi>G</mi><mn>2</mn></msubsup><mo>+</mo><msubsup><mi>σ</mi><mi>ε</mi><mn>2</mn></msubsup></mstyle></math></mjx-assistive-mml></mjx-container></p>
+<p style="text-align: center;"><mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="8" style="font-size: 119.8%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mtext class="mjx-n"><mjx-c class="mjx-c45"></mjx-c><mjx-c class="mjx-c71"></mjx-c><mjx-c class="mjx-c75"></mjx-c><mjx-c class="mjx-c61"></mjx-c><mjx-c class="mjx-c74"></mjx-c><mjx-c class="mjx-c69"></mjx-c><mjx-c class="mjx-c6F"></mjx-c><mjx-c class="mjx-c6E"></mjx-c><mjx-c class="mjx-c20"></mjx-c><mjx-c class="mjx-c32"></mjx-c></mjx-mtext></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mtext>Equation 2</mtext></math></mjx-assistive-mml></mjx-container> Variance model for phenotypic trait,</p>
+<p style="padding-left: 80px;"><strong>where:<br>
+</strong><mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="9" style="font-size: 119.8%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-msubsup><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D70E TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.3em; margin-left: 0px;"><mjx-mn class="mjx-n" size="s"><mjx-c class="mjx-c32"></mjx-c></mjx-mn><mjx-spacer style="margin-top: 0.18em;"></mjx-spacer><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D443 TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msubsup></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><msubsup><mi>σ</mi><mi>P</mi><mn>2</mn></msubsup></math></mjx-assistive-mml></mjx-container> = the phenotypic variance,<br>
+<mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="10" style="font-size: 119.8%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-msubsup><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D70E TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.316em; margin-left: 0px;"><mjx-mn class="mjx-n" size="s"><mjx-c class="mjx-c32"></mjx-c></mjx-mn><mjx-spacer style="margin-top: 0.18em;"></mjx-spacer><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D43A TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msubsup></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><msubsup><mi>σ</mi><mi>G</mi><mn>2</mn></msubsup></math></mjx-assistive-mml></mjx-container> = the genotypic variance,<br>
+<mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="11" style="font-size: 119.8%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-msubsup><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D70E TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.247em; margin-left: 0px;"><mjx-mn class="mjx-n" size="s"><mjx-c class="mjx-c32"></mjx-c></mjx-mn><mjx-spacer style="margin-top: 0.29em;"></mjx-spacer><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D700 TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msubsup></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><msubsup><mi>σ</mi><mi>ε</mi><mn>2</mn></msubsup></math></mjx-assistive-mml></mjx-container> = residual or non-genotypic variance.</p>
+<h2>Parameter Assignment</h2>
+<p>The next step is to assign values to each of the parameters in the model. Mean, µ is assigned the value of 50, and values for e<sub>ij</sub> are sampled from a Normal distribution with a mean of zero and a standard deviation of σ<sub>e</sub>. We decided that we want to simulate data in which <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="12" style="font-size: 119.8%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mstyle size="lg"><mjx-msubsup><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D70E TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.3em; margin-left: 0px;"><mjx-mn class="mjx-n" size="s"><mjx-c class="mjx-c32"></mjx-c></mjx-mn><mjx-spacer style="margin-top: 0.18em;"></mjx-spacer><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D443 TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msubsup><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c3D"></mjx-c></mjx-mo><mjx-msubsup space="4"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D70E TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.316em; margin-left: 0px;"><mjx-mn class="mjx-n" size="s"><mjx-c class="mjx-c32"></mjx-c></mjx-mn><mjx-spacer style="margin-top: 0.18em;"></mjx-spacer><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D43A TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msubsup><mjx-mo class="mjx-n" space="3"><mjx-c class="mjx-c2B"></mjx-c></mjx-mo><mjx-msubsup space="3"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D70E TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.247em; margin-left: 0px;"><mjx-mn class="mjx-n" size="s"><mjx-c class="mjx-c32"></mjx-c></mjx-mn><mjx-spacer style="margin-top: 0.29em;"></mjx-spacer><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D700 TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msubsup></mjx-mstyle></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mstyle mathsize="1.2em"><msubsup><mi>σ</mi><mi>P</mi><mn>2</mn></msubsup><mo>=</mo><msubsup><mi>σ</mi><mi>G</mi><mn>2</mn></msubsup><mo>+</mo><msubsup><mi>σ</mi><mi>ε</mi><mn>2</mn></msubsup></mstyle></math></mjx-assistive-mml></mjx-container> (Equation 2 above).</p>
+<p>We can choose any value for σ<sup>2</sup><sub>P</sub>, but it is often best to choose a value that is ~ consistent with estimates from field trials for the crop of interest. In this case, let us say our field trials have typically produced estimates of phenotypic variance of ~ 98. Thus, both <em>σ<sup>2</sup></em><em><sub>G</sub></em> and <em>σ<sup>2</sup><sub>ε</sub></em> are ~ 49. Thus, we can obtain values for <em>ε<sub>ij </sub></em>by sampling a normal distribution with mean = 0 and standard deviation = 7.</p>
+<h2>Genotypic Values</h2>
+<p>We also need numeric values for each of the genotypes. Recall from Quantitative Genetic Models Theory we can assign coded genotypic values to each genotype as follows:</p>
+<ul>
+<li>Coded genotypic value of one homozygote (gg) = +a;</li>
+<li>Coded genotypic value of the other homozygote (tt) = -a;</li>
+<li>Coded genotypic value of heterozygotes (tg or gt) = d.</li>
+</ul>
+<p>Since we are simulating an additive genetic model, the genotypic value of the heterozygotes (d) is midway between the two values for the homozygotes, i.e., d = 0. Thus,</p>
+<p>G<sub>i</sub> = a for i = “gg”;&nbsp;-a for i = “tt”;&nbsp;and 0 for i = “gt” or “tg”.</p>
+<p>Now we need a numeric value for a.</p>
+<h2>Calculations</h2>
+<p>Recall that <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="13" style="font-size: 119.8%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-msubsup><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D70E TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.3em; margin-left: 0px;"><mjx-mn class="mjx-n" size="s"><mjx-c class="mjx-c32"></mjx-c></mjx-mn><mjx-spacer style="margin-top: 0.18em;"></mjx-spacer><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D443 TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msubsup><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c3D"></mjx-c></mjx-mo><mjx-msubsup space="4"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D70E TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.316em; margin-left: 0px;"><mjx-mn class="mjx-n" size="s"><mjx-c class="mjx-c32"></mjx-c></mjx-mn><mjx-spacer style="margin-top: 0.18em;"></mjx-spacer><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D43A TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msubsup><mjx-mo class="mjx-n" space="3"><mjx-c class="mjx-c2B"></mjx-c></mjx-mo><mjx-msubsup space="3"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D70E TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.247em; margin-left: 0px;"><mjx-mn class="mjx-n" size="s"><mjx-c class="mjx-c32"></mjx-c></mjx-mn><mjx-spacer style="margin-top: 0.29em;"></mjx-spacer><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D700 TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msubsup></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><msubsup><mi>σ</mi><mi>P</mi><mn>2</mn></msubsup><mo>=</mo><msubsup><mi>σ</mi><mi>G</mi><mn>2</mn></msubsup><mo>+</mo><msubsup><mi>σ</mi><mi>ε</mi><mn>2</mn></msubsup></math></mjx-assistive-mml></mjx-container> (Equation 2), and the additive portion of genetic variance is represented by Equation 3:</p>
+<p style="text-align: center;"><mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="14" style="font-size: 119.8%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-msubsup><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D70E TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.323em; margin-left: 0px;"><mjx-mn class="mjx-n" size="s"><mjx-c class="mjx-c32"></mjx-c></mjx-mn><mjx-spacer style="margin-top: 0.18em;"></mjx-spacer><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D434 TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msubsup><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c3D"></mjx-c></mjx-mo><mjx-mn class="mjx-n" space="4"><mjx-c class="mjx-c32"></mjx-c></mjx-mn><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D45D TEX-I"></mjx-c></mjx-mi><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D45E TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c5B"></mjx-c></mjx-mo><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D44E TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n" space="3"><mjx-c class="mjx-c2B"></mjx-c></mjx-mo><mjx-mi class="mjx-i" space="3"><mjx-c class="mjx-c1D451 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D45E TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n" space="3"><mjx-c class="mjx-c2212"></mjx-c></mjx-mo><mjx-mi class="mjx-i" space="3"><mjx-c class="mjx-c1D45D TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo><mjx-msup><mjx-mo class="mjx-n"><mjx-c class="mjx-c5D"></mjx-c></mjx-mo><mjx-script style="vertical-align: 0.363em;"><mjx-mn class="mjx-n" size="s"><mjx-c class="mjx-c32"></mjx-c></mjx-mn></mjx-script></mjx-msup><mjx-mo class="mjx-n"><mjx-c class="mjx-c2C"></mjx-c></mjx-mo><mjx-mstyle><mjx-mspace style="width: 0.278em;"></mjx-mspace></mjx-mstyle><mjx-mstyle><mjx-mspace style="width: 0.278em;"></mjx-mspace></mjx-mstyle><mjx-mstyle><mjx-mspace style="width: 0.278em;"></mjx-mspace></mjx-mstyle><mjx-mi class="mjx-i" space="2"><mjx-c class="mjx-c1D44E TEX-I"></mjx-c></mjx-mi><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D45B TEX-I"></mjx-c></mjx-mi><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D451 TEX-I"></mjx-c></mjx-mi><mjx-mstyle><mjx-mspace style="width: 0.278em;"></mjx-mspace></mjx-mstyle><mjx-mstyle><mjx-mspace style="width: 0.278em;"></mjx-mspace></mjx-mstyle><mjx-mstyle><mjx-mspace style="width: 0.278em;"></mjx-mspace></mjx-mstyle><mjx-msubsup><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D70E TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.3em; margin-left: 0px;"><mjx-mn class="mjx-n" size="s"><mjx-c class="mjx-c32"></mjx-c></mjx-mn><mjx-spacer style="margin-top: 0.18em;"></mjx-spacer><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D437 TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msubsup><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c3D"></mjx-c></mjx-mo><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-mn class="mjx-n"><mjx-c class="mjx-c32"></mjx-c></mjx-mn><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D45D TEX-I"></mjx-c></mjx-mi><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D45E TEX-I"></mjx-c></mjx-mi><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D451 TEX-I"></mjx-c></mjx-mi><mjx-msup><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo><mjx-script style="vertical-align: 0.363em;"><mjx-mn class="mjx-n" size="s"><mjx-c class="mjx-c32"></mjx-c></mjx-mn></mjx-script></mjx-msup></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><msubsup><mi>σ</mi><mi>A</mi><mn>2</mn></msubsup><mo>=</mo><mn>2</mn><mi>p</mi><mi>q</mi><mo stretchy="false">[</mo><mi>a</mi><mo>+</mo><mi>d</mi><mo stretchy="false">(</mo><mi>q</mi><mo>−</mo><mi>p</mi><mo stretchy="false">)</mo><msup><mo stretchy="false">]</mo><mn>2</mn></msup><mo>,</mo><mstyle scriptlevel="0"><mspace width="0.278em"></mspace></mstyle><mstyle scriptlevel="0"><mspace width="0.278em"></mspace></mstyle><mstyle scriptlevel="0"><mspace width="0.278em"></mspace></mstyle><mi>a</mi><mi>n</mi><mi>d</mi><mstyle scriptlevel="0"><mspace width="0.278em"></mspace></mstyle><mstyle scriptlevel="0"><mspace width="0.278em"></mspace></mstyle><mstyle scriptlevel="0"><mspace width="0.278em"></mspace></mstyle><msubsup><mi>σ</mi><mi>D</mi><mn>2</mn></msubsup><mo>=</mo><mo stretchy="false">(</mo><mn>2</mn><mi>p</mi><mi>q</mi><mi>d</mi><msup><mo stretchy="false">)</mo><mn>2</mn></msup></math></mjx-assistive-mml></mjx-container></p>
+<p style="text-align: center;"><mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="15" style="font-size: 119.8%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mtext class="mjx-n"><mjx-c class="mjx-c45"></mjx-c><mjx-c class="mjx-c71"></mjx-c><mjx-c class="mjx-c75"></mjx-c><mjx-c class="mjx-c61"></mjx-c><mjx-c class="mjx-c74"></mjx-c><mjx-c class="mjx-c69"></mjx-c><mjx-c class="mjx-c6F"></mjx-c><mjx-c class="mjx-c6E"></mjx-c><mjx-c class="mjx-c20"></mjx-c><mjx-c class="mjx-c33"></mjx-c></mjx-mtext></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mtext>Equation 3</mtext></math></mjx-assistive-mml></mjx-container> Formula for calculating additive genetic variance.</p>
+<p style="padding-left: 80px;"><strong>where:<br>
+</strong><mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="16" style="font-size: 119.8%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-msubsup><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D70E TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.323em; margin-left: 0px;"><mjx-mn class="mjx-n" size="s"><mjx-c class="mjx-c32"></mjx-c></mjx-mn><mjx-spacer style="margin-top: 0.18em;"></mjx-spacer><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D434 TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msubsup></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><msubsup><mi>σ</mi><mi>A</mi><mn>2</mn></msubsup></math></mjx-assistive-mml></mjx-container> = the additive genetic variance,<br>
+<mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="17" style="font-size: 119.8%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-msubsup><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D70E TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.3em; margin-left: 0px;"><mjx-mn class="mjx-n" size="s"><mjx-c class="mjx-c32"></mjx-c></mjx-mn><mjx-spacer style="margin-top: 0.18em;"></mjx-spacer><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D437 TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msubsup></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><msubsup><mi>σ</mi><mi>D</mi><mn>2</mn></msubsup></math></mjx-assistive-mml></mjx-container> = the dominance variance,<br>
+<mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="18" style="font-size: 119.8%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mtext class="mjx-n"><mjx-c class="mjx-c70"></mjx-c><mjx-c class="mjx-c20"></mjx-c><mjx-c class="mjx-c61"></mjx-c><mjx-c class="mjx-c6E"></mjx-c><mjx-c class="mjx-c64"></mjx-c><mjx-c class="mjx-c20"></mjx-c><mjx-c class="mjx-c71"></mjx-c></mjx-mtext></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mtext>p and q</mtext></math></mjx-assistive-mml></mjx-container> = the frequency of the two alleles (<em>g</em> or <em>t</em>),<br>
+<mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="19" style="font-size: 119.8%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mtext class="mjx-n"><mjx-c class="mjx-c61"></mjx-c><mjx-c class="mjx-c20"></mjx-c><mjx-c class="mjx-c61"></mjx-c><mjx-c class="mjx-c6E"></mjx-c><mjx-c class="mjx-c64"></mjx-c><mjx-c class="mjx-c20"></mjx-c><mjx-c class="mjx-c64"></mjx-c></mjx-mtext></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mtext>a and d</mtext></math></mjx-assistive-mml></mjx-container> = coded genotypic values.</p>
+<p>Since we have decided to simulate d = 0, the genetic variance is all due to additive effects ((Equation 4):</p>
+<p style="text-align: center;"><mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="20" style="font-size: 119.8%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-msubsup><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D70E TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.316em; margin-left: 0px;"><mjx-mn class="mjx-n" size="s"><mjx-c class="mjx-c32"></mjx-c></mjx-mn><mjx-spacer style="margin-top: 0.18em;"></mjx-spacer><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D43A TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msubsup><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c3D"></mjx-c></mjx-mo><mjx-msubsup space="4"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D70E TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.323em; margin-left: 0px;"><mjx-mn class="mjx-n" size="s"><mjx-c class="mjx-c32"></mjx-c></mjx-mn><mjx-spacer style="margin-top: 0.18em;"></mjx-spacer><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D434 TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msubsup><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c3D"></mjx-c></mjx-mo><mjx-mn class="mjx-n" space="4"><mjx-c class="mjx-c32"></mjx-c></mjx-mn><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D45D TEX-I"></mjx-c></mjx-mi><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D45E TEX-I"></mjx-c></mjx-mi><mjx-msup><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D44E TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: 0.363em;"><mjx-mn class="mjx-n" size="s"><mjx-c class="mjx-c32"></mjx-c></mjx-mn></mjx-script></mjx-msup></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><msubsup><mi>σ</mi><mi>G</mi><mn>2</mn></msubsup><mo>=</mo><msubsup><mi>σ</mi><mi>A</mi><mn>2</mn></msubsup><mo>=</mo><mn>2</mn><mi>p</mi><mi>q</mi><msup><mi>a</mi><mn>2</mn></msup></math></mjx-assistive-mml></mjx-container></p>
+<p style="text-align: center;"><mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="21" style="font-size: 119.8%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mtext class="mjx-n"><mjx-c class="mjx-c45"></mjx-c><mjx-c class="mjx-c71"></mjx-c><mjx-c class="mjx-c75"></mjx-c><mjx-c class="mjx-c61"></mjx-c><mjx-c class="mjx-c74"></mjx-c><mjx-c class="mjx-c69"></mjx-c><mjx-c class="mjx-c6F"></mjx-c><mjx-c class="mjx-c6E"></mjx-c><mjx-c class="mjx-c20"></mjx-c><mjx-c class="mjx-c34"></mjx-c></mjx-mtext></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mtext>Equation 4</mtext></math></mjx-assistive-mml></mjx-container> Algebraic formula for calculating genotypic variance.</p>
+<p style="padding-left: 80px;"><strong>where:<br>
+</strong><span style="text-align: initial; font-size: 1em;"><mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="22" style="font-size: 119.8%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mstyle size="sm"><mjx-mtext class="mjx-n"><mjx-c class="mjx-c41"></mjx-c><mjx-c class="mjx-c6C"></mjx-c><mjx-c class="mjx-c6C"></mjx-c><mjx-c class="mjx-c20"></mjx-c><mjx-c class="mjx-c74"></mjx-c><mjx-c class="mjx-c65"></mjx-c><mjx-c class="mjx-c72"></mjx-c><mjx-c class="mjx-c6D"></mjx-c><mjx-c class="mjx-c73"></mjx-c></mjx-mtext></mjx-mstyle></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mstyle mathsize="0.85em"><mtext>All terms</mtext></mstyle></math></mjx-assistive-mml></mjx-container> are as defined previously</span><span style="text-align: initial; font-size: 1em;">.</span></p>
+<p>Thus,&nbsp;<span style="text-align: center; font-size: 1em;"><mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="23" style="font-size: 119.8%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D44E TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c3D"></mjx-c></mjx-mo><mjx-msqrt space="4"><mjx-sqrt><mjx-surd><mjx-mo class="mjx-lop"><mjx-c class="mjx-c221A TEX-S2"></mjx-c></mjx-mo></mjx-surd><mjx-box style="padding-top: 0.23em;"><mjx-mfrac><mjx-frac><mjx-num><mjx-nstrut></mjx-nstrut><mjx-mn class="mjx-n" size="s"><mjx-c class="mjx-c34"></mjx-c><mjx-c class="mjx-c39"></mjx-c></mjx-mn></mjx-num><mjx-dbox><mjx-dtable><mjx-line></mjx-line><mjx-row><mjx-den><mjx-dstrut></mjx-dstrut><mjx-mrow size="s"><mjx-mn class="mjx-n"><mjx-c class="mjx-c32"></mjx-c></mjx-mn><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D45D TEX-I"></mjx-c></mjx-mi><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D45E TEX-I"></mjx-c></mjx-mi></mjx-mrow></mjx-den></mjx-row></mjx-dtable></mjx-dbox></mjx-frac></mjx-mfrac></mjx-box></mjx-sqrt></mjx-msqrt><mjx-mo class="mjx-n"><mjx-c class="mjx-c2E"></mjx-c></mjx-mo></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mi>a</mi><mo>=</mo><msqrt><mfrac><mn>49</mn><mrow><mn>2</mn><mi>p</mi><mi>q</mi></mrow></mfrac></msqrt><mo>.</mo></math></mjx-assistive-mml></mjx-container></span></p>
+<p>If we assume that the frequency of ‘t’ (or ‘g’) in the population is <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="24" style="font-size: 119.8%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mfrac><mjx-frac><mjx-num><mjx-nstrut></mjx-nstrut><mjx-mn class="mjx-n" size="s"><mjx-c class="mjx-c31"></mjx-c></mjx-mn></mjx-num><mjx-dbox><mjx-dtable><mjx-line></mjx-line><mjx-row><mjx-den><mjx-dstrut></mjx-dstrut><mjx-mn class="mjx-n" size="s"><mjx-c class="mjx-c34"></mjx-c></mjx-mn></mjx-den></mjx-row></mjx-dtable></mjx-dbox></mjx-frac></mjx-mfrac></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mfrac><mn>1</mn><mn>4</mn></mfrac></math></mjx-assistive-mml></mjx-container>, then a reasonable value for <span style="text-align: center; font-size: 1em;"><mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="25" style="font-size: 119.8%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D44E TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c3D"></mjx-c></mjx-mo><mjx-msqrt space="4"><mjx-sqrt><mjx-surd><mjx-mo class="mjx-lop"><mjx-c class="mjx-c221A TEX-S2"></mjx-c></mjx-mo></mjx-surd><mjx-box style="padding-top: 0.23em;"><mjx-mfrac><mjx-frac><mjx-num><mjx-nstrut></mjx-nstrut><mjx-mn class="mjx-n" size="s"><mjx-c class="mjx-c34"></mjx-c><mjx-c class="mjx-c39"></mjx-c></mjx-mn></mjx-num><mjx-dbox><mjx-dtable><mjx-line></mjx-line><mjx-row><mjx-den><mjx-dstrut></mjx-dstrut><mjx-mrow size="s"><mjx-mn class="mjx-n"><mjx-c class="mjx-c32"></mjx-c></mjx-mn><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D45D TEX-I"></mjx-c></mjx-mi><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D45E TEX-I"></mjx-c></mjx-mi></mjx-mrow></mjx-den></mjx-row></mjx-dtable></mjx-dbox></mjx-frac></mjx-mfrac></mjx-box></mjx-sqrt></mjx-msqrt><mjx-texatom texclass="ORD"><mjx-mover><mjx-over style="padding-bottom: 0.105em; margin-bottom: -0.215em;"><mjx-mo class="mjx-n" style="width: 0px; margin-left: -0.25em;"><mjx-c class="mjx-c7E"></mjx-c></mjx-mo></mjx-over><mjx-base style="padding-top: 0.442em;"><mjx-mrow></mjx-mrow></mjx-base></mjx-mover></mjx-texatom><mjx-mstyle size="sm"><mjx-mn class="mjx-n"><mjx-c class="mjx-c31"></mjx-c><mjx-c class="mjx-c39"></mjx-c><mjx-c class="mjx-c2E"></mjx-c><mjx-c class="mjx-c38"></mjx-c><mjx-c class="mjx-c30"></mjx-c></mjx-mn><mjx-mo class="mjx-n"><mjx-c class="mjx-c2E"></mjx-c></mjx-mo></mjx-mstyle></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mi>a</mi><mo>=</mo><msqrt><mfrac><mn>49</mn><mrow><mn>2</mn><mi>p</mi><mi>q</mi></mrow></mfrac></msqrt><mrow data-mjx-texclass="ORD"><mover><mrow></mrow><mo stretchy="false">~</mo></mover></mrow><mstyle mathsize="0.85em"><mn>19.80</mn><mo>.</mo></mstyle></math></mjx-assistive-mml></mjx-container></span></p>
+<h2>Excel Application</h2>
+<p>Next, let us translate these values for the parameters into Excel functions.</p>
+<p class="rteindent1"><strong>Syntax for assigning ‘a’: Type </strong><span class="code">=IF(E3=“gg”,11.43, IF(E3=“tt”,-11.43,0))</span><strong> in Cell G3, then drag across all relevant cells.</strong></p>
+<p><img loading="lazy" decoding="async" class="aligncenter" src="./Chapter 13_ Simulation Modeling – Quantitative Genetics for Plant Breeding_files/sm_af_15_42_0.png" alt="Spreadsheet with sampleid, Random sample number, random genotype, fixed values, fixed genotype, mu, and G_i in respective columns." width="480" height="160"></p>
+<p>In order to fully understand how to sample from a normal distribution requires knowledge of probability density functions, cumulative density functions, and integral calculus that enables the translation between the two. These are topics beyond our current scope but worth exploring by those who wish to develop their own simulation capabilities.</p>
+<h2>Normal Distribution Interval</h2>
+<p>For our immediate purpose, the Syntax for obtaining values for <em>ε<sub>ij</sub></em> by sampling a Normal distribution with mean = 0 and standard deviation = 7 is the following:</p>
+<p><strong>Type </strong><span class="code">=NORMINV(RAND(),0,7)</span><strong> in cell H3 and then drag across all relevant cells.</strong></p>
+<p><img loading="lazy" decoding="async" class="aligncenter" src="./Chapter 13_ Simulation Modeling – Quantitative Genetics for Plant Breeding_files/sm_af_16_45_0.png" alt="Spreadsheet with sampleid, Random sample number, random genotype, fixed values, fixed genotype, mu, G_i, and epsilon_ij in respective columns." width="480" height="107"></p>
+<h2>Simulated Phenotypes</h2>
+<p>We now have values for all of the parameters in the model and need merely sum columns F, G, and H to obtain the simulated phenotypes (column I) for each of the sampleids.</p>
+<p><img loading="lazy" decoding="async" class="aligncenter" src="./Chapter 13_ Simulation Modeling – Quantitative Genetics for Plant Breeding_files/sm_af_17_48_0.png" alt="Spreadsheet with sampleid, Random sample number, random genotype, fixed values, fixed genotype, mu, G_i, epsilon_ij, and P in respective columns." width="480" height="107"></p>
+<p>Keep in mind that if these were field trial data, we would only be able to obtain data found in columns A and I. It should be immediately apparent that column F could be a mean value for a particular replication or environment of the sampleids. Thus, it should be possible to simulate data from multiple replicates and multiple environments with different mean values. It should also be apparent that the sampling of <em>ε<sub>ij</sub></em> could be derived from environments with a different plot-to-plot variability. For example, instead of using 7 in the function <span class="code">=NORMINV(RAND(),0,7)</span>, we could designate the standard deviation for some environments to be 14 and thus create a type of GxE that we discussed in&nbsp;<span style="font-size: 1em;">Chapter 12 on </span><span style="text-align: initial; font-size: 1em;">Multi Environment Trials.</span></p>
+<h2>Example Calculations</h2>
+<p>For the specific case of an F<sub>2</sub> generation derived from a cross of two inbred lines, p = q = 0.5, <span style="text-align: center; font-size: 1em;"><mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="26" style="font-size: 119.8%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D44E TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c3D"></mjx-c></mjx-mo><mjx-msqrt space="4"><mjx-sqrt><mjx-surd><mjx-mo class="mjx-lop"><mjx-c class="mjx-c221A TEX-S2"></mjx-c></mjx-mo></mjx-surd><mjx-box style="padding-top: 0.198em;"><mjx-mfrac><mjx-frac><mjx-num><mjx-nstrut></mjx-nstrut><mjx-mn class="mjx-n" size="s"><mjx-c class="mjx-c34"></mjx-c><mjx-c class="mjx-c39"></mjx-c></mjx-mn></mjx-num><mjx-dbox><mjx-dtable><mjx-line></mjx-line><mjx-row><mjx-den><mjx-dstrut></mjx-dstrut><mjx-mrow size="s"><mjx-mn class="mjx-n"><mjx-c class="mjx-c32"></mjx-c></mjx-mn><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-mn class="mjx-n"><mjx-c class="mjx-c30"></mjx-c><mjx-c class="mjx-c2E"></mjx-c><mjx-c class="mjx-c32"></mjx-c><mjx-c class="mjx-c35"></mjx-c></mjx-mn><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo></mjx-mrow></mjx-den></mjx-row></mjx-dtable></mjx-dbox></mjx-frac></mjx-mfrac></mjx-box></mjx-sqrt></mjx-msqrt><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c3D"></mjx-c></mjx-mo><mjx-mstyle size="sm" space="4"><mjx-mn class="mjx-n"><mjx-c class="mjx-c39"></mjx-c><mjx-c class="mjx-c2E"></mjx-c><mjx-c class="mjx-c39"></mjx-c></mjx-mn></mjx-mstyle></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mi>a</mi><mo>=</mo><msqrt><mfrac><mn>49</mn><mrow><mn>2</mn><mo stretchy="false">(</mo><mn>0.25</mn><mo stretchy="false">)</mo></mrow></mfrac></msqrt><mo>=</mo><mstyle mathsize="0.85em"><mn>9.9</mn></mstyle></math></mjx-assistive-mml></mjx-container></span></p>
+<p>Alternatively, we could be interested in the case of recombinant inbred lines derived in the F<sub>5</sub> generation of a cross of two inbred lines. In this case, &nbsp;the additive portion of genetic variance is represented by Equation 5:</p>
+<p style="text-align: center;"><mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="27" style="font-size: 119.8%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-msubsup><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D70E TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.323em; margin-left: 0px;"><mjx-mn class="mjx-n" size="s"><mjx-c class="mjx-c32"></mjx-c></mjx-mn><mjx-spacer style="margin-top: 0.18em;"></mjx-spacer><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D434 TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msubsup><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c3D"></mjx-c></mjx-mo><mjx-mn class="mjx-n" space="4"><mjx-c class="mjx-c32"></mjx-c></mjx-mn><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D45D TEX-I"></mjx-c></mjx-mi><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D45E TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-mn class="mjx-n"><mjx-c class="mjx-c31"></mjx-c></mjx-mn><mjx-mo class="mjx-n" space="3"><mjx-c class="mjx-c2B"></mjx-c></mjx-mo><mjx-mi class="mjx-i" space="3"><mjx-c class="mjx-c1D439 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo><mjx-mo class="mjx-n"><mjx-c class="mjx-c5B"></mjx-c></mjx-mo><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D44E TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n" space="3"><mjx-c class="mjx-c2B"></mjx-c></mjx-mo><mjx-mi class="mjx-i" space="3"><mjx-c class="mjx-c1D451 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D45E TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n" space="3"><mjx-c class="mjx-c2212"></mjx-c></mjx-mo><mjx-mi class="mjx-i" space="3"><mjx-c class="mjx-c1D45D TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo><mjx-msup><mjx-mo class="mjx-n"><mjx-c class="mjx-c5D"></mjx-c></mjx-mo><mjx-script style="vertical-align: 0.363em;"><mjx-mn class="mjx-n" size="s"><mjx-c class="mjx-c32"></mjx-c></mjx-mn></mjx-script></mjx-msup></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><msubsup><mi>σ</mi><mi>A</mi><mn>2</mn></msubsup><mo>=</mo><mn>2</mn><mi>p</mi><mi>q</mi><mo stretchy="false">(</mo><mn>1</mn><mo>+</mo><mi>F</mi><mo stretchy="false">)</mo><mo stretchy="false">[</mo><mi>a</mi><mo>+</mo><mi>d</mi><mo stretchy="false">(</mo><mi>q</mi><mo>−</mo><mi>p</mi><mo stretchy="false">)</mo><msup><mo stretchy="false">]</mo><mn>2</mn></msup></math></mjx-assistive-mml></mjx-container></p>
+<p style="text-align: center;"><mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="28" style="font-size: 119.8%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mtext class="mjx-n"><mjx-c class="mjx-c45"></mjx-c><mjx-c class="mjx-c71"></mjx-c><mjx-c class="mjx-c75"></mjx-c><mjx-c class="mjx-c61"></mjx-c><mjx-c class="mjx-c74"></mjx-c><mjx-c class="mjx-c69"></mjx-c><mjx-c class="mjx-c6F"></mjx-c><mjx-c class="mjx-c6E"></mjx-c><mjx-c class="mjx-c20"></mjx-c><mjx-c class="mjx-c35"></mjx-c></mjx-mtext></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mtext>Equation 5</mtext></math></mjx-assistive-mml></mjx-container> Formula for calculating additive genetic variance involving inbreeding coefficient.</p>
+<p style="padding-left: 80px;"><strong>where:<br>
+</strong><mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="29" style="font-size: 119.8%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mstyle size="sm"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D439 TEX-I"></mjx-c></mjx-mi></mjx-mstyle></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mstyle mathsize="0.85em"><mi>F</mi></mstyle></math></mjx-assistive-mml></mjx-container> = the coefficient of inbreeding,<br>
+<span style="text-align: initial; font-size: 1em;"><mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="30" style="font-size: 119.8%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mstyle size="sm"><mjx-mtext class="mjx-n"><mjx-c class="mjx-c41"></mjx-c><mjx-c class="mjx-c6C"></mjx-c><mjx-c class="mjx-c6C"></mjx-c><mjx-c class="mjx-c20"></mjx-c><mjx-c class="mjx-c74"></mjx-c><mjx-c class="mjx-c65"></mjx-c><mjx-c class="mjx-c72"></mjx-c><mjx-c class="mjx-c6D"></mjx-c><mjx-c class="mjx-c73"></mjx-c></mjx-mtext></mjx-mstyle></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mstyle mathsize="0.85em"><mtext>All terms</mtext></mstyle></math></mjx-assistive-mml></mjx-container> are as defined previously</span>.</p>
+<p>Again, let d = 0, p = q = 0.5, but F = \small 0.875 and a reasonable value to simulate for <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="31" style="font-size: 119.8%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D44E TEX-I"></mjx-c></mjx-mi></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mi>a</mi></math></mjx-assistive-mml></mjx-container> as:</p>
+<p style="text-align: center;"><mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="32" style="font-size: 119.8%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mstyle size="lg"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D44E TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c3D"></mjx-c></mjx-mo><mjx-msqrt space="4"><mjx-sqrt><mjx-surd><mjx-mo class="mjx-lop"><mjx-c class="mjx-c221A TEX-S2"></mjx-c></mjx-mo></mjx-surd><mjx-box style="padding-top: 0.198em;"><mjx-mfrac><mjx-frac><mjx-num><mjx-nstrut></mjx-nstrut><mjx-mn class="mjx-n" size="s"><mjx-c class="mjx-c34"></mjx-c><mjx-c class="mjx-c39"></mjx-c></mjx-mn></mjx-num><mjx-dbox><mjx-dtable><mjx-line></mjx-line><mjx-row><mjx-den><mjx-dstrut></mjx-dstrut><mjx-mrow size="s"><mjx-mn class="mjx-n"><mjx-c class="mjx-c32"></mjx-c></mjx-mn><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-mn class="mjx-n"><mjx-c class="mjx-c31"></mjx-c></mjx-mn><mjx-mo class="mjx-n"><mjx-c class="mjx-c2B"></mjx-c></mjx-mo><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D439 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D45D TEX-I"></mjx-c></mjx-mi><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D45E TEX-I"></mjx-c></mjx-mi></mjx-mrow></mjx-den></mjx-row></mjx-dtable></mjx-dbox></mjx-frac></mjx-mfrac></mjx-box></mjx-sqrt></mjx-msqrt><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c2245"></mjx-c></mjx-mo><mjx-texatom space="4" texclass="ORD"></mjx-texatom><mjx-mstyle style="font-size: 70.8%;"><mjx-mn class="mjx-n"><mjx-c class="mjx-c37"></mjx-c><mjx-c class="mjx-c2E"></mjx-c><mjx-c class="mjx-c32"></mjx-c><mjx-c class="mjx-c33"></mjx-c></mjx-mn><mjx-mo class="mjx-n"><mjx-c class="mjx-c2E"></mjx-c></mjx-mo></mjx-mstyle></mjx-mstyle></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mstyle mathsize="1.2em"><mi>a</mi><mo>=</mo><msqrt><mfrac><mn>49</mn><mrow><mn>2</mn><mo stretchy="false">(</mo><mn>1</mn><mo>+</mo><mi>F</mi><mo stretchy="false">)</mo><mi>p</mi><mi>q</mi></mrow></mfrac></msqrt><mo>≅</mo><mrow data-mjx-texclass="ORD"></mrow><mstyle mathsize="0.85em"><mn>7.23</mn><mo>.</mo></mstyle></mstyle></math></mjx-assistive-mml></mjx-container></p>
+<h1 id="chapter-159-section-3" class="section-header">Polygenic Trait Simulation</h1>
+<p>Let us next simulate a polygenic trait <em>P</em> in which segregation at three loci will contribute additive genotypic values that are responsible for 30% of the phenotypic variability. In this case, the phenotype is modeled&nbsp;where <em>i</em>, <em>j</em>, <em>G,</em> and <em>ε</em> are as before, and <em>k</em> represents each locus, while n is 3. For simplicity, let us assume that segregation at each of the three loci contributes an equal amount to the genotypic variability in an F<sub>2</sub> population. Let us refer to these loci as quantitative trait loci (QTL). Using the quantitative genetic models we have already used, we learn that <span style="font-size: 1em;">for each of the simulated QTL, <em><strong>a</strong></em> can be obtained using Equation 6:</span></p>
+<p style="text-align: center;"><mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="33" style="font-size: 119.8%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mstyle size="lg"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D44E TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c3D"></mjx-c></mjx-mo><mjx-mfrac space="4"><mjx-frac><mjx-num><mjx-nstrut></mjx-nstrut><mjx-mstyle size="s"><mjx-msqrt><mjx-sqrt><mjx-surd><mjx-mo class="mjx-s3"><mjx-c class="mjx-c221A TEX-S3"></mjx-c></mjx-mo></mjx-surd><mjx-box style="padding-top: 0.24em;"><mjx-mfrac><mjx-frac><mjx-num><mjx-nstrut></mjx-nstrut><mjx-msubsup size="s"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D70E TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.531em; margin-left: 0px;"><mjx-mn class="mjx-n"><mjx-c class="mjx-c32"></mjx-c></mjx-mn><mjx-spacer style="margin-top: 0.18em;"></mjx-spacer><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D43A TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msubsup></mjx-num><mjx-dbox><mjx-dtable><mjx-line></mjx-line><mjx-row><mjx-den><mjx-dstrut></mjx-dstrut><mjx-mrow size="s"><mjx-mn class="mjx-n"><mjx-c class="mjx-c32"></mjx-c></mjx-mn><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D45D TEX-I"></mjx-c></mjx-mi><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D45E TEX-I"></mjx-c></mjx-mi></mjx-mrow></mjx-den></mjx-row></mjx-dtable></mjx-dbox></mjx-frac></mjx-mfrac></mjx-box></mjx-sqrt></mjx-msqrt></mjx-mstyle></mjx-num><mjx-dbox><mjx-dtable><mjx-line></mjx-line><mjx-row><mjx-den><mjx-dstrut></mjx-dstrut><mjx-mstyle style="font-size: 50.1%;"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D45B TEX-I"></mjx-c></mjx-mi><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D444 TEX-I"></mjx-c></mjx-mi><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D447 TEX-I"></mjx-c></mjx-mi><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D43F TEX-I"></mjx-c></mjx-mi></mjx-mstyle></mjx-den></mjx-row></mjx-dtable></mjx-dbox></mjx-frac></mjx-mfrac><mjx-mo class="mjx-n"><mjx-c class="mjx-c2C"></mjx-c></mjx-mo></mjx-mstyle></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mstyle mathsize="1.2em"><mi>a</mi><mo>=</mo><mfrac><mstyle><msqrt><mfrac><msubsup><mi>σ</mi><mi>G</mi><mn>2</mn></msubsup><mrow><mn>2</mn><mi>p</mi><mi>q</mi></mrow></mfrac></msqrt></mstyle><mstyle mathsize="0.85em"><mi>n</mi><mi>Q</mi><mi>T</mi><mi>L</mi></mstyle></mfrac><mo>,</mo></mstyle></math></mjx-assistive-mml></mjx-container></p>
+<p style="text-align: center;"><mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="34" style="font-size: 119.8%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mtext class="mjx-n"><mjx-c class="mjx-c45"></mjx-c><mjx-c class="mjx-c71"></mjx-c><mjx-c class="mjx-c75"></mjx-c><mjx-c class="mjx-c61"></mjx-c><mjx-c class="mjx-c74"></mjx-c><mjx-c class="mjx-c69"></mjx-c><mjx-c class="mjx-c6F"></mjx-c><mjx-c class="mjx-c6E"></mjx-c><mjx-c class="mjx-c20"></mjx-c><mjx-c class="mjx-c36"></mjx-c></mjx-mtext></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mtext>Equation 6</mtext></math></mjx-assistive-mml></mjx-container> Formula for calculating additive genotypic value involving QTL,</p>
+<p style="padding-left: 80px;"><strong>where:<br>
+</strong>[latex]<span style="text-align: initial; font-size: 1em;">\small </span>\textrm{All terms}[/latex] <span style="text-align: initial; font-size: 1em;">are as defined previously</span>.</p>
+<p>If we want the total phenotypic variability to be ~98, as before, and the frequency of each of the alleles at all three loci is 0.5 (as in an F<sub>2</sub>), then σ<sup>2</sup><sub>G</sub> = σ<sup>2</sup><sub>A</sub> = 29 and a = 2.56 for each of the loci. We would translate this information to the Excel spreadsheet as before, but now the spreadsheet will have three columns for genotypes and three columns for genotypic values at each of the loci.</p>
+<h1 id="chapter-159-section-4" class="section-header">QTL Simulations</h1>
+<p>How would you simulate genotypic effects if you wanted one of the QTLs to contribute 75%, a second QTL to contribute 20%, and the third to contribute 5% to the total genotypic variability?</p>
+<p>For hybrid crops, the segregating progeny are often evaluated in testcross combination. For example, in maize, it is routine to generate doubled haploids (DHs) from a cross of two elite Stiff Stalk homozygous lines. The DH’s are then crossed to an elite non-Stiff-Stalk homozygous ‘tester’. The resulting sample of Testcrossed DH (TDH) will be evaluated in an initial field trial. Let us simulate this situation for TDHs, grown in a field trial in which the CV for yield is ~ 7% and the mean is ~ 225 bu/ac. In order to simulate TDH’s we need to recall that the additive genetic variance for testcross progeny is represented by Equation 7:</p>
+<p style="text-align: center;"><mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="35" style="font-size: 119.8%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-msubsup><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D70E TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.36em; margin-left: 0px;"><mjx-mn class="mjx-n" size="s"><mjx-c class="mjx-c32"></mjx-c></mjx-mn><mjx-spacer style="margin-top: 0.18em;"></mjx-spacer><mjx-texatom size="s" texclass="ORD"><mjx-msup><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D434 TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: 0.289em;"><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D447 TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msup></mjx-texatom></mjx-script></mjx-msubsup><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c3D"></mjx-c></mjx-mo><mjx-texatom space="4" texclass="ORD"><mjx-mfrac><mjx-frac><mjx-num><mjx-nstrut></mjx-nstrut><mjx-mn class="mjx-n" size="s"><mjx-c class="mjx-c31"></mjx-c></mjx-mn></mjx-num><mjx-dbox><mjx-dtable><mjx-line></mjx-line><mjx-row><mjx-den><mjx-dstrut></mjx-dstrut><mjx-mn class="mjx-n" size="s"><mjx-c class="mjx-c32"></mjx-c></mjx-mn></mjx-den></mjx-row></mjx-dtable></mjx-dbox></mjx-frac></mjx-mfrac></mjx-texatom><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-mn class="mjx-n"><mjx-c class="mjx-c31"></mjx-c></mjx-mn><mjx-mo class="mjx-n" space="3"><mjx-c class="mjx-c2B"></mjx-c></mjx-mo><mjx-mi class="mjx-i" space="3"><mjx-c class="mjx-c1D439 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-msup><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D6FC TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: 0.363em;"><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D447 TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msup><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><msubsup><mi>σ</mi><mrow data-mjx-texclass="ORD"><msup><mi>A</mi><mi>T</mi></msup></mrow><mn>2</mn></msubsup><mo>=</mo><mrow data-mjx-texclass="ORD"><mfrac><mn>1</mn><mn>2</mn></mfrac></mrow><mo stretchy="false">(</mo><mn>1</mn><mo>+</mo><mi>F</mi><mo stretchy="false">)</mo><mo stretchy="false">(</mo><msup><mi>α</mi><mi>T</mi></msup><mo stretchy="false">)</mo></math></mjx-assistive-mml></mjx-container></p>
+<p style="text-align: center;"><mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="36" style="font-size: 119.8%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mtext class="mjx-n"><mjx-c class="mjx-c45"></mjx-c><mjx-c class="mjx-c71"></mjx-c><mjx-c class="mjx-c75"></mjx-c><mjx-c class="mjx-c61"></mjx-c><mjx-c class="mjx-c74"></mjx-c><mjx-c class="mjx-c69"></mjx-c><mjx-c class="mjx-c6F"></mjx-c><mjx-c class="mjx-c6E"></mjx-c><mjx-c class="mjx-c20"></mjx-c><mjx-c class="mjx-c37"></mjx-c></mjx-mtext></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mtext>Equation 7</mtext></math></mjx-assistive-mml></mjx-container> Formula for calculating additive genetic variance for testcross progeny,</p>
+<p style="padding-left: 80px;"><strong>where:<br>
+</strong><mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="37" style="font-size: 119.8%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-msubsup><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D70E TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.36em; margin-left: 0px;"><mjx-mn class="mjx-n" size="s"><mjx-c class="mjx-c32"></mjx-c></mjx-mn><mjx-spacer style="margin-top: 0.18em;"></mjx-spacer><mjx-texatom size="s" texclass="ORD"><mjx-msup><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D434 TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: 0.289em;"><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D447 TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msup></mjx-texatom></mjx-script></mjx-msubsup></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><msubsup><mi>σ</mi><mrow data-mjx-texclass="ORD"><msup><mi>A</mi><mi>T</mi></msup></mrow><mn>2</mn></msubsup></math></mjx-assistive-mml></mjx-container> = the additive genetic variance for testcross,<br>
+<mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="38" style="font-size: 119.8%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D439 TEX-I"></mjx-c></mjx-mi></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mi>F</mi></math></mjx-assistive-mml></mjx-container> = the coefficient of inbreeding,<br>
+<mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="39" style="font-size: 119.8%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-msup><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D6FC TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: 0.363em;"><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D447 TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msup></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><msup><mi>α</mi><mi>T</mi></msup></math></mjx-assistive-mml></mjx-container> = the average effect of testcrossed allele.</p>
+<p>Because the parents of the DH lines are fully homozygous, we can assume F=1. Thus, <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="40" style="font-size: 119.8%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-msubsup><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D70E TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.36em; margin-left: 0px;"><mjx-mn class="mjx-n" size="s"><mjx-c class="mjx-c32"></mjx-c></mjx-mn><mjx-spacer style="margin-top: 0.18em;"></mjx-spacer><mjx-texatom size="s" texclass="ORD"><mjx-msup><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D434 TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: 0.289em;"><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D447 TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msup></mjx-texatom></mjx-script></mjx-msubsup><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c3D"></mjx-c></mjx-mo><mjx-msup space="4"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D6FC TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: 0.363em;"><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D447 TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msup></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><msubsup><mi>σ</mi><mrow data-mjx-texclass="ORD"><msup><mi>A</mi><mi>T</mi></msup></mrow><mn>2</mn></msubsup><mo>=</mo><msup><mi>α</mi><mi>T</mi></msup></math></mjx-assistive-mml></mjx-container>.<br>
+Otherwise, the simulations will be generated as before, except we now have a different mean and phenotypic variance.</p>
+<h1 id="chapter-159-section-5" class="section-header">References</h1>
+<p>Beavis, W. D.1994. The power and deceit of QTL experiments: lessons from comparative QTL studies, p.250-266. In Proceedings of the forty-ninth annual corn and sorghum industry research conference. American Seed Trade Association, Washington, DC.</p>
+<p>Bulmer, M. G. 1976. The effect of selection on genetic variability: a simulation study. Genet. Res., Camb. (1976), 28, pp. 101-117</p>
+<p>Hill, W. G., and A. Robertson. 1968. Linkage disequilibrium in finite populations. Theor. Appl. Genet. 38, 226–231.</p>
+<p>Podlich, D. W., and M. Cooper. 1998. Modelling plant breeding programs as search strategies on a complex response surface, p.171-178. In Asia-Pacific Conference on Simulated Evolution and Learning. Springer, Berlin, Heidelberg</p>
+<p>&nbsp;</p>
+<div class="textbox">
+<p><strong>How to cite this chapter</strong>: Beavis, W., A. A. Mahama, &amp; W. Suza. 2023. Simulation Modeling. In W. P. Suza, &amp; K. R. Lamkey (Eds.), <em>Quantitative Genetics for Plant Breeding</em>. Iowa State University Digital Press.</p>
+</div>
+
+</section>
+</div><!-- #content -->
+					<nav aria-labelledby="reading-nav" class="nav-reading " role="navigation">
+		<p id="reading-nav" class="screen-reader-text">Previous/next navigation</p>
+		<div class="nav-reading__previous js-nav-previous">
+											<a href="https://iastate.pressbooks.pub/quantitativegenetics/chapter/multi-environment-trials-linear-mixed-models/">
+					<svg class="icon--svg" role="none" aria-hidden="true" focusable="false" width="512" height="410"><use href="#arrow-left"></use></svg>
+										<span class="nav-reading__label">Previous: Chapter 12: Multi Environment Trials: Linear Mixed Models</span>
+				</a>
+					</div>
+		<div class="nav-reading__next js-nav-next">
+											<a href="https://iastate.pressbooks.pub/quantitativegenetics/back-matter/plant-breeding-basics/">
+										<span class="nav-reading__label">Next: Plant Breeding Basics</span>
+					<svg class="icon--svg" role="none" aria-hidden="true" focusable="false" width="512" height="410"><use href="#arrow-right"></use></svg>
+				</a>
+					</div>
+		<button class="nav-reading__up" style="opacity: 0;">
+			<svg class="icon--svg" width="410" height="512"><use href="#arrow-up"></use></svg>
+			<span class="screen-reader-text">Back to top</span>
+		</button>
+		</nav>
+							<div class="block block-reading-meta">
+						<div class="block-reading-meta__inner">
+							<div class="block-reading-meta__subsection">
+								<h2 class="section__subtitle block-reading-meta__subtitle">License</h2>
+								<div class="license-attribution"><p><img src="./Chapter 13_ Simulation Modeling – Quantitative Genetics for Plant Breeding_files/cc-by-nc.svg" alt="Icon for the Creative Commons Attribution-NonCommercial 4.0 International License" role="presentation"></p><p><a rel="cc:attributionURL" href="https://iastate.pressbooks.pub/quantitativegenetics" property="dc:title">Quantitative Genetics for Plant Breeding</a> Copyright © 2023 by <span property="cc:attributionName">William Beavis; Katherine Espinosa; Mark Newell; Anthony Assibi Mahama; and Walter Suza</span> is licensed under a <a rel="license" href="https://creativecommons.org/licenses/by-nc/4.0/">Creative Commons Attribution-NonCommercial 4.0 International License</a>, except where otherwise noted.</p></div>							</div>
+														<div class="block-reading-meta__subsection">
+								<h2 class="section__subtitle block-reading-meta__subtitle">Share This Book</h2>
+								<div class="block-reading-meta__share">
+																	</div>
+							</div>
+													</div>
+					</div>
+						</main>
+
+
+<footer class="footer
+ footer--reading">
+	<div class="footer__inner">
+		<section class="footer__pressbooks focusable" tabindex="-1">
+			<a class="footer__pressbooks__icon" href="https://pressbooks.com/">
+				<svg class="icon--svg" role="none" aria-hidden="true" focusable="false">
+					<use href="#icon-pressbooks"></use>
+				</svg>
+				<span class="screen-reader-text">Pressbooks</span>
+			</a>
+			<div class="footer__pressbooks__links">
+								<p class="footer__pressbooks__links__title"><a href="https://pressbooks.com/">Powered by <span class="pressbooks">Pressbooks</span></a></p>
+				<ul class="footer__pressbooks__links__list">
+					<li class="footer__pressbooks__links__list-item footer__pressbooks__links__list-item-guide"><a href="https://guide.pressbooks.com/">Pressbooks User Guide</a></li>
+					<li class="footer__pressbooks__links__list-item footer__pressbooks__links__list-item-pressbooks-directory">|<a href="https://pressbooks.directory/">Pressbooks Directory</a></li>
+											<li class="footer__pressbooks__links__list-item footer__pressbooks__links__list-item-contact">|<a href="https://www.iastatedigitalpress.com/contact/">Contact</a></li>
+									</ul>
+			</div>
+			<div class="footer__pressbooks__social">
+				<a class="youtube" href="https://www.youtube.com/user/pressbooks">
+					<svg class="icon--svg" role="none" aria-hidden="true" focusable="false">
+						<use href="#youtube-icon"></use>
+					</svg>
+					<span class="screen-reader-text">Pressbooks on YouTube</span>
+				</a>
+				<a class="linkedin" href="https://www.linkedin.com/company/pressbooks/?originalSubdomain=ca">
+					<svg class="icon--svg" role="none" aria-hidden="true" focusable="false">
+						<use href="#linkedin-icon"></use>
+					</svg>
+					<span class="screen-reader-text">Pressbooks on LinkedIn</span></a>
+			</div>
+
+		</section>
+	</div><!-- .container -->
+</footer><!-- .footer -->
+<script type="speculationrules">
+{"prefetch":[{"source":"document","where":{"and":[{"href_matches":"/quantitativegenetics/*"},{"not":{"href_matches":["/quantitativegenetics/wp-*.php","/quantitativegenetics/wp-admin/*","/app/uploads/sites/102/*","/app/*","/app/plugins/*","/app/themes/pressbooks-malala/*","/app/themes/pressbooks-book/*","/quantitativegenetics/*\\?(.+)"]}},{"not":{"selector_matches":"a[rel~=\"nofollow\"]"}},{"not":{"selector_matches":".no-prefetch, .no-prefetch a"}}]},"eagerness":"conservative"}]}
+</script>
+<script type="text/javascript" src="./Chapter 13_ Simulation Modeling – Quantitative Genetics for Plant Breeding_files/nohighlights.js.download" id="nohighlights-js"></script>
+<script type="text/javascript" src="./Chapter 13_ Simulation Modeling – Quantitative Genetics for Plant Breeding_files/showhighlights.js.download" id="showhighlights-js"></script>
+<script type="text/javascript" defer="" src="./Chapter 13_ Simulation Modeling – Quantitative Genetics for Plant Breeding_files/script.js.download" id="koko-analytics-js"></script>
+<script type="text/javascript" src="./Chapter 13_ Simulation Modeling – Quantitative Genetics for Plant Breeding_files/tex-mml-chtml.js.download" id="pb_mathjax-js"></script>
+<script id="wp-emoji-settings" type="application/json">
+{"baseUrl":"https://s.w.org/images/core/emoji/17.0.2/72x72/","ext":".png","svgUrl":"https://s.w.org/images/core/emoji/17.0.2/svg/","svgExt":".svg","source":{"concatemoji":"https://iastate.pressbooks.pub/quantitativegenetics/wp-includes/js/wp-emoji-release.min.js?ver=6.9.5"}}
+</script>
+<script type="module">
+/* <![CDATA[ */
+/*! This file is auto-generated */
+const a=JSON.parse(document.getElementById("wp-emoji-settings").textContent),o=(window._wpemojiSettings=a,"wpEmojiSettingsSupports"),s=["flag","emoji"];function i(e){try{var t={supportTests:e,timestamp:(new Date).valueOf()};sessionStorage.setItem(o,JSON.stringify(t))}catch(e){}}function c(e,t,n){e.clearRect(0,0,e.canvas.width,e.canvas.height),e.fillText(t,0,0);t=new Uint32Array(e.getImageData(0,0,e.canvas.width,e.canvas.height).data);e.clearRect(0,0,e.canvas.width,e.canvas.height),e.fillText(n,0,0);const a=new Uint32Array(e.getImageData(0,0,e.canvas.width,e.canvas.height).data);return t.every((e,t)=>e===a[t])}function p(e,t){e.clearRect(0,0,e.canvas.width,e.canvas.height),e.fillText(t,0,0);var n=e.getImageData(16,16,1,1);for(let e=0;e<n.data.length;e++)if(0!==n.data[e])return!1;return!0}function u(e,t,n,a){switch(t){case"flag":return n(e,"\ud83c\udff3\ufe0f\u200d\u26a7\ufe0f","\ud83c\udff3\ufe0f\u200b\u26a7\ufe0f")?!1:!n(e,"\ud83c\udde8\ud83c\uddf6","\ud83c\udde8\u200b\ud83c\uddf6")&&!n(e,"\ud83c\udff4\udb40\udc67\udb40\udc62\udb40\udc65\udb40\udc6e\udb40\udc67\udb40\udc7f","\ud83c\udff4\u200b\udb40\udc67\u200b\udb40\udc62\u200b\udb40\udc65\u200b\udb40\udc6e\u200b\udb40\udc67\u200b\udb40\udc7f");case"emoji":return!a(e,"\ud83e\u1fac8")}return!1}function f(e,t,n,a){let r;const o=(r="undefined"!=typeof WorkerGlobalScope&&self instanceof WorkerGlobalScope?new OffscreenCanvas(300,150):document.createElement("canvas")).getContext("2d",{willReadFrequently:!0}),s=(o.textBaseline="top",o.font="600 32px Arial",{});return e.forEach(e=>{s[e]=t(o,e,n,a)}),s}function r(e){var t=document.createElement("script");t.src=e,t.defer=!0,document.head.appendChild(t)}a.supports={everything:!0,everythingExceptFlag:!0},new Promise(t=>{let n=function(){try{var e=JSON.parse(sessionStorage.getItem(o));if("object"==typeof e&&"number"==typeof e.timestamp&&(new Date).valueOf()<e.timestamp+604800&&"object"==typeof e.supportTests)return e.supportTests}catch(e){}return null}();if(!n){if("undefined"!=typeof Worker&&"undefined"!=typeof OffscreenCanvas&&"undefined"!=typeof URL&&URL.createObjectURL&&"undefined"!=typeof Blob)try{var e="postMessage("+f.toString()+"("+[JSON.stringify(s),u.toString(),c.toString(),p.toString()].join(",")+"));",a=new Blob([e],{type:"text/javascript"});const r=new Worker(URL.createObjectURL(a),{name:"wpTestEmojiSupports"});return void(r.onmessage=e=>{i(n=e.data),r.terminate(),t(n)})}catch(e){}i(n=f(s,u,c,p))}t(n)}).then(e=>{for(const n in e)a.supports[n]=e[n],a.supports.everything=a.supports.everything&&a.supports[n],"flag"!==n&&(a.supports.everythingExceptFlag=a.supports.everythingExceptFlag&&a.supports[n]);var t;a.supports.everythingExceptFlag=a.supports.everythingExceptFlag&&!a.supports.flag,a.supports.everything||((t=a.source||{}).concatemoji?r(t.concatemoji):t.wpemoji&&t.twemoji&&(r(t.twemoji),r(t.wpemoji)))});
+//# sourceURL=https://iastate.pressbooks.pub/quantitativegenetics/wp-includes/js/wp-emoji-loader.min.js
+/* ]]> */
+</script>
+</div>
+
+
+
+
+</body></html>

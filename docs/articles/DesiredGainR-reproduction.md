@@ -13,9 +13,9 @@ and Debnath (2023), *Scientific Reports* **13**, 18977, computed in SAS
 PROC IML and published in tables.
 
 The reference values are frozen in
-[`rahimi_debnath_2023()`](https://FAkohoue.github.io/DesiredGainR/reference/rahimi_debnath_2023.md)
-and must not be recomputed here. The moment they are derived from this
-package they stop being an external check.
+[`rahimi_debnath_2023()`](https://FAkohoue.github.io/DesiredGainR/reference/rahimi_debnath_2023.md).
+Preserve them exactly. The moment they are derived from this package
+they stop being an external check.
 
 ``` r
 reference <- rahimi_debnath_2023()
@@ -25,13 +25,12 @@ reference$traits
 #> [7] "yield"
 ```
 
-## What can and cannot be reproduced
+## Scope of the reproduction
 
 The article’s genetic and phenotypic covariance matrices are in
-supplementary data files that are not distributed with it, so the index
-**coefficients** cannot be recomputed. That limits what is checkable,
-and it would be easy to stop there and claim the reproduction was
-impossible.
+supplementary data files that are absent from the publication. The index
+**coefficients** therefore remain unavailable for direct recomputation.
+This limits the quantities that can be checked.
 
 It is not, because the Pesek–Baker index has an exact algebraic property
 that the published table either satisfies or does not.
@@ -89,7 +88,7 @@ fail if either party had the method wrong.
 
 | Quantity | Tolerance | Why |
 |----|----|----|
-| Relative spread of the seven ratios | \\2\times10^{-3}\\ | Table values are printed to four significant figures; the smallest, `row_length` = 0.224, carries the most rounding |
+| Relative spread of the seven ratios | \\2\times10^{-3}\\ | Table values are printed to four significant figures. The smallest, `row_length` = 0.224, carries the most rounding. |
 | Common ratio against 0.33585 | \\10^{-3}\\ | As above |
 | Each trait’s ratio individually | \\5\times10^{-3}\\ | Dominated by `row_length`, where a half-unit in the fourth figure is 0.2 per cent |
 
@@ -181,10 +180,11 @@ implements a different paper — Cerón-Rojas et al. (2026) — and needs its
 own anchor.
 
 That paper’s replication deposit contains the authors’ own R scripts.
-The intermediate data files those scripts read were not deposited, so
-their published numbers cannot be recomputed. The **algorithm** can be,
-and a reference implementation is a stronger comparison than a table
-anyway: it can be run on any input rather than only on theirs.
+The intermediate data files those scripts read were absent from the
+deposit. Their published numbers therefore remain unavailable for direct
+recomputation. The **algorithm** can still be reproduced. A reference
+implementation provides a stronger comparison than a table because it
+can be run on any input rather than only on theirs.
 
 `tests/testthat/test-reference-implementation.R` transcribes their code
 verbatim and runs both implementations on identical inputs. The
@@ -200,7 +200,7 @@ quantities compared are:
 
 The second row is worth noting because the two expressions do not look
 alike. The reference computes accuracy as a ratio of standard
-deviations; this package computes a correlation. For the optimum index
+deviations. This package computes a correlation. For the optimum index
 \\\mathbf{b} = \mathbf{P}^{-1}\mathbf{G}\mathbf{w}\\ we have
 \\\mathbf{b}'\mathbf{G}\mathbf{w} = \mathbf{b}'\mathbf{P}\mathbf{b}\\,
 so they are the same number by an identity that is itself asserted as a
@@ -226,7 +226,7 @@ than it earns.
   over breeding cycles is checked only against its own internal
   consistency.
 - **The Monte Carlo tests remain the primary evidence** for the rest of
-  the package. This vignette adds two external anchors; it does not
+  the package. This vignette adds two external anchors. It does not
   replace them.
 
 The qualitative orderings that *are* checkable, and hold:

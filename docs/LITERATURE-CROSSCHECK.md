@@ -1,5 +1,26 @@
 # DesiredGainR — cross-check against the Publications folder
 
+## Architecture decision added 4 August 2026
+
+Montesinos-López, Montesinos-López, Hernández-Suárez and Alemu (2026),
+*A selection index with minimal genetic relatedness for multi-trait data
+via binary quadratic programming* (Plant Methods 22:7,
+<https://doi.org/10.1186/s13007-025-01484-4>), does **not** define
+another DesiredGainR index family. Its QPMSI selects a fixed-size binary
+subset by combining multi-trait merit with a genomic-relatedness
+penalty. That is an operational parent-selection problem and belongs to
+HapBlockR.
+
+QPMSI is not true optimal contribution selection (OCS), because its
+binary selection variables do not optimise continuous parental
+contributions. It is also not a complete optimum-cross-selection method,
+because it does not choose parent pairs or allocate matings. Those
+distinctions remain HapBlockR’s responsibility. The intended integration
+is that HapBlockR obtains the multi-trait merit score from DesiredGainR,
+then applies parent selection, OCS or optimum cross selection as
+required. DesiredGainR must not import HapBlockR or reproduce those
+downstream optimisers.
+
 Date 2026-07-30. Sources read in full or in relevant part:
 
 1.  Covarrubias-Pazaran G. (2021) *Guideline: Practical implementation

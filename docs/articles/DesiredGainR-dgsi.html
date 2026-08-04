@@ -85,7 +85,8 @@
     <li><a class="dropdown-item" href="../articles/DesiredGainR-empirical-validation.html">Empirical validation with real breeding programmes</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Index methods</h6></li>
-    <li><a class="dropdown-item" href="../articles/DesiredGainR-index-families.html">Choosing an index</a></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-index-families.html">Multiple-trait selection and method comparison</a></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-information.html">Using predictions and prediction errors</a></li>
     <li><a class="dropdown-item" href="../articles/DesiredGainR-dgsi.html">Optimising desired gains</a></li>
     <li><a class="dropdown-item" href="../articles/DesiredGainR-qgsi.html">Quadratic genomic selection</a></li>
     <li><hr class="dropdown-divider"></li>
@@ -210,7 +211,7 @@ the implementation uses a reproducible derivative-free search.</p>
 <span><span class="co">#&gt;   Feasible anywhere in this population: no</span></span>
 <span><span class="co">#&gt;   Attainable fraction of the requested gain: 54.7%</span></span></code></pre></div>
 <p>If the exact ray is unattainable, optimisation can find a closer
-selected set; it cannot create unavailable genetic variation. If the
+selected set. it cannot create unavailable genetic variation. If the
 entries are minimum floors rather than an exact ratio, use <a href="../reference/suggest_desired_gains.html"><code>suggest_desired_gains()</code></a>
 or interval optimisation and assess joint attainment instead.</p>
 <hr>
@@ -254,7 +255,7 @@ replicates, followed by holdout or external validation.</p>
 <p><code>dg</code> and <code>realised_response</code> use candidate
 standard-deviation units. The coefficient solve still respects the
 original units of <span class="math inline">\(\mathbf{G}\)</span> and
-<span class="math inline">\(\mathbf{P}\)</span>; the package performs
+<span class="math inline">\(\mathbf{P}\)</span>. The package performs
 the conversion internally.</p>
 <p>The operational output is the ranked candidate table, not the
 coefficient vector by itself.</p>
@@ -351,11 +352,11 @@ separation is not expected to be inherited.</p>
 <p>The winning replicate is selected on held-out candidates by default.
 Report:</p>
 <ol style="list-style-type: decimal">
-<li>the training and holdout objectives;</li>
-<li>whether the search reached a plateau;</li>
-<li>coefficient and rank stability across replicates;</li>
-<li>selected-set agreement;</li>
-<li>the response for every trait; and</li>
+<li>The training and holdout objectives.</li>
+<li>Whether the search reached a plateau.</li>
+<li>Coefficient and rank stability across replicates.</li>
+<li>Selected-set agreement.</li>
+<li>The response for every trait.</li>
 <li>the covariance source and its uncertainty.</li>
 </ol>
 <p>If independent replicates produce different selected sets with
@@ -398,8 +399,8 @@ core rather than hiding the instability.</p>
 <span><span class="co">#&gt; 6                    0.391</span></span></code></pre></div>
 <p>Compute both objective values from the full candidate set so that the
 comparison uses the same observations. The stored
-<code>dgsi$objective</code> can instead be a holdout objective and must
-not be compared directly with a full-sample quantity.</p>
+<code>dgsi$objective</code> can instead be a holdout objective. Compare
+it only with other holdout quantities.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">dgsi_loss</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">response</span>, <span class="va">target</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="op">(</span><span class="op">(</span><span class="va">response</span> <span class="op">-</span> <span class="va">target</span><span class="op">)</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">pmax</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="va">target</span><span class="op">)</span>, <span class="fl">0.25</span><span class="op">)</span><span class="op">)</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span></span>
@@ -421,7 +422,7 @@ uniform across traits. The anthesis-silking interval changes from an
 unfavourable differential to a favourable one, and plant height and
 anthesis date move much closer to their requests. Grain yield, ears per
 plant and grey leaf spot do not all become closer individually. DGSI
-minimises the declared multi-trait loss; it does not guarantee a smaller
+minimises the declared multi-trait loss. it does not guarantee a smaller
 error for every trait. The trait table must therefore accompany the
 total objective.</p>
 <p>The iterative method has value only if the improvement is meaningful
@@ -439,17 +440,16 @@ fitting.</p>
 </h2>
 <p>A defensible analysis reports all of the following:</p>
 <ol style="list-style-type: decimal">
-<li>the requested gain vector and whether it represents an exact ratio
-or minimum floors;</li>
-<li>the exact-ray feasibility result at the planned selection
-intensity;</li>
-<li>the non-iterated Yamada response;</li>
-<li>the optimised direction, selected differential and expected
-transmitted response;</li>
-<li>the selected candidates and their index ranks;</li>
-<li>training and holdout objectives;</li>
-<li>rank, coefficient and selected-set stability across replicates;
-and</li>
+<li>The requested gain vector and whether it represents an exact ratio
+or minimum floors.</li>
+<li>The exact-ray feasibility result at the planned selection
+intensity.</li>
+<li>The non-iterated Yamada response.</li>
+<li>The optimised direction, selected differential and expected
+transmitted response.</li>
+<li>The selected candidates and their index ranks.</li>
+<li>Training and holdout objectives.</li>
+<li>Rank, coefficient and selected-set stability across replicates.</li>
 <li>validation in a later cohort when one is available.</li>
 </ol>
 <p>The demonstration above now covers items 1–7 with the shipped

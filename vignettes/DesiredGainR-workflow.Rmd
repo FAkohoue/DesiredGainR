@@ -93,7 +93,7 @@ G_working <- estimate_genetic_covariance(
   method = "adjusted_means_surrogate"
 )
 G_working$estimand
-#> [1] "working surrogate for genetic covariance; covariance of
+#> [1] "working surrogate for genetic covariance. Covariance of
 #>      across-environment adjusted means"
 ```
 
@@ -125,7 +125,7 @@ Two of those weights are negative for traits the objective asks to improve,
 which is correct rather than an error. In addition, the target values are
 already genetic-standard-deviation gains, whereas the returned weights are per
 original trait unit because `dgr_G` and `dgr_P` are in original units. The
-following multiplication expresses each weight per genetic standard deviation;
+following multiplication expresses each weight per genetic standard deviation.
 it does not standardise the target again:
 
 ```{r rescale}
@@ -159,8 +159,8 @@ feasibility
 
 The required intensity is 3.2082, equivalent under normal truncation to the
 best 0.1773%. Among 200 candidates, that proportion represents 0.355 candidate.
-It cannot be rounded to one because selecting one retains 0.5% and gives a
-lower intensity. Therefore, the exact vector is not attainable in this finite
+Rounding to one changes the selection proportion to 0.5% and lowers the
+intensity. Therefore, the exact vector lies beyond this finite
 candidate set.
 
 The planned selection of 20 candidates has intensity 1.7550. Its ratio to the
@@ -223,6 +223,12 @@ rank_sum <- selection_index(
   method = "mulamba_mock",
   lower_is_better = lower_is_better, n_select = 20L
 )
+base_index <- selection_index(
+  dgr_candidates, traits,
+  method = "base",
+  G = dgr_G, P = dgr_P, economic_weights = economic_weights,
+  lower_is_better = lower_is_better, n_select = 20L, main_trait = "GY"
+)
 smith_hazel
 ```
 
@@ -230,25 +236,33 @@ Relative efficiency below one is the intended trade of response in the main
 trait for response elsewhere in the objective, not a defect. Every value
 reported by Rahimi and Debnath (2023) was below one.
 
-The Mulamba-Mock rank-sum index needs neither weights nor covariance matrices,
-which is why Guimarães et al. (2021) found it competitive. Compare the two by
-rank correlation *and* by set overlap, because the two must be consistent:
+The Mulamba-Mock rank-sum index needs neither weights nor covariance matrices.
+This explains its value as a low-assumption comparator. The base index shows
+how much the covariance adjustment contributes beyond direct weighting.
+
+Use `compare_selection_methods()` to verify the comparison conditions. Then
+read biological responses, summary criteria, rank agreement, and selected-set
+agreement.
 
 ```{r compare}
-paired <- merge(
-  smith_hazel$ranking[, c("id", "score")],
-  rank_sum$ranking[, c("id", "score")],
-  by = "id", suffixes = c("_sh", "_mm")
+comparison <- compare_selection_methods(
+  list(
+    Smith_Hazel = smith_hazel,
+    Base = base_index,
+    Rank_sum = rank_sum
+  )
 )
-round(stats::cor(paired$score_sh, paired$score_mm, method = "spearman"), 3)
-length(intersect(smith_hazel$selected$id, rank_sum$selected$id))
+comparison$fairness
+comparison$summary
+round(comparison$rank_correlation, 2)
+comparison$selected_overlap
 ```
 
-A high correlation paired with a nearly empty intersection would indicate a
-fault rather than a finding. That check found a genuine row-alignment bug
-during development.
+Rank correlation uses all candidates. Selected-set overlap concerns the final
+decision. Report both because close overall rankings can still diverge near the
+selection boundary.
 
-See [Choosing an index](DesiredGainR-index-families.html).
+See [Multiple-trait selection](DesiredGainR-index-families.html).
 
 ---
 
@@ -280,7 +294,7 @@ dgsi <- run_dgsi(
 round(dgsi$realised_response - desired_gains, 3)
 ```
 
-Read that against Stage 4. Feasibility constrains the requested *proportion*;
+Read that against Stage 4. Feasibility constrains the requested *proportion*.
 the optimiser is not bound to it, and distributes the shortfall unevenly,
 overshooting grain yield while undershooting anthesis date. Whether that trade
 is acceptable is a breeding decision rather than a numerical one.
@@ -355,7 +369,12 @@ breeder's own phased marker data. See
 
 **Which candidates should actually be crossed?** Parent, cross and mating
 allocation, coancestry control and operational feasibility are outside this
-package's scope by design. See
+package's scope by design. Use
+[HapBlockR](https://github.com/FAkohoue/HapBlockR) for parent selection, OCS,
+optimum cross selection and mate allocation. HapBlockR's
+`build_selection_index()` calls
+DesiredGainR for DGSI or QGSI, so the index developed here passes directly into
+that downstream decision. See
 [Working with other breeding software](DesiredGainR-interoperation.html).
 
 ---
@@ -366,11 +385,11 @@ package's scope by design. See
 |---|---|
 | 1-2 | [Obtaining G and P](DesiredGainR-covariance.html) |
 | 3-5 | [Defining a breeding objective](DesiredGainR-objective.html) |
-| 6-7 | [Choosing an index](DesiredGainR-index-families.html) |
+| 6-7 | [Multiple-trait selection](DesiredGainR-index-families.html) |
 | 8 | [Optimising desired gains](DesiredGainR-dgsi.html) |
 | 9 | [Quadratic genomic selection](DesiredGainR-qgsi.html) |
 | 10 | [Defining a breeding objective](DesiredGainR-objective.html) |
-| Beyond | [Comparing objectives over several cycles](DesiredGainR-simulation.html); [Working with other breeding software](DesiredGainR-interoperation.html) |
+| Beyond | [Comparing objectives over several cycles](DesiredGainR-simulation.html) and [Working with other breeding software](DesiredGainR-interoperation.html) |
 
 ```{r session}
 sessionInfo()

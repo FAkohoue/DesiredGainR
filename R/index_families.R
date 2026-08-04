@@ -132,6 +132,10 @@
 #'     ranks are summed. It requires neither economic weights nor covariance
 #'     matrices, and Guimaraes et al. (2021) found it to give the most balanced
 #'     multi-trait response of the methods they compared.}
+#'   \item{`"elston"`}{The Elston multiplicative index. Candidates first meet every stated
+#'     floor. Eligible candidates are ranked by the product of their margins
+#'     above those floors. The logarithm of the product provides numerical
+#'     stability.}
 #'   \item{`"independent_culling"`}{Not an index. Candidates must exceed a
 #'     threshold for every trait. Included as a comparator because it is what
 #'     most programmes actually do.}
@@ -172,13 +176,17 @@
 #'   happened.
 #' @param method Index family. See Details.
 #' @param G Genetic variance-covariance matrix, named by trait. Required by
-#'   every method except `"base"`, `"mulamba_mock"`, `"independent_culling"`,
-#'   and `"tandem"`.
+#'   every method except `"base"`, `"mulamba_mock"`, `"elston"`,
+#'   `"independent_culling"`, and `"tandem"`.
 #' @param P Phenotypic variance-covariance matrix, named by trait. Required by
 #'   `"smith_hazel"` and `"yamada"`.
-#' @param economic_weights Named non-negative economic weights in the
-#'   favourable-direction trait space. Required by `"smith_hazel"` and
-#'   `"base"`, and optionally used to weight ranks in `"mulamba_mock"`.
+#' @param economic_weights Named economic weights in the favourable-direction
+#'   trait space. Required by `"smith_hazel"` and `"base"`, and optionally used
+#'   to weight ranks in `"mulamba_mock"`. Negative values are valid for the
+#'   economic indices. They can arise when correlated response would otherwise
+#'   move a trait beyond its economically preferred level. Rank weights remain
+#'   non-negative because they state relative emphasis after trait direction
+#'   has been declared.
 #' @param desired_gains Named non-negative desired gains in the
 #'   favourable-direction trait space. Required by `"pesek_baker"` and
 #'   `"yamada"`.
@@ -217,8 +225,11 @@
 #'   narrow-sense heritabilities on its diagonal. Prefer it whenever `P` is a
 #'   genuine population estimate rather than a covariance computed from the
 #'   candidates at hand.
-#' @param culling_thresholds Named thresholds in the favourable-direction trait
-#'   space, required by `"independent_culling"`.
+#' @param culling_thresholds Named acceptance limits in the original trait
+#'   units, required by `"elston"` and `"independent_culling"`. Supply a
+#'   minimum for traits where larger values are favourable. Supply a maximum
+#'   for traits named in `lower_is_better`. The function applies direction,
+#'   centring, and scaling to these limits internally.
 #' @param tandem_order Character vector giving the order in which traits are
 #'   selected, required by `"tandem"`.
 #' @param n_select Number of candidates selected.
@@ -266,6 +277,9 @@
 #' Mulamba NN, Mock JJ (1978). *Egyptian Journal of Genetics and Cytology*
 #' 7:40-51.
 #'
+#' Elston RC (1963). A weight-free index for ranking or selection with respect
+#' to several traits at a time. *Biometrics* 19:85-97.
+#'
 #' Pesek J, Baker RJ (1969). *Canadian Journal of Plant Science* 49:803-804.
 #' \doi{10.4141/cjps69-137}
 #'
@@ -285,7 +299,7 @@ selection_index <- function(
   id_col = NULL,
   method = c(
     "smith_hazel", "base", "pesek_baker", "yamada",
-    "mulamba_mock", "independent_culling", "tandem"
+    "mulamba_mock", "elston", "independent_culling", "tandem"
   ),
   G = NULL,
   P = NULL,
@@ -441,12 +455,12 @@ selection_index <- function(
     }
     invisible(TRUE)
   }
-  objective_vector <- function(x, name) {
+  objective_vector <- function(x, name, non_negative = FALSE) {
     if (is.null(x)) {
       stop(name, " is required for method = '", method, "'.", call. = FALSE)
     }
     x <- .dgr_named_vector(x, trait_cols, name)
-    if (any(x < 0)) {
+    if (isTRUE(non_negative) && any(x < 0)) {
       stop(
         name, " must contain non-negative magnitudes in the ",
         "favourable-direction space; use lower_is_better to declare traits ",
@@ -455,6 +469,17 @@ selection_index <- function(
       )
     }
     x
+  }
+  threshold_vector <- function(x) {
+    if (is.null(x)) {
+      stop(
+        "culling_thresholds is required for method = '", method, "'.",
+        call. = FALSE
+      )
+    }
+    raw <- .dgr_named_vector(x, trait_cols, "culling_thresholds")
+    as.numeric((raw - centre) / scale_factor * direction) |>
+      stats::setNames(trait_cols)
   }
 
   coefficients <- NULL
@@ -472,11 +497,15 @@ selection_index <- function(
     objective <- objective_vector(economic_weights, "economic_weights")
   } else if (method == "pesek_baker") {
     require_matrix(G, "G")
-    objective <- objective_vector(desired_gains, "desired_gains")
+    objective <- objective_vector(
+      desired_gains, "desired_gains", non_negative = TRUE
+    )
   } else if (method == "yamada") {
     require_matrix(G, "G")
     require_matrix(P, "P")
-    objective <- objective_vector(desired_gains, "desired_gains")
+    objective <- objective_vector(
+      desired_gains, "desired_gains", non_negative = TRUE
+    )
   }
 
   if (!is.null(objective)) {
@@ -494,13 +523,31 @@ selection_index <- function(
     rank_weights <- if (is.null(economic_weights)) {
       NULL
     } else {
-      objective_vector(economic_weights, "economic_weights")
+      objective_vector(
+        economic_weights, "economic_weights", non_negative = TRUE
+      )
     }
     scores <- -.dgr_rank_sum(X, rank_weights)
     strategy <- "rank_sum"
     aggregate_weights <- rank_weights
+  } else if (method == "elston") {
+    thresholds <- threshold_vector(culling_thresholds)
+    margins <- sweep(X, 2L, thresholds, FUN = "-")
+    passes <- rowSums(margins <= 0) == 0L
+    failures <- apply(margins <= 0, 1L, function(row) {
+      paste(trait_cols[row], collapse = ", ")
+    })
+    culling_report <- data.table::data.table(
+      id = candidate_id,
+      passed = passes,
+      n_failed = as.integer(rowSums(margins <= 0)),
+      failed_traits = ifelse(passes, NA_character_, failures)
+    )
+    scores <- rep(-Inf, nrow(X))
+    scores[passes] <- rowSums(log(margins[passes, , drop = FALSE]))
+    strategy <- "elston"
   } else if (method == "independent_culling") {
-    thresholds <- objective_vector(culling_thresholds, "culling_thresholds")
+    thresholds <- threshold_vector(culling_thresholds)
     below <- sweep(X, 2L, thresholds, FUN = "<")
     passes <- rowSums(below) == 0L
     # Which gate each candidate failed, so that a rejection can be explained
@@ -556,7 +603,7 @@ selection_index <- function(
     # must never be selected, whatever n_select asks for, so n_select is a
     # maximum rather than a quota. Ranking on a 0/1 pass indicator and then
     # taking the top n_select would fill the shortfall with failures.
-    eligible <- if (identical(strategy, "culling")) {
+    eligible <- if (strategy %in% c("culling", "elston")) {
       culling_report$passed
     } else {
       rep(TRUE, nrow(X))
@@ -567,13 +614,13 @@ selection_index <- function(
     if (n_taken > 0L) {
       selection[ordering[seq_len(n_taken)]] <- TRUE
     }
-    if (identical(strategy, "culling") && n_taken < n_select) {
+    if (strategy %in% c("culling", "elston") && n_taken < n_select) {
       warning(
         sprintf(
           paste(
             "Only %d of %d candidates passed every culling threshold, so %d",
-            "were selected rather than the %d requested. Independent culling",
-            "does not fill a shortfall; relax the thresholds or use a method",
+            "were selected rather than the %d requested. This method",
+            "keeps the floors firm. Relax them or use a method",
             "that trades traits off against one another."
           ),
           sum(eligible), nrow(X), n_taken, n_select

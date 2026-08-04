@@ -70,7 +70,7 @@ gain_feasibility(
 ```
 
 If the exact ray is unattainable, optimisation can find a closer
-selected set; it cannot create unavailable genetic variation. If the
+selected set. it cannot create unavailable genetic variation. If the
 entries are minimum floors rather than an exact ratio, use
 [`suggest_desired_gains()`](https://FAkohoue.github.io/DesiredGainR/reference/suggest_desired_gains.md)
 or interval optimisation and assess joint attainment instead.
@@ -116,7 +116,7 @@ dgsi
 
 `dg` and `realised_response` use candidate standard-deviation units. The
 coefficient solve still respects the original units of \\\mathbf{G}\\
-and \\\mathbf{P}\\; the package performs the conversion internally.
+and \\\mathbf{P}\\. The package performs the conversion internally.
 
 The operational output is the ranked candidate table, not the
 coefficient vector by itself.
@@ -219,11 +219,11 @@ dgsi$selected_set_agreement
 The winning replicate is selected on held-out candidates by default.
 Report:
 
-1.  the training and holdout objectives;
-2.  whether the search reached a plateau;
-3.  coefficient and rank stability across replicates;
-4.  selected-set agreement;
-5.  the response for every trait; and
+1.  The training and holdout objectives.
+2.  Whether the search reached a plateau.
+3.  Coefficient and rank stability across replicates.
+4.  Selected-set agreement.
+5.  The response for every trait.
 6.  the covariance source and its uncertainty.
 
 If independent replicates produce different selected sets with similar
@@ -268,8 +268,8 @@ comparison
 
 Compute both objective values from the full candidate set so that the
 comparison uses the same observations. The stored `dgsi$objective` can
-instead be a holdout objective and must not be compared directly with a
-full-sample quantity.
+instead be a holdout objective. Compare it only with other holdout
+quantities.
 
 ``` r
 dgsi_loss <- function(response, target) {
@@ -294,7 +294,7 @@ across traits. The anthesis-silking interval changes from an
 unfavourable differential to a favourable one, and plant height and
 anthesis date move much closer to their requests. Grain yield, ears per
 plant and grey leaf spot do not all become closer individually. DGSI
-minimises the declared multi-trait loss; it does not guarantee a smaller
+minimises the declared multi-trait loss. it does not guarantee a smaller
 error for every trait. The trait table must therefore accompany the
 total objective.
 
@@ -313,15 +313,15 @@ transportability. When a later cohort is available, pass it through
 
 A defensible analysis reports all of the following:
 
-1.  the requested gain vector and whether it represents an exact ratio
-    or minimum floors;
-2.  the exact-ray feasibility result at the planned selection intensity;
-3.  the non-iterated Yamada response;
-4.  the optimised direction, selected differential and expected
-    transmitted response;
-5.  the selected candidates and their index ranks;
-6.  training and holdout objectives;
-7.  rank, coefficient and selected-set stability across replicates; and
+1.  The requested gain vector and whether it represents an exact ratio
+    or minimum floors.
+2.  The exact-ray feasibility result at the planned selection intensity.
+3.  The non-iterated Yamada response.
+4.  The optimised direction, selected differential and expected
+    transmitted response.
+5.  The selected candidates and their index ranks.
+6.  Training and holdout objectives.
+7.  Rank, coefficient and selected-set stability across replicates.
 8.  validation in a later cohort when one is available.
 
 The demonstration above now covers items 1–7 with the shipped

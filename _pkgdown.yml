@@ -86,8 +86,10 @@ navbar:
           href: articles/DesiredGainR-empirical-validation.html
         - text: -------
         - text: "Index methods"
-        - text: Choosing an index
+        - text: Multiple-trait selection and method comparison
           href: articles/DesiredGainR-index-families.html
+        - text: Using predictions and prediction errors
+          href: articles/DesiredGainR-information.html
         - text: Optimising desired gains
           href: articles/DesiredGainR-dgsi.html
         - text: Quadratic genomic selection
@@ -121,8 +123,8 @@ home:
     been applying implicitly from its historical selection differentials, and
     reports how far a decision depends on weights that are themselves
     uncertain. It provides the classical index families through one interface
-    (Smith-Hazel, base, Pesek-Baker, Yamada, Mulamba-Mock rank-sum, independent
-    culling and tandem selection), the iterative desired-gain index of
+    (Smith-Hazel, base, Pesek-Baker, Yamada, Mulamba-Mock rank-sum, Elston,
+    independent culling and tandem selection), the iterative desired-gain index of
     Joukhadar et al. (2024), and the quadratic genomic selection index of
     Ceron-Rojas et al. (2026), each reported with the standard evaluation
     criteria. A multi-cycle simulation layer compares desired-gain directions
@@ -152,10 +154,11 @@ articles:
       - DesiredGainR-covariance
       - DesiredGainR-reproduction
       - DesiredGainR-empirical-validation
-  - title: "Index methods"
+  - title: "Multiple-trait selection and index methods"
     navbar: "Index methods"
     contents:
       - DesiredGainR-index-families
+      - DesiredGainR-information
       - DesiredGainR-dgsi
       - DesiredGainR-qgsi
   - title: "Looking ahead"
@@ -237,7 +240,10 @@ reference:
       selection index.
     contents:
       - selection_index
+      - selection_information
+      - generalized_index
       - restricted_index
+      - restricted_breeding_values
       - run_dgsi
       - run_qgsi
       - run_dgsi_qgsi_pipeline
@@ -261,9 +267,13 @@ reference:
       matrices.
     contents:
       - evaluate_index
+      - compare_selection_methods
       - summary.desiredgainr_index
       - predict.desiredgainr_index
       - index_uncertainty
+      - candidate_score_uncertainty
+      - index_information_efficiency
+      - evaluate_restricted_response
       - compare_dg_and_qgsi
 
   - title: "Multi-environment structure"
@@ -318,6 +328,9 @@ reference:
       of the target programme. The search treats the simulation as the
       objective function and never substitutes a cheaper approximation for it.
     contents:
+      - breeding_scenario
+      - simulation_calibration
+      - stress_test_desired_gains
       - founder_haplotypes
       - haplotypes_from_inbred_dosage
       - dosage_diagnostics

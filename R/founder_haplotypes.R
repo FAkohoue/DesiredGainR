@@ -750,13 +750,16 @@ print.desiredgainr_founders <- function(x, ...) {
 #'   mating system requires.
 #' @param dominance_variance Optional named variance of the **degree of
 #'   dominance** across loci. This is AlphaSimR's `varDD` and is not the
-#'   dominance genetic variance; the two are different quantities.
+#'   dominance genetic variance. These quantities have different meanings.
 #' @param heritability Whether `h2` is narrow-sense (the default, a statement
 #'   about breeding values) or broad-sense (a statement about genotypic values).
 #'   They differ exactly when dominance is simulated, which is when a clonal
 #'   programme is being represented, so it must be stated rather than assumed.
 #' @param seed Random seed. The caller's random number generator state is
 #'   restored on exit.
+#' @param scenario Optional object from [breeding_scenario()]. It supplies the
+#'   quantitative trait locus count, neutral marker count, effect distribution,
+#'   and dominance assumptions through one auditable object.
 #'
 #' @return A list of class `desiredgainr_sim_setup` holding the AlphaSimR
 #'   simulation parameters, the founder population, and the calibration
@@ -774,7 +777,8 @@ founder_population <- function(
   dominance_degree = NULL,
   dominance_variance = NULL,
   heritability = c("narrow", "broad"),
-  seed = 42L
+  seed = 42L,
+  scenario = NULL
 ) {
   .dgr_require_alphasimr("founder_population()")
   if (!inherits(founders, "desiredgainr_founders")) {
@@ -793,6 +797,21 @@ founder_population <- function(
     .dgr_check_psd(residual_covariance, "residual_covariance")
   }
   n_traits <- length(trait_cols)
+
+  qtl_effect_gamma <- FALSE
+  qtl_effect_shape <- 1
+  if (!is.null(scenario)) {
+    if (!inherits(scenario, "desiredgainr_scenario")) {
+      stop("scenario must come from breeding_scenario().", call. = FALSE)
+    }
+    architecture <- scenario$architecture
+    n_qtl_per_chromosome <- architecture$qtl_per_chromosome
+    n_markers_per_chromosome <- architecture$markers_per_chromosome
+    dominance_degree <- architecture$dominance_degree
+    dominance_variance <- architecture$dominance_variance
+    qtl_effect_gamma <- identical(architecture$effect_distribution, "gamma")
+    qtl_effect_shape <- architecture$qtl_shape
+  }
 
   if (length(h2) == 1L) {
     h2 <- stats::setNames(rep(as.numeric(h2), n_traits), trait_cols)
@@ -881,14 +900,18 @@ founder_population <- function(
         var = as.numeric(additive_target),
         meanDD = as.numeric(dominance_degree),
         varDD = as.numeric(dominance_variance),
-        corA = correlation_target
+        corA = correlation_target,
+        gamma = qtl_effect_gamma,
+        shape = qtl_effect_shape
       )
     } else {
       SP$addTraitA(
         nQtlPerChr = n_qtl_per_chromosome,
         mean = rep(0, n_traits),
         var = as.numeric(additive_target),
-        corA = correlation_target
+        corA = correlation_target,
+        gamma = qtl_effect_gamma,
+        shape = qtl_effect_shape
       )
     }
     population <- AlphaSimR::newPop(map_pop, simParam = SP)
@@ -1058,6 +1081,9 @@ founder_population <- function(
     dominance = use_dominance,
     dominance_degree = if (use_dominance) dominance_degree else NULL,
     dominance_degree_variance = if (use_dominance) dominance_variance else NULL,
+    qtl_effect_distribution = if (qtl_effect_gamma) "gamma" else "normal",
+    qtl_effect_shape = qtl_effect_shape,
+    scenario = scenario,
     seed = seed,
     founders = founders,
     calibration = paste(
