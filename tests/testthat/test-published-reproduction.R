@@ -44,10 +44,10 @@ test_that("published Pesek-Baker gains permit one exact common ratio", {
   # ratio uses the largest numerator and smallest denominator.
   ratio_lower <-
     (reference$pesek_baker_gain - 0.00005) /
-    (reference$desired_gains + 0.0005)
+      (reference$desired_gains + 0.0005)
   ratio_upper <-
     (reference$pesek_baker_gain + 0.00005) /
-    (reference$desired_gains - 0.0005)
+      (reference$desired_gains - 0.0005)
 
   common_interval <- c(
     lower = max(ratio_lower),

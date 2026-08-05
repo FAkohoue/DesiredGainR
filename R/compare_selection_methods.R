@@ -118,7 +118,9 @@ comparison_objective <- function(
 }
 
 .dgr_comparison_ids <- function(model, table, preferred = NULL) {
-  if (!is.null(model$candidate_id)) return(as.character(model$candidate_id))
+  if (!is.null(model$candidate_id)) {
+    return(as.character(model$candidate_id))
+  }
   if (!is.null(preferred) && preferred %in% names(table)) {
     return(as.character(table[[preferred]]))
   }
@@ -146,16 +148,24 @@ comparison_objective <- function(
     ranks <- stats::setNames(model$ranking$rank, model$ranking$id)[ids]
     scores <- stats::setNames(model$ranking$score, model$ranking$id)[ids]
     selected <- as.character(model$selected$id)
-    expected <- if (is.null(model$evaluation)) NULL else
+    expected <- if (is.null(model$evaluation)) {
+      NULL
+    } else {
       model$evaluation$expected_response[traits] * scale
-    observed <- if (is.null(model$observed_differential)) NULL else
+    }
+    observed <- if (is.null(model$observed_differential)) {
+      NULL
+    } else {
       stats::setNames(
         model$observed_differential$Differential[
           match(traits, model$observed_differential$Trait)
         ],
         traits
       ) * scale
-    G <- if (is.null(model$G)) NULL else {
+    }
+    G <- if (is.null(model$G)) {
+      NULL
+    } else {
       S <- diag(scale, nrow = length(traits))
       dimnames(S) <- list(traits, traits)
       S %*% model$G[traits, traits, drop = FALSE] %*% S
@@ -169,8 +179,11 @@ comparison_objective <- function(
       G = G, G_source = "fitted genetic covariance",
       scale_to_trait = scale,
       selection_intensity = model$selection_intensity,
-      expected_basis = if (is.null(expected)) "unavailable" else
-        "exact linear-index response",
+      expected_basis = if (is.null(expected)) {
+        "unavailable"
+      } else {
+        "exact linear-index response"
+      },
       native_R_HI = if (is.null(native)) NA_real_ else native$R_HI,
       native_Delta_H = if (is.null(native)) NA_real_ else native$delta_H,
       native_RE = if (is.null(native)) NA_real_ else native$RE,
@@ -220,16 +233,25 @@ comparison_objective <- function(
     } else {
       .dgr_comparison_ids(structure(list(), class = "list"), table)
     }
-    ids <- if (is.null(model$candidate_id)) row_ids else
+    ids <- if (is.null(model$candidate_id)) {
+      row_ids
+    } else {
       as.character(model$candidate_id)
+    }
     rank_by_id <- stats::setNames(table$Rank, row_ids)
     score_by_id <- stats::setNames(table$SelectionIndex, row_ids)
     selected <- row_ids[table$Selected]
-    expected <- if (is.null(model$theoretical_response)) NULL else
+    expected <- if (is.null(model$theoretical_response)) {
+      NULL
+    } else {
       model$theoretical_response$analysis_units[traits] * scale
+    }
     gain_scale <- model$candidate_sd_analysis
-    observed <- if (is.null(gain_scale)) NULL else
+    observed <- if (is.null(gain_scale)) {
+      NULL
+    } else {
       model$realised_response[traits] * gain_scale[traits] * scale
+    }
     S <- diag(scale, nrow = length(traits))
     dimnames(S) <- list(traits, traits)
     return(list(
@@ -240,8 +262,11 @@ comparison_objective <- function(
       G = S %*% model$G[traits, traits, drop = FALSE] %*% S,
       G_source = "DGSI fitted genetic covariance",
       scale_to_trait = scale,
-      selection_intensity = if (is.null(model$theoretical_response)) NA_real_
-        else model$theoretical_response$selection_intensity,
+      selection_intensity = if (is.null(model$theoretical_response)) {
+        NA_real_
+      } else {
+        model$theoretical_response$selection_intensity
+      },
       expected_basis = "exact response of the final linear index",
       native_R_HI = NA_real_, native_Delta_H = NA_real_, native_RE = NA_real_,
       native_h2 = NA_real_, native_accuracy = NA_real_, native_MSPE = NA_real_
@@ -259,8 +284,11 @@ comparison_objective <- function(
     } else {
       .dgr_comparison_ids(structure(list(), class = "list"), table)
     }
-    ids <- if (is.null(model$candidate_id)) row_ids else
+    ids <- if (is.null(model$candidate_id)) {
+      row_ids
+    } else {
       as.character(model$candidate_id)
+    }
     rank_by_id <- stats::setNames(table$Rank, row_ids)
     score_by_id <- stats::setNames(table$QGSI, row_ids)
     selected <- row_ids[table$Selected]
@@ -268,20 +296,27 @@ comparison_objective <- function(
     expected <- stats::setNames(
       gains$Expected_Genetic_Gain[match(traits, gains$Trait)], traits
     ) * scale
-    observed <- if (is.null(model$observed_selection_differential)) NULL else
+    observed <- if (is.null(model$observed_selection_differential)) {
+      NULL
+    } else {
       stats::setNames(
         model$observed_selection_differential$Observed_GEBV_differential[
           match(traits, model$observed_selection_differential$Trait)
         ],
         traits
       ) * scale
+    }
     G_analysis <- if (is.null(model$true_G)) model$Gamma else model$true_G
     S <- diag(scale, nrow = length(traits))
     dimnames(S) <- list(traits, traits)
     theory <- model$theoretical_parameters
     squared_accuracy <- theory$squared_index_merit_correlation
     q_accuracy <- if (length(squared_accuracy) == 1L &&
-      is.finite(squared_accuracy)) sqrt(squared_accuracy) else NA_real_
+      is.finite(squared_accuracy)) {
+      sqrt(squared_accuracy)
+    } else {
+      NA_real_
+    }
     has_curvature <- any(abs(model$W) > sqrt(.Machine$double.eps))
     return(list(
       family = if (has_curvature) "qgsi" else "linear_genomic_index",
@@ -290,8 +325,11 @@ comparison_objective <- function(
       score = as.numeric(score_by_id[ids]), rank = as.numeric(rank_by_id[ids]),
       selected = selected, expected = expected, observed = observed,
       G = S %*% G_analysis[traits, traits, drop = FALSE] %*% S,
-      G_source = if (is.null(model$true_G))
-        "genomic prediction covariance Gamma" else "supplied true_G",
+      G_source = if (is.null(model$true_G)) {
+        "genomic prediction covariance Gamma"
+      } else {
+        "supplied true_G"
+      },
       scale_to_trait = scale,
       selection_intensity = model$selection$normal_selection_intensity,
       expected_basis = if (has_curvature) {
@@ -321,7 +359,8 @@ comparison_objective <- function(
   absent <- setdiff(traits, names(frame))
   if (length(absent)) {
     stop("validation_data is missing objective traits: ",
-      paste(absent, collapse = ", "), call. = FALSE
+      paste(absent, collapse = ", "),
+      call. = FALSE
     )
   }
   id_candidates <- setdiff(names(frame), traits)
@@ -418,10 +457,16 @@ compare_selection_methods <- function(
     order <- match(traits, x$traits)
     x$traits <- traits
     x$direction <- x$direction[traits]
-    x$expected <- if (is.null(x[["expected"]])) NULL else
+    x$expected <- if (is.null(x[["expected"]])) {
+      NULL
+    } else {
       x[["expected"]][traits]
-    x$observed <- if (is.null(x[["observed"]])) NULL else
+    }
+    x$observed <- if (is.null(x[["observed"]])) {
+      NULL
+    } else {
       x[["observed"]][traits]
+    }
     fitted_G <- x[["G"]]
     x["G"] <- list(if (is.null(fitted_G)) {
       NULL
@@ -432,8 +477,10 @@ compare_selection_methods <- function(
     x
   })
   direction <- adapted[[1L]]$direction
-  if (!all(vapply(adapted, function(x) identical(x$direction, direction),
-    logical(1L)))) {
+  if (!all(vapply(
+    adapted, function(x) identical(x$direction, direction),
+    logical(1L)
+  ))) {
     stop("Every model must use the same favourable trait directions.",
       call. = FALSE
     )
@@ -458,9 +505,12 @@ compare_selection_methods <- function(
       )
     }
     reference_scale <- adapted[[1L]]$scale_to_trait
-    same_scale <- all(vapply(adapted, function(x) isTRUE(all.equal(
-      x$scale_to_trait, reference_scale, check.attributes = FALSE
-    )), logical(1L)))
+    same_scale <- all(vapply(adapted, function(x) {
+      isTRUE(all.equal(
+        x$scale_to_trait, reference_scale,
+        check.attributes = FALSE
+      ))
+    }, logical(1L)))
     if (!same_scale) {
       stop("Every model must use the same direction, centring, and scaling for legacy target_gains.",
         call. = FALSE
@@ -521,7 +571,9 @@ compare_selection_methods <- function(
   if (!is.null(common_G)) {
     common_G <- sweep(sweep(common_G, 1L, unit_sd, "/"), 2L, unit_sd, "/")
   }
-  common_G_invertible <- if (is.null(common_G)) FALSE else {
+  common_G_invertible <- if (is.null(common_G)) {
+    FALSE
+  } else {
     eigenvalues <- eigen(common_G, symmetric = TRUE, only.values = TRUE)$values
     min(eigenvalues) > sqrt(.Machine$double.eps) * max(1, max(eigenvalues))
   }
@@ -556,8 +608,10 @@ compare_selection_methods <- function(
       return(c(beta = NA_real_, alignment = NA_real_, residual = NA_real_))
     }
     value <- evaluate_restricted_response(response, target, common_G)
-    c(beta = value$beta, alignment = value$mahalanobis_alignment,
-      residual = value$mahalanobis_residual)
+    c(
+      beta = value$beta, alignment = value$mahalanobis_alignment,
+      residual = value$mahalanobis_residual
+    )
   }
 
   response_rows <- lapply(names(adapted), function(label) {
@@ -577,10 +631,16 @@ compare_selection_methods <- function(
       Expected_response = as.numeric(expected),
       Observed_differential = as.numeric(observed),
       Target = if (is.null(target)) NA_real_ else as.numeric(target),
-      Expected_attainment = if (is.null(target)) NA_real_ else
-        ifelse(target > 0, expected / target, NA_real_),
-      Observed_attainment = if (is.null(target)) NA_real_ else
-        ifelse(target > 0, observed / target, NA_real_),
+      Expected_attainment = if (is.null(target)) {
+        NA_real_
+      } else {
+        ifelse(target > 0, expected / target, NA_real_)
+      },
+      Observed_attainment = if (is.null(target)) {
+        NA_real_
+      } else {
+        ifelse(target > 0, observed / target, NA_real_)
+      },
       Expected_response_basis = x$expected_basis,
       Units = gain_units,
       stringsAsFactors = FALSE
@@ -605,9 +665,14 @@ compare_selection_methods <- function(
     }
     validation_responses <- data.table::rbindlist(lapply(names(adapted), function(label) {
       selected <- ids %in% adapted[[label]]$selected
-      delta <- if (any(selected)) colMeans(validation_matrix[selected, , drop = FALSE]) -
-        colMeans(validation_matrix) else rep(NA_real_, length(traits))
-      data.frame(Method = label, Trait = traits,
+      delta <- if (any(selected)) {
+        colMeans(validation_matrix[selected, , drop = FALSE]) -
+          colMeans(validation_matrix)
+      } else {
+        rep(NA_real_, length(traits))
+      }
+      data.frame(
+        Method = label, Trait = traits,
         Validation_response = as.numeric(delta), Units = gain_units
       )
     }))
@@ -616,8 +681,11 @@ compare_selection_methods <- function(
         selected <- ids %in% adapted[[label]]$selected
         data.frame(
           Method = label,
-          Validation_utility_response = if (any(selected))
-            mean(utility[selected]) - mean(utility) else NA_real_,
+          Validation_utility_response = if (any(selected)) {
+            mean(utility[selected]) - mean(utility)
+          } else {
+            NA_real_
+          },
           Validation_utility_rank_correlation = safe_spearman(
             adapted[[label]]$score, utility
           )
@@ -637,7 +705,9 @@ compare_selection_methods <- function(
     common_merit_response <- if (!is.null(weights) &&
       all(is.finite(expected))) {
       sum(weights * expected)
-    } else NA_real_
+    } else {
+      NA_real_
+    }
     common_merit_correlation <- NA_real_
     if (is.finite(common_merit_response) && !is.null(common_G) &&
       grepl("^exact", x$expected_basis) &&
@@ -650,8 +720,11 @@ compare_selection_methods <- function(
         )
       }
     }
-    validation_row <- if (is.null(validation_utility)) NULL else
+    validation_row <- if (is.null(validation_utility)) {
+      NULL
+    } else {
       validation_utility[validation_utility$Method == label]
+    }
     data.frame(
       Method = label, Family = x$family, Strategy = x$strategy,
       N_selected = length(x$selected),
@@ -668,10 +741,16 @@ compare_selection_methods <- function(
       Satoh_beta = diagnostics[["beta"]],
       Mahalanobis_alignment = diagnostics[["alignment"]],
       Mahalanobis_residual = diagnostics[["residual"]],
-      Validation_utility_response = if (is.null(validation_row)) NA_real_ else
-        validation_row$Validation_utility_response,
-      Validation_utility_rank_correlation = if (is.null(validation_row)) NA_real_ else
-        validation_row$Validation_utility_rank_correlation,
+      Validation_utility_response = if (is.null(validation_row)) {
+        NA_real_
+      } else {
+        validation_row$Validation_utility_response
+      },
+      Validation_utility_rank_correlation = if (is.null(validation_row)) {
+        NA_real_
+      } else {
+        validation_row$Validation_utility_rank_correlation
+      },
       Expected_response_basis = x$expected_basis,
       stringsAsFactors = FALSE
     )
@@ -682,16 +761,20 @@ compare_selection_methods <- function(
   colnames(rank_matrix) <- names(adapted)
   rank_correlation <- outer(
     names(adapted), names(adapted),
-    Vectorize(function(a, b) safe_spearman(
-      rank_matrix[, a], rank_matrix[, b]
-    ))
+    Vectorize(function(a, b) {
+      safe_spearman(
+        rank_matrix[, a], rank_matrix[, b]
+      )
+    })
   )
   dimnames(rank_correlation) <- list(names(adapted), names(adapted))
   selected_sets <- lapply(adapted, `[[`, "selected")
-  selected_overlap <- outer(selected_sets, selected_sets,
+  selected_overlap <- outer(
+    selected_sets, selected_sets,
     Vectorize(function(a, b) length(intersect(a, b)))
   )
-  selected_jaccard <- outer(selected_sets, selected_sets,
+  selected_jaccard <- outer(
+    selected_sets, selected_sets,
     Vectorize(function(a, b) {
       total <- length(union(a, b))
       if (total) length(intersect(a, b)) / total else NA_real_
@@ -700,14 +783,21 @@ compare_selection_methods <- function(
   dimnames(selected_overlap) <- dimnames(selected_jaccard) <-
     list(names(adapted), names(adapted))
 
-  G_agreement <- if (is.null(common_G)) FALSE else all(vapply(adapted, function(x) {
-    fitted_G <- x[["G"]]
-    if (is.null(fitted_G)) return(FALSE)
-    candidate_G <- sweep(sweep(fitted_G, 1L, unit_sd, "/"), 2L, unit_sd, "/")
-    isTRUE(all.equal(candidate_G, common_G, tolerance = 1e-7,
-      check.attributes = FALSE
-    ))
-  }, logical(1L)))
+  G_agreement <- if (is.null(common_G)) {
+    FALSE
+  } else {
+    all(vapply(adapted, function(x) {
+      fitted_G <- x[["G"]]
+      if (is.null(fitted_G)) {
+        return(FALSE)
+      }
+      candidate_G <- sweep(sweep(fitted_G, 1L, unit_sd, "/"), 2L, unit_sd, "/")
+      isTRUE(all.equal(candidate_G, common_G,
+        tolerance = 1e-7,
+        check.attributes = FALSE
+      ))
+    }, logical(1L)))
+  }
   counts <- vapply(adapted, function(x) length(x$selected), integer(1L))
   intensities <- vapply(adapted, `[[`, numeric(1L), "selection_intensity")
   fairness <- data.frame(

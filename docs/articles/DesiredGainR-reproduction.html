@@ -211,10 +211,10 @@ Their rounding half-unit is 0.00005.</p>
 <span></span>
 <span><span class="va">ratio_lower</span> <span class="op">&lt;-</span></span>
 <span>  <span class="op">(</span><span class="va">reference</span><span class="op">$</span><span class="va">pesek_baker_gain</span> <span class="op">-</span> <span class="va">response_half_unit</span><span class="op">)</span> <span class="op">/</span></span>
-<span>  <span class="op">(</span><span class="va">reference</span><span class="op">$</span><span class="va">desired_gains</span> <span class="op">+</span> <span class="va">desired_half_unit</span><span class="op">)</span></span>
+<span>    <span class="op">(</span><span class="va">reference</span><span class="op">$</span><span class="va">desired_gains</span> <span class="op">+</span> <span class="va">desired_half_unit</span><span class="op">)</span></span>
 <span><span class="va">ratio_upper</span> <span class="op">&lt;-</span></span>
 <span>  <span class="op">(</span><span class="va">reference</span><span class="op">$</span><span class="va">pesek_baker_gain</span> <span class="op">+</span> <span class="va">response_half_unit</span><span class="op">)</span> <span class="op">/</span></span>
-<span>  <span class="op">(</span><span class="va">reference</span><span class="op">$</span><span class="va">desired_gains</span> <span class="op">-</span> <span class="va">desired_half_unit</span><span class="op">)</span></span>
+<span>    <span class="op">(</span><span class="va">reference</span><span class="op">$</span><span class="va">desired_gains</span> <span class="op">-</span> <span class="va">desired_half_unit</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">common_ratio_interval</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
 <span>  lower <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">ratio_lower</span><span class="op">)</span>,</span>

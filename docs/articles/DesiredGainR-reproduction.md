@@ -95,10 +95,10 @@ response_half_unit <- 0.00005
 
 ratio_lower <-
   (reference$pesek_baker_gain - response_half_unit) /
-  (reference$desired_gains + desired_half_unit)
+    (reference$desired_gains + desired_half_unit)
 ratio_upper <-
   (reference$pesek_baker_gain + response_half_unit) /
-  (reference$desired_gains - desired_half_unit)
+    (reference$desired_gains - desired_half_unit)
 
 common_ratio_interval <- c(
   lower = max(ratio_lower),

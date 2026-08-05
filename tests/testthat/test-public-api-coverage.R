@@ -3,10 +3,14 @@ method_coverage_fixture <- function() {
   values <- data.frame(
     id = paste0("L", seq_len(12)),
     yield = seq(-1.1, 1.1, length.out = 12),
-    disease = c(0.9, 0.1, -0.6, 0.5, -0.8, 0.2,
-                -1.0, 0.7, -0.3, 0.4, -0.5, -0.9),
-    height = c(0.8, -0.4, 0.2, -0.8, 0.6, -0.2,
-               0.4, -0.6, 0.1, -0.1, 0.5, -0.5)
+    disease = c(
+      0.9, 0.1, -0.6, 0.5, -0.8, 0.2,
+      -1.0, 0.7, -0.3, 0.4, -0.5, -0.9
+    ),
+    height = c(
+      0.8, -0.4, 0.2, -0.8, 0.6, -0.2,
+      0.4, -0.6, 0.1, -0.1, 0.5, -0.5
+    )
   )
   G <- matrix(
     c(
@@ -158,7 +162,8 @@ test_that("tandem selection applies the declared stage order", {
   expect_setequal(fit$selected$id, c("B", "C"))
   expect_error(
     selection_index(
-      values, c("yield", "disease"), id_col = "id",
+      values, c("yield", "disease"),
+      id_col = "id",
       method = "tandem", tandem_order = "yield",
       center_traits = FALSE, scale_traits = FALSE
     ),
@@ -166,7 +171,8 @@ test_that("tandem selection applies the declared stage order", {
   )
   expect_error(
     selection_index(
-      values, c("yield", "disease"), id_col = "id",
+      values, c("yield", "disease"),
+      id_col = "id",
       method = "tandem", tandem_order = c("yield", "unknown"),
       center_traits = FALSE, scale_traits = FALSE, n_select = 2L
     ),
@@ -427,7 +433,8 @@ test_that("one objective compares classical, general, DGSI, and QGSI fits", {
     center_traits = FALSE, scale_traits = FALSE, n_select = 4L
   )
   information <- selection_information(
-    values[set$traits], P = set$P, C = set$G, G = set$G
+    values[set$traits],
+    P = set$P, C = set$G, G = set$G
   )
   information$candidate_id <- values$GenoID
   general <- generalized_index(
@@ -552,7 +559,8 @@ test_that("comparison objectives enforce one named scale and covariance", {
   )
   expect_s3_class(objective, "desiredgainr_comparison_objective")
   expect_error(
-    comparison_objective(desired_gains = set$desired,
+    comparison_objective(
+      desired_gains = set$desired,
       gain_units = "genetic_sd"
     ),
     "requires G"
