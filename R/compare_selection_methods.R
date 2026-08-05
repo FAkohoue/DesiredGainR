@@ -500,7 +500,8 @@ compare_selection_methods <- function(
   legacy <- !is.null(target_gains)
   if (legacy) {
     if (!all(vapply(models, inherits, logical(1L), "desiredgainr_index"))) {
-      stop("Legacy target_gains supports selection_index() and restricted_index() only. Use objective for cross-family comparisons.",
+      stop("Legacy target_gains supports selection_index() and",
+      "restricted_index() only. Use objective for cross-family comparisons.",
         call. = FALSE
       )
     }
@@ -512,14 +513,16 @@ compare_selection_methods <- function(
       ))
     }, logical(1L)))
     if (!same_scale) {
-      stop("Every model must use the same direction, centring, and scaling for legacy target_gains.",
+      stop("Every model must use the same direction,",
+      "centring, and scaling for legacy target_gains.",
         call. = FALSE
       )
     }
     target_gains <- .dgr_named_vector(target_gains, traits, "target_gains")
     if (any(target_gains < 0) || !any(target_gains > 0)) {
       stop(
-        "target_gains must contain favourable non-negative gains and at least one positive value.",
+        "target_gains must contain favourable",
+        "non-negative gains and at least one positive value.",
         call. = FALSE
       )
     }
