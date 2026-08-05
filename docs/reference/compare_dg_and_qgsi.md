@@ -1,13 +1,15 @@
-# Compare DGSI and QGSI candidate rankings
+# Compare an iteratively optimised DGSI with a QGSI
 
-Merges canonical
+Merges results from
 [`run_dgsi()`](https://FAkohoue.github.io/DesiredGainR/reference/run_dgsi.md)
 and
 [`run_qgsi()`](https://FAkohoue.github.io/DesiredGainR/reference/run_qgsi.md)
-results by candidate identifier and reports score and rank agreement.
-The comparison is descriptive: DGSI and QGSI optimise different breeding
-objectives, so agreement is not interpreted as validation of either
-method.
+by candidate identifier. It reports scores, ranks, and the selection
+flag from each fit. DGSI means desired-gain selection index. The
+[`run_dgsi()`](https://FAkohoue.github.io/DesiredGainR/reference/run_dgsi.md)
+object contains the established desired-gain index after the iterative
+search applied by Joukhadar et al. (2024). QGSI means quadratic genomic
+selection index.
 
 ## Usage
 
@@ -62,4 +64,14 @@ compare_dg_and_qgsi(
 
 ## Value
 
-A list with `comparison_table` and `correlation_summary`.
+A list with `comparison_table`, `correlation_summary`, and
+`decision_summary`. The last component reports the common candidate
+count, selected counts, selected overlap, and Jaccard similarity.
+
+## Details
+
+The comparison is descriptive. DGSI targets a desired response
+direction. QGSI represents linear, squared, and cross-product economic
+value. Agreement does not validate either objective and disagreement
+does not identify a winner. The breeder must first decide which
+objective represents the programme.

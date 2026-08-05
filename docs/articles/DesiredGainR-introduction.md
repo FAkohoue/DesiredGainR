@@ -43,9 +43,9 @@ provides labelled approximations that record what they actually are.
 
 | DesiredGainR does | DesiredGainR does not |
 |----|----|
-| Translate between economic weights and desired gains | Fit the multi-trait genetic model |
+| Map economic weights and desired gains algebraically | Fit the multi-trait genetic model |
 | Test whether a stated objective is attainable | Estimate breeding values or marker effects |
-| Build and compare classical index families | Select the operational parent set |
+| Build and compare supported selection methods | Select the operational parent set |
 | Report the standard index-evaluation criteria | Analyse field trials or adjust for design |
 | Simulate desired-gain directions over declared scenarios | Perform OCS, rank crosses or allocate matings |
 
@@ -66,11 +66,16 @@ software](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-interope
 ### 3.1 Defining the objective
 
 The Smith-Hazel economic index and the Pesek-Baker desired-gain index
-are two parameterisations of one linear index, so each desired-gain
-vector corresponds to exactly one economic-weight vector. That duality
-is the foundation of the layer: a breeder who cannot state weights but
-can state relative gains gets the weights for free, and one who proposes
-weights can be shown what response they actually request.
+both produce linear scores. However, they start from different breeding
+statements. Smith-Hazel starts from aggregate-value weights. Pesek-Baker
+starts from a desired response direction.
+
+For admissible covariance matrices, each desired-gain direction has an
+implied weight vector that reproduces the same coefficient direction.
+This is an algebraic translation. It does not create economic values for
+free. The translation helps a breeder inspect the trade-offs implied by
+an objective. It also shows the response implied by a proposed weight
+vector.
 
 Around it sit a feasibility test, a method for recovering the objective
 a programme has been using implicitly, and a sensitivity analysis that
@@ -86,16 +91,19 @@ trade-offs before choosing a method.
 [`selection_index()`](https://FAkohoue.github.io/DesiredGainR/reference/selection_index.md)
 provides Smith-Hazel, the base index, both desired-gain formulations,
 the Mulamba-Mock rank-sum index, Elston’s multiplicative index,
-independent culling, and tandem selection. One interface allows
-alternatives to use identical data and settings.
+independent culling, and a within-cohort sequential screen. One
+interface lets these alternatives use identical data and settings.
+[`comparison_objective()`](https://FAkohoue.github.io/DesiredGainR/reference/comparison_objective.md)
+fixes one yardstick for all fitted methods.
 [`compare_selection_methods()`](https://FAkohoue.github.io/DesiredGainR/reference/compare_selection_methods.md)
 then checks fairness and compares responses, target attainment,
-rankings, and selected sets.
+rankings, and selected sets across the classical, restricted, general,
+iterative desired-gain and quadratic genomic results.
 [`run_dgsi()`](https://FAkohoue.github.io/DesiredGainR/reference/run_dgsi.md)
-implements the iterative desired-gain method of Joukhadar et al. (2024),
-and
+applies the iterative optimisation procedure of Joukhadar et al. (2024)
+to the established desired-gain index.
 [`run_qgsi()`](https://FAkohoue.github.io/DesiredGainR/reference/run_qgsi.md)
-the quadratic genomic index of Cerón-Rojas et al. (2026).
+fits the quadratic genomic selection index of Cerón-Rojas et al. (2026).
 
 ### 3.3 Evaluating an index
 
@@ -230,7 +238,7 @@ round(
 #>     GY    PHT     AD    ASI    EPP    GLS 
 #>  14.52   0.03   2.32 -13.21 -15.15   0.68 
 #> attr(,"provenance")
-#> [1] "Implied by the supplied desired gains through w = G^-1 P G^-1 d; not an independently estimated economic value. Expressed in the favourable-direction space, so a positive weight always means the trait matters."
+#> [1] "Implied by the supplied desired gains through w = G^-1 P G^-1 d; not an independently estimated economic value. Expressed in the favourable-direction space, so a positive weight favours movement in the breeder-defined direction."
 ```
 
 **Ask whether it can be attained.**
@@ -293,7 +301,7 @@ selection_index(
 | Obtain or judge a covariance matrix | [Obtaining G and P](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-covariance.md) |
 | Choose and compare multiple-trait methods | [Multiple-trait selection](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-index-families.md) |
 | Use GEBVs, prediction errors, or distinct information traits | [Using predictions, prediction errors, and restricted responses](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-information.md) |
-| Understand the iterative desired-gain method | [Optimising desired gains](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-dgsi.md) |
+| Understand what iteration changes in a desired-gain index | [Iterative optimisation of the desired-gain index](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-dgsi.md) |
 | Use the quadratic genomic index | [Quadratic genomic selection](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-qgsi.md) |
 | Compare objectives over several cycles | [Multi-cycle simulation](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-simulation.md) |
 | Inspect validation with real programmes | [Empirical validation](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-empirical-validation.md) |

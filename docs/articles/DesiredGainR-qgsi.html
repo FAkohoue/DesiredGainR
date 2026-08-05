@@ -87,7 +87,7 @@
     <li><h6 class="dropdown-header" data-toc-skip>Index methods</h6></li>
     <li><a class="dropdown-item" href="../articles/DesiredGainR-index-families.html">Multiple-trait selection and method comparison</a></li>
     <li><a class="dropdown-item" href="../articles/DesiredGainR-information.html">Using predictions and prediction errors</a></li>
-    <li><a class="dropdown-item" href="../articles/DesiredGainR-dgsi.html">Optimising desired gains</a></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-dgsi.html">Iterative optimisation of the desired-gain index</a></li>
     <li><a class="dropdown-item" href="../articles/DesiredGainR-qgsi.html">Quadratic genomic selection</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Looking ahead</h6></li>
@@ -488,6 +488,80 @@ is not buying a materially different decision.</p>
 term is statistically non-zero. The breeder’s question is whether it
 changes which candidates are retained, whether that change is stable,
 and whether the non-linear value judgement is defensible.</p>
+<p><code><a href="../reference/compare_selection_methods.html">compare_selection_methods()</a></code> accepts both QGSI objects.
+Use <code><a href="../reference/comparison_objective.html">comparison_objective()</a></code> to fix the utility and
+covariance matrix. Supply common validation values when the objective
+contains curvature. The function then evaluates the selected sets under
+the same linear and quadratic utility. Use the same candidates,
+transformations, weights, covariance matrix and selected count.</p>
+<p>Report at least four results:</p>
+<ol style="list-style-type: decimal">
+<li>expected response for every trait;</li>
+<li>Spearman rank correlation;</li>
+<li>selected-set overlap and Jaccard similarity;</li>
+<li>the linear and quadratic score contributions for candidates whose
+decision changed.</li>
+</ol>
+<p>The Jaccard similarity is the number selected by both fits divided by
+the number selected by either fit. A value of one means that both fits
+select the same candidates. A value of zero means that the selected sets
+do not overlap.</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">selected_quadratic</span> <span class="op">&lt;-</span> <span class="va">rank_comparison</span><span class="op">$</span><span class="va">Selected_quadratic</span></span>
+<span><span class="va">selected_linear</span> <span class="op">&lt;-</span> <span class="va">rank_comparison</span><span class="op">$</span><span class="va">Selected_linear</span></span>
+<span><span class="va">selected_overlap</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">selected_quadratic</span> <span class="op">&amp;</span> <span class="va">selected_linear</span><span class="op">)</span></span>
+<span><span class="va">selected_union</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">selected_quadratic</span> <span class="op">|</span> <span class="va">selected_linear</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>  selected_overlap <span class="op">=</span> <span class="va">selected_overlap</span>,</span>
+<span>  selected_jaccard <span class="op">=</span> <span class="va">selected_overlap</span> <span class="op">/</span> <span class="va">selected_union</span></span>
+<span><span class="op">)</span></span>
+<span><span class="co">#&gt; selected_overlap selected_jaccard </span></span>
+<span><span class="co">#&gt;             15.0              0.6</span></span></code></pre></div>
+<p>Evaluate both selected sets under one quadratic utility. The fitted
+weights refer to standardised GEBVs. Convert them back to weights per
+original GEBV unit before defining the common objective.</p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">qg_scale</span> <span class="op">&lt;-</span> <span class="va">qgsi</span><span class="op">$</span><span class="va">transformation</span><span class="op">$</span><span class="va">scale</span><span class="op">[</span><span class="va">traits</span><span class="op">]</span></span>
+<span><span class="va">common_linear_raw</span> <span class="op">&lt;-</span> <span class="va">linear_weights</span> <span class="op">/</span> <span class="va">qg_scale</span></span>
+<span><span class="va">common_W_raw</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sweep.html" class="external-link">sweep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sweep.html" class="external-link">sweep</a></span><span class="op">(</span><span class="va">W</span>, <span class="fl">1L</span>, <span class="va">qg_scale</span>, <span class="st">"/"</span><span class="op">)</span>, <span class="fl">2L</span>, <span class="va">qg_scale</span>, <span class="st">"/"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">qg_objective</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/comparison_objective.html">comparison_objective</a></span><span class="op">(</span></span>
+<span>  aggregate_weights <span class="op">=</span> <span class="va">common_linear_raw</span>,</span>
+<span>  W <span class="op">=</span> <span class="va">common_W_raw</span>,</span>
+<span>  G <span class="op">=</span> <span class="va">dgr_G</span><span class="op">[</span><span class="va">traits</span>, <span class="va">traits</span><span class="op">]</span>,</span>
+<span>  gain_units <span class="op">=</span> <span class="st">"trait"</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">qg_comparison</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compare_selection_methods.html">compare_selection_methods</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>Linear <span class="op">=</span> <span class="va">linear_only</span>, Quadratic <span class="op">=</span> <span class="va">qgsi</span><span class="op">)</span>,</span>
+<span>  objective <span class="op">=</span> <span class="va">qg_objective</span>,</span>
+<span>  validation_data <span class="op">=</span> <span class="va">dgr_gebv</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"GenoID"</span>, <span class="va">traits</span><span class="op">)</span><span class="op">]</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">qg_comparison</span><span class="op">$</span><span class="va">summary</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>  <span class="st">"Method"</span>, <span class="st">"Expected_response_basis"</span>,</span>
+<span>  <span class="st">"Validation_utility_response"</span>,</span>
+<span>  <span class="st">"Validation_utility_rank_correlation"</span></span>
+<span><span class="op">)</span><span class="op">]</span></span>
+<span><span class="co">#&gt;       Method                                            Expected_response_basis</span></span>
+<span><span class="co">#&gt;       &lt;char&gt;                                                             &lt;char&gt;</span></span>
+<span><span class="co">#&gt; 1:    Linear                        exact linear genomic-index response (W = 0)</span></span>
+<span><span class="co">#&gt; 2: Quadratic linear-regression approximation; the quadratic score is non-normal</span></span>
+<span><span class="co">#&gt;    Validation_utility_response Validation_utility_rank_correlation</span></span>
+<span><span class="co">#&gt;                          &lt;num&gt;                               &lt;num&gt;</span></span>
+<span><span class="co">#&gt; 1:                    2.042713                           0.9904403</span></span>
+<span><span class="co">#&gt; 2:                    2.093085                           0.9998605</span></span>
+<span><span class="va">qg_comparison</span><span class="op">$</span><span class="va">selected_jaccard</span></span>
+<span><span class="co">#&gt;           Linear Quadratic</span></span>
+<span><span class="co">#&gt; Linear       1.0       0.6</span></span>
+<span><span class="co">#&gt; Quadratic    0.6       1.0</span></span></code></pre></div>
+<p>The validation utility is exact for the supplied GEBVs. Its
+evidential strength depends on their provenance. Independent predictions
+or simulated true genetic values provide stronger evidence than the
+values used to construct the scores.</p>
+<p>The quadratic fit earns its extra complexity only when it improves a
+declared non-linear utility in independent data or simulation. A change
+in rank alone does not establish improvement.</p>
 <hr>
 </div>
 <div class="section level2">
@@ -528,16 +602,19 @@ a useful, stable and biologically defensible way.</p>
 selection</a> places QGSI beside the linear and desired-gain
 families.</li>
 <li>
-<a href="DesiredGainR-dgsi.html">Optimising desired gains</a>
-explains the iterative desired-gain selection index, which solves a
-different breeding problem.</li>
+<a href="DesiredGainR-dgsi.html">Iterative optimisation of the
+desired-gain index</a> explains the iterative search applied to the
+desired-gain selection index. It represents a different breeding
+objective from a quadratic economic index.</li>
 <li>
 <a href="../reference/run_qgsi.html"><code>run_qgsi()</code></a>
 gives the complete argument and return-value contract.</li>
 <li>
 <a href="../reference/compare_dg_and_qgsi.html"><code>compare_dg_and_qgsi()</code></a>
-compares rankings descriptively without implying that DGSI and QGSI
-optimise the same objective.</li>
+compares scores, rankings and selected sets descriptively. Its
+<code>decision_summary</code> reports overlap and Jaccard similarity.
+These quantities do not imply that DGSI and QGSI optimise the same
+objective.</li>
 </ul>
 </div>
 <div class="section level2">

@@ -1,13 +1,13 @@
-# Optimising desired gains
+# Iterative optimisation of the desired-gain index
 
 ## 1. What the iterative method changes
 
-The classical desired-gain coefficient solve fixes a response direction
-under the covariance model. The iterative desired-gain selection index
-(DGSI) of Joukhadar et al. searches nearby desired-gain vectors and
-evaluates the selected candidates directly. Its purpose is to reduce
-disagreement between the requested standardised gain vector and the
-differential of the selected group.
+The classical desired-gain selection index (DGSI) fixes a response
+direction under the covariance model. Joukhadar et al. (2024) retained
+that established index formula and added an iterative search over nearby
+desired-gain vectors. The search evaluates the selected candidates
+directly. Its purpose is to reduce disagreement between the requested
+standardised gain vector and the differential of the selected group.
 
 [`run_dgsi()`](https://FAkohoue.github.io/DesiredGainR/reference/run_dgsi.md)
 does not discover the breeding objective. The breeder must still state
@@ -69,8 +69,25 @@ gain_feasibility(
 #>   Attainable fraction of the requested gain: 54.7%
 ```
 
+The feasibility target uses genetic-standard-deviation units.
+[`run_dgsi()`](https://FAkohoue.github.io/DesiredGainR/reference/run_dgsi.md)
+uses candidate-standard-deviation units. Convert the same biological
+target before fitting.
+
+``` r
+genetic_sd <- sqrt(diag(dgr_G))[traits]
+candidate_sd <- vapply(
+  dgr_candidates[, traits], stats::sd, numeric(1L)
+)
+target_original_units <- desired_gains * genetic_sd
+dg_target <- target_original_units / candidate_sd
+round(dg_target, 3)
+#>    GY   PHT    AD   ASI   EPP   GLS 
+#> 0.540 0.327 0.499 0.286 0.241 0.426
+```
+
 If the exact ray is unattainable, optimisation can find a closer
-selected set. it cannot create unavailable genetic variation. If the
+selected set. It cannot create unavailable genetic variation. If the
 entries are minimum floors rather than an exact ratio, use
 [`suggest_desired_gains()`](https://FAkohoue.github.io/DesiredGainR/reference/suggest_desired_gains.md)
 or interval optimisation and assess joint attainment instead.
@@ -88,7 +105,7 @@ dgsi <- run_dgsi(
   init_data = dgr_candidates["GenoID"],
   cand_data = dgr_candidates,
   trait_cols = traits,
-  dg = desired_gains,
+  dg = dg_target,
   G = dgr_G,
   P = dgr_P,
   lower_is_better = lower_is_better,
@@ -103,12 +120,12 @@ dgsi
 #>   Traits: 6   Candidates: 200   Selected: 20
 #>   Selection rule: top_n 
 #>   Coefficients:
-#>      GY     PHT      AD     ASI     EPP     GLS 
-#>  3.6396  0.0659  0.7469 -0.6898  4.2241 -0.0277 
+#>       GY      PHT       AD      ASI      EPP      GLS 
+#>  13.5687  -0.1837   4.0918  -3.2739 -38.2414   0.1771 
 #>   Realised response against the desired gains:
-#>     GY    PHT     AD    ASI    EPP    GLS 
-#> 1.5623 0.4525 0.5510 0.1162 0.7475 0.2092 
-#>   Objective 2.78141, chosen from 3 replicates.
+#>      GY     PHT      AD     ASI     EPP     GLS 
+#>  1.2522  0.0620  0.9686 -0.0270  0.2308  0.0663 
+#>   Objective 8.69789, chosen from 3 replicates.
 #>   Replicate selection used: internal pre-fit holdout 
 #>   The comparison observations were excluded before fitting.
 #>   P provenance: user supplied
@@ -127,35 +144,35 @@ head(dgsi$ranked_geno[, c(
 )])
 #>     GenoID SelectionIndex  Rank Eligible Selected
 #>     <char>          <num> <num>   <lgcl>   <lgcl>
-#> 1: CAND051      -23.77901     1     TRUE     TRUE
-#> 2: CAND092      -25.63016     2     TRUE     TRUE
-#> 3: CAND193      -26.44297     3     TRUE     TRUE
-#> 4: CAND115      -26.49760     4     TRUE     TRUE
-#> 5: CAND135      -26.62914     5     TRUE     TRUE
-#> 6: CAND130      -26.91844     6     TRUE     TRUE
+#> 1: CAND130      -133.2926     1     TRUE     TRUE
+#> 2: CAND135      -151.7086     2     TRUE     TRUE
+#> 3: CAND092      -152.4793     3     TRUE     TRUE
+#> 4: CAND005      -153.6863     4     TRUE     TRUE
+#> 5: CAND051      -155.1229     5     TRUE     TRUE
+#> 6: CAND087      -156.8744     6     TRUE     TRUE
 dgsi$selected_geno[, c("GenoID", "SelectionIndex", "Rank")]
 #>      GenoID SelectionIndex  Rank
 #>      <char>          <num> <num>
-#>  1: CAND051      -23.77901     1
-#>  2: CAND092      -25.63016     2
-#>  3: CAND193      -26.44297     3
-#>  4: CAND115      -26.49760     4
-#>  5: CAND135      -26.62914     5
-#>  6: CAND130      -26.91844     6
-#>  7: CAND160      -27.36982     7
-#>  8: CAND005      -28.09595     8
-#>  9: CAND004      -28.15358     9
-#> 10: CAND158      -28.48562    10
-#> 11: CAND146      -28.56305    11
-#> 12: CAND087      -28.97873    12
-#> 13: CAND137      -29.24266    13
-#> 14: CAND103      -29.26149    14
-#> 15: CAND007      -29.42558    15
-#> 16: CAND075      -29.44933    16
-#> 17: CAND065      -29.72210    17
-#> 18: CAND199      -30.12385    18
-#> 19: CAND036      -30.73888    19
-#> 20: CAND071      -30.76035    20
+#>  1: CAND130      -133.2926     1
+#>  2: CAND135      -151.7086     2
+#>  3: CAND092      -152.4793     3
+#>  4: CAND005      -153.6863     4
+#>  5: CAND051      -155.1229     5
+#>  6: CAND087      -156.8744     6
+#>  7: CAND004      -158.6038     7
+#>  8: CAND150      -159.4416     8
+#>  9: CAND147      -159.9039     9
+#> 10: CAND158      -160.0289    10
+#> 11: CAND160      -161.5619    11
+#> 12: CAND065      -161.6259    12
+#> 13: CAND146      -162.4855    13
+#> 14: CAND115      -162.8150    14
+#> 15: CAND075      -166.1193    15
+#> 16: CAND153      -166.5070    16
+#> 17: CAND074      -166.7513    17
+#> 18: CAND175      -166.9187    18
+#> 19: CAND054      -167.3839    19
+#> 20: CAND186      -167.4782    20
 #>      GenoID SelectionIndex  Rank
 #>      <char>          <num> <num>
 ```
@@ -170,16 +187,16 @@ selects the requested number with deterministic tie-breaking.
 
 ``` r
 round(rbind(
-  requested = dgsi$desired_gain,
+  requested_candidate_sd = dgsi$desired_gain,
   optimised_direction = dgsi$optimised_d,
   selected_differential = dgsi$realised_response,
-  expected_genetic_response_sd = dgsi$theoretical_response$standardised
+  expected_response_candidate_sd = dgsi$theoretical_response$standardised
 ), 3)
-#>                                 GY   PHT    AD   ASI   EPP   GLS
-#> requested                    1.000 0.400 0.600 0.500 0.400 0.600
-#> optimised_direction          1.040 0.610 1.019 0.859 0.789 0.337
-#> selected_differential        1.562 0.452 0.551 0.116 0.747 0.209
-#> expected_genetic_response_sd 0.366 0.215 0.359 0.302 0.278 0.119
+#>                                   GY    PHT    AD    ASI   EPP   GLS
+#> requested_candidate_sd         0.540  0.327 0.499  0.286 0.241 0.426
+#> optimised_direction            2.651 -0.351 5.142  2.738 0.008 0.967
+#> selected_differential          1.252  0.062 0.969 -0.027 0.231 0.066
+#> expected_response_candidate_sd 0.250 -0.033 0.484  0.258 0.001 0.091
 ```
 
 The selected differential describes the candidates retained. The
@@ -187,6 +204,23 @@ theoretical response is the model-based expectation transmitted to the
 next generation. They are not synonyms. A large selected differential
 with a small theoretical response indicates that much of the observed
 separation is not expected to be inherited.
+
+To compare transmitted response with the original feasibility target,
+return to genetic-standard-deviation units.
+
+``` r
+transmitted_genetic_sd <-
+  dgsi$theoretical_response$original_units / genetic_sd
+round(rbind(
+  requested_genetic_sd = desired_gains,
+  transmitted_genetic_sd = transmitted_genetic_sd,
+  attainment = transmitted_genetic_sd / desired_gains
+), 3)
+#>                           GY   PHT     AD    ASI   EPP    GLS
+#> requested_genetic_sd   1.000 0.400  0.600  0.500 0.400  0.600
+#> transmitted_genetic_sd 0.462 0.040 -0.582 -0.451 0.001 -0.128
+#> attainment             0.462 0.101 -0.970 -0.902 0.004 -0.214
+```
 
 ------------------------------------------------------------------------
 
@@ -196,24 +230,24 @@ separation is not expected to be inherited.
 dgsi$replicate_diagnostics
 #>    Replicate Objective Iteration_of_best Selected Plateau
 #>        <int>     <num>             <int>    <int>  <lgcl>
-#> 1:         1 1.4841447                60       20   FALSE
-#> 2:         2 0.9569090                23       20   FALSE
-#> 3:         3 0.3441077                33       20   FALSE
+#> 1:         1  4.763623                48       20   FALSE
+#> 2:         2  3.481674                30       20   FALSE
+#> 3:         3  3.370560                23       20   FALSE
 #>    Final_window_relative_improvement Chosen
 #>                                <num> <lgcl>
-#> 1:                         0.3077807   TRUE
-#> 2:                         0.5536885  FALSE
-#> 3:                         0.8395049  FALSE
+#> 1:                       0.005523655  FALSE
+#> 2:                       0.273149398  FALSE
+#> 3:                       0.296346133   TRUE
 dgsi$rank_correlation
 #>           [,1]      [,2]      [,3]
-#> [1,] 1.0000000 0.8608820 0.8692597
-#> [2,] 0.8608820 1.0000000 0.9736353
-#> [3,] 0.8692597 0.9736353 1.0000000
+#> [1,] 1.0000000 0.9535618 0.8320378
+#> [2,] 0.9535618 1.0000000 0.8824196
+#> [3,] 0.8320378 0.8824196 1.0000000
 dgsi$selected_set_agreement
 #>             replicate_1 replicate_2 replicate_3
-#> replicate_1   1.0000000   0.5384615   0.4814815
-#> replicate_2   0.5384615   1.0000000   0.5384615
-#> replicate_3   0.4814815   0.5384615   1.0000000
+#> replicate_1   1.0000000   0.6000000   0.3333333
+#> replicate_2   0.6000000   1.0000000   0.4814815
+#> replicate_3   0.3333333   0.4814815   1.0000000
 ```
 
 The winning replicate is selected on held-out candidates by default.
@@ -224,7 +258,7 @@ Report:
 3.  Coefficient and rank stability across replicates.
 4.  Selected-set agreement.
 5.  The response for every trait.
-6.  the covariance source and its uncertainty.
+6.  The covariance source and its uncertainty.
 
 If independent replicates produce different selected sets with similar
 objectives, the data do not identify one operational recommendation.
@@ -251,19 +285,19 @@ comparison$Absolute_error_iterative <- abs(
 comparison[-1] <- round(comparison[-1], 3)
 comparison
 #>   Trait Requested Non_iterated Iterative Absolute_error_non_iterated
-#> 1    GY       1.0        1.526     1.562                       0.526
-#> 2   PHT       0.4        0.274     0.452                       0.126
-#> 3    AD       0.6        0.441     0.551                       0.159
-#> 4   ASI       0.5       -0.256     0.116                       0.756
-#> 5   EPP       0.4        0.562     0.747                       0.162
-#> 6   GLS       0.6        0.228     0.209                       0.372
+#> 1    GY     0.540        1.468     1.252                       0.928
+#> 2   PHT     0.327        0.425     0.062                       0.098
+#> 3    AD     0.499        0.536     0.969                       0.037
+#> 4   ASI     0.286       -0.173    -0.027                       0.459
+#> 5   EPP     0.241        0.636     0.231                       0.395
+#> 6   GLS     0.426        0.495     0.066                       0.070
 #>   Absolute_error_iterative
-#> 1                    0.562
-#> 2                    0.052
-#> 3                    0.049
-#> 4                    0.384
-#> 5                    0.347
-#> 6                    0.391
+#> 1                    0.712
+#> 2                    0.265
+#> 3                    0.469
+#> 4                    0.313
+#> 5                    0.010
+#> 6                    0.359
 ```
 
 Compute both objective values from the full candidate set so that the
@@ -285,18 +319,14 @@ c(
   )
 )
 #> non_iterated_full_sample    iterative_full_sample 
-#>                 3.279795                 2.108015
+#>                 8.150162                 5.194453
 ```
 
-In this reproducible run, the full-sample loss falls from about 3.280 to
-2.108, a reduction of approximately 36%. That improvement is not uniform
-across traits. The anthesis-silking interval changes from an
-unfavourable differential to a favourable one, and plant height and
-anthesis date move much closer to their requests. Grain yield, ears per
-plant and grey leaf spot do not all become closer individually. DGSI
-minimises the declared multi-trait loss. it does not guarantee a smaller
-error for every trait. The trait table must therefore accompany the
-total objective.
+The two values show whether iteration reduced the declared full-sample
+loss. The improvement can differ among traits. Therefore, always inspect
+the trait-specific errors as well as the total. The iterative procedure
+minimises the declared multi-trait loss. It does not guarantee a smaller
+error for every trait.
 
 The iterative method has value only if the improvement is meaningful on
 held-out candidates and stable across searches. A smaller training
@@ -322,7 +352,7 @@ A defensible analysis reports all of the following:
 5.  The selected candidates and their index ranks.
 6.  Training and holdout objectives.
 7.  Rank, coefficient and selected-set stability across replicates.
-8.  validation in a later cohort when one is available.
+8.  Validation in a later cohort when one is available.
 
 The demonstration above now covers items 1–7 with the shipped
 population. Item 8 necessarily requires data from a genuinely later
@@ -334,6 +364,7 @@ intervals](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-desired
 
 ## References
 
-Joukhadar R, Daetwyler HD, Bansal U, Gendall AR, Hayden MJ (2024). An
-iterative desired-gain selection index for simultaneous improvement of
-multiple traits.
+Joukhadar R, Li Y, Thistlethwaite R, Forrest KL, Tibbits JF, Trethowan
+R, Hayden MJ (2024). Optimising desired gain indices to maximise
+selection response. *Frontiers in Plant Science* **15**:1337388.
+<https://doi.org/10.3389/fpls.2024.1337388>

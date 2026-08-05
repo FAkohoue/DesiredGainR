@@ -5,17 +5,22 @@
 #'
 #' Net merit is \eqn{H = a^\mathsf{T}g}, and the correlation between an index
 #' and net merit is only defined once \eqn{a} is stated. A desired-gain vector
-#' is not an economic weight vector, so using \eqn{d} in place of \eqn{a}
-#' yields a quantity with no standard interpretation: substituting
-#' \eqn{b = G^{-1}d} gives
+#' defines a response direction. It does not automatically state a separate
+#' aggregate merit. Using \eqn{d} in place of \eqn{a} constructs the merit
+#' \eqn{H_d=d^\mathsf{T}g}. Substituting \eqn{b = G^{-1}d} then gives the
+#' correlation
 #' \eqn{d^\mathsf{T}d / (\sqrt{d^\mathsf{T}G^{-1}PG^{-1}d}\sqrt{d^\mathsf{T}Gd})},
-#' which is not an accuracy and behaves erratically when trait scales differ.
+#' between the desired-gain index and \eqn{H_d}. This correlation has weak
+#' biological meaning unless the breeder deliberately declares \eqn{d} as a
+#' value-per-unit vector. It is also sensitive to trait measurement units, so
+#' it does not measure attainment of the desired response direction.
 #'
 #' The economic weights that make the desired-gain index optimal are
 #' \eqn{w = G^{-1}PG^{-1}d}, and evaluating against those recovers the standard
-#' Smith-Hazel accuracy. Joukhadar et al. (2024) note the underlying point
-#' directly: the covariance between a desired-gain index and net merit is
-#' undefined until an economic weight vector is supplied.
+#' Smith-Hazel accuracy. A different implied vector for each desired-gain
+#' direction also changes the comparison yardstick. Joukhadar et al. (2024)
+#' note the underlying distinction: evaluation against net merit requires a
+#' declared economic weight vector.
 #'
 #' @param d Desired gains, oriented and transformed.
 #' @param G Genetic covariance, oriented and transformed.
@@ -100,12 +105,12 @@
   as.numeric(ranks %*% weights)
 }
 
-#' Construct a classical multi-trait selection index
+#' Apply a classical multi-trait selection method
 #'
-#' `selection_index()` builds any of the classical linear selection indices
-#' from a common interface, so that alternative objectives and alternative
-#' index families can be compared on identical data. All traits are first
-#' oriented so that larger values are favourable.
+#' `selection_index()` applies six classical index families and two operational
+#' comparators through a common interface. The comparators are independent
+#' culling and a within-cohort sequential screen. All traits are first oriented
+#' so that larger values are favourable.
 #'
 #' @details
 #' # Available methods
@@ -139,8 +144,11 @@
 #'   \item{`"independent_culling"`}{Not an index. Candidates must exceed a
 #'     threshold for every trait. Included as a comparator because it is what
 #'     most programmes actually do.}
-#'   \item{`"tandem"`}{Not an index. Candidates are selected sequentially, one
-#'     trait at a time. Included as a comparator.}
+#'   \item{`"tandem"`}{Not an index. It filters one candidate cohort
+#'     sequentially through the traits in `tandem_order`. This is a
+#'     within-cohort sequential-screen comparator. Classical tandem selection
+#'     changes the focal trait across cycles and requires a multi-cycle
+#'     schedule.}
 #' }
 #'
 #' # Two formulations share the name Pesek-Baker, and they coincide
@@ -230,8 +238,8 @@
 #'   minimum for traits where larger values are favourable. Supply a maximum
 #'   for traits named in `lower_is_better`. The function applies direction,
 #'   centring, and scaling to these limits internally.
-#' @param tandem_order Character vector giving the order in which traits are
-#'   selected, required by `"tandem"`.
+#' @param tandem_order Character vector giving the order of the within-cohort
+#'   sequential screens, required by `"tandem"`.
 #' @param n_select Number of candidates selected.
 #' @param selection_intensity Optional standardised selection intensity used
 #'   for the expected-response calculations. When `NULL`, it is derived from
@@ -498,13 +506,15 @@ selection_index <- function(
   } else if (method == "pesek_baker") {
     require_matrix(G, "G")
     objective <- objective_vector(
-      desired_gains, "desired_gains", non_negative = TRUE
+      desired_gains, "desired_gains",
+      non_negative = TRUE
     )
   } else if (method == "yamada") {
     require_matrix(G, "G")
     require_matrix(P, "P")
     objective <- objective_vector(
-      desired_gains, "desired_gains", non_negative = TRUE
+      desired_gains, "desired_gains",
+      non_negative = TRUE
     )
   }
 
@@ -524,7 +534,8 @@ selection_index <- function(
       NULL
     } else {
       objective_vector(
-        economic_weights, "economic_weights", non_negative = TRUE
+        economic_weights, "economic_weights",
+        non_negative = TRUE
       )
     }
     scores <- -.dgr_rank_sum(X, rank_weights)

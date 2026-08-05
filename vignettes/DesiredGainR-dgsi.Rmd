@@ -1,8 +1,8 @@
 ---
-title: "Optimising desired gains"
+title: "Iterative optimisation of the desired-gain index"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Optimising desired gains}
+  %\VignetteIndexEntry{Iterative optimisation of the desired-gain index}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -20,10 +20,11 @@ lower_is_better <- dgr_traits$trait[dgr_traits$direction == "decrease"]
 
 ## 1. What the iterative method changes
 
-The classical desired-gain coefficient solve fixes a response direction under
-the covariance model. The iterative desired-gain selection index (DGSI) of
-Joukhadar et al. searches nearby desired-gain vectors and evaluates the
-selected candidates directly. Its purpose is to reduce disagreement between
+The classical desired-gain selection index (DGSI) fixes a response direction
+under the covariance model. Joukhadar et al. (2024) retained that established
+index formula and added an iterative search over nearby desired-gain vectors.
+The search evaluates the selected candidates directly. Its purpose is to
+reduce disagreement between
 the requested standardised gain vector and the differential of the selected
 group.
 
@@ -80,8 +81,22 @@ gain_feasibility(
 )
 ```
 
+The feasibility target uses genetic-standard-deviation units. `run_dgsi()`
+uses candidate-standard-deviation units. Convert the same biological target
+before fitting.
+
+```{r convert-target-units}
+genetic_sd <- sqrt(diag(dgr_G))[traits]
+candidate_sd <- vapply(
+  dgr_candidates[, traits], stats::sd, numeric(1L)
+)
+target_original_units <- desired_gains * genetic_sd
+dg_target <- target_original_units / candidate_sd
+round(dg_target, 3)
+```
+
 If the exact ray is unattainable, optimisation can find a closer selected set.
-it cannot create unavailable genetic variation. If the entries are minimum
+It cannot create unavailable genetic variation. If the entries are minimum
 floors rather than an exact ratio, use
 [`suggest_desired_gains()`](../reference/suggest_desired_gains.html) or interval
 optimisation and assess joint attainment instead.
@@ -99,7 +114,7 @@ dgsi <- run_dgsi(
   init_data = dgr_candidates["GenoID"],
   cand_data = dgr_candidates,
   trait_cols = traits,
-  dg = desired_gains,
+  dg = dg_target,
   G = dgr_G,
   P = dgr_P,
   lower_is_better = lower_is_better,
@@ -136,10 +151,10 @@ requested number with deterministic tie-breaking.
 
 ```{r responses}
 round(rbind(
-  requested = dgsi$desired_gain,
+  requested_candidate_sd = dgsi$desired_gain,
   optimised_direction = dgsi$optimised_d,
   selected_differential = dgsi$realised_response,
-  expected_genetic_response_sd = dgsi$theoretical_response$standardised
+  expected_response_candidate_sd = dgsi$theoretical_response$standardised
 ), 3)
 ```
 
@@ -148,6 +163,19 @@ response is the model-based expectation transmitted to the next generation.
 They are not synonyms. A large selected differential with a small theoretical
 response indicates that much of the observed separation is not expected to be
 inherited.
+
+To compare transmitted response with the original feasibility target, return
+to genetic-standard-deviation units.
+
+```{r transmitted-genetic-sd}
+transmitted_genetic_sd <-
+  dgsi$theoretical_response$original_units / genetic_sd
+round(rbind(
+  requested_genetic_sd = desired_gains,
+  transmitted_genetic_sd = transmitted_genetic_sd,
+  attainment = transmitted_genetic_sd / desired_gains
+), 3)
+```
 
 ---
 
@@ -166,7 +194,7 @@ The winning replicate is selected on held-out candidates by default. Report:
 3. Coefficient and rank stability across replicates.
 4. Selected-set agreement.
 5. The response for every trait.
-6. the covariance source and its uncertainty.
+6. The covariance source and its uncertainty.
 
 If independent replicates produce different selected sets with similar
 objectives, the data do not identify one operational recommendation. Increase
@@ -213,14 +241,11 @@ c(
 )
 ```
 
-In this reproducible run, the full-sample loss falls from about 3.280 to
-2.108, a reduction of approximately 36%. That improvement is not uniform
-across traits. The anthesis-silking interval changes from an unfavourable
-differential to a favourable one, and plant height and anthesis date move much
-closer to their requests. Grain yield, ears per plant and grey leaf spot do not
-all become closer individually. DGSI minimises the declared multi-trait loss.
-it does not guarantee a smaller error for every trait. The trait table must
-therefore accompany the total objective.
+The two values show whether iteration reduced the declared full-sample loss.
+The improvement can differ among traits. Therefore, always inspect the
+trait-specific errors as well as the total. The iterative procedure minimises
+the declared multi-trait loss. It does not guarantee a smaller error for every
+trait.
 
 The iterative method has value only if the improvement is meaningful on
 held-out candidates and stable across searches. A smaller training objective
@@ -246,7 +271,7 @@ A defensible analysis reports all of the following:
 5. The selected candidates and their index ranks.
 6. Training and holdout objectives.
 7. Rank, coefficient and selected-set stability across replicates.
-8. validation in a later cohort when one is available.
+8. Validation in a later cohort when one is available.
 
 The demonstration above now covers items 1–7 with the shipped population.
 Item 8 necessarily requires data from a genuinely later breeding cohort.
@@ -256,5 +281,7 @@ For objectives stated as intervals rather than one exact vector, read
 
 ## References
 
-Joukhadar R, Daetwyler HD, Bansal U, Gendall AR, Hayden MJ (2024). An iterative
-desired-gain selection index for simultaneous improvement of multiple traits.
+Joukhadar R, Li Y, Thistlethwaite R, Forrest KL, Tibbits JF, Trethowan R,
+Hayden MJ (2024). Optimising desired gain indices to maximise selection
+response. *Frontiers in Plant Science* **15**:1337388.
+<https://doi.org/10.3389/fpls.2024.1337388>

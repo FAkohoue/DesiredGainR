@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Optimising desired gains • DesiredGainR</title>
+<title>Iterative optimisation of the desired-gain index • DesiredGainR</title>
 <!-- favicons --><link rel="icon" type="image/png" sizes="96x96" href="../favicon-96x96.png">
 <link rel="icon" type="”image/svg+xml”" href="../favicon.svg">
 <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
@@ -21,7 +21,7 @@
 <link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Optimising desired gains">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Iterative optimisation of the desired-gain index">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;600&amp;display=swap" rel="stylesheet">
 <style>
@@ -87,7 +87,7 @@
     <li><h6 class="dropdown-header" data-toc-skip>Index methods</h6></li>
     <li><a class="dropdown-item" href="../articles/DesiredGainR-index-families.html">Multiple-trait selection and method comparison</a></li>
     <li><a class="dropdown-item" href="../articles/DesiredGainR-information.html">Using predictions and prediction errors</a></li>
-    <li><a class="dropdown-item" href="../articles/DesiredGainR-dgsi.html">Optimising desired gains</a></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-dgsi.html">Iterative optimisation of the desired-gain index</a></li>
     <li><a class="dropdown-item" href="../articles/DesiredGainR-qgsi.html">Quadratic genomic selection</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Looking ahead</h6></li>
@@ -117,7 +117,7 @@
 
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
-      <img src="../logo.svg" class="logo" alt=""><h1>Optimising desired gains</h1>
+      <img src="../logo.svg" class="logo" alt=""><h1>Iterative optimisation of the desired-gain index</h1>
             
       
       <small class="dont-index">Source: <a href="https://github.com/FAkohoue/DesiredGainR/blob/HEAD/vignettes/DesiredGainR-dgsi.Rmd" class="external-link"><code>vignettes/DesiredGainR-dgsi.Rmd</code></a></small>
@@ -129,12 +129,12 @@
 <div class="section level2">
 <h2 id="what-the-iterative-method-changes">1. What the iterative method changes<a class="anchor" aria-label="anchor" href="#what-the-iterative-method-changes"></a>
 </h2>
-<p>The classical desired-gain coefficient solve fixes a response
-direction under the covariance model. The iterative desired-gain
-selection index (DGSI) of Joukhadar et al. searches nearby desired-gain
-vectors and evaluates the selected candidates directly. Its purpose is
-to reduce disagreement between the requested standardised gain vector
-and the differential of the selected group.</p>
+<p>The classical desired-gain selection index (DGSI) fixes a response
+direction under the covariance model. Joukhadar et al. (2024) retained
+that established index formula and added an iterative search over nearby
+desired-gain vectors. The search evaluates the selected candidates
+directly. Its purpose is to reduce disagreement between the requested
+standardised gain vector and the differential of the selected group.</p>
 <p><code><a href="../reference/run_dgsi.html">run_dgsi()</a></code> does not discover the breeding objective. The
 breeder must still state the direction, minimum requirements or
 acceptable intervals. Test attainability before interpreting an
@@ -210,8 +210,21 @@ the implementation uses a reproducible derivative-free search.</p>
 <span><span class="co">#&gt;   Feasible at planned intensity: no</span></span>
 <span><span class="co">#&gt;   Feasible anywhere in this population: no</span></span>
 <span><span class="co">#&gt;   Attainable fraction of the requested gain: 54.7%</span></span></code></pre></div>
+<p>The feasibility target uses genetic-standard-deviation units.
+<code><a href="../reference/run_dgsi.html">run_dgsi()</a></code> uses candidate-standard-deviation units. Convert
+the same biological target before fitting.</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">genetic_sd</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/diag.html" class="external-link">diag</a></span><span class="op">(</span><span class="va">dgr_G</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="va">traits</span><span class="op">]</span></span>
+<span><span class="va">candidate_sd</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">vapply</a></span><span class="op">(</span></span>
+<span>  <span class="va">dgr_candidates</span><span class="op">[</span>, <span class="va">traits</span><span class="op">]</span>, <span class="fu">stats</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/r/stats/sd.html" class="external-link">sd</a></span>, <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></span><span class="op">(</span><span class="fl">1L</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">target_original_units</span> <span class="op">&lt;-</span> <span class="va">desired_gains</span> <span class="op">*</span> <span class="va">genetic_sd</span></span>
+<span><span class="va">dg_target</span> <span class="op">&lt;-</span> <span class="va">target_original_units</span> <span class="op">/</span> <span class="va">candidate_sd</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">dg_target</span>, <span class="fl">3</span><span class="op">)</span></span>
+<span><span class="co">#&gt;    GY   PHT    AD   ASI   EPP   GLS </span></span>
+<span><span class="co">#&gt; 0.540 0.327 0.499 0.286 0.241 0.426</span></span></code></pre></div>
 <p>If the exact ray is unattainable, optimisation can find a closer
-selected set. it cannot create unavailable genetic variation. If the
+selected set. It cannot create unavailable genetic variation. If the
 entries are minimum floors rather than an exact ratio, use <a href="../reference/suggest_desired_gains.html"><code>suggest_desired_gains()</code></a>
 or interval optimisation and assess joint attainment instead.</p>
 <hr>
@@ -223,12 +236,12 @@ or interval optimisation and assess joint attainment instead.</p>
 <p>The example below is deliberately small enough for a vignette.
 Operational analyses should use more iterations and independent
 replicates, followed by holdout or external validation.</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">dgsi</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/run_dgsi.html">run_dgsi</a></span><span class="op">(</span></span>
 <span>  init_data <span class="op">=</span> <span class="va">dgr_candidates</span><span class="op">[</span><span class="st">"GenoID"</span><span class="op">]</span>,</span>
 <span>  cand_data <span class="op">=</span> <span class="va">dgr_candidates</span>,</span>
 <span>  trait_cols <span class="op">=</span> <span class="va">traits</span>,</span>
-<span>  dg <span class="op">=</span> <span class="va">desired_gains</span>,</span>
+<span>  dg <span class="op">=</span> <span class="va">dg_target</span>,</span>
 <span>  G <span class="op">=</span> <span class="va">dgr_G</span>,</span>
 <span>  P <span class="op">=</span> <span class="va">dgr_P</span>,</span>
 <span>  lower_is_better <span class="op">=</span> <span class="va">lower_is_better</span>,</span>
@@ -243,12 +256,12 @@ replicates, followed by holdout or external validation.</p>
 <span><span class="co">#&gt;   Traits: 6   Candidates: 200   Selected: 20</span></span>
 <span><span class="co">#&gt;   Selection rule: top_n </span></span>
 <span><span class="co">#&gt;   Coefficients:</span></span>
-<span><span class="co">#&gt;      GY     PHT      AD     ASI     EPP     GLS </span></span>
-<span><span class="co">#&gt;  3.6396  0.0659  0.7469 -0.6898  4.2241 -0.0277 </span></span>
+<span><span class="co">#&gt;       GY      PHT       AD      ASI      EPP      GLS </span></span>
+<span><span class="co">#&gt;  13.5687  -0.1837   4.0918  -3.2739 -38.2414   0.1771 </span></span>
 <span><span class="co">#&gt;   Realised response against the desired gains:</span></span>
-<span><span class="co">#&gt;     GY    PHT     AD    ASI    EPP    GLS </span></span>
-<span><span class="co">#&gt; 1.5623 0.4525 0.5510 0.1162 0.7475 0.2092 </span></span>
-<span><span class="co">#&gt;   Objective 2.78141, chosen from 3 replicates.</span></span>
+<span><span class="co">#&gt;      GY     PHT      AD     ASI     EPP     GLS </span></span>
+<span><span class="co">#&gt;  1.2522  0.0620  0.9686 -0.0270  0.2308  0.0663 </span></span>
+<span><span class="co">#&gt;   Objective 8.69789, chosen from 3 replicates.</span></span>
 <span><span class="co">#&gt;   Replicate selection used: internal pre-fit holdout </span></span>
 <span><span class="co">#&gt;   The comparison observations were excluded before fitting.</span></span>
 <span><span class="co">#&gt;   P provenance: user supplied</span></span></code></pre></div>
@@ -259,41 +272,41 @@ original units of <span class="math inline">\(\mathbf{G}\)</span> and
 the conversion internally.</p>
 <p>The operational output is the ranked candidate table, not the
 coefficient vector by itself.</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">dgsi</span><span class="op">$</span><span class="va">ranked_geno</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
 <span>  <span class="st">"GenoID"</span>, <span class="st">"SelectionIndex"</span>, <span class="st">"Rank"</span>, <span class="st">"Eligible"</span>, <span class="st">"Selected"</span></span>
 <span><span class="op">)</span><span class="op">]</span><span class="op">)</span></span>
 <span><span class="co">#&gt;     GenoID SelectionIndex  Rank Eligible Selected</span></span>
 <span><span class="co">#&gt;     &lt;char&gt;          &lt;num&gt; &lt;num&gt;   &lt;lgcl&gt;   &lt;lgcl&gt;</span></span>
-<span><span class="co">#&gt; 1: CAND051      -23.77901     1     TRUE     TRUE</span></span>
-<span><span class="co">#&gt; 2: CAND092      -25.63016     2     TRUE     TRUE</span></span>
-<span><span class="co">#&gt; 3: CAND193      -26.44297     3     TRUE     TRUE</span></span>
-<span><span class="co">#&gt; 4: CAND115      -26.49760     4     TRUE     TRUE</span></span>
-<span><span class="co">#&gt; 5: CAND135      -26.62914     5     TRUE     TRUE</span></span>
-<span><span class="co">#&gt; 6: CAND130      -26.91844     6     TRUE     TRUE</span></span>
+<span><span class="co">#&gt; 1: CAND130      -133.2926     1     TRUE     TRUE</span></span>
+<span><span class="co">#&gt; 2: CAND135      -151.7086     2     TRUE     TRUE</span></span>
+<span><span class="co">#&gt; 3: CAND092      -152.4793     3     TRUE     TRUE</span></span>
+<span><span class="co">#&gt; 4: CAND005      -153.6863     4     TRUE     TRUE</span></span>
+<span><span class="co">#&gt; 5: CAND051      -155.1229     5     TRUE     TRUE</span></span>
+<span><span class="co">#&gt; 6: CAND087      -156.8744     6     TRUE     TRUE</span></span>
 <span><span class="va">dgsi</span><span class="op">$</span><span class="va">selected_geno</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"GenoID"</span>, <span class="st">"SelectionIndex"</span>, <span class="st">"Rank"</span><span class="op">)</span><span class="op">]</span></span>
 <span><span class="co">#&gt;      GenoID SelectionIndex  Rank</span></span>
 <span><span class="co">#&gt;      &lt;char&gt;          &lt;num&gt; &lt;num&gt;</span></span>
-<span><span class="co">#&gt;  1: CAND051      -23.77901     1</span></span>
-<span><span class="co">#&gt;  2: CAND092      -25.63016     2</span></span>
-<span><span class="co">#&gt;  3: CAND193      -26.44297     3</span></span>
-<span><span class="co">#&gt;  4: CAND115      -26.49760     4</span></span>
-<span><span class="co">#&gt;  5: CAND135      -26.62914     5</span></span>
-<span><span class="co">#&gt;  6: CAND130      -26.91844     6</span></span>
-<span><span class="co">#&gt;  7: CAND160      -27.36982     7</span></span>
-<span><span class="co">#&gt;  8: CAND005      -28.09595     8</span></span>
-<span><span class="co">#&gt;  9: CAND004      -28.15358     9</span></span>
-<span><span class="co">#&gt; 10: CAND158      -28.48562    10</span></span>
-<span><span class="co">#&gt; 11: CAND146      -28.56305    11</span></span>
-<span><span class="co">#&gt; 12: CAND087      -28.97873    12</span></span>
-<span><span class="co">#&gt; 13: CAND137      -29.24266    13</span></span>
-<span><span class="co">#&gt; 14: CAND103      -29.26149    14</span></span>
-<span><span class="co">#&gt; 15: CAND007      -29.42558    15</span></span>
-<span><span class="co">#&gt; 16: CAND075      -29.44933    16</span></span>
-<span><span class="co">#&gt; 17: CAND065      -29.72210    17</span></span>
-<span><span class="co">#&gt; 18: CAND199      -30.12385    18</span></span>
-<span><span class="co">#&gt; 19: CAND036      -30.73888    19</span></span>
-<span><span class="co">#&gt; 20: CAND071      -30.76035    20</span></span>
+<span><span class="co">#&gt;  1: CAND130      -133.2926     1</span></span>
+<span><span class="co">#&gt;  2: CAND135      -151.7086     2</span></span>
+<span><span class="co">#&gt;  3: CAND092      -152.4793     3</span></span>
+<span><span class="co">#&gt;  4: CAND005      -153.6863     4</span></span>
+<span><span class="co">#&gt;  5: CAND051      -155.1229     5</span></span>
+<span><span class="co">#&gt;  6: CAND087      -156.8744     6</span></span>
+<span><span class="co">#&gt;  7: CAND004      -158.6038     7</span></span>
+<span><span class="co">#&gt;  8: CAND150      -159.4416     8</span></span>
+<span><span class="co">#&gt;  9: CAND147      -159.9039     9</span></span>
+<span><span class="co">#&gt; 10: CAND158      -160.0289    10</span></span>
+<span><span class="co">#&gt; 11: CAND160      -161.5619    11</span></span>
+<span><span class="co">#&gt; 12: CAND065      -161.6259    12</span></span>
+<span><span class="co">#&gt; 13: CAND146      -162.4855    13</span></span>
+<span><span class="co">#&gt; 14: CAND115      -162.8150    14</span></span>
+<span><span class="co">#&gt; 15: CAND075      -166.1193    15</span></span>
+<span><span class="co">#&gt; 16: CAND153      -166.5070    16</span></span>
+<span><span class="co">#&gt; 17: CAND074      -166.7513    17</span></span>
+<span><span class="co">#&gt; 18: CAND175      -166.9187    18</span></span>
+<span><span class="co">#&gt; 19: CAND054      -167.3839    19</span></span>
+<span><span class="co">#&gt; 20: CAND186      -167.4782    20</span></span>
 <span><span class="co">#&gt;      GenoID SelectionIndex  Rank</span></span>
 <span><span class="co">#&gt;      &lt;char&gt;          &lt;num&gt; &lt;num&gt;</span></span></code></pre></div>
 <p><code>Eligible</code> matters only when
@@ -305,50 +318,64 @@ index selects the requested number with deterministic tie-breaking.</p>
 <div class="section level2">
 <h2 id="separate-the-selected-differential-from-transmitted-response">3. Separate the selected differential from transmitted response<a class="anchor" aria-label="anchor" href="#separate-the-selected-differential-from-transmitted-response"></a>
 </h2>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span></span>
-<span>  requested <span class="op">=</span> <span class="va">dgsi</span><span class="op">$</span><span class="va">desired_gain</span>,</span>
+<span>  requested_candidate_sd <span class="op">=</span> <span class="va">dgsi</span><span class="op">$</span><span class="va">desired_gain</span>,</span>
 <span>  optimised_direction <span class="op">=</span> <span class="va">dgsi</span><span class="op">$</span><span class="va">optimised_d</span>,</span>
 <span>  selected_differential <span class="op">=</span> <span class="va">dgsi</span><span class="op">$</span><span class="va">realised_response</span>,</span>
-<span>  expected_genetic_response_sd <span class="op">=</span> <span class="va">dgsi</span><span class="op">$</span><span class="va">theoretical_response</span><span class="op">$</span><span class="va">standardised</span></span>
+<span>  expected_response_candidate_sd <span class="op">=</span> <span class="va">dgsi</span><span class="op">$</span><span class="va">theoretical_response</span><span class="op">$</span><span class="va">standardised</span></span>
 <span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span></span>
-<span><span class="co">#&gt;                                 GY   PHT    AD   ASI   EPP   GLS</span></span>
-<span><span class="co">#&gt; requested                    1.000 0.400 0.600 0.500 0.400 0.600</span></span>
-<span><span class="co">#&gt; optimised_direction          1.040 0.610 1.019 0.859 0.789 0.337</span></span>
-<span><span class="co">#&gt; selected_differential        1.562 0.452 0.551 0.116 0.747 0.209</span></span>
-<span><span class="co">#&gt; expected_genetic_response_sd 0.366 0.215 0.359 0.302 0.278 0.119</span></span></code></pre></div>
+<span><span class="co">#&gt;                                   GY    PHT    AD    ASI   EPP   GLS</span></span>
+<span><span class="co">#&gt; requested_candidate_sd         0.540  0.327 0.499  0.286 0.241 0.426</span></span>
+<span><span class="co">#&gt; optimised_direction            2.651 -0.351 5.142  2.738 0.008 0.967</span></span>
+<span><span class="co">#&gt; selected_differential          1.252  0.062 0.969 -0.027 0.231 0.066</span></span>
+<span><span class="co">#&gt; expected_response_candidate_sd 0.250 -0.033 0.484  0.258 0.001 0.091</span></span></code></pre></div>
 <p>The selected differential describes the candidates retained. The
 theoretical response is the model-based expectation transmitted to the
 next generation. They are not synonyms. A large selected differential
 with a small theoretical response indicates that much of the observed
 separation is not expected to be inherited.</p>
+<p>To compare transmitted response with the original feasibility target,
+return to genetic-standard-deviation units.</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">transmitted_genetic_sd</span> <span class="op">&lt;-</span></span>
+<span>  <span class="va">dgsi</span><span class="op">$</span><span class="va">theoretical_response</span><span class="op">$</span><span class="va">original_units</span> <span class="op">/</span> <span class="va">genetic_sd</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span></span>
+<span>  requested_genetic_sd <span class="op">=</span> <span class="va">desired_gains</span>,</span>
+<span>  transmitted_genetic_sd <span class="op">=</span> <span class="va">transmitted_genetic_sd</span>,</span>
+<span>  attainment <span class="op">=</span> <span class="va">transmitted_genetic_sd</span> <span class="op">/</span> <span class="va">desired_gains</span></span>
+<span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span></span>
+<span><span class="co">#&gt;                           GY   PHT     AD    ASI   EPP    GLS</span></span>
+<span><span class="co">#&gt; requested_genetic_sd   1.000 0.400  0.600  0.500 0.400  0.600</span></span>
+<span><span class="co">#&gt; transmitted_genetic_sd 0.462 0.040 -0.582 -0.451 0.001 -0.128</span></span>
+<span><span class="co">#&gt; attainment             0.462 0.101 -0.970 -0.902 0.004 -0.214</span></span></code></pre></div>
 <hr>
 </div>
 <div class="section level2">
 <h2 id="inspect-optimisation-stability">4. Inspect optimisation stability<a class="anchor" aria-label="anchor" href="#inspect-optimisation-stability"></a>
 </h2>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">dgsi</span><span class="op">$</span><span class="va">replicate_diagnostics</span></span>
 <span><span class="co">#&gt;    Replicate Objective Iteration_of_best Selected Plateau</span></span>
 <span><span class="co">#&gt;        &lt;int&gt;     &lt;num&gt;             &lt;int&gt;    &lt;int&gt;  &lt;lgcl&gt;</span></span>
-<span><span class="co">#&gt; 1:         1 1.4841447                60       20   FALSE</span></span>
-<span><span class="co">#&gt; 2:         2 0.9569090                23       20   FALSE</span></span>
-<span><span class="co">#&gt; 3:         3 0.3441077                33       20   FALSE</span></span>
+<span><span class="co">#&gt; 1:         1  4.763623                48       20   FALSE</span></span>
+<span><span class="co">#&gt; 2:         2  3.481674                30       20   FALSE</span></span>
+<span><span class="co">#&gt; 3:         3  3.370560                23       20   FALSE</span></span>
 <span><span class="co">#&gt;    Final_window_relative_improvement Chosen</span></span>
 <span><span class="co">#&gt;                                &lt;num&gt; &lt;lgcl&gt;</span></span>
-<span><span class="co">#&gt; 1:                         0.3077807   TRUE</span></span>
-<span><span class="co">#&gt; 2:                         0.5536885  FALSE</span></span>
-<span><span class="co">#&gt; 3:                         0.8395049  FALSE</span></span>
+<span><span class="co">#&gt; 1:                       0.005523655  FALSE</span></span>
+<span><span class="co">#&gt; 2:                       0.273149398  FALSE</span></span>
+<span><span class="co">#&gt; 3:                       0.296346133   TRUE</span></span>
 <span><span class="va">dgsi</span><span class="op">$</span><span class="va">rank_correlation</span></span>
 <span><span class="co">#&gt;           [,1]      [,2]      [,3]</span></span>
-<span><span class="co">#&gt; [1,] 1.0000000 0.8608820 0.8692597</span></span>
-<span><span class="co">#&gt; [2,] 0.8608820 1.0000000 0.9736353</span></span>
-<span><span class="co">#&gt; [3,] 0.8692597 0.9736353 1.0000000</span></span>
+<span><span class="co">#&gt; [1,] 1.0000000 0.9535618 0.8320378</span></span>
+<span><span class="co">#&gt; [2,] 0.9535618 1.0000000 0.8824196</span></span>
+<span><span class="co">#&gt; [3,] 0.8320378 0.8824196 1.0000000</span></span>
 <span><span class="va">dgsi</span><span class="op">$</span><span class="va">selected_set_agreement</span></span>
 <span><span class="co">#&gt;             replicate_1 replicate_2 replicate_3</span></span>
-<span><span class="co">#&gt; replicate_1   1.0000000   0.5384615   0.4814815</span></span>
-<span><span class="co">#&gt; replicate_2   0.5384615   1.0000000   0.5384615</span></span>
-<span><span class="co">#&gt; replicate_3   0.4814815   0.5384615   1.0000000</span></span></code></pre></div>
+<span><span class="co">#&gt; replicate_1   1.0000000   0.6000000   0.3333333</span></span>
+<span><span class="co">#&gt; replicate_2   0.6000000   1.0000000   0.4814815</span></span>
+<span><span class="co">#&gt; replicate_3   0.3333333   0.4814815   1.0000000</span></span></code></pre></div>
 <p>The winning replicate is selected on held-out candidates by default.
 Report:</p>
 <ol style="list-style-type: decimal">
@@ -357,7 +384,7 @@ Report:</p>
 <li>Coefficient and rank stability across replicates.</li>
 <li>Selected-set agreement.</li>
 <li>The response for every trait.</li>
-<li>the covariance source and its uncertainty.</li>
+<li>The covariance source and its uncertainty.</li>
 </ol>
 <p>If independent replicates produce different selected sets with
 similar objectives, the data do not identify one operational
@@ -368,7 +395,7 @@ core rather than hiding the instability.</p>
 <div class="section level2">
 <h2 id="compare-with-the-non-iterated-solution">5. Compare with the non-iterated solution<a class="anchor" aria-label="anchor" href="#compare-with-the-non-iterated-solution"></a>
 </h2>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">comparison</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  Trait <span class="op">=</span> <span class="va">traits</span>,</span>
 <span>  Requested <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/unname.html" class="external-link">unname</a></span><span class="op">(</span><span class="va">dgsi</span><span class="op">$</span><span class="va">desired_gain</span><span class="op">[</span><span class="va">traits</span><span class="op">]</span><span class="op">)</span>,</span>
@@ -384,24 +411,24 @@ core rather than hiding the instability.</p>
 <span><span class="va">comparison</span><span class="op">[</span><span class="op">-</span><span class="fl">1</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">comparison</span><span class="op">[</span><span class="op">-</span><span class="fl">1</span><span class="op">]</span>, <span class="fl">3</span><span class="op">)</span></span>
 <span><span class="va">comparison</span></span>
 <span><span class="co">#&gt;   Trait Requested Non_iterated Iterative Absolute_error_non_iterated</span></span>
-<span><span class="co">#&gt; 1    GY       1.0        1.526     1.562                       0.526</span></span>
-<span><span class="co">#&gt; 2   PHT       0.4        0.274     0.452                       0.126</span></span>
-<span><span class="co">#&gt; 3    AD       0.6        0.441     0.551                       0.159</span></span>
-<span><span class="co">#&gt; 4   ASI       0.5       -0.256     0.116                       0.756</span></span>
-<span><span class="co">#&gt; 5   EPP       0.4        0.562     0.747                       0.162</span></span>
-<span><span class="co">#&gt; 6   GLS       0.6        0.228     0.209                       0.372</span></span>
+<span><span class="co">#&gt; 1    GY     0.540        1.468     1.252                       0.928</span></span>
+<span><span class="co">#&gt; 2   PHT     0.327        0.425     0.062                       0.098</span></span>
+<span><span class="co">#&gt; 3    AD     0.499        0.536     0.969                       0.037</span></span>
+<span><span class="co">#&gt; 4   ASI     0.286       -0.173    -0.027                       0.459</span></span>
+<span><span class="co">#&gt; 5   EPP     0.241        0.636     0.231                       0.395</span></span>
+<span><span class="co">#&gt; 6   GLS     0.426        0.495     0.066                       0.070</span></span>
 <span><span class="co">#&gt;   Absolute_error_iterative</span></span>
-<span><span class="co">#&gt; 1                    0.562</span></span>
-<span><span class="co">#&gt; 2                    0.052</span></span>
-<span><span class="co">#&gt; 3                    0.049</span></span>
-<span><span class="co">#&gt; 4                    0.384</span></span>
-<span><span class="co">#&gt; 5                    0.347</span></span>
-<span><span class="co">#&gt; 6                    0.391</span></span></code></pre></div>
+<span><span class="co">#&gt; 1                    0.712</span></span>
+<span><span class="co">#&gt; 2                    0.265</span></span>
+<span><span class="co">#&gt; 3                    0.469</span></span>
+<span><span class="co">#&gt; 4                    0.313</span></span>
+<span><span class="co">#&gt; 5                    0.010</span></span>
+<span><span class="co">#&gt; 6                    0.359</span></span></code></pre></div>
 <p>Compute both objective values from the full candidate set so that the
 comparison uses the same observations. The stored
 <code>dgsi$objective</code> can instead be a holdout objective. Compare
 it only with other holdout quantities.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">dgsi_loss</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">response</span>, <span class="va">target</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="op">(</span><span class="op">(</span><span class="va">response</span> <span class="op">-</span> <span class="va">target</span><span class="op">)</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">pmax</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="va">target</span><span class="op">)</span>, <span class="fl">0.25</span><span class="op">)</span><span class="op">)</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span></span>
 <span><span class="op">}</span></span>
@@ -415,16 +442,12 @@ it only with other holdout quantities.</p>
 <span>  <span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; non_iterated_full_sample    iterative_full_sample </span></span>
-<span><span class="co">#&gt;                 3.279795                 2.108015</span></span></code></pre></div>
-<p>In this reproducible run, the full-sample loss falls from about 3.280
-to 2.108, a reduction of approximately 36%. That improvement is not
-uniform across traits. The anthesis-silking interval changes from an
-unfavourable differential to a favourable one, and plant height and
-anthesis date move much closer to their requests. Grain yield, ears per
-plant and grey leaf spot do not all become closer individually. DGSI
-minimises the declared multi-trait loss. it does not guarantee a smaller
-error for every trait. The trait table must therefore accompany the
-total objective.</p>
+<span><span class="co">#&gt;                 8.150162                 5.194453</span></span></code></pre></div>
+<p>The two values show whether iteration reduced the declared
+full-sample loss. The improvement can differ among traits. Therefore,
+always inspect the trait-specific errors as well as the total. The
+iterative procedure minimises the declared multi-trait loss. It does not
+guarantee a smaller error for every trait.</p>
 <p>The iterative method has value only if the improvement is meaningful
 on held-out candidates and stable across searches. A smaller training
 objective alone is not sufficient evidence.</p>
@@ -450,7 +473,7 @@ transmitted response.</li>
 <li>The selected candidates and their index ranks.</li>
 <li>Training and holdout objectives.</li>
 <li>Rank, coefficient and selected-set stability across replicates.</li>
-<li>validation in a later cohort when one is available.</li>
+<li>Validation in a later cohort when one is available.</li>
 </ol>
 <p>The demonstration above now covers items 1–7 with the shipped
 population. Item 8 necessarily requires data from a genuinely later
@@ -462,9 +485,10 @@ gains and acceptable intervals</a>.</p>
 <div class="section level2">
 <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h2>
-<p>Joukhadar R, Daetwyler HD, Bansal U, Gendall AR, Hayden MJ (2024). An
-iterative desired-gain selection index for simultaneous improvement of
-multiple traits.</p>
+<p>Joukhadar R, Li Y, Thistlethwaite R, Forrest KL, Tibbits JF,
+Trethowan R, Hayden MJ (2024). Optimising desired gain indices to
+maximise selection response. <em>Frontiers in Plant Science</em>
+<strong>15</strong>:1337388. <a href="https://doi.org/10.3389/fpls.2024.1337388" class="external-link uri">https://doi.org/10.3389/fpls.2024.1337388</a></p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

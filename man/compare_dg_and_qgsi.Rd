@@ -2,7 +2,7 @@
 % Please edit documentation in R/compare_dg_and_qgsi.R
 \name{compare_dg_and_qgsi}
 \alias{compare_dg_and_qgsi}
-\title{Compare DGSI and QGSI candidate rankings}
+\title{Compare an iteratively optimised DGSI with a QGSI}
 \usage{
 compare_dg_and_qgsi(
   dg_result,
@@ -35,11 +35,21 @@ Spearman rank correlations.}
 \item{debug}{Whether to print progress messages.}
 }
 \value{
-A list with \code{comparison_table} and \code{correlation_summary}.
+A list with \code{comparison_table}, \code{correlation_summary}, and
+\code{decision_summary}. The last component reports the common candidate count,
+selected counts, selected overlap, and Jaccard similarity.
 }
 \description{
-Merges canonical \code{\link[=run_dgsi]{run_dgsi()}} and \code{\link[=run_qgsi]{run_qgsi()}} results by candidate
-identifier and reports score and rank agreement. The comparison is
-descriptive: DGSI and QGSI optimise different breeding objectives, so
-agreement is not interpreted as validation of either method.
+Merges results from \code{\link[=run_dgsi]{run_dgsi()}} and \code{\link[=run_qgsi]{run_qgsi()}} by candidate identifier.
+It reports scores, ranks, and the selection flag from each fit. DGSI means
+desired-gain selection index. The \code{run_dgsi()} object contains the established
+desired-gain index after the iterative search applied by Joukhadar et al.
+(2024). QGSI means quadratic genomic selection index.
+}
+\details{
+The comparison is descriptive. DGSI targets a desired response direction.
+QGSI represents linear, squared, and cross-product economic value. Agreement
+does not validate either objective and disagreement does not identify a
+winner. The breeder must first decide which objective represents the
+programme.
 }

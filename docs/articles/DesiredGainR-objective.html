@@ -87,7 +87,7 @@
     <li><h6 class="dropdown-header" data-toc-skip>Index methods</h6></li>
     <li><a class="dropdown-item" href="../articles/DesiredGainR-index-families.html">Multiple-trait selection and method comparison</a></li>
     <li><a class="dropdown-item" href="../articles/DesiredGainR-information.html">Using predictions and prediction errors</a></li>
-    <li><a class="dropdown-item" href="../articles/DesiredGainR-dgsi.html">Optimising desired gains</a></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-dgsi.html">Iterative optimisation of the desired-gain index</a></li>
     <li><a class="dropdown-item" href="../articles/DesiredGainR-qgsi.html">Quadratic genomic selection</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Looking ahead</h6></li>
@@ -150,7 +150,7 @@ decision.</p>
 <hr>
 </div>
 <div class="section level2">
-<h2 id="the-duality-two-ways-of-saying-one-thing">2. The duality: two ways of saying one thing<a class="anchor" aria-label="anchor" href="#the-duality-two-ways-of-saying-one-thing"></a>
+<h2 id="the-algebraic-bridge-between-two-objective-statements">2. The algebraic bridge between two objective statements<a class="anchor" aria-label="anchor" href="#the-algebraic-bridge-between-two-objective-statements"></a>
 </h2>
 <div class="section level3">
 <h3 id="the-result">2.1 The result<a class="anchor" aria-label="anchor" href="#the-result"></a>
@@ -161,20 +161,28 @@ weights <code>w</code>. The desired-gain index sets
 Setting the two equal gives</p>
 <p><span class="math display">\[w = G^{-1}PG^{-1}d, \qquad d =
 GP^{-1}Gw.\]</span></p>
-<p>So they are not competing methods. They are two coordinate systems on
-one index, and every objective stated in either can be read in the
-other.</p>
+<p>Therefore, any desired-gain direction has an implied weight vector
+that produces the same coefficient direction under the supplied
+covariance matrices. The reverse mapping also exists when the required
+inverses are defined.</p>
+<p>This algebraic equivalence does not make the biological statements
+identical. Economic weights define value per trait unit. Desired gains
+define a response direction. Independently elicited economic weights and
+desired gains can lead to different indices because they can represent
+different programme priorities.</p>
 </div>
 <div class="section level3">
 <h3 id="why-it-matters-practically">2.2 Why it matters practically<a class="anchor" aria-label="anchor" href="#why-it-matters-practically"></a>
 </h3>
 <p>A breeder who cannot put a currency value on grey leaf spot
-resistance can usually say how much of it they want relative to yield.
-The duality turns that into weights.</p>
-<p>The reverse direction is the more useful one in practice, and is
-under-exploited. When a programme proposes weights, showing them the
-response those weights actually request often reveals that the objective
-is not what anyone intended.</p>
+resistance can usually say how much improvement is required relative to
+yield. The algebraic mapping calculates the weights that reproduce that
+response direction. These are implied weights. They are not measured
+prices or profit coefficients.</p>
+<p>The reverse direction is also useful. When a programme proposes
+weights, the implied response shows what those weights request under the
+fitted covariance model. This often reveals a difference between the
+stated objective and the response the index is expected to deliver.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">desired_gains</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
 <span>  GY <span class="op">=</span> <span class="fl">1.0</span>, PHT <span class="op">=</span> <span class="fl">0.4</span>, AD <span class="op">=</span> <span class="fl">0.6</span>, ASI <span class="op">=</span> <span class="fl">0.5</span>,</span>
@@ -189,9 +197,9 @@ is not what anyone intended.</p>
 <span><span class="co">#&gt;      GY     PHT      AD     ASI     EPP     GLS </span></span>
 <span><span class="co">#&gt;  14.516   0.030   2.323 -13.213 -15.150   0.678 </span></span>
 <span><span class="co">#&gt; attr(,"provenance")</span></span>
-<span><span class="co">#&gt; [1] "Implied by the supplied desired gains through w = G^-1 P G^-1 d; not an independently estimated economic value. Expressed in the favourable-direction space, so a positive weight always means the trait matters."</span></span></code></pre></div>
-<p>The translation is exactly invertible when the units match, and
-checking that is worth the one line it costs:</p>
+<span><span class="co">#&gt; [1] "Implied by the supplied desired gains through w = G^-1 P G^-1 d; not an independently estimated economic value. Expressed in the favourable-direction space, so a positive weight favours movement in the breeder-defined direction."</span></span></code></pre></div>
+<p>The algebraic mapping is exactly invertible when the units match and
+the matrices have the required rank. This is worth checking:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span></span>
 <span>  <span class="fu"><a href="../reference/implied_desired_gains.html">implied_desired_gains</a></span><span class="op">(</span></span>

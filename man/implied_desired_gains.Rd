@@ -2,7 +2,7 @@
 % Please edit documentation in R/objective_tools.R
 \name{implied_desired_gains}
 \alias{implied_desired_gains}
-\title{Translate economic weights into the desired gains they imply}
+\title{Map economic weights to the desired gains they imply}
 \usage{
 implied_desired_gains(
   economic_weights,
@@ -46,7 +46,7 @@ traits <- c("yield", "disease")
 G <- matrix(c(0.60, -0.15, -0.15, 0.40), 2, dimnames = list(traits, traits))
 P <- matrix(c(1.10, -0.20, -0.20, 0.90), 2, dimnames = list(traits, traits))
 
-# The translation is exactly invertible when the units match.
+# The algebraic mapping is invertible when the units and model match.
 d <- c(yield = 0.5, disease = 0.3)
 w <- implied_economic_weights(
   d, G, P,

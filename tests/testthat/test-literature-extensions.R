@@ -7,7 +7,8 @@ test_that("general information index reduces to classical equations", {
   dimnames(P) <- list(traits, traits)
   set.seed(4)
   values <- as.data.frame(matrix(
-    stats::rnorm(80), ncol = 2,
+    stats::rnorm(80),
+    ncol = 2,
     dimnames = list(paste0("g", 1:40), traits)
   ))
   model <- selection_information(values, P = P, C = G, G = G)
@@ -22,7 +23,8 @@ test_that("general information index reduces to classical equations", {
   )
 
   fit_desired <- generalized_index(
-    model, desired, "desired_gain", n_select = 8
+    model, desired, "desired_gain",
+    n_select = 8
   )
   expected_direction <- crossprod(G, fit_desired$coefficients)
   expect_equal(
@@ -32,11 +34,13 @@ test_that("general information index reduces to classical equations", {
   )
 
   oriented <- generalized_index(
-    model, desired, "desired_gain", n_select = 8,
+    model, desired, "desired_gain",
+    n_select = 8,
     lower_is_better = "quality"
   )
   signed <- generalized_index(
-    model, c(yield = 1, quality = -0.5), "desired_gain", n_select = 8
+    model, c(yield = 1, quality = -0.5), "desired_gain",
+    n_select = 8
   )
   expect_equal(oriented$coefficients, signed$coefficients, tolerance = 1e-10)
   expect_lt(oriented$expected_response[["quality"]], 0)
@@ -58,12 +62,14 @@ test_that("rectangular information model predicts a smaller objective", {
   expect_true(min(eigen(joint, symmetric = TRUE)$values) > 0)
   set.seed(5)
   values <- as.data.frame(matrix(
-    stats::rnorm(90), ncol = 3,
+    stats::rnorm(90),
+    ncol = 3,
     dimnames = list(paste0("g", 1:30), information)
   ))
   model <- selection_information(values, P, C, G)
   fit <- generalized_index(
-    model, c(yield = 1, disease = -0.4), "desired_gain", n_select = 6
+    model, c(yield = 1, disease = -0.4), "desired_gain",
+    n_select = 6
   )
   expect_named(fit$coefficients, information)
   expect_named(fit$expected_response, objective)
@@ -94,14 +100,16 @@ test_that("candidate prediction errors propagate to selection probabilities", {
     row.names = c("a", "b", "c")
   )
   fit <- selection_index(
-    values, traits, method = "smith_hazel",
+    values, traits,
+    method = "smith_hazel",
     G = G, P = P, economic_weights = c(t1 = 1, t2 = 1),
     scale_traits = FALSE, n_select = 1
   )
   low <- diag(c(0.001, 0.001))
   dimnames(low) <- list(traits, traits)
   uncertainty <- candidate_score_uncertainty(
-    fit, low, n_draws = 500, seed = 9
+    fit, low,
+    n_draws = 500, seed = 9
   )
   expect_gt(
     uncertainty$summary[id == "a", selection_probability],
@@ -136,7 +144,8 @@ test_that("Satoh projection gives proportional restricted breeding values", {
   expect_equal(response$mahalanobis_residual, 0, tolerance = 1e-10)
 
   decreasing <- restricted_breeding_values(
-    values, G, direction = direction, lower_is_better = "t3"
+    values, G,
+    direction = direction, lower_is_better = "t3"
   )
   expect_true(all(decreasing$restriction$direction[["t3"]] < 0))
 })
@@ -152,11 +161,13 @@ test_that("restricted index reports Satoh criterion for a full direction", {
   dimnames(P) <- list(traits, traits)
   set.seed(2)
   values <- as.data.frame(matrix(
-    stats::rnorm(150), ncol = 3,
+    stats::rnorm(150),
+    ncol = 3,
     dimnames = list(paste0("g", 1:50), traits)
   ))
   fit <- restricted_index(
-    values, traits, method = "harville", G = G, P = P,
+    values, traits,
+    method = "harville", G = G, P = P,
     target_gains = c(t1 = 3, t2 = 4, t3 = 5),
     scale_traits = FALSE, n_select = 10
   )
@@ -178,7 +189,8 @@ test_that("Cunningham efficiency identifies redundant information", {
     weak = stats::rnorm(30)
   )
   fit <- selection_index(
-    values, traits, method = "smith_hazel", G = G, P = P,
+    values, traits,
+    method = "smith_hazel", G = G, P = P,
     economic_weights = c(strong = 1, weak = 1),
     scale_traits = FALSE, n_select = 5
   )
@@ -189,7 +201,8 @@ test_that("Cunningham efficiency identifies redundant information", {
   )
   expect_error(
     index_information_efficiency(selection_index(
-      values, traits, method = "base",
+      values, traits,
+      method = "base",
       economic_weights = c(strong = 1, weak = 1),
       scale_traits = FALSE, n_select = 5
     )),
@@ -197,7 +210,8 @@ test_that("Cunningham efficiency identifies redundant information", {
   )
   information <- selection_information(values, P = P, C = G, G = G)
   general <- generalized_index(
-    information, c(strong = 1, weak = 1), "economic", n_select = 5
+    information, c(strong = 1, weak = 1), "economic",
+    n_select = 5
   )
   expect_equal(nrow(index_information_efficiency(general)), 2)
 })
@@ -210,7 +224,8 @@ test_that("Elston index keeps every floor firm", {
   )
   expect_warning(
     fit <- selection_index(
-      values, c("yield", "quality"), method = "elston",
+      values, c("yield", "quality"),
+      method = "elston",
       culling_thresholds = c(yield = 1.5, quality = 1.5),
       center_traits = FALSE, scale_traits = FALSE, n_select = 2
     ),
@@ -228,7 +243,8 @@ test_that("culling limits use original units and respect trait direction", {
     row.names = c("fails_both", "at_limits", "passes")
   )
   fit <- selection_index(
-    values, c("yield", "disease"), method = "independent_culling",
+    values, c("yield", "disease"),
+    method = "independent_culling",
     culling_thresholds = c(yield = 9, disease = 3),
     lower_is_better = "disease",
     center_traits = TRUE, scale_traits = TRUE, n_select = 2
@@ -253,18 +269,21 @@ test_that("method comparison checks fairness and reports attainment", {
   objective <- c(yield = 1, disease = 0.5)
   fits <- list(
     Smith_Hazel = selection_index(
-      values, traits, method = "smith_hazel", G = G, P = P,
+      values, traits,
+      method = "smith_hazel", G = G, P = P,
       economic_weights = objective, lower_is_better = "disease",
       scale_traits = FALSE, n_select = 2
     ),
     Base = selection_index(
-      values, traits, method = "base", G = G, P = P,
+      values, traits,
+      method = "base", G = G, P = P,
       economic_weights = objective, lower_is_better = "disease",
       scale_traits = FALSE, n_select = 2
     )
   )
   comparison <- compare_selection_methods(
-    fits, target_gains = c(yield = 0.5, disease = 0.2)
+    fits,
+    target_gains = c(yield = 0.5, disease = 0.2)
   )
   expect_s3_class(comparison, "desiredgainr_method_comparison")
   expect_equal(nrow(comparison$summary), 2)
@@ -330,7 +349,8 @@ test_that("scenario calibration and stress testing form one auditable path", {
     )
   )
   setup <- suppressWarnings(founder_population(
-    founders, G = G, h2 = c(yield = 0.4, disease = 0.4),
+    founders,
+    G = G, h2 = c(yield = 0.4, disease = 0.4),
     seed = 23L, scenario = scenario
   ))
   expect_equal(setup$qtl_effect_distribution, "gamma")
@@ -360,7 +380,8 @@ test_that("scenario calibration and stress testing form one auditable path", {
   expect_s3_class(stress, "desiredgainr_stress_test")
   expect_true(stress$matched_replicate_seeds)
   expect_equal(stress$summary$Mean_utility[1],
-    stress$summary$Mean_utility[2], tolerance = 1e-12
+    stress$summary$Mean_utility[2],
+    tolerance = 1e-12
   )
   expect_true(all(stress$summary$Regret == 0))
 })

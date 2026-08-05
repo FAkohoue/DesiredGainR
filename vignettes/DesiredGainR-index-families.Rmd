@@ -19,6 +19,7 @@ data(dgr_traits, package = "DesiredGainR")
 data(dgr_G, package = "DesiredGainR")
 data(dgr_P, package = "DesiredGainR")
 data(dgr_candidates, package = "DesiredGainR")
+data(dgr_gebv, package = "DesiredGainR")
 traits <- dgr_traits$trait
 lower_is_better <- dgr_traits$trait[dgr_traits$direction == "decrease"]
 ```
@@ -51,13 +52,74 @@ Four broad strategies are recognised by Beavis, Lamkey, Mahama, and Suza
 | Strategy | Definition | Suitable situation | Main limitation |
 |---|---|---|---|
 | Multistage selection | Different traits are evaluated at different stages. | Expensive traits are measured after inexpensive screening. | Early rejection can remove candidates that would perform well later. |
-| Tandem selection | One trait is improved first. Another trait becomes the focus later. | One urgent trait dominates a specific breeding stage. | Other traits can deteriorate while attention is placed elsewhere. |
+| Tandem selection | One trait is improved across one or more cycles before another trait becomes the focus. | One trait has temporary programme priority. | Other traits can deteriorate before the focus changes. |
 | Independent culling | Every candidate must satisfy a limit for every required trait. | Release standards or biological limits are firm. | Excellence elsewhere gives no compensation for a failed limit. |
 | Index selection | Traits are combined into one score of overall merit. | Trade-offs are allowed and simultaneous improvement is required. | The score is useful only when its objective and inputs are defensible. |
 
 These strategies answer different questions. Hence, a comparison should never
 treat them as interchangeable algorithms. The breeder's decision rule comes
 first. The statistical method follows.
+
+### 2.1 Choose the strategy before choosing the index
+
+No strategy is universally best. The suitable strategy follows from four
+programme decisions.
+
+1. **Are any limits non-negotiable?** Use independent culling for those limits.
+   An index can rank the candidates that pass.
+2. **Are traits measured at different stages or costs?** Use a multistage
+   design. Place inexpensive or highly heritable screens early. Reserve costly
+   traits for the reduced set.
+3. **Must one trait dominate several breeding cycles?** Use a true tandem
+   schedule. Monitor correlated deterioration in the other traits before the
+   focal trait changes.
+4. **Can progress in one trait compensate for less progress in another?** Use
+   index selection. Then choose the index family from the biological objective.
+
+These choices can be combined. For example, disease susceptibility can define
+a firm culling limit. A desired-gain index can then rank the eligible lines for
+yield, quality, and maturity. This hybrid rule represents the programme more
+accurately than forcing every trait into one score.
+
+### 2.2 What DesiredGainR implements
+
+The four strategies have different software coverage. The distinction below
+is important.
+
+| Strategy | Current package support | What can be compared directly |
+|---|---|---|
+| Multistage selection | No dedicated stage-allocation optimiser | Analyse the candidate set retained after each stage. Record attrition, cost, and final response separately. |
+| Classical tandem selection across cycles | No dedicated alternating-cycle simulator | Define separate cycle scenarios outside the one-call comparison. Monitor response in every trait. |
+| Within-cohort sequential screening | `selection_index(method = "tandem")` | Rankings, selected candidates, and observed differentials within one cohort. |
+| Independent culling | `selection_index(method = "independent_culling")` | Passing rate, failed limits, selected candidates, and observed differentials. |
+| Index selection | `selection_index()`, `restricted_index()`, `generalized_index()`, `run_dgsi()`, and `run_qgsi()` | The available criteria depend on the fitted index family. They are defined in Section 6. |
+
+The option named `method = "tandem"` is retained for compatibility. It applies
+successive trait screens to one candidate cohort. Classical tandem selection
+changes the focal trait across cycles or generations. These procedures should
+not be interpreted as the same strategy.
+
+### 2.3 Compare strategies on programme outcomes
+
+Strategy comparison requires more than a common candidate score. Use the same
+initial population, selection budget, time horizon, and release constraints.
+Then compare the following outcomes.
+
+| Outcome | Why it matters |
+|---|---|
+| Candidates retained after each decision | Shows where useful material is lost. |
+| Cost per selected candidate | Gives multistage selection its operational value. |
+| Expected transmitted response by trait | Measures the genetic consequence of selection. |
+| Frequency of failed mandatory limits | Protects non-negotiable requirements. |
+| Cycle time | Distinguishes rapid simultaneous selection from a tandem schedule. |
+| Rank and selected-set agreement | Shows whether strategies change the immediate decision. |
+| Multi-cycle response and genetic variance | Shows whether short-term gain persists. |
+| Validation in a later cohort | Tests whether the rule transfers beyond the fitted candidates. |
+
+Therefore, the preferred strategy is the simplest rule that respects every
+firm constraint and gives the strongest validated response within the
+programme's cost and time limits. A larger index statistic alone cannot choose
+among the four strategies.
 
 ## 3. The quantities used by an index
 
@@ -108,6 +170,35 @@ formulation.
 
 ## 4. The methods available in DesiredGainR
 
+The table below links each statistical method to its exact package call. The
+value in the `method` column is supplied to the stated function. This makes the
+mathematical name and the R interface explicit.
+
+| Index family | Function and method value | Main input that defines the objective |
+|---|---|---|
+| Smith-Hazel | `selection_index(method = "smith_hazel")` | Economic weights |
+| Base index | `selection_index(method = "base")` | Economic weights |
+| Pesek-Baker | `selection_index(method = "pesek_baker")` | Desired gains |
+| Yamada | `selection_index(method = "yamada")` | Desired gains |
+| Mulamba-Mock rank sum | `selection_index(method = "mulamba_mock")` | Rank weights, or equal weights |
+| Elston multiplicative index | `selection_index(method = "elston")` | Trait-specific culling limits |
+| Independent culling | `selection_index(method = "independent_culling")` | Trait-specific culling limits |
+| Within-cohort sequential screen | `selection_index(method = "tandem")` | Ordered trait screens in one cohort |
+| Kempthorne-Nordskog | `restricted_index(method = "kempthorne_nordskog")` | Economic weights and zero-response traits |
+| Restricted Smith-Hazel | `restricted_index(method = "restricted_smith_hazel")` | Economic weights and zero-response traits |
+| Tallis | `restricted_index(method = "tallis")` | Economic weights and proportional target gains |
+| Mallard | `restricted_index(method = "mallard")` | Economic weights and target gain amounts |
+| Harville | `restricted_index(method = "harville")` | Economic weights, target gains, and a finite penalty |
+| General economic index | `generalized_index(method = "economic")` | Economic weights and distinct information sources |
+| General desired-gain index | `generalized_index(method = "desired_gain")` | Desired gains and distinct information sources |
+| Desired-gain index with iterative search | `run_dgsi()` | Desired gains and candidate values |
+| QGSI | `run_qgsi()` | Linear, squared, and cross-product economic values |
+
+DGSI means desired-gain selection index. QGSI means quadratic genomic
+selection index. The general index applies when the information variables and
+the objective traits differ. For example, testcross records may predict the
+additive genetic values of parental lines.
+
 ### 4.1 Economic-value methods
 
 The Smith-Hazel index maximises expected response in aggregate genetic merit.
@@ -152,11 +243,19 @@ confidently than economic weights. The vector fixes response proportions. The
 selection intensity fixes the attainable magnitude. Multiplying every desired
 gain by the same positive constant leaves the ranking unchanged.
 
-`run_dgsi()` implements the iterative desired-gain selection index (DGSI). It
-searches for a candidate ranking whose selected differential is close to the
-requested vector. The closed-form desired-gain index remains its mathematical
-reference. Read [Optimising desired gains](DesiredGainR-dgsi.html) before using
-the iterative method.
+`run_dgsi()` uses the established desired-gain selection index (DGSI) formula.
+It adds the iterative search applied by Joukhadar et al. (2024). The search
+changes the input desired-gain vector. It seeks a candidate ranking whose
+selected differential is close to the breeder's target. Joukhadar et al. did
+not introduce a separate index family. Read [Optimising desired
+gains](DesiredGainR-dgsi.html) before using the iterative search.
+
+The closed-form Pesek-Baker and Yamada methods define a response direction
+from covariance matrices. DGSI adds candidate-level iteration. It searches for
+a ranking whose realised selected differential approaches the requested
+direction. Fit both when candidate-level attainment matters. Agreement gives a
+useful implementation check. A difference directs attention to finite
+candidate supply, selection intensity, and the shape of the candidate cloud.
 
 ### 4.3 Rank and threshold methods
 
@@ -173,8 +272,9 @@ The Elston multiplicative index also applies firm limits. It then ranks the
 eligible candidates using their joint margins above those limits. It is useful
 when balanced superiority among eligible candidates matters.
 
-Tandem selection focuses on one trait at each stage. DesiredGainR includes it
-as a historical and operational comparator.
+`selection_index(method = "tandem")` applies ordered trait screens within one
+candidate cohort. It is useful as an operational comparator. It does not
+represent classical tandem selection across breeding cycles.
 
 ### 4.4 Restricted methods
 
@@ -199,6 +299,12 @@ Mahalanobis residual measures departure from that direction after accounting
 for genetic covariance. DesiredGainR reports both quantities through
 `evaluate_restricted_response()`.
 
+All five restricted forms use the same interface. The restriction determines
+which form has a clear interpretation. Use Kempthorne-Nordskog or restricted
+Smith-Hazel for zero expected change. Use Tallis for a response direction. Use
+Mallard for stated response amounts. Use Harville when the programme accepts a
+measured departure from the target in exchange for greater aggregate merit.
+
 ### 4.5 Non-linear economic value
 
 The quadratic genomic selection index (QGSI) represents linear, squared, and
@@ -207,10 +313,15 @@ genuinely curved. A desired gain is a response target. It is a different
 quantity from a quadratic weight. Read [Quadratic genomic
 selection](DesiredGainR-qgsi.html) for the full demonstration.
 
-## 5. How to choose a method
+`run_qgsi_desired_gain()` remains as a compatibility entry point. It raises an
+informative error because desired gains and quadratic economic values define
+different objectives. Use `run_dgsi()` for desired gains. Use `run_qgsi()` for
+curved economic merit.
 
-Begin with the breeder's statement. Then choose the simplest method that
-represents it accurately.
+## 5. How to choose a strategy and an index family
+
+Begin with the programme structure. Then choose the simplest index family that
+represents the allowed trade-offs.
 
 | Breeder's statement | Starting method | Required evidence |
 |---|---|---|
@@ -220,23 +331,56 @@ represents it accurately.
 | "Every candidate must satisfy these limits." | Independent culling | Candidate values and limits |
 | "Eligible candidates should have balanced margins." | Elston | Candidate values and limits |
 | "Some traits should remain unchanged." | Restricted index | \(\mathbf{G}\), \(\mathbf{P}\), merit weights, and restrictions |
-| "One trait is screened at each stage." | Tandem or multistage selection | Stage order and stage-specific evidence |
+| "Different traits become available at defined stages." | Multistage selection | Measurement cost, reliability, stage capacity, and attrition |
+| "One trait must dominate successive cycles." | Classical tandem schedule | Cycle schedule and correlated response in every trait |
+| "One cohort must pass ordered trait screens." | `selection_index(method = "tandem")` | Screen order and candidate values |
 | "I need a simple comparator with few assumptions." | Base or Mulamba-Mock | Weights for the base index, or candidate ranks |
 | "Merit contains curvature or trait interactions." | QGSI | Genomic estimated breeding values and quadratic economic values |
 
 Use the following decision sequence.
 
 1. Define the objective traits and their favourable directions.
-2. Identify firm limits that allow no trade-off.
-3. Decide whether the remaining objective is economic, desired-gain, or
-   non-linear.
-4. Confirm the covariance matrices and units required by that method.
-5. Fit one simple benchmark and one objective-matched method.
-6. Compare biological response before comparing scalar criteria.
-7. Examine ranking stability and uncertainty.
-8. Use simulation when repeated cycles or non-linear decisions matter.
+2. Identify firm limits that allow no compensation.
+3. Record when each trait becomes available and what it costs to measure.
+4. Decide whether selection is simultaneous, multistage, or spread across
+   cycles.
+5. For simultaneous selection, define an economic, desired-gain, restricted,
+   rank-based, threshold, or quadratic objective.
+6. Confirm the covariance matrices and units required by that objective.
+7. Fit one simple benchmark and one objective-matched method.
+8. Compare biological response before comparing scalar criteria.
+9. Examine ranking stability and uncertainty.
+10. Use validation and simulation when the decision extends beyond one cohort.
 
-## 6. Conditions for a fair comparison
+## 6. What can be compared and how
+
+### 6.1 Exact scope of the comparison functions
+
+`compare_selection_methods()` accepts fitted objects from `selection_index()`,
+`restricted_index()`, `generalized_index()`, `run_dgsi()`, and `run_qgsi()`.
+Internal adapters harmonise candidates, favourable trait directions and
+response units. They compare responses, rankings and selected sets. They never
+compare coefficients across families.
+
+Use `comparison_objective()` for a cross-family analysis. It fixes one desired
+response target, one aggregate-weight vector, one optional quadratic utility,
+and one genetic covariance matrix. Every fitted method is then evaluated
+against that same objective.
+
+`compare_dg_and_qgsi()` accepts one `run_dgsi()` result and one `run_qgsi()`
+result. It compares candidate scores, ranks, and selected sets. Its
+`decision_summary` reports selected counts, overlap and Jaccard similarity.
+The comparison is descriptive. A desired response objective and a quadratic economic
+objective are different biological statements. Rank agreement cannot decide
+which statement is appropriate.
+
+A QGSI with non-zero curvature retains its documented linear-regression
+approximation. The special case with $\mathbf{W}=0$ is a linear genomic index
+and has the exact linear response. A quadratic common utility is evaluated
+exactly from common validation values. This distinction appears in
+`Expected_response_basis` and must remain visible when methods are ranked.
+
+### 6.2 Conditions for a fair comparison
 
 A comprehensive comparison requires common conditions. Otherwise, a numerical
 difference can reflect the setup rather than the method.
@@ -245,7 +389,7 @@ Use the same:
 
 1. candidates and trait records;
 2. trait directions and units;
-3. genetic and phenotypic covariance estimates;
+3. one common genetic covariance for the objective traits;
 4. selected proportion or selection intensity;
 5. aggregate-merit definition when comparing \(R_{HI}\) or \(\Delta H\);
 6. training, validation, and test partitions;
@@ -273,6 +417,26 @@ The coefficient of variation of the index, \(CV_I\), is retained for
 reproduction of published analyses. It depends on the score origin and becomes
 undefined after centring. Therefore, it should never decide the preferred
 method.
+
+### 6.3 Evaluate each family with the criteria it can support
+
+| Family or strategy | Primary criteria | Additional evidence |
+|---|---|---|
+| Smith-Hazel and base | Expected response by trait, $R_{HI}$, $\Delta H$, relative efficiency, and index accuracy | Weight sensitivity, covariance uncertainty, and validation |
+| Closed-form desired-gain index | Expected response by trait, feasibility, target attainment, Satoh's $\beta$, and Mahalanobis alignment | Covariance uncertainty and selected-set stability |
+| Desired-gain index with iterative search | The same desired-gain criteria, plus selected differential, holdout objective, replicate stability, and comparison with the closed-form starting index | Independent-cohort validation |
+| Restricted index | Expected response, restriction residual, loss in common aggregate merit, and Satoh projection where relevant | Sensitivity to the restriction and penalty |
+| Mulamba-Mock rank sum | Rank stability, selected-set overlap, and observed differential | Later-cohort validation or simulation |
+| Independent culling | Passing rate, failed limits, selected count, and observed differential | Sensitivity to each threshold |
+| Elston multiplicative index | Passing rate, margins among survivors, selected set, and observed differential | Threshold sensitivity and validation |
+| Within-cohort sequential screen | Attrition at each screen, selected set, and observed differential | Screen-order sensitivity and operational cost |
+| Generalised index | Expected response in the objective traits, accuracy for the economic form, and information-deletion efficiency | Prediction-error propagation and validation |
+| Quadratic genomic selection index | Linear and quadratic score contributions, observed genomic estimated breeding value differential, approximate expected gains, and selection agreement with a linear benchmark | Out-of-sample utility, true-value accuracy in simulation, and multi-cycle response |
+
+The absence of one criterion is not evidence of poor quality. For example,
+independent culling has no linear-index accuracy. Its purpose is to enforce
+limits. Conversely, a high $R_{HI}$ cannot rescue a method that violates a
+mandatory disease threshold.
 
 ## 7. A comprehensive comparison analysis
 
@@ -425,7 +589,7 @@ elston <- do.call(selection_index, c(
   list(method = "elston", culling_thresholds = limits_sd)
 ))
 
-tandem <- do.call(selection_index, c(
+sequential_screen <- do.call(selection_index, c(
   common_arguments,
   list(method = "tandem", tandem_order = c("GY", "GLS", "AD"))
 ))
@@ -442,7 +606,7 @@ comparison <- compare_selection_methods(
     Rank_sum = rank_sum,
     Culling = culling,
     Elston = elston,
-    Tandem = tandem
+    Sequential_screen = sequential_screen
   ),
   target_gains = desired_gains_sd
 )
@@ -472,7 +636,7 @@ comparison$responses[
 Expected response and observed differential answer different questions.
 Expected response predicts transmitted change under the covariance model.
 Observed differential describes the candidates selected from this data set.
-Rank, threshold, and tandem methods retain the second quantity because a
+Rank, threshold, and sequential-screen methods retain the second quantity because a
 closed-form expected response is unavailable here.
 
 Target attainment equals expected response divided by the requested gain. A
@@ -513,6 +677,210 @@ comparison$selected_overlap
 Rank correlation uses every candidate. Jaccard similarity uses the selected
 sets. A high rank correlation can coexist with a different parent list near
 the selection boundary. Therefore, report both.
+
+### 7.8 Compare the closed-form and iteratively optimised desired-gain index
+
+The iterative procedure remains part of the desired-gain family. Therefore,
+compare it first with its closed-form starting index. Use the same candidates,
+covariance matrices, trait directions, and selected count.
+
+`run_dgsi()` expresses its target in candidate standard-deviation units. The
+closed-form example above uses genetic standard deviations. The conversion
+must be explicit.
+
+```{r fit-iterative-dgsi, eval=FALSE}
+candidate_sd <- vapply(
+  dgr_candidates[, traits], stats::sd, numeric(1L)
+)
+target_original_units <- desired_gains_sd * genetic_sd
+target_candidate_sd <- target_original_units / candidate_sd
+
+iterative_dgsi <- run_dgsi(
+  init_data = dgr_candidates["GenoID"],
+  cand_data = dgr_candidates,
+  trait_cols = traits,
+  dg = target_candidate_sd,
+  G = dgr_G,
+  P = dgr_P,
+  lower_is_better = lower_is_better,
+  n_select = 20L,
+  n_iter = 500L,
+  n_rep = 10L,
+  seed = 2026L
+)
+```
+
+Construct one objective and include the iterative result in the same call.
+
+```{r compare-iterative-objective, eval=FALSE}
+comparison_target <- comparison_objective(
+  desired_gains = desired_gains_sd,
+  aggregate_weights = economic_weights,
+  G = dgr_G,
+  gain_units = "genetic_sd"
+)
+
+cross_family <- compare_selection_methods(
+  list(
+    Pesek_Baker = pesek_baker,
+    Iterative_DGSI = iterative_dgsi
+  ),
+  objective = comparison_target,
+  validation_data = dgr_candidates
+)
+```
+
+The direct calculations below show the components returned by the unified
+comparison.
+
+```{r compare-iterative-dgsi, eval=FALSE}
+closed_rank <- setNames(
+  pesek_baker$ranking$rank,
+  pesek_baker$ranking$id
+)
+iterative_rank <- setNames(
+  iterative_dgsi$ranked_geno$Rank,
+  iterative_dgsi$ranked_geno$GenoID
+)
+
+rank_correlation <- cor(
+  closed_rank[names(closed_rank)],
+  iterative_rank[names(closed_rank)],
+  method = "spearman"
+)
+selected_overlap <- length(intersect(
+  pesek_baker$selected$id,
+  iterative_dgsi$selected_geno$GenoID
+))
+
+response_genetic_sd <- rbind(
+  closed_form = pesek_baker$evaluation$expected_response,
+  iterative =
+    iterative_dgsi$theoretical_response$original_units / genetic_sd
+)
+attainment <- sweep(
+  response_genetic_sd,
+  2L,
+  desired_gains_sd,
+  "/"
+)
+```
+
+Read four results: (i) transmitted response, (ii) target attainment, (iii)
+rank correlation, and (iv) selected overlap. Then inspect the iterative
+holdout objective and replicate stability. Improvement on the fitted candidate
+set alone is insufficient.
+
+### 7.9 Compare a linear and quadratic genomic index
+
+A quadratic genomic selection index (QGSI) should have a linear genomic
+selection index (LGSI) benchmark. Use the same genomic estimated breeding
+values (GEBVs), linear economic weights, genomic covariance, transformation,
+and selected count. Set the quadratic matrix to zero for the linear benchmark.
+
+```{r compare-linear-quadratic, eval=FALSE}
+q_traits <- c("GY", "PHT", "GLS")
+linear_values <- c(GY = 1.0, PHT = 0.2, GLS = 0.4)
+Gamma <- stats::cov(dgr_gebv[, q_traits])
+
+W_zero <- matrix(
+  0, length(q_traits), length(q_traits),
+  dimnames = list(q_traits, q_traits)
+)
+W_curved <- W_zero
+diag(W_curved) <- c(-0.05, -0.02, -0.04)
+
+lgsi <- run_qgsi(
+  init_data = dgr_gebv["GenoID"],
+  gebv_data = dgr_gebv,
+  trait_cols = q_traits,
+  linear_weights = linear_values,
+  W = W_zero,
+  Gamma = Gamma,
+  lower_is_better = c("PHT", "GLS"),
+  n_select = 20L
+)
+qgsi <- run_qgsi(
+  init_data = dgr_gebv["GenoID"],
+  gebv_data = dgr_gebv,
+  trait_cols = q_traits,
+  linear_weights = linear_values,
+  W = W_curved,
+  Gamma = Gamma,
+  lower_is_better = c("PHT", "GLS"),
+  n_select = 20L
+)
+
+linear_rank <- setNames(lgsi$ranked_geno$Rank, lgsi$ranked_geno$GenoID)
+quadratic_rank <- setNames(qgsi$ranked_geno$Rank, qgsi$ranked_geno$GenoID)
+cor(linear_rank, quadratic_rank, method = "spearman")
+length(intersect(
+  lgsi$selected_geno$GenoID,
+  qgsi$selected_geno$GenoID
+))
+lgsi$expected_gain_per_trait
+qgsi$expected_gain_per_trait
+qgsi$component_summary
+```
+
+The numerical weights above illustrate the comparison mechanics. They are not
+a breeding recommendation. A quadratic analysis requires biological or
+economic justification for every squared and cross-product term.
+
+Evaluate the two fits using: (i) per-trait response, (ii) rank and selected-set
+agreement, (iii) candidate-specific linear and quadratic contributions, and
+(iv) out-of-sample nonlinear utility. In simulation, also compare accuracy
+against true genetic merit and multi-cycle response. The linear model is
+preferred when curvature does not improve validated utility or change the
+decision reliably.
+
+### 7.10 Compare every fitted family under one objective
+
+The final comparison uses one declared yardstick. `common_G` is the genetic
+covariance in original trait coordinates. `validation_values` contains one row
+per fitted candidate and the same objective traits. These values can be
+independent predictions, simulated true genetic values, or later measurements.
+Their provenance determines the strength of the evidence.
+
+```{r unified-cross-family-comparison, eval=FALSE}
+common_objective <- comparison_objective(
+  desired_gains = desired_gains_sd,
+  aggregate_weights = common_aggregate_weights,
+  W = common_quadratic_utility,
+  G = common_G,
+  gain_units = "genetic_sd"
+)
+
+all_methods <- compare_selection_methods(
+  list(
+    Smith_Hazel = smith_hazel,
+    Restricted = restricted_fit,
+    General = general_fit,
+    Desired_gain = pesek_baker,
+    Iterative_DGSI = iterative_dgsi,
+    Linear_genomic = lgsi,
+    Quadratic_genomic = qgsi
+  ),
+  objective = common_objective,
+  validation_data = validation_values
+)
+
+all_methods$fairness
+all_methods$responses
+all_methods$validation_responses
+all_methods$validation_utility
+all_methods$summary
+all_methods$rank_correlation
+all_methods$selected_jaccard
+```
+
+The `R_HI`, `Delta_H`, and `Index_accuracy` columns retain native family
+criteria. They can describe different merits. `Common_merit_response` is the
+response in the linear component of the declared common utility. Use it for a
+cross-family conclusion about that component. `Validation_utility_response`
+evaluates the complete utility on the supplied validation values. A non-zero
+quadratic term requires these values because mean trait responses do not
+determine the mean of a quadratic function.
 
 ## 8. Add uncertainty and validation
 
@@ -575,7 +943,37 @@ State why it matches the objective. Report the expected response for every
 trait. State the main uncertainty. Then describe how the decision will be
 validated in the breeding programme.
 
-## 10. References
+## 10. Package coverage and regression tests
+
+DesiredGainR maintains an explicit contract for its public interface. The
+contract currently covers 43 exported functions. Every export must have a
+manual alias and at least one behavioural test file. Adding an exported
+function without both entries causes the test suite to fail.
+
+The family-level tests cover the complete method set described in this
+vignette. They fit six classical index families and two operational
+comparators on one labelled data set. They
+also fit all five restricted families and both general-index objectives. The
+tests check the method returned, the selected candidates, trait responses,
+restriction residuals, target attainment, rank agreement, and selected-set
+agreement. Separate tests cover DGSI, QGSI, uncertainty, feasibility,
+simulation, covariance handling, and data validation.
+
+Contributors should run the following commands after changing code or
+documentation.
+
+```r
+devtools::document()
+devtools::test()
+devtools::check()
+```
+
+`devtools::document()` rebuilds the manual files from the documentation beside
+each R function. `devtools::test()` checks scientific and programming
+contracts. `devtools::check()` checks the complete source package in a clean
+build environment.
+
+## 11. References
 
 - Beavis W, Lamkey K, Mahama AA, Suza W (2023). Multiple Trait Selection. In
   Suza WP and Lamkey KR, editors, *Quantitative Genetics for Plant Breeding*.

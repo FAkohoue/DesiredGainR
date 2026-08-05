@@ -365,6 +365,8 @@ run_qgsi <- function(
   result <- list(
     method = "QGSI",
     call = match.call(),
+    id_col = id_col,
+    candidate_id = as.character(prepared$init_data[[id_col]]),
     trait_cols = trait_cols,
     linear_weights = weights,
     W = W,

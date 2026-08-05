@@ -178,6 +178,15 @@ test_that("compare_dg_and_qgsi merges canonical outputs", {
       names(comparison$comparison_table)
   ))
   expect_equal(nrow(comparison$comparison_table), nrow(values))
+  expect_equal(comparison$decision_summary$Common_candidates, nrow(values))
+  expect_equal(comparison$decision_summary$DGSI_selected, 5L)
+  expect_equal(comparison$decision_summary$QGSI_selected, 5L)
+  expect_true(comparison$decision_summary$Selected_overlap >= 0L)
+  expect_true(comparison$decision_summary$Selected_overlap <= 5L)
+  expect_true(
+    comparison$decision_summary$Selected_Jaccard >= 0 &&
+      comparison$decision_summary$Selected_Jaccard <= 1
+  )
   expect_match(comparison$interpretation, "descriptive", fixed = TRUE)
 })
 

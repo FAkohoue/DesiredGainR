@@ -68,7 +68,7 @@ randomised complete block design with three replications."><meta property="og:im
     <li><h6 class="dropdown-header" data-toc-skip>Index methods</h6></li>
     <li><a class="dropdown-item" href="../articles/DesiredGainR-index-families.html">Multiple-trait selection and method comparison</a></li>
     <li><a class="dropdown-item" href="../articles/DesiredGainR-information.html">Using predictions and prediction errors</a></li>
-    <li><a class="dropdown-item" href="../articles/DesiredGainR-dgsi.html">Optimising desired gains</a></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-dgsi.html">Iterative optimisation of the desired-gain index</a></li>
     <li><a class="dropdown-item" href="../articles/DesiredGainR-qgsi.html">Quadratic genomic selection</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Looking ahead</h6></li>
@@ -159,8 +159,8 @@ stated tolerances.</p>
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">reference</span> <span class="op">&lt;-</span> <span class="fu">rahimi_debnath_2023</span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="co"># The Pesek-Baker property: expected response is exactly proportional to the</span></span></span>
-<span class="r-in"><span><span class="co"># desired gains. The published numbers satisfy it to four significant</span></span></span>
-<span class="r-in"><span><span class="co"># figures.</span></span></span>
+<span class="r-in"><span><span class="co"># desired gains. Rounded table values show small ratio differences. The</span></span></span>
+<span class="r-in"><span><span class="co"># reproduction vignette propagates their printed decimal precision.</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">reference</span><span class="op">$</span><span class="va">pesek_baker_gain</span> <span class="op">/</span> <span class="va">reference</span><span class="op">$</span><span class="va">desired_gains</span>, <span class="fl">5</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         plant_height      number_of_grain        number_of_row </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>              0.33585              0.33586              0.33585 </span>

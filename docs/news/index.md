@@ -2,16 +2,26 @@
 
 ## DesiredGainR 0.5.0 (in development)
 
-- Added
+- Extended
   [`compare_selection_methods()`](https://FAkohoue.github.io/DesiredGainR/reference/compare_selection_methods.md)
-  for a common-condition comparison of expected response, target
-  attainment, classical criteria, Mahalanobis alignment, rank agreement
-  and selected-set agreement. The multiple-trait selection vignette now
-  defines the major strategy classes, explains every implemented method,
-  gives a method-choice framework and develops a complete worked
-  comparison. Independent-culling and Elston limits now use original
-  trait units. Economic indices now accept valid negative economic
-  weights.
+  to accept classical, restricted, general, iteratively optimised
+  desired-gain and quadratic genomic fits.
+  [`comparison_objective()`](https://FAkohoue.github.io/DesiredGainR/reference/comparison_objective.md)
+  fixes one target, utility, response scale and genetic covariance
+  before methods are inspected. Internal adapters harmonise candidates
+  and response units. Common validation values support per-trait
+  response and linear or quadratic utility comparisons. QGSI
+  approximations remain labelled separately from exact linear-index
+  responses.
+
+- Added the original common-condition comparison of expected response,
+  target attainment, classical criteria, Mahalanobis alignment, rank
+  agreement and selected-set agreement. The multiple-trait selection
+  vignette now defines the major strategy classes, explains every
+  implemented method, gives a method-choice framework and develops a
+  complete worked comparison. Independent-culling and Elston limits now
+  use original trait units. Economic indices now accept valid negative
+  economic weights.
 
 ### Critical remediation of 1 August 2026
 

@@ -15,17 +15,19 @@ selection decision without running R themselves.
 
 ## Defining the breeding objective
 
-The distinctive layer of the package. Economic weights and desired gains
-are two parameterisations of one linear index, so each implies the other
-exactly; those translations, a feasibility test derived from the
-achievable-response ellipsoid, recovery of the objective implicit in
-past selection decisions, and a sensitivity analysis reporting whether
-the decision depends on the stated weights at all.
+The distinctive layer of the package. Economic weights define aggregate
+merit. Desired gains define a response direction. An exact algebraic map
+connects these statements under the stated covariance model, but it does
+not give them the same biological meaning. This section covers that map,
+a feasibility test derived from the achievable-response ellipsoid,
+recovery of the objective implicit in past selection decisions, and a
+sensitivity analysis reporting whether the decision depends on the
+stated weights at all.
 
 - [`implied_economic_weights()`](https://FAkohoue.github.io/DesiredGainR/reference/implied_economic_weights.md)
-  : Translate desired gains into the economic weights they imply
+  : Map desired gains to the aggregate weights they imply
 - [`implied_desired_gains()`](https://FAkohoue.github.io/DesiredGainR/reference/implied_desired_gains.md)
-  : Translate economic weights into the desired gains they imply
+  : Map economic weights to the desired gains they imply
 - [`define_desired_gain_intervals()`](https://FAkohoue.github.io/DesiredGainR/reference/define_desired_gain_intervals.md)
   : Define acceptable intervals for desired genetic gains
 - [`suggest_desired_gains()`](https://FAkohoue.github.io/DesiredGainR/reference/suggest_desired_gains.md)
@@ -57,13 +59,14 @@ predictions as a genetic covariance.
 
 ## Building a selection index
 
-The classical index families through one interface, so that alternative
-objectives and alternative families can be compared on identical data,
-together with the iterative desired-gain index and the quadratic genomic
-selection index.
+The classical and restricted index families, the iterative search
+applied to the desired-gain index, and the quadratic genomic selection
+index. A common comparison objective and internal result adapters allow
+these families to be evaluated on the same candidates, trait units,
+target, utility and validation values.
 
 - [`selection_index()`](https://FAkohoue.github.io/DesiredGainR/reference/selection_index.md)
-  : Construct a classical multi-trait selection index
+  : Apply a classical multi-trait selection method
 - [`selection_information()`](https://FAkohoue.github.io/DesiredGainR/reference/selection_information.md)
   : Define the information used by a selection index
 - [`generalized_index()`](https://FAkohoue.github.io/DesiredGainR/reference/generalized_index.md)
@@ -95,7 +98,9 @@ matrices.
 - [`evaluate_index()`](https://FAkohoue.github.io/DesiredGainR/reference/evaluate_index.md)
   : Evaluate a selection index against the standard criteria
 - [`compare_selection_methods()`](https://FAkohoue.github.io/DesiredGainR/reference/compare_selection_methods.md)
-  : Compare multi-trait selection methods on one decision problem
+  : Compare selection methods on one common decision problem
+- [`comparison_objective()`](https://FAkohoue.github.io/DesiredGainR/reference/comparison_objective.md)
+  : Define one objective for a cross-family comparison
 - [`summary(`*`<desiredgainr_index>`*`)`](https://FAkohoue.github.io/DesiredGainR/reference/summary.desiredgainr_index.md)
   : Summarise a fitted selection index
 - [`predict(`*`<desiredgainr_index>`*`)`](https://FAkohoue.github.io/DesiredGainR/reference/predict.desiredgainr_index.md)
@@ -109,7 +114,7 @@ matrices.
 - [`evaluate_restricted_response()`](https://FAkohoue.github.io/DesiredGainR/reference/evaluate_restricted_response.md)
   : Evaluate an achieved response against a desired-gain direction
 - [`compare_dg_and_qgsi()`](https://FAkohoue.github.io/DesiredGainR/reference/compare_dg_and_qgsi.md)
-  : Compare DGSI and QGSI candidate rankings
+  : Compare an iteratively optimised DGSI with a QGSI
 
 ## Multi-environment structure
 

@@ -2,7 +2,7 @@
 % Please edit documentation in R/objective_tools.R
 \name{implied_economic_weights}
 \alias{implied_economic_weights}
-\title{Translate desired gains into the economic weights they imply}
+\title{Map desired gains to the aggregate weights they imply}
 \usage{
 implied_economic_weights(
   desired_gains,
@@ -39,12 +39,16 @@ A named numeric vector of implied economic weights, carrying a
 \code{provenance} attribute.
 }
 \description{
-The Smith-Hazel economic index and the Pesek-Baker desired-gain index are
-two parameterisations of one linear index. Setting
+The Smith-Hazel economic index and the Yamada desired-gain index both use
+linear candidate scores. They express different breeding objectives.
+Setting their coefficient vectors equal gives an algebraic mapping. Thus,
 \eqn{b = P^{-1}Gw} equal to \eqn{b = P^{-1}G(GP^{-1}G)^{-1}d} gives
 \deqn{w = G^{-1}PG^{-1}d.}
-Hence every desired-gain vector corresponds to exactly one economic-weight
-vector, and \code{\link[=implied_desired_gains]{implied_desired_gains()}} performs the reverse translation.
+Hence every desired-gain vector corresponds to one implied aggregate-weight
+vector under the supplied covariance model, provided the required inverses
+exist. \code{\link[=implied_desired_gains]{implied_desired_gains()}} performs the reverse mapping. The implied
+vector reproduces the same index direction. It is not an independently
+estimated price, profit or biological value.
 }
 \details{
 This is the most direct answer to a breeder who cannot state economic
@@ -62,8 +66,9 @@ implied weight turns negative.
 
 When \code{lower_is_better} is supplied the weights are returned in the
 favourable-direction space, in which larger is better for every trait.
-A negative weight therefore never means that a trait should decrease; the
-direction has already been applied.
+A negative implied weight can hold back favourable change that correlations
+would otherwise make larger than requested. The desired-gain vector remains
+the breeder's statement of direction.
 }
 
 \section{The desired gains may be standardised while the weights are not}{

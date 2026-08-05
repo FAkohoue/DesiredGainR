@@ -276,14 +276,18 @@ print.desiredgainr_gain_intervals <- function(x, ...) {
   invisible(x)
 }
 
-#' Translate desired gains into the economic weights they imply
+#' Map desired gains to the aggregate weights they imply
 #'
-#' The Smith-Hazel economic index and the Pesek-Baker desired-gain index are
-#' two parameterisations of one linear index. Setting
+#' The Smith-Hazel economic index and the Yamada desired-gain index both use
+#' linear candidate scores. They express different breeding objectives.
+#' Setting their coefficient vectors equal gives an algebraic mapping. Thus,
 #' \eqn{b = P^{-1}Gw} equal to \eqn{b = P^{-1}G(GP^{-1}G)^{-1}d} gives
 #' \deqn{w = G^{-1}PG^{-1}d.}
-#' Hence every desired-gain vector corresponds to exactly one economic-weight
-#' vector, and [implied_desired_gains()] performs the reverse translation.
+#' Hence every desired-gain vector corresponds to one implied aggregate-weight
+#' vector under the supplied covariance model, provided the required inverses
+#' exist. [implied_desired_gains()] performs the reverse mapping. The implied
+#' vector reproduces the same index direction. It is not an independently
+#' estimated price, profit or biological value.
 #'
 #' This is the most direct answer to a breeder who cannot state economic
 #' weights but can state relative desired gains, and, more usefully, to a
@@ -299,8 +303,9 @@ print.desiredgainr_gain_intervals <- function(x, ...) {
 #'
 #' When `lower_is_better` is supplied the weights are returned in the
 #' favourable-direction space, in which larger is better for every trait.
-#' A negative weight therefore never means that a trait should decrease; the
-#' direction has already been applied.
+#' A negative implied weight can hold back favourable change that correlations
+#' would otherwise make larger than requested. The desired-gain vector remains
+#' the breeder's statement of direction.
 #'
 #' @section The desired gains may be standardised while the weights are not:
 #' `gain_units = "genetic_sd"` means that `desired_gains` is already expressed
@@ -394,7 +399,7 @@ implied_economic_weights <- function(
     if (any(direction < 0)) {
       paste(
         "Expressed in the favourable-direction space, so a positive weight",
-        "always means the trait matters."
+        "favours movement in the breeder-defined direction."
       )
     } else {
       "Expressed in the raw trait direction."
@@ -403,7 +408,7 @@ implied_economic_weights <- function(
   weights
 }
 
-#' Translate economic weights into the desired gains they imply
+#' Map economic weights to the desired gains they imply
 #'
 #' Inverse of [implied_economic_weights()]. For economic weights \eqn{w},
 #' the Smith-Hazel index requests the response
@@ -432,7 +437,7 @@ implied_economic_weights <- function(
 #' G <- matrix(c(0.60, -0.15, -0.15, 0.40), 2, dimnames = list(traits, traits))
 #' P <- matrix(c(1.10, -0.20, -0.20, 0.90), 2, dimnames = list(traits, traits))
 #'
-#' # The translation is exactly invertible when the units match.
+#' # The algebraic mapping is invertible when the units and model match.
 #' d <- c(yield = 0.5, disease = 0.3)
 #' w <- implied_economic_weights(
 #'   d, G, P,

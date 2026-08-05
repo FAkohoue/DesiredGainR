@@ -31,8 +31,8 @@
   comparison](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-index-families.md):
 - [Using predictions, prediction errors, and restricted
   responses](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-information.md):
-- [Optimising desired
-  gains](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-dgsi.md):
+- [Iterative optimisation of the desired-gain
+  index](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-dgsi.md):
 - [Quadratic genomic
   selection](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-qgsi.md):
 

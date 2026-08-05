@@ -64,7 +64,7 @@
     <li><h6 class="dropdown-header" data-toc-skip>Index methods</h6></li>
     <li><a class="dropdown-item" href="../articles/DesiredGainR-index-families.html">Multiple-trait selection and method comparison</a></li>
     <li><a class="dropdown-item" href="../articles/DesiredGainR-information.html">Using predictions and prediction errors</a></li>
-    <li><a class="dropdown-item" href="../articles/DesiredGainR-dgsi.html">Optimising desired gains</a></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-dgsi.html">Iterative optimisation of the desired-gain index</a></li>
     <li><a class="dropdown-item" href="../articles/DesiredGainR-qgsi.html">Quadratic genomic selection</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Looking ahead</h6></li>
@@ -114,7 +114,7 @@
       </dl></div><div class="section level2">
       <h2 id="defining-the-breeding-objective">Defining the breeding objective<a class="anchor" aria-label="anchor" href="#defining-the-breeding-objective"></a></h2>
 
-      <div class="section-desc"><p>The distinctive layer of the package. Economic weights and desired gains are two parameterisations of one linear index, so each implies the other exactly; those translations, a feasibility test derived from the achievable-response ellipsoid, recovery of the objective implicit in past selection decisions, and a sensitivity analysis reporting whether the decision depends on the stated weights at all.</p></div>
+      <div class="section-desc"><p>The distinctive layer of the package. Economic weights define aggregate merit. Desired gains define a response direction. An exact algebraic map connects these statements under the stated covariance model, but it does not give them the same biological meaning. This section covers that map, a feasibility test derived from the achievable-response ellipsoid, recovery of the objective implicit in past selection decisions, and a sensitivity analysis reporting whether the decision depends on the stated weights at all.</p></div>
 
       <dl></dl></div><div class="section level2">
 
@@ -126,14 +126,14 @@
           <code><a href="implied_economic_weights.html">implied_economic_weights()</a></code>
 
         </dt>
-        <dd>Translate desired gains into the economic weights they imply</dd>
+        <dd>Map desired gains to the aggregate weights they imply</dd>
 
         <dt>
 
           <code><a href="implied_desired_gains.html">implied_desired_gains()</a></code>
 
         </dt>
-        <dd>Translate economic weights into the desired gains they imply</dd>
+        <dd>Map economic weights to the desired gains they imply</dd>
 
         <dt>
 
@@ -209,7 +209,7 @@
       </dl></div><div class="section level2">
       <h2 id="building-a-selection-index">Building a selection index<a class="anchor" aria-label="anchor" href="#building-a-selection-index"></a></h2>
 
-      <div class="section-desc"><p>The classical index families through one interface, so that alternative objectives and alternative families can be compared on identical data, together with the iterative desired-gain index and the quadratic genomic selection index.</p></div>
+      <div class="section-desc"><p>The classical and restricted index families, the iterative search applied to the desired-gain index, and the quadratic genomic selection index. A common comparison objective and internal result adapters allow these families to be evaluated on the same candidates, trait units, target, utility and validation values.</p></div>
 
       <dl></dl></div><div class="section level2">
 
@@ -221,7 +221,7 @@
           <code><a href="selection_index.html">selection_index()</a></code>
 
         </dt>
-        <dd>Construct a classical multi-trait selection index</dd>
+        <dd>Apply a classical multi-trait selection method</dd>
 
         <dt>
 
@@ -293,7 +293,14 @@
           <code><a href="compare_selection_methods.html">compare_selection_methods()</a></code>
 
         </dt>
-        <dd>Compare multi-trait selection methods on one decision problem</dd>
+        <dd>Compare selection methods on one common decision problem</dd>
+
+        <dt>
+
+          <code><a href="comparison_objective.html">comparison_objective()</a></code>
+
+        </dt>
+        <dd>Define one objective for a cross-family comparison</dd>
 
         <dt>
 
@@ -342,7 +349,7 @@
           <code><a href="compare_dg_and_qgsi.html">compare_dg_and_qgsi()</a></code>
 
         </dt>
-        <dd>Compare DGSI and QGSI candidate rankings</dd>
+        <dd>Compare an iteratively optimised DGSI with a QGSI</dd>
       </dl></div><div class="section level2">
       <h2 id="multi-environment-structure">Multi-environment structure<a class="anchor" aria-label="anchor" href="#multi-environment-structure"></a></h2>
 

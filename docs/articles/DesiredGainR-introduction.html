@@ -87,7 +87,7 @@
     <li><h6 class="dropdown-header" data-toc-skip>Index methods</h6></li>
     <li><a class="dropdown-item" href="../articles/DesiredGainR-index-families.html">Multiple-trait selection and method comparison</a></li>
     <li><a class="dropdown-item" href="../articles/DesiredGainR-information.html">Using predictions and prediction errors</a></li>
-    <li><a class="dropdown-item" href="../articles/DesiredGainR-dgsi.html">Optimising desired gains</a></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-dgsi.html">Iterative optimisation of the desired-gain index</a></li>
     <li><a class="dropdown-item" href="../articles/DesiredGainR-qgsi.html">Quadratic genomic selection</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Looking ahead</h6></li>
@@ -174,7 +174,7 @@ provides labelled approximations that record what they actually are.</p>
 </tr></thead>
 <tbody>
 <tr class="odd">
-<td>Translate between economic weights and desired gains</td>
+<td>Map economic weights and desired gains algebraically</td>
 <td>Fit the multi-trait genetic model</td>
 </tr>
 <tr class="even">
@@ -182,7 +182,7 @@ provides labelled approximations that record what they actually are.</p>
 <td>Estimate breeding values or marker effects</td>
 </tr>
 <tr class="odd">
-<td>Build and compare classical index families</td>
+<td>Build and compare supported selection methods</td>
 <td>Select the operational parent set</td>
 </tr>
 <tr class="even">
@@ -212,11 +212,15 @@ software</a>.</p>
 <h3 id="defining-the-objective">3.1 Defining the objective<a class="anchor" aria-label="anchor" href="#defining-the-objective"></a>
 </h3>
 <p>The Smith-Hazel economic index and the Pesek-Baker desired-gain index
-are two parameterisations of one linear index, so each desired-gain
-vector corresponds to exactly one economic-weight vector. That duality
-is the foundation of the layer: a breeder who cannot state weights but
-can state relative gains gets the weights for free, and one who proposes
-weights can be shown what response they actually request.</p>
+both produce linear scores. However, they start from different breeding
+statements. Smith-Hazel starts from aggregate-value weights. Pesek-Baker
+starts from a desired response direction.</p>
+<p>For admissible covariance matrices, each desired-gain direction has
+an implied weight vector that reproduces the same coefficient direction.
+This is an algebraic translation. It does not create economic values for
+free. The translation helps a breeder inspect the trade-offs implied by
+an objective. It also shows the response implied by a proposed weight
+vector.</p>
 <p>Around it sit a feasibility test, a method for recovering the
 objective a programme has been using implicitly, and a sensitivity
 analysis that reports whether the decision depends on the weights at
@@ -231,13 +235,17 @@ allow different types of trade-off. The breeder must define those
 trade-offs before choosing a method.</p>
 <p><code><a href="../reference/selection_index.html">selection_index()</a></code> provides Smith-Hazel, the base index,
 both desired-gain formulations, the Mulamba-Mock rank-sum index,
-Elston’s multiplicative index, independent culling, and tandem
-selection. One interface allows alternatives to use identical data and
-settings. <code><a href="../reference/compare_selection_methods.html">compare_selection_methods()</a></code> then checks fairness
-and compares responses, target attainment, rankings, and selected sets.
-<code><a href="../reference/run_dgsi.html">run_dgsi()</a></code> implements the iterative desired-gain method of
-Joukhadar et al. (2024), and <code><a href="../reference/run_qgsi.html">run_qgsi()</a></code> the quadratic
-genomic index of Cerón-Rojas et al. (2026).</p>
+Elston’s multiplicative index, independent culling, and a within-cohort
+sequential screen. One interface lets these alternatives use identical
+data and settings. <code><a href="../reference/comparison_objective.html">comparison_objective()</a></code> fixes one
+yardstick for all fitted methods.
+<code><a href="../reference/compare_selection_methods.html">compare_selection_methods()</a></code> then checks fairness and
+compares responses, target attainment, rankings, and selected sets
+across the classical, restricted, general, iterative desired-gain and
+quadratic genomic results. <code><a href="../reference/run_dgsi.html">run_dgsi()</a></code> applies the iterative
+optimisation procedure of Joukhadar et al. (2024) to the established
+desired-gain index. <code><a href="../reference/run_qgsi.html">run_qgsi()</a></code> fits the quadratic genomic
+selection index of Cerón-Rojas et al. (2026).</p>
 </div>
 <div class="section level3">
 <h3 id="evaluating-an-index">3.3 Evaluating an index<a class="anchor" aria-label="anchor" href="#evaluating-an-index"></a>
@@ -354,7 +362,7 @@ default.</p>
 <span><span class="co">#&gt;     GY    PHT     AD    ASI    EPP    GLS </span></span>
 <span><span class="co">#&gt;  14.52   0.03   2.32 -13.21 -15.15   0.68 </span></span>
 <span><span class="co">#&gt; attr(,"provenance")</span></span>
-<span><span class="co">#&gt; [1] "Implied by the supplied desired gains through w = G^-1 P G^-1 d; not an independently estimated economic value. Expressed in the favourable-direction space, so a positive weight always means the trait matters."</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] "Implied by the supplied desired gains through w = G^-1 P G^-1 d; not an independently estimated economic value. Expressed in the favourable-direction space, so a positive weight favours movement in the breeder-defined direction."</span></span></code></pre></div>
 <p><strong>Ask whether it can be attained.</strong></p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/gain_feasibility.html">gain_feasibility</a></span><span class="op">(</span></span>
@@ -440,8 +448,9 @@ selection</a></td>
 prediction errors, and restricted responses</a></td>
 </tr>
 <tr class="odd">
-<td>Understand the iterative desired-gain method</td>
-<td><a href="DesiredGainR-dgsi.html">Optimising desired gains</a></td>
+<td>Understand what iteration changes in a desired-gain index</td>
+<td><a href="DesiredGainR-dgsi.html">Iterative optimisation of the
+desired-gain index</a></td>
 </tr>
 <tr class="even">
 <td>Use the quadratic genomic index</td>

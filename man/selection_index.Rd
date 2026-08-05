@@ -2,7 +2,7 @@
 % Please edit documentation in R/index_families.R
 \name{selection_index}
 \alias{selection_index}
-\title{Construct a classical multi-trait selection index}
+\title{Apply a classical multi-trait selection method}
 \usage{
 selection_index(
   values,
@@ -107,8 +107,8 @@ minimum for traits where larger values are favourable. Supply a maximum
 for traits named in \code{lower_is_better}. The function applies direction,
 centring, and scaling to these limits internally.}
 
-\item{tandem_order}{Character vector giving the order in which traits are
-selected, required by \code{"tandem"}.}
+\item{tandem_order}{Character vector giving the order of the within-cohort
+sequential screens, required by \code{"tandem"}.}
 
 \item{n_select}{Number of candidates selected.}
 
@@ -126,10 +126,10 @@ the candidate scores and ranking, the evaluation criteria from
 input.
 }
 \description{
-\code{selection_index()} builds any of the classical linear selection indices
-from a common interface, so that alternative objectives and alternative
-index families can be compared on identical data. All traits are first
-oriented so that larger values are favourable.
+\code{selection_index()} applies six classical index families and two operational
+comparators through a common interface. The comparators are independent
+culling and a within-cohort sequential screen. All traits are first oriented
+so that larger values are favourable.
 }
 \section{Available methods}{
 \describe{
@@ -161,8 +161,11 @@ stability.}
 \item{\code{"independent_culling"}}{Not an index. Candidates must exceed a
 threshold for every trait. Included as a comparator because it is what
 most programmes actually do.}
-\item{\code{"tandem"}}{Not an index. Candidates are selected sequentially, one
-trait at a time. Included as a comparator.}
+\item{\code{"tandem"}}{Not an index. It filters one candidate cohort
+sequentially through the traits in \code{tandem_order}. This is a
+within-cohort sequential-screen comparator. Classical tandem selection
+changes the focal trait across cycles and requires a multi-cycle
+schedule.}
 }
 }
 

@@ -26,7 +26,7 @@ decision.
 
 ------------------------------------------------------------------------
 
-## 2. The duality: two ways of saying one thing
+## 2. The algebraic bridge between two objective statements
 
 ### 2.1 The result
 
@@ -36,20 +36,29 @@ Setting the two equal gives
 
 \\w = G^{-1}PG^{-1}d, \qquad d = GP^{-1}Gw.\\
 
-So they are not competing methods. They are two coordinate systems on
-one index, and every objective stated in either can be read in the
-other.
+Therefore, any desired-gain direction has an implied weight vector that
+produces the same coefficient direction under the supplied covariance
+matrices. The reverse mapping also exists when the required inverses are
+defined.
+
+This algebraic equivalence does not make the biological statements
+identical. Economic weights define value per trait unit. Desired gains
+define a response direction. Independently elicited economic weights and
+desired gains can lead to different indices because they can represent
+different programme priorities.
 
 ### 2.2 Why it matters practically
 
 A breeder who cannot put a currency value on grey leaf spot resistance
-can usually say how much of it they want relative to yield. The duality
-turns that into weights.
+can usually say how much improvement is required relative to yield. The
+algebraic mapping calculates the weights that reproduce that response
+direction. These are implied weights. They are not measured prices or
+profit coefficients.
 
-The reverse direction is the more useful one in practice, and is
-under-exploited. When a programme proposes weights, showing them the
-response those weights actually request often reveals that the objective
-is not what anyone intended.
+The reverse direction is also useful. When a programme proposes weights,
+the implied response shows what those weights request under the fitted
+covariance model. This often reveals a difference between the stated
+objective and the response the index is expected to deliver.
 
 ``` r
 desired_gains <- c(
@@ -65,11 +74,11 @@ round(implied, 3)
 #>      GY     PHT      AD     ASI     EPP     GLS 
 #>  14.516   0.030   2.323 -13.213 -15.150   0.678 
 #> attr(,"provenance")
-#> [1] "Implied by the supplied desired gains through w = G^-1 P G^-1 d; not an independently estimated economic value. Expressed in the favourable-direction space, so a positive weight always means the trait matters."
+#> [1] "Implied by the supplied desired gains through w = G^-1 P G^-1 d; not an independently estimated economic value. Expressed in the favourable-direction space, so a positive weight favours movement in the breeder-defined direction."
 ```
 
-The translation is exactly invertible when the units match, and checking
-that is worth the one line it costs:
+The algebraic mapping is exactly invertible when the units match and the
+matrices have the required rank. This is worth checking:
 
 ``` r
 round(

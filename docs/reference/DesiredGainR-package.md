@@ -2,13 +2,15 @@
 
 Package providing tools for:
 
-- desired-gain selection index optimization,
+- desired-gain selection indices, including iterative optimisation of
+  the input desired-gain direction,
 
 - quadratic genomic selection index computation from trait genomic
   estimated breeding values, explicit economic weights, genomic
   covariance estimation, and published response diagnostics,
 
-- comparison of DG and QGSI outputs,
+- cross-family comparison of classical, restricted, general,
+  desired-gain, and quadratic genomic candidate decisions,
 
 - a high-level wrapper for full pipeline execution.
 

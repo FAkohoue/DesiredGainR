@@ -195,7 +195,8 @@ restricted_index <- function(
     estimated_bv <- fitted$scaled_values %*% P_inverse %*% G_a
     colnames(estimated_bv) <- trait_cols
     result$restricted_breeding_values <- restricted_breeding_values(
-      estimated_bv, G_a, direction = target_gains
+      estimated_bv, G_a,
+      direction = target_gains
     )
     result$constraint$satoh_response <- evaluate_restricted_response(
       result$evaluation$expected_response, target_gains, G_a

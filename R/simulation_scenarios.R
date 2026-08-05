@@ -159,15 +159,18 @@ simulation_calibration <- function(
   }
 
   SP <- setup$SP
-  realised_h2 <- tryCatch({
-    genetic <- if (identical(setup$heritability_type, "broad")) {
-      as.numeric(SP$varG)
-    } else {
-      as.numeric(SP$varA)
-    }
-    residual <- if (is.matrix(SP$varE)) diag(SP$varE) else as.numeric(SP$varE)
-    genetic / (as.numeric(SP$varG) + residual)
-  }, error = function(e) rep(NA_real_, length(setup$h2)))
+  realised_h2 <- tryCatch(
+    {
+      genetic <- if (identical(setup$heritability_type, "broad")) {
+        as.numeric(SP$varG)
+      } else {
+        as.numeric(SP$varA)
+      }
+      residual <- if (is.matrix(SP$varE)) diag(SP$varE) else as.numeric(SP$varE)
+      genetic / (as.numeric(SP$varG) + residual)
+    },
+    error = function(e) rep(NA_real_, length(setup$h2))
+  )
   names(realised_h2) <- names(setup$h2)
   heritability_error <- abs(realised_h2 - setup$h2)
 
@@ -309,7 +312,8 @@ stress_test_desired_gains <- function(setups, desired_gains, options = list()) {
   }
 
   traits <- setups[[1L]]$trait_cols
-  if (any(vapply(setups, function(x) !identical(x$trait_cols, traits),
+  if (any(vapply(
+    setups, function(x) !identical(x$trait_cols, traits),
     logical(1L)
   ))) {
     stop("Every setup must use the same ordered traits.", call. = FALSE)
@@ -327,7 +331,8 @@ stress_test_desired_gains <- function(setups, desired_gains, options = list()) {
   direction <- direction / sqrt(sum(direction^2))
 
   outcomes <- lapply(setups, function(x) {
-    list(gain = matrix(numeric(0), nrow = 0, ncol = length(traits),
+    list(gain = matrix(numeric(0),
+      nrow = 0, ncol = length(traits),
       dimnames = list(NULL, traits)
     ), utility = numeric(0))
   })
@@ -452,7 +457,8 @@ print.desiredgainr_calibration <- function(x, ...) {
 print.desiredgainr_stress_test <- function(x, ...) {
   cat("<desiredgainr_stress_test>\n")
   cat("  Matched replicate seeds: yes\n")
-  cat("  Precision target reached:",
+  cat(
+    "  Precision target reached:",
     if (x$precision_reached) "yes" else "review", "\n"
   )
   print(x$summary)

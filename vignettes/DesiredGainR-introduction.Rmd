@@ -64,9 +64,9 @@ provides labelled approximations that record what they actually are.
 
 | DesiredGainR does | DesiredGainR does not |
 |---|---|
-| Translate between economic weights and desired gains | Fit the multi-trait genetic model |
+| Map economic weights and desired gains algebraically | Fit the multi-trait genetic model |
 | Test whether a stated objective is attainable | Estimate breeding values or marker effects |
-| Build and compare classical index families | Select the operational parent set |
+| Build and compare supported selection methods | Select the operational parent set |
 | Report the standard index-evaluation criteria | Analyse field trials or adjust for design |
 | Simulate desired-gain directions over declared scenarios | Perform OCS, rank crosses or allocate matings |
 
@@ -85,12 +85,16 @@ DesiredGainR does not call HapBlockR. See
 
 ### 3.1 Defining the objective
 
-The Smith-Hazel economic index and the Pesek-Baker desired-gain index are two
-parameterisations of one linear index, so each desired-gain vector corresponds
-to exactly one economic-weight vector. That duality is the foundation of the
-layer: a breeder who cannot state weights but can state relative gains gets the
-weights for free, and one who proposes weights can be shown what response they
-actually request.
+The Smith-Hazel economic index and the Pesek-Baker desired-gain index both
+produce linear scores. However, they start from different breeding statements.
+Smith-Hazel starts from aggregate-value weights. Pesek-Baker starts from a
+desired response direction.
+
+For admissible covariance matrices, each desired-gain direction has an implied
+weight vector that reproduces the same coefficient direction. This is an
+algebraic translation. It does not create economic values for free. The
+translation helps a breeder inspect the trade-offs implied by an objective. It
+also shows the response implied by a proposed weight vector.
 
 Around it sit a feasibility test, a method for recovering the objective a
 programme has been using implicitly, and a sensitivity analysis that reports
@@ -105,12 +109,16 @@ method.
 
 `selection_index()` provides Smith-Hazel, the base index, both desired-gain
 formulations, the Mulamba-Mock rank-sum index, Elston's multiplicative index,
-independent culling, and tandem selection. One interface allows alternatives
-to use identical data and settings. `compare_selection_methods()` then checks
-fairness and compares responses, target attainment, rankings, and selected
-sets. `run_dgsi()` implements the iterative
-desired-gain method of Joukhadar et al. (2024), and `run_qgsi()` the quadratic
-genomic index of Cerón-Rojas et al. (2026).
+independent culling, and a within-cohort sequential screen. One interface lets
+these alternatives use identical data and settings.
+`comparison_objective()` fixes one yardstick for all fitted methods.
+`compare_selection_methods()` then checks fairness and compares responses,
+target attainment, rankings, and selected sets across the classical,
+restricted, general, iterative desired-gain and quadratic genomic results.
+`run_dgsi()` applies the iterative optimisation
+procedure of Joukhadar et al. (2024) to the established desired-gain index.
+`run_qgsi()` fits the quadratic genomic selection index of Cerón-Rojas et al.
+(2026).
 
 ### 3.3 Evaluating an index
 
@@ -258,7 +266,7 @@ selection_index(
 | Obtain or judge a covariance matrix | [Obtaining G and P](DesiredGainR-covariance.html) |
 | Choose and compare multiple-trait methods | [Multiple-trait selection](DesiredGainR-index-families.html) |
 | Use GEBVs, prediction errors, or distinct information traits | [Using predictions, prediction errors, and restricted responses](DesiredGainR-information.html) |
-| Understand the iterative desired-gain method | [Optimising desired gains](DesiredGainR-dgsi.html) |
+| Understand what iteration changes in a desired-gain index | [Iterative optimisation of the desired-gain index](DesiredGainR-dgsi.html) |
 | Use the quadratic genomic index | [Quadratic genomic selection](DesiredGainR-qgsi.html) |
 | Compare objectives over several cycles | [Multi-cycle simulation](DesiredGainR-simulation.html) |
 | Inspect validation with real programmes | [Empirical validation](DesiredGainR-empirical-validation.html) |

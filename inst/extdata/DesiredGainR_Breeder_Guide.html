@@ -11,7 +11,7 @@
 
 <meta name="author" content="Félicien Akohoue · PhD" />
 
-<meta name="date" content="2026-08-04" />
+<meta name="date" content="2026-08-05" />
 
 <title>The DesiredGainR Breeder’s Guide</title>
 
@@ -2946,7 +2946,7 @@ font-size: 0.95em;
 <h3 class="subtitle">Turning breeder intent into a defensible selection
 decision — Edition 1</h3>
 <h4 class="author">Félicien Akohoue · PhD</h4>
-<h4 class="date">04 August 2026</h4>
+<h4 class="date">05 August 2026</h4>
 
 </div>
 
@@ -3422,12 +3422,14 @@ those gains <em>are</em> the Smith–Hazel optimum is</p>
 <p>and conversely the gains implied by weights <span class="math inline">\(\mathbf{w}\)</span> are <span class="math inline">\(\mathbf{d} =
 \mathbf{G}\mathbf{P}^{-1}\mathbf{G}\mathbf{w}\)</span>.</p>
 <p><code>implied_economic_weights()</code> and
-<code>implied_desired_gains()</code> perform these conversions. Read the
-implied weights for <strong>sign surprises</strong>: a negative implied
-weight on a trait you asked to improve means the index obtains more of
-that trait by selecting against it directly, because of how strongly it
-correlates with something else in the objective. That may be correct,
-but it should be a decision rather than an accident.</p>
+<code>implied_desired_gains()</code> perform these conversions. The
+implied weights reproduce a coefficient direction under the supplied
+covariance matrices. They do not estimate prices or profit. Read them
+for <strong>sign surprises</strong>: a negative implied weight on a
+trait you asked to improve means the index obtains more of that trait by
+selecting against it directly, because of how strongly it correlates
+with something else in the objective. That may be correct, but it should
+be a decision rather than an accident.</p>
 <p>If the desired gains are stated in genetic standard deviations while
 <span class="math inline">\(\mathbf{G}\)</span> and <span class="math inline">\(\mathbf{P}\)</span> remain in original trait
 units, the returned weights are per original unit. Hence, compare
@@ -3569,10 +3571,11 @@ value.</td>
 </tr>
 <tr class="even">
 <td align="left">Tandem selection</td>
-<td align="left">One trait is improved before attention moves to
-another.</td>
-<td align="left">One urgent trait dominates a specific stage.</td>
-<td align="left">Other traits can deteriorate during that stage.</td>
+<td align="left">One trait is improved across one or more cycles before
+another trait becomes the focus.</td>
+<td align="left">One trait has temporary programme priority.</td>
+<td align="left">Other traits can deteriorate before the focus
+changes.</td>
 </tr>
 <tr class="odd">
 <td align="left">Independent culling</td>
@@ -3595,6 +3598,24 @@ quality.</td>
 <p>These strategies solve different problems. Therefore, method choice
 starts with the allowed trade-offs. It does not start with the most
 elaborate algorithm.</p>
+<p>Use four questions to choose the strategy.</p>
+<ol style="list-style-type: decimal">
+<li>Are any limits non-negotiable? Apply independent culling to those
+traits.</li>
+<li>Are traits measured at different costs or stages? Use a multistage
+design.</li>
+<li>Must one trait dominate several cycles? Use a classical tandem
+schedule.</li>
+<li>Can traits compensate for one another? Use index selection for those
+trade-offs.</li>
+</ol>
+<p>Strategies can be combined. A breeder can cull lines that fail a
+disease limit and then rank the survivors with a desired-gain index.</p>
+<p>DesiredGainR implements independent culling and several index
+families. The option <code>selection_index(method = &quot;tandem&quot;)</code> is
+a within-cohort sequential screen. It is not classical tandem selection
+across cycles. The package has no dedicated multistage allocation
+optimiser or alternating-cycle tandem simulator in version 0.5.0.</p>
 </div>
 <div id="the-common-index-model" class="section level2" number="4.3">
 <h2><span class="header-section-number">4.3</span> The common index
@@ -3785,18 +3806,23 @@ simulation when the method changes the operational decision.</p>
 <div id="selection_indexmethod-tandem" class="section level3" number="5.3.4">
 <h3><span class="header-section-number">5.3.4</span>
 <code>selection_index(method = &quot;tandem&quot;)</code></h3>
-<p>Question: <em>only one trait matters per stage.</em></p>
-<p>Sequential selection on one trait at a time in a stated order.
-Historically common, rarely optimal, retained as a comparator.</p>
+<p>Question: <em>how would sequential within-cohort screening
+behave?</em></p>
+<p>This option filters one candidate cohort through traits in a stated
+order. It is an operational sequential-screen comparator. Classical
+tandem selection changes the focal trait across breeding cycles or
+generations. That strategy requires a multi-cycle schedule and is not
+implemented by this one-call option.</p>
 </div>
 </div>
 <div id="constrained-families" class="section level2" number="5.4">
 <h2><span class="header-section-number">5.4</span> Constrained
 families</h2>
-<p><code>restricted_index()</code> implements the closed-form
-constrained indices. Where a restriction on the response is linear,
-these give exactly what an iterative search approaches, without the
-replicate dependence.</p>
+<p><code>restricted_index()</code> implements closed-form constraints on
+model-based expected response. <code>run_dgsi()</code> instead searches
+against the differential observed in a finite candidate set. The two
+procedures answer different questions and can select different
+candidates.</p>
 <p>Let <span class="math inline">\(\mathbf{C}\)</span> be the <span class="math inline">\(k \times p\)</span> matrix selecting the
 constrained traits. Expected response is proportional to <span class="math inline">\(\mathbf{G}\mathbf{b}\)</span>, so a zero-response
 restriction is <span class="math inline">\(\mathbf{C}\mathbf{G}\mathbf{b} =
@@ -3875,24 +3901,27 @@ alignment and residual distance. Satoh showed that the Yamada
 proportional desired-gain index is a special case of restricted index
 theory.</p>
 </div>
-<div id="the-iterative-desired-gain-index" class="section level2" number="5.5">
-<h2><span class="header-section-number">5.5</span> The iterative
-desired-gain index</h2>
+<div id="iterative-optimisation-of-the-desired-gain-index" class="section level2" number="5.5">
+<h2><span class="header-section-number">5.5</span> Iterative
+optimisation of the desired-gain index</h2>
 <div id="run_dgsi" class="section level3" number="5.5.1">
 <h3><span class="header-section-number">5.5.1</span>
 <code>run_dgsi()</code></h3>
-<p>Searches stochastically for the desired-gain vector whose realised
-response best matches the target, then reports the resulting
-coefficients.</p>
+<p>The desired-gain index formula remains unchanged.
+<code>run_dgsi()</code> adds the iterative search applied by Joukhadar
+et al. (2024). It searches for an input desired-gain vector whose
+selected-candidate differential best matches the breeder’s target. It
+then reports the resulting coefficients.</p>
 <p>DGSI is <strong>not</strong> a method hidden inside
 <code>selection_index()</code>. The call
 <code>selection_index(method = &quot;yamada&quot;)</code> fits the closed-form,
 non-iterated desired-gain index. <code>run_dgsi()</code> starts from
 that coefficient direction, searches alternative directions and stores
 the original comparator in <code>non_iterated</code>. The dedicated
-<em>Optimising desired gains</em> vignette demonstrates the requested
-direction, feasibility, both responses, candidate ranking, full-sample
-comparison, holdout choice and stability diagnostics.</p>
+<em>Iterative optimisation of the desired-gain index</em> vignette
+demonstrates the requested direction, feasibility, both responses,
+candidate ranking, full-sample comparison, holdout choice and stability
+diagnostics.</p>
 <table>
 <colgroup>
 <col width="33%" />
@@ -3968,6 +3997,14 @@ inherits</td>
 </table>
 <p>A large differential with a small transmitted response means
 selection is acting mostly on non-heritable variation.</p>
+<p>The <code>dg</code> argument and <code>realised_response</code> use
+candidate standard-deviation units. A target stated in genetic standard
+deviations needs an explicit conversion. Multiply each target by its
+genetic standard deviation. Then divide by the standard deviation of
+that trait among the candidates. The iterative desired-gain vignette
+shows this calculation. This conversion keeps one biological target
+consistent across the feasibility test and the fitted candidate
+analysis.</p>
 </div>
 </div>
 <div id="the-quadratic-genomic-index" class="section level2" number="5.6">
@@ -4001,11 +4038,12 @@ comparing indices</h1>
 <h2><span class="header-section-number">6.1</span> What a comprehensive
 comparison requires</h2>
 <p>A fair comparison uses one decision problem. Keep the candidates,
-trait order, trait direction, measurement scale, covariance estimates
-and selected proportion fixed. Use one definition of aggregate genetic
-merit when comparing <span class="math inline">\(R_{HI}\)</span> or
-<span class="math inline">\(\Delta H\)</span>. Use the same validation
-split and simulation scenarios when those layers are added.</p>
+trait order, trait direction, measurement scale, common genetic
+covariance and selected proportion fixed. Each family may need a
+different information covariance structure. Its source and estimation
+set must remain explicit. Use one definition of aggregate genetic merit
+when comparing <span class="math inline">\(R_{HI}\)</span> or <span class="math inline">\(\Delta H\)</span>. Use the same validation split
+and simulation scenarios when those layers are added.</p>
 <p>The analysis should answer four questions.</p>
 <ol style="list-style-type: decimal">
 <li><strong>Biological response:</strong> what change is expected in
@@ -4017,11 +4055,24 @@ the same candidates?</li>
 <li><strong>Stability:</strong> does the decision persist under
 covariance, weight and prediction uncertainty?</li>
 </ol>
-<p><code>compare_selection_methods()</code> assembles these components
-for fitted objects returned by <code>selection_index()</code>. It
-reports the fairness conditions first. It then reports per-trait
-responses, target attainment, classical criteria, Mahalanobis alignment,
-rank correlations and Jaccard similarities among the selected sets.</p>
+<p><code>comparison_objective()</code> defines one common desired-gain
+target, aggregate utility and genetic covariance.
+<code>compare_selection_methods()</code> then accepts results from
+<code>selection_index()</code>, <code>restricted_index()</code>,
+<code>generalized_index()</code>, <code>run_dgsi()</code>, and
+<code>run_qgsi()</code>. It reports fairness conditions, per-trait
+responses, attainment, Mahalanobis alignment, rank correlations and
+Jaccard similarities. Common validation values provide the same external
+yardstick for every selected set.</p>
+<p><code>compare_dg_and_qgsi()</code> remains a smaller descriptive
+helper. It compares candidate scores, ranks and selected sets from one
+desired-gain fit after iterative search and one quadratic genomic fit.
+Its <code>decision_summary</code> reports the selected counts, overlap
+and Jaccard similarity. The comparison is descriptive because the two
+methods represent different objectives. The <em>Multiple-trait
+selection</em> vignette gives explicit workflows for comparing the
+closed-form and iterative desired-gain fits, and for comparing linear
+and quadratic genomic indices.</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>comparison <span class="ot">&lt;-</span> <span class="fu">compare_selection_methods</span>(</span>
 <span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>  <span class="fu">list</span>(</span>
 <span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>    <span class="at">Smith_Hazel =</span> smith_hazel,</span>
@@ -4044,8 +4095,59 @@ critical trait. Finally, inspect rank and selected-set agreement.
 Similar average performance can still produce different operational
 decisions.</p>
 </div>
-<div id="the-classical-criteria" class="section level2" number="6.2">
-<h2><span class="header-section-number">6.2</span> The classical
+<div id="match-the-evaluation-to-the-method" class="section level2" number="6.2">
+<h2><span class="header-section-number">6.2</span> Match the evaluation
+to the method</h2>
+<table>
+<colgroup>
+<col width="50%" />
+<col width="50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">Method</th>
+<th align="left">Primary evidence</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Economic linear index</td>
+<td align="left">Per-trait response, <span class="math inline">\(R_{HI}\)</span>, <span class="math inline">\(\Delta H\)</span>, relative efficiency, accuracy
+and weight sensitivity</td>
+</tr>
+<tr class="even">
+<td align="left">Closed-form desired-gain index</td>
+<td align="left">Per-trait response, feasibility, target attainment and
+Mahalanobis alignment</td>
+</tr>
+<tr class="odd">
+<td align="left">Desired-gain index with iterative search</td>
+<td align="left">The same desired-gain criteria, selected differential,
+holdout objective and replicate stability</td>
+</tr>
+<tr class="even">
+<td align="left">Restricted index</td>
+<td align="left">Per-trait response, restriction residual and loss under
+one common aggregate merit</td>
+</tr>
+<tr class="odd">
+<td align="left">Rank or threshold method</td>
+<td align="left">Passing rate where relevant, observed differential,
+rank stability and later-cohort validation</td>
+</tr>
+<tr class="even">
+<td align="left">Quadratic genomic selection index</td>
+<td align="left">Linear and quadratic contributions, observed GEBV
+differential, approximate gain, validated nonlinear utility and
+simulation</td>
+</tr>
+</tbody>
+</table>
+<p>One statistic cannot choose among all families. Each method must
+first satisfy the objective it was designed to represent.</p>
+</div>
+<div id="the-classical-criteria" class="section level2" number="6.3">
+<h2><span class="header-section-number">6.3</span> The classical
 criteria</h2>
 <p>Let <span class="math inline">\(I=\mathbf{b}^{\mathsf
 T}\mathbf{x}\)</span> denote the index score and <span class="math inline">\(H=\mathbf{a}^{\mathsf T}\mathbf{g}\)</span> one
@@ -4128,22 +4230,26 @@ legacy statistic, not a robust basis for ranking indices.</td>
 </tbody>
 </table>
 </div>
-<div id="how-each-fails" class="section level2" number="6.3">
-<h2><span class="header-section-number">6.3</span> How each fails</h2>
+<div id="how-each-fails" class="section level2" number="6.4">
+<h2><span class="header-section-number">6.4</span> How each fails</h2>
 <p><strong>Relative efficiency below 1 is not a defect.</strong> A
 multi-trait index deliberately gives up response in any single trait to
 gain elsewhere. Read it alongside what direct selection would have
 sacrificed.</p>
 <p><strong><span class="math inline">\(R_{HI}\)</span> requires a
-definition of net merit.</strong> Desired gains do not provide one.
-Unless one common <code>aggregate_weights</code> vector is supplied,
-DesiredGainR returns <code>NA</code> for <span class="math inline">\(R_{HI}\)</span> and <span class="math inline">\(\Delta H\)</span> rather than changing the
-definition of merit from one desired-gain direction to another. The
-implied weights <span class="math inline">\(\mathbf{w} =
+separately declared aggregate merit.</strong> Desired gains already
+define a valid response objective. They answer a different question.
+This distinction is a strength of desired-gain selection because
+breeders can state biological progress without inventing economic
+values. DesiredGainR still reports expected response, feasibility,
+attainment and stability. It returns <code>NA</code> only for <span class="math inline">\(R_{HI}\)</span> and <span class="math inline">\(\Delta H\)</span> when aggregate merit remains
+undefined. If the programme supplies one common
+<code>aggregate_weights</code> vector, both criteria are reported under
+that common yardstick. The implied weights <span class="math inline">\(\mathbf{w} =
 \mathbf{G}^{-1}\mathbf{P}\mathbf{G}^{-1}\mathbf{d}\)</span> remain
 available as an explicit diagnostic through
-<code>implied_economic_weights()</code>. They are not a common objective
-for cross-method comparison.</p>
+<code>implied_economic_weights()</code>. A separate implied vector for
+every direction would change the yardstick during comparison.</p>
 <p><strong><span class="math inline">\(CV_I\)</span> is undefined when
 the index is centred.</strong> Standardising or centring the traits puts
 the index mean at zero and the ratio diverges. The package withholds it
@@ -4154,8 +4260,8 @@ genetic component. Two indices can have the same <span class="math inline">\(h_I
 directions. Hence, it cannot replace assessment of trait responses and
 objective attainment.</p>
 </div>
-<div id="a-stronger-decision-panel-for-desired-gain-indices" class="section level2" number="6.4">
-<h2><span class="header-section-number">6.4</span> A stronger decision
+<div id="a-stronger-decision-panel-for-desired-gain-indices" class="section level2" number="6.5">
+<h2><span class="header-section-number">6.5</span> A stronger decision
 panel for desired-gain indices</h2>
 <p>No classical scalar is sufficiently robust for a recommendation. Use
 the following panel.</p>
@@ -4176,8 +4282,8 @@ stability. A spectacular gain in one trait cannot conceal failure of
 another minimum, and a stable point estimate cannot conceal sensitivity
 to the estimated covariance matrices.</p>
 </div>
-<div id="reusing-a-fitted-index" class="section level2" number="6.5">
-<h2><span class="header-section-number">6.5</span> Reusing a fitted
+<div id="reusing-a-fitted-index" class="section level2" number="6.6">
+<h2><span class="header-section-number">6.6</span> Reusing a fitted
 index</h2>
 <p><code>predict()</code> applies a fitted index to a new candidate set,
 reusing the centring and scaling constants <strong>from fitting</strong>
@@ -4710,8 +4816,29 @@ differential?</li>
 <div id="complete-function-map" class="section level1" number="13">
 <h1><span class="header-section-number">13</span> Complete function
 map</h1>
-<div id="objective-definition" class="section level2" number="13.1">
-<h2><span class="header-section-number">13.1</span> Objective
+<div id="guide-access" class="section level2" number="13.1">
+<h2><span class="header-section-number">13.1</span> Guide access</h2>
+<table>
+<colgroup>
+<col width="50%" />
+<col width="50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">Function</th>
+<th align="left">Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left"><code>open_desiredgain_guide()</code></td>
+<td align="left">Open the installed HTML or PDF Breeder’s Guide</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="objective-definition" class="section level2" number="13.2">
+<h2><span class="header-section-number">13.2</span> Objective
 definition</h2>
 <table>
 <colgroup>
@@ -4726,34 +4853,39 @@ definition</h2>
 </thead>
 <tbody>
 <tr class="odd">
+<td align="left"><code>define_desired_gain_intervals()</code></td>
+<td align="left">Record trait-specific acceptable gain intervals and
+their units</td>
+</tr>
+<tr class="even">
 <td align="left"><code>implied_economic_weights()</code></td>
 <td align="left">Weights implied by stated desired gains</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left"><code>implied_desired_gains()</code></td>
 <td align="left">Gains implied by stated weights</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left"><code>gain_feasibility()</code></td>
 <td align="left">Required intensity and selected fraction</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left"><code>weight_sensitivity()</code></td>
 <td align="left">Stability of the selected set under perturbation</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left"><code>retrospective_weights()</code></td>
 <td align="left">Objective implied by a past decision</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left"><code>effective_weights()</code></td>
 <td align="left">Weights an existing coefficient vector behaves as</td>
 </tr>
 </tbody>
 </table>
 </div>
-<div id="covariance-handling" class="section level2" number="13.2">
-<h2><span class="header-section-number">13.2</span> Covariance
+<div id="covariance-handling" class="section level2" number="13.3">
+<h2><span class="header-section-number">13.3</span> Covariance
 handling</h2>
 <table>
 <colgroup>
@@ -4788,8 +4920,8 @@ reported</td>
 </tbody>
 </table>
 </div>
-<div id="index-construction" class="section level2" number="13.3">
-<h2><span class="header-section-number">13.3</span> Index
+<div id="index-construction" class="section level2" number="13.4">
+<h2><span class="header-section-number">13.4</span> Index
 construction</h2>
 <table>
 <colgroup>
@@ -4805,7 +4937,8 @@ construction</h2>
 <tbody>
 <tr class="odd">
 <td align="left"><code>selection_index()</code></td>
-<td align="left">Eight classical families through one interface</td>
+<td align="left">Six classical index families and two operational
+comparators through one interface</td>
 </tr>
 <tr class="even">
 <td align="left"><code>selection_information()</code></td>
@@ -4826,7 +4959,7 @@ restricted Smith–Hazel</td>
 </tr>
 <tr class="even">
 <td align="left"><code>run_dgsi()</code></td>
-<td align="left">Iterative desired-gain index with replicate
+<td align="left">Desired-gain index with iterative search and replicate
 diagnostics</td>
 </tr>
 <tr class="odd">
@@ -4834,18 +4967,25 @@ diagnostics</td>
 <td align="left">Quadratic genomic selection index</td>
 </tr>
 <tr class="even">
-<td align="left"><code>run_dgsi_qgsi_pipeline()</code></td>
-<td align="left">Both, with comparison</td>
+<td align="left"><code>run_qgsi_desired_gain()</code></td>
+<td align="left">Compatibility entry point that explains why desired
+gains require DGSI rather than QGSI</td>
 </tr>
 <tr class="odd">
+<td align="left"><code>run_dgsi_qgsi_pipeline()</code></td>
+<td align="left">DGSI and QGSI fits with a descriptive candidate
+comparison</td>
+</tr>
+<tr class="even">
 <td align="left"><code>compare_dg_and_qgsi()</code></td>
-<td align="left">Rank agreement between the two</td>
+<td align="left">Scores, ranks and selected-set agreement for one DGSI
+and one QGSI fit</td>
 </tr>
 </tbody>
 </table>
 </div>
-<div id="evaluation-and-reuse" class="section level2" number="13.4">
-<h2><span class="header-section-number">13.4</span> Evaluation and
+<div id="evaluation-and-reuse" class="section level2" number="13.5">
+<h2><span class="header-section-number">13.5</span> Evaluation and
 reuse</h2>
 <table>
 <colgroup>
@@ -4869,31 +5009,36 @@ reuse</h2>
 and selected-set agreement</td>
 </tr>
 <tr class="odd">
+<td align="left"><code>comparison_objective()</code></td>
+<td align="left">One target, utility and covariance for a cross-family
+comparison</td>
+</tr>
+<tr class="even">
 <td align="left"><code>evaluate_restricted_response()</code></td>
 <td align="left">Satoh progress, alignment, and residual distance</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left"><code>index_information_efficiency()</code></td>
 <td align="left">Cunningham deletion efficiency</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left"><code>candidate_score_uncertainty()</code></td>
 <td align="left">Score intervals and selection probabilities from
 PEC</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left"><code>summary()</code>, <code>coef()</code></td>
 <td align="left">Tidy tables of coefficients, response and criteria</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left"><code>predict()</code></td>
 <td align="left">Apply a fitted index to a new candidate set</td>
 </tr>
 </tbody>
 </table>
 </div>
-<div id="uncertainty-1" class="section level2" number="13.5">
-<h2><span class="header-section-number">13.5</span> Uncertainty</h2>
+<div id="uncertainty-1" class="section level2" number="13.6">
+<h2><span class="header-section-number">13.6</span> Uncertainty</h2>
 <table>
 <colgroup>
 <col width="50%" />
@@ -4921,8 +5066,8 @@ PEC</td>
 </tbody>
 </table>
 </div>
-<div id="multi-environment" class="section level2" number="13.6">
-<h2><span class="header-section-number">13.6</span>
+<div id="multi-environment" class="section level2" number="13.7">
+<h2><span class="header-section-number">13.7</span>
 Multi-environment</h2>
 <table>
 <thead>
@@ -4943,8 +5088,8 @@ Multi-environment</h2>
 </tbody>
 </table>
 </div>
-<div id="simulation" class="section level2" number="13.7">
-<h2><span class="header-section-number">13.7</span> Simulation</h2>
+<div id="simulation" class="section level2" number="13.8">
+<h2><span class="header-section-number">13.8</span> Simulation</h2>
 <table>
 <colgroup>
 <col width="50%" />
@@ -4997,8 +5142,8 @@ precision</td>
 </tbody>
 </table>
 </div>
-<div id="reference-values" class="section level2" number="13.8">
-<h2><span class="header-section-number">13.8</span> Reference
+<div id="reference-values" class="section level2" number="13.9">
+<h2><span class="header-section-number">13.9</span> Reference
 values</h2>
 <table>
 <colgroup>

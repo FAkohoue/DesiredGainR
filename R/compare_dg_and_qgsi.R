@@ -1,9 +1,16 @@
-#' Compare DGSI and QGSI candidate rankings
+#' Compare an iteratively optimised DGSI with a QGSI
 #'
-#' Merges canonical [run_dgsi()] and [run_qgsi()] results by candidate
-#' identifier and reports score and rank agreement. The comparison is
-#' descriptive: DGSI and QGSI optimise different breeding objectives, so
-#' agreement is not interpreted as validation of either method.
+#' Merges results from [run_dgsi()] and [run_qgsi()] by candidate identifier.
+#' It reports scores, ranks, and the selection flag from each fit. DGSI means
+#' desired-gain selection index. The `run_dgsi()` object contains the established
+#' desired-gain index after the iterative search applied by Joukhadar et al.
+#' (2024). QGSI means quadratic genomic selection index.
+#'
+#' The comparison is descriptive. DGSI targets a desired response direction.
+#' QGSI represents linear, squared, and cross-product economic value. Agreement
+#' does not validate either objective and disagreement does not identify a
+#' winner. The breeder must first decide which objective represents the
+#' programme.
 #'
 #' @param dg_result A result returned by [run_dgsi()].
 #' @param qgsi_result A result returned by [run_qgsi()].
@@ -16,7 +23,9 @@
 #' @param sort_by Output sorting rule.
 #' @param debug Whether to print progress messages.
 #'
-#' @return A list with `comparison_table` and `correlation_summary`.
+#' @return A list with `comparison_table`, `correlation_summary`, and
+#'   `decision_summary`. The last component reports the common candidate count,
+#'   selected counts, selected overlap, and Jaccard similarity.
 #' @export
 compare_dg_and_qgsi <- function(
   dg_result,
@@ -154,12 +163,39 @@ compare_dg_and_qgsi <- function(
   if (sort_by == "QGSI") data.table::setorder(merged, -QGSI)
   if (sort_by == "DG_rank") data.table::setorder(merged, DG_Rank)
   if (sort_by == "QGSI_rank") data.table::setorder(merged, QGSI_Rank)
+
+  has_selection <- all(c("DG_Selected", "QGSI_Selected") %in% names(merged))
+  decision_summary <- if (has_selection) {
+    common <- !is.na(merged$DG_Selected) & !is.na(merged$QGSI_Selected)
+    dg_selected <- common & merged$DG_Selected
+    qgsi_selected <- common & merged$QGSI_Selected
+    overlap <- sum(dg_selected & qgsi_selected)
+    union_size <- sum(dg_selected | qgsi_selected)
+    data.table::data.table(
+      Common_candidates = sum(common),
+      DGSI_selected = sum(dg_selected),
+      QGSI_selected = sum(qgsi_selected),
+      Selected_overlap = overlap,
+      Selected_Jaccard = if (union_size > 0L) overlap / union_size else NA_real_
+    )
+  } else {
+    data.table::data.table(
+      Common_candidates = sum(
+        is.finite(merged$DG_Rank) & is.finite(merged$QGSI_Rank)
+      ),
+      DGSI_selected = NA_integer_,
+      QGSI_selected = NA_integer_,
+      Selected_overlap = NA_integer_,
+      Selected_Jaccard = NA_real_
+    )
+  }
   .desiredgainr_dbg(
     debug, "Compared %d candidates across DGSI and QGSI.", nrow(merged)
   )
   list(
     comparison_table = merged,
     correlation_summary = correlation_summary,
+    decision_summary = decision_summary,
     interpretation = paste(
       "Agreement is descriptive because DGSI targets desired responses",
       "whereas QGSI predicts a quadratic economic merit."

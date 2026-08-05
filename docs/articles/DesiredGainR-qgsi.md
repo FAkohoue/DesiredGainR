@@ -357,6 +357,91 @@ term is statistically non-zero. The breeder’s question is whether it
 changes which candidates are retained, whether that change is stable,
 and whether the non-linear value judgement is defensible.
 
+[`compare_selection_methods()`](https://FAkohoue.github.io/DesiredGainR/reference/compare_selection_methods.md)
+accepts both QGSI objects. Use
+[`comparison_objective()`](https://FAkohoue.github.io/DesiredGainR/reference/comparison_objective.md)
+to fix the utility and covariance matrix. Supply common validation
+values when the objective contains curvature. The function then
+evaluates the selected sets under the same linear and quadratic utility.
+Use the same candidates, transformations, weights, covariance matrix and
+selected count.
+
+Report at least four results:
+
+1.  expected response for every trait;
+2.  Spearman rank correlation;
+3.  selected-set overlap and Jaccard similarity;
+4.  the linear and quadratic score contributions for candidates whose
+    decision changed.
+
+The Jaccard similarity is the number selected by both fits divided by
+the number selected by either fit. A value of one means that both fits
+select the same candidates. A value of zero means that the selected sets
+do not overlap.
+
+``` r
+selected_quadratic <- rank_comparison$Selected_quadratic
+selected_linear <- rank_comparison$Selected_linear
+selected_overlap <- sum(selected_quadratic & selected_linear)
+selected_union <- sum(selected_quadratic | selected_linear)
+
+c(
+  selected_overlap = selected_overlap,
+  selected_jaccard = selected_overlap / selected_union
+)
+#> selected_overlap selected_jaccard 
+#>             15.0              0.6
+```
+
+Evaluate both selected sets under one quadratic utility. The fitted
+weights refer to standardised GEBVs. Convert them back to weights per
+original GEBV unit before defining the common objective.
+
+``` r
+qg_scale <- qgsi$transformation$scale[traits]
+common_linear_raw <- linear_weights / qg_scale
+common_W_raw <- sweep(sweep(W, 1L, qg_scale, "/"), 2L, qg_scale, "/")
+
+qg_objective <- comparison_objective(
+  aggregate_weights = common_linear_raw,
+  W = common_W_raw,
+  G = dgr_G[traits, traits],
+  gain_units = "trait"
+)
+
+qg_comparison <- compare_selection_methods(
+  list(Linear = linear_only, Quadratic = qgsi),
+  objective = qg_objective,
+  validation_data = dgr_gebv[, c("GenoID", traits)]
+)
+qg_comparison$summary[, c(
+  "Method", "Expected_response_basis",
+  "Validation_utility_response",
+  "Validation_utility_rank_correlation"
+)]
+#>       Method                                            Expected_response_basis
+#>       <char>                                                             <char>
+#> 1:    Linear                        exact linear genomic-index response (W = 0)
+#> 2: Quadratic linear-regression approximation; the quadratic score is non-normal
+#>    Validation_utility_response Validation_utility_rank_correlation
+#>                          <num>                               <num>
+#> 1:                    2.042713                           0.9904403
+#> 2:                    2.093085                           0.9998605
+qg_comparison$selected_jaccard
+#>           Linear Quadratic
+#> Linear       1.0       0.6
+#> Quadratic    0.6       1.0
+```
+
+The validation utility is exact for the supplied GEBVs. Its evidential
+strength depends on their provenance. Independent predictions or
+simulated true genetic values provide stronger evidence than the values
+used to construct the scores.
+
+The quadratic fit earns its extra complexity only when it improves a
+declared non-linear utility in independent data or simulation. A change
+in rank alone does not establish improvement.
+
 ------------------------------------------------------------------------
 
 ## 9. Minimum evidence before operational use
@@ -391,15 +476,18 @@ a useful, stable and biologically defensible way.
 - [Multiple-trait
   selection](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-index-families.md)
   places QGSI beside the linear and desired-gain families.
-- [Optimising desired
-  gains](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-dgsi.md)
-  explains the iterative desired-gain selection index, which solves a
-  different breeding problem.
+- [Iterative optimisation of the desired-gain
+  index](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-dgsi.md)
+  explains the iterative search applied to the desired-gain selection
+  index. It represents a different breeding objective from a quadratic
+  economic index.
 - [`run_qgsi()`](https://FAkohoue.github.io/DesiredGainR/reference/run_qgsi.md)
   gives the complete argument and return-value contract.
 - [`compare_dg_and_qgsi()`](https://FAkohoue.github.io/DesiredGainR/reference/compare_dg_and_qgsi.md)
-  compares rankings descriptively without implying that DGSI and QGSI
-  optimise the same objective.
+  compares scores, rankings and selected sets descriptively. Its
+  `decision_summary` reports overlap and Jaccard similarity. These
+  quantities do not imply that DGSI and QGSI optimise the same
+  objective.
 
 ## References
 

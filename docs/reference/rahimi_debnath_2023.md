@@ -73,8 +73,8 @@ for the reproduction and its stated tolerances.
 ``` r
 reference <- rahimi_debnath_2023()
 # The Pesek-Baker property: expected response is exactly proportional to the
-# desired gains. The published numbers satisfy it to four significant
-# figures.
+# desired gains. Rounded table values show small ratio differences. The
+# reproduction vignette propagates their printed decimal precision.
 round(reference$pesek_baker_gain / reference$desired_gains, 5)
 #>         plant_height      number_of_grain        number_of_row 
 #>              0.33585              0.33586              0.33585 

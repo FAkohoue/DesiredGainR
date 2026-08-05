@@ -240,9 +240,11 @@ The Mulamba-Mock rank-sum index needs neither weights nor covariance matrices.
 This explains its value as a low-assumption comparator. The base index shows
 how much the covariance adjustment contributes beyond direct weighting.
 
-Use `compare_selection_methods()` to verify the comparison conditions. Then
-read biological responses, summary criteria, rank agreement, and selected-set
-agreement.
+Use `comparison_objective()` to fix one target, utility and genetic covariance.
+Then use `compare_selection_methods()` across every supported fitted family.
+Read biological responses, response basis, target attainment, rank agreement,
+selected-set agreement and common validation response. See [Multiple-trait
+selection](DesiredGainR-index-families.html) for the complete workflow.
 
 ```{r compare}
 comparison <- compare_selection_methods(
@@ -276,28 +278,44 @@ smith_hazel$effective_weights[, c("Trait", "Genetic_share")]
 
 ## 9. Stage 8 — Optimise the desired-gain vector
 
-`run_dgsi()` implements the iterative method of Joukhadar et al. (2024),
-searching for a desired-gain vector whose realised response in the selected set
-approaches the stated target.
+`run_dgsi()` applies the iterative optimisation procedure of Joukhadar et al.
+(2024) to the established desired-gain index. It searches for an input
+desired-gain vector whose realised response in the selected set approaches the
+stated target.
 
 ```{r dgsi}
+candidate_sd <- vapply(
+  dgr_candidates[, traits], stats::sd, numeric(1L)
+)
+target_original_units <- desired_gains * genetic_sd
+dg_target <- target_original_units / candidate_sd
+
 dgsi <- run_dgsi(
   init_data = dgr_candidates[, c("GenoID", "Family")],
   cand_data = dgr_candidates,
   trait_cols = traits,
-  dg = desired_gains,
+  dg = dg_target,
   G = dgr_G, P = dgr_P,
   lower_is_better = lower_is_better,
   scale_traits = TRUE,
   n_select = 20L, n_iter = 200L, n_rep = 5L, seed = 42L
 )
-round(dgsi$realised_response - desired_gains, 3)
+round(dgsi$realised_response - dg_target, 3)
 ```
 
-Read that against Stage 4. Feasibility constrains the requested *proportion*.
-the optimiser is not bound to it, and distributes the shortfall unevenly,
-overshooting grain yield while undershooting anthesis date. Whether that trade
-is acceptable is a breeding decision rather than a numerical one.
+`realised_response` is a selected-candidate differential in candidate standard
+deviations. Read the model-based transmitted response in the original
+genetic-standard-deviation units before judging attainment.
+
+```{r dgsi-transmitted}
+transmitted_genetic_sd <-
+  dgsi$theoretical_response$original_units / genetic_sd
+round(transmitted_genetic_sd, 3)
+round(transmitted_genetic_sd / desired_gains, 3)
+```
+
+Feasibility constrains the requested response ray. The iterative search can
+leave that ray. Therefore, inspect every trait-specific attainment value.
 
 The classical solution without iteration is returned as a comparator:
 
@@ -305,11 +323,13 @@ The classical solution without iteration is returned as a comparator:
 round(dgsi$non_iterated$realised_response, 3)
 ```
 
-The anthesis-silking interval moves in the wrong direction there. Joukhadar et
-al. reported exactly this failure of the unoptimised method, and it reproduces
-here on independent data.
+The anthesis-silking interval moves in the unfavourable direction in this
+candidate set. Joukhadar et al. (2024) introduced their iterative search to
+reduce this type of disagreement between a target and a selected-candidate
+differential. This is a finite-candidate result. It does not contradict the
+closed-form proportional-response identity under the covariance model.
 
-See [Optimising desired gains](DesiredGainR-dgsi.html).
+See [Iterative optimisation of the desired-gain index](DesiredGainR-dgsi.html).
 
 ---
 
@@ -330,6 +350,10 @@ qgsi <- run_qgsi(
 )
 qgsi$expected_gain_per_trait
 ```
+
+Use the same call with a zero `W` matrix as the linear genomic benchmark. Keep
+all other inputs fixed. Compare per-trait response, rank correlation, selected
+overlap, and validated nonlinear utility.
 
 Standardisation matters more here than anywhere else in the package. On the
 original scale, plant height carries half the linear index despite holding
@@ -386,7 +410,7 @@ that downstream decision. See
 | 1-2 | [Obtaining G and P](DesiredGainR-covariance.html) |
 | 3-5 | [Defining a breeding objective](DesiredGainR-objective.html) |
 | 6-7 | [Multiple-trait selection](DesiredGainR-index-families.html) |
-| 8 | [Optimising desired gains](DesiredGainR-dgsi.html) |
+| 8 | [Iterative optimisation of the desired-gain index](DesiredGainR-dgsi.html) |
 | 9 | [Quadratic genomic selection](DesiredGainR-qgsi.html) |
 | 10 | [Defining a breeding objective](DesiredGainR-objective.html) |
 | Beyond | [Comparing objectives over several cycles](DesiredGainR-simulation.html) and [Working with other breeding software](DesiredGainR-interoperation.html) |

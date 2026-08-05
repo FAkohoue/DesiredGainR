@@ -12,14 +12,17 @@ Covarrubias-Pazaran (2021) advises breeders not to interpret index
 coefficients at all, because the desired response is the only decision
 genuinely available to them.
 
-The package therefore translates exactly between economic weights and
-desired gains, tests whether a stated objective can be attained at the
-planned selection intensity, recovers the objective a programme has been
-applying implicitly, and reports how far a decision depends on weights
-that are themselves uncertain. It provides the classical index families,
-the iterative desired-gain index of Joukhadar et al. (2024), and the
-quadratic genomic selection index of Cerón-Rojas et al. (2026), together
-with a multi-cycle simulation layer whose founders are built from the
+The package provides an exact algebraic map between economic weights and
+desired gains under a stated covariance model. These inputs retain
+different biological meanings. Economic weights define aggregate merit.
+Desired gains define a response direction. DesiredGainR also tests
+whether a stated objective can be attained at the planned selection
+intensity. It recovers the objective a programme has been applying
+implicitly. It reports how far a decision depends on uncertain weights.
+The package includes the classical index families, the iterative
+optimisation procedure applied to the desired-gain index by Joukhadar et
+al. (2024), and the quadratic genomic selection index of Cerón-Rojas et
+al. (2026). A multi-cycle simulation layer uses founders built from the
 breeder’s own phased marker data.
 
 DesiredGainR begins **after** the genetic evaluation. It does not
@@ -62,20 +65,21 @@ trait-specific gains more confidently than monetary values.
 - It reports several defensible gain vectors with independently
   confirmed support, stability and uncertainty instead of presenting one
   opaque answer.
-- It compares classical, desired-gain and quadratic genomic indices
-  under a common audit trail.
+- It compares classical, restricted, general, iteratively optimised
+  desired-gain and quadratic genomic fits against one declared
+  objective.
 - It combines exact one-cycle quantitative-genetic mathematics,
   independently validated optimisation, genomic prediction,
   multi-environment testing and multi-cycle simulation.
 
-The package’s evidence portfolio includes 869 passing test assertions,
-independent Clarabel and OSQP solver comparisons, analytical and Monte
-Carlo theory checks, and six real breeding-programme validations. In the
-CIMMYT maize rapid-cycle programme, DesiredGainR’s validation suite
-reproduced the published yield-gain trajectory, recovered a strong raw
-genomic-prediction signal, verified all 1,000 training-family
-phenotype-to-genotype links, and tested desired-gain directions in
-environments excluded from fitting.
+The package’s evidence portfolio includes a complete public-function
+test registry, family-level behavioural tests, independent Clarabel and
+OSQP solver comparisons, analytical and Monte Carlo theory checks, and
+six real breeding-programme validations. In the CIMMYT maize rapid-cycle
+programme, DesiredGainR’s validation suite reproduced the published
+yield-gain trajectory, recovered a strong raw genomic-prediction signal,
+verified all 1,000 training-family phenotype-to-genotype links, and
+tested desired-gain directions in environments excluded from fitting.
 
 DesiredGainR is therefore intended for rigorous, auditable breeding
 decision support. Its probabilities describe support under the fitted
@@ -123,7 +127,7 @@ Full documentation is at **<https://FAkohoue.github.io/DesiredGainR/>**.
 | [Obtaining G and P](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-covariance.html) | Covariance estimands, import, working alternatives, diagnostics and reporting |
 | [Multiple-trait selection](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-index-families.html) | Definitions, method choice, implementation, fair comparison and decision criteria |
 | [Using predictions and prediction errors](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-information.html) | Distinct information and objective traits, GEBV uncertainty, Cunningham efficiency and Satoh restricted responses |
-| [Optimising desired gains](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-dgsi.html) | Iterative DGSI fitting, transmitted response and optimisation stability |
+| [Iterative optimisation of the desired-gain index](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-dgsi.html) | What iteration changes, target units, transmitted response and optimisation stability |
 | [Quadratic genomic selection](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-qgsi.html) | Complete QGSI demonstration, weight interpretation, contributions and linear comparison |
 | [Multi-cycle simulation](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-simulation.html) | Comparing objectives over several breeding cycles |
 | [Published-result reproduction](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-reproduction.html) | Independent checks against published selection-index results |
@@ -226,17 +230,19 @@ selection decision without running R themselves.
 
 ## Defining the breeding objective
 
-The distinctive layer of the package. Economic weights and desired gains
-are two parameterisations of one linear index, so each implies the other
-exactly; those translations, a feasibility test derived from the
-achievable-response ellipsoid, recovery of the objective implicit in
-past selection decisions, and a sensitivity analysis reporting whether
-the decision depends on the stated weights at all.
+The distinctive layer of the package. Economic weights define aggregate
+merit. Desired gains define a response direction. An exact algebraic map
+connects these statements under the stated covariance model, but it does
+not give them the same biological meaning. This section covers that map,
+a feasibility test derived from the achievable-response ellipsoid,
+recovery of the objective implicit in past selection decisions, and a
+sensitivity analysis reporting whether the decision depends on the
+stated weights at all.
 
 - [`implied_economic_weights()`](https://FAkohoue.github.io/DesiredGainR/reference/implied_economic_weights.md)
-  : Translate desired gains into the economic weights they imply
+  : Map desired gains to the aggregate weights they imply
 - [`implied_desired_gains()`](https://FAkohoue.github.io/DesiredGainR/reference/implied_desired_gains.md)
-  : Translate economic weights into the desired gains they imply
+  : Map economic weights to the desired gains they imply
 - [`define_desired_gain_intervals()`](https://FAkohoue.github.io/DesiredGainR/reference/define_desired_gain_intervals.md)
   : Define acceptable intervals for desired genetic gains
 - [`suggest_desired_gains()`](https://FAkohoue.github.io/DesiredGainR/reference/suggest_desired_gains.md)
@@ -268,13 +274,14 @@ predictions as a genetic covariance.
 
 ## Building a selection index
 
-The classical index families through one interface, so that alternative
-objectives and alternative families can be compared on identical data,
-together with the iterative desired-gain index and the quadratic genomic
-selection index.
+The classical and restricted index families, the iterative search
+applied to the desired-gain index, and the quadratic genomic selection
+index. A common comparison objective and internal result adapters allow
+these families to be evaluated on the same candidates, trait units,
+target, utility and validation values.
 
 - [`selection_index()`](https://FAkohoue.github.io/DesiredGainR/reference/selection_index.md)
-  : Construct a classical multi-trait selection index
+  : Apply a classical multi-trait selection method
 - [`selection_information()`](https://FAkohoue.github.io/DesiredGainR/reference/selection_information.md)
   : Define the information used by a selection index
 - [`generalized_index()`](https://FAkohoue.github.io/DesiredGainR/reference/generalized_index.md)
@@ -306,7 +313,9 @@ matrices.
 - [`evaluate_index()`](https://FAkohoue.github.io/DesiredGainR/reference/evaluate_index.md)
   : Evaluate a selection index against the standard criteria
 - [`compare_selection_methods()`](https://FAkohoue.github.io/DesiredGainR/reference/compare_selection_methods.md)
-  : Compare multi-trait selection methods on one decision problem
+  : Compare selection methods on one common decision problem
+- [`comparison_objective()`](https://FAkohoue.github.io/DesiredGainR/reference/comparison_objective.md)
+  : Define one objective for a cross-family comparison
 - [`summary(`*`<desiredgainr_index>`*`)`](https://FAkohoue.github.io/DesiredGainR/reference/summary.desiredgainr_index.md)
   : Summarise a fitted selection index
 - [`predict(`*`<desiredgainr_index>`*`)`](https://FAkohoue.github.io/DesiredGainR/reference/predict.desiredgainr_index.md)
@@ -320,7 +329,7 @@ matrices.
 - [`evaluate_restricted_response()`](https://FAkohoue.github.io/DesiredGainR/reference/evaluate_restricted_response.md)
   : Evaluate an achieved response against a desired-gain direction
 - [`compare_dg_and_qgsi()`](https://FAkohoue.github.io/DesiredGainR/reference/compare_dg_and_qgsi.md)
-  : Compare DGSI and QGSI candidate rankings
+  : Compare an iteratively optimised DGSI with a QGSI
 
 ## Multi-environment structure
 
@@ -450,8 +459,8 @@ anything.
   comparison](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-index-families.md):
 - [Using predictions, prediction errors, and restricted
   responses](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-information.md):
-- [Optimising desired
-  gains](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-dgsi.md):
+- [Iterative optimisation of the desired-gain
+  index](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-dgsi.md):
 - [Quadratic genomic
   selection](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-qgsi.md):
 

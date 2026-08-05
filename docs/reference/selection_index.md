@@ -1,9 +1,9 @@
-# Construct a classical multi-trait selection index
+# Apply a classical multi-trait selection method
 
-`selection_index()` builds any of the classical linear selection indices
-from a common interface, so that alternative objectives and alternative
-index families can be compared on identical data. All traits are first
-oriented so that larger values are favourable.
+`selection_index()` applies six classical index families and two
+operational comparators through a common interface. The comparators are
+independent culling and a within-cohort sequential screen. All traits
+are first oriented so that larger values are favourable.
 
 ## Usage
 
@@ -144,8 +144,8 @@ selection_index(
 
 - tandem_order:
 
-  Character vector giving the order in which traits are selected,
-  required by `"tandem"`.
+  Character vector giving the order of the within-cohort sequential
+  screens, required by `"tandem"`.
 
 - n_select:
 
@@ -220,8 +220,10 @@ the effective weights, and the provenance of every input.
 
 - `"tandem"`:
 
-  Not an index. Candidates are selected sequentially, one trait at a
-  time. Included as a comparator.
+  Not an index. It filters one candidate cohort sequentially through the
+  traits in `tandem_order`. This is a within-cohort sequential-screen
+  comparator. Classical tandem selection changes the focal trait across
+  cycles and requires a multi-cycle schedule.
 
 ## Two formulations share the name Pesek-Baker, and they coincide
 

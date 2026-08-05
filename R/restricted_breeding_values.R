@@ -55,7 +55,8 @@ restricted_breeding_values <- function(
   absent <- setdiff(traits, names(frame))
   if (length(absent)) {
     stop("breeding_values is missing traits: ",
-      paste(absent, collapse = ", "), call. = FALSE
+      paste(absent, collapse = ", "),
+      call. = FALSE
     )
   }
   values <- as.matrix(frame[, traits, drop = FALSE])
@@ -111,7 +112,8 @@ restricted_breeding_values <- function(
       absent_C <- setdiff(traits, colnames(C))
       if (length(absent_C)) {
         stop("constraint_matrix is missing traits: ",
-          paste(absent_C, collapse = ", "), call. = FALSE
+          paste(absent_C, collapse = ", "),
+          call. = FALSE
         )
       }
       C <- C[, traits, drop = FALSE]
@@ -132,7 +134,8 @@ restricted_breeding_values <- function(
     apply(abs(projected %*% t(C)), 1L, max)
   } else {
     residual <- projected - beta * matrix(
-      d, nrow = nrow(projected), ncol = length(d), byrow = TRUE
+      d,
+      nrow = nrow(projected), ncol = length(d), byrow = TRUE
     )
     apply(abs(residual), 1L, max)
   }
@@ -231,11 +234,13 @@ print.desiredgainr_restricted_bv <- function(x, ...) {
   cat("<desiredgainr_restricted_bv>\n")
   cat("  Restriction:", x$restriction$type, "\n")
   cat("  Candidates:", nrow(x$restricted), "\n")
-  cat("  Largest numerical violation:",
+  cat(
+    "  Largest numerical violation:",
     format(x$largest_violation, digits = 4), "\n"
   )
   if (!is.null(x$beta)) {
-    cat("  Beta range:",
+    cat(
+      "  Beta range:",
       format(min(x$beta), digits = 4), "to",
       format(max(x$beta), digits = 4), "\n"
     )
@@ -247,10 +252,12 @@ print.desiredgainr_restricted_bv <- function(x, ...) {
 print.desiredgainr_restricted_response <- function(x, ...) {
   cat("<desiredgainr_restricted_response>\n")
   cat("  Satoh beta:", format(x$beta, digits = 5), "\n")
-  cat("  Mahalanobis alignment:",
+  cat(
+    "  Mahalanobis alignment:",
     format(x$mahalanobis_alignment, digits = 5), "\n"
   )
-  cat("  Mahalanobis residual:",
+  cat(
+    "  Mahalanobis residual:",
     format(x$mahalanobis_residual, digits = 5), "\n"
   )
   invisible(x)

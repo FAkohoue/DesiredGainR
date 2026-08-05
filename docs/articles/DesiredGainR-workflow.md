@@ -104,7 +104,7 @@ round(implied, 2)
 #>     GY    PHT     AD    ASI    EPP    GLS 
 #>  14.52   0.03   2.32 -13.21 -15.15   0.68 
 #> attr(,"provenance")
-#> [1] "Implied by the supplied desired gains through w = G^-1 P G^-1 d; not an independently estimated economic value. Expressed in the favourable-direction space, so a positive weight always means the trait matters."
+#> [1] "Implied by the supplied desired gains through w = G^-1 P G^-1 d; not an independently estimated economic value. Expressed in the favourable-direction space, so a positive weight favours movement in the breeder-defined direction."
 ```
 
 Two of those weights are negative for traits the objective asks to
@@ -255,9 +255,14 @@ base index shows how much the covariance adjustment contributes beyond
 direct weighting.
 
 Use
+[`comparison_objective()`](https://FAkohoue.github.io/DesiredGainR/reference/comparison_objective.md)
+to fix one target, utility and genetic covariance. Then use
 [`compare_selection_methods()`](https://FAkohoue.github.io/DesiredGainR/reference/compare_selection_methods.md)
-to verify the comparison conditions. Then read biological responses,
-summary criteria, rank agreement, and selected-set agreement.
+across every supported fitted family. Read biological responses,
+response basis, target attainment, rank agreement, selected-set
+agreement and common validation response. See [Multiple-trait
+selection](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-index-families.md)
+for the complete workflow.
 
 ``` r
 comparison <- compare_selection_methods(
@@ -268,18 +273,24 @@ comparison <- compare_selection_methods(
   )
 )
 comparison$fairness
-#>                                              Condition Satisfied
-#> 1                      Same candidates and trait order      TRUE
-#> 2                Same direction, centring, and scaling      TRUE
-#> 3                                 Same number selected      TRUE
-#> 4                             Same selection intensity      TRUE
-#> 5 Common aggregate merit among merit-based comparisons      TRUE
-#>                                                             Interpretation
-#> 1                                  Required and enforced by this function.
-#> 2                                  Required and enforced by this function.
-#> 3  A culling method may select fewer candidates when few pass every limit.
-#> 4                Expected responses require one common selection pressure.
-#> 5 R_HI and Delta_H answer one common question only under one merit vector.
+#>                                             Condition Satisfied
+#> 1                Same candidates and objective traits      TRUE
+#> 2                    Same favourable trait directions      TRUE
+#> 3                               Common response units      TRUE
+#> 4                                Same number selected      TRUE
+#> 5                            Same selection intensity      TRUE
+#> 6 One common genetic covariance for response geometry     FALSE
+#> 7             Common genetic covariance is invertible      TRUE
+#> 8        Validation identifiers aligned when supplied      TRUE
+#>                                                                        Interpretation
+#> 1                                             Required and enforced by this function.
+#> 2                                             Required and enforced by this function.
+#> 3                                              Responses are reported in trait units.
+#> 4                            Hard culling can retain fewer candidates than requested.
+#> 5                        Model-based responses require one common selection pressure.
+#> 6                Alignment uses fitted genetic covariance ; disagreement is reported.
+#> 7 Mahalanobis alignment and Satoh projection require an invertible covariance matrix.
+#> 8 No validation data were supplied. External validation evidence remains unavailable.
 comparison$summary
 #>         Method       Family Strategy N_selected Selected_fraction
 #>         <char>       <char>   <char>      <int>             <num>
@@ -291,21 +302,31 @@ comparison$summary
 #> 1:            1.754983 0.7088841 1.222814 0.7658206          0.5124609
 #> 2:            1.754983 0.6950918 1.199023 0.8431941          0.4831527
 #> 3:            1.754983        NA       NA        NA                 NA
-#>    Index_accuracy Worst_expected_attainment Mean_expected_attainment
-#>             <num>                     <num>                    <num>
-#> 1:      0.7158637                        NA                       NA
-#> 2:      0.6950918                        NA                       NA
-#> 3:             NA                        NA                       NA
-#>    Worst_observed_attainment Satoh_beta Mahalanobis_alignment
-#>                        <num>      <num>                 <num>
-#> 1:                        NA         NA                    NA
-#> 2:                        NA         NA                    NA
-#> 3:                        NA         NA                    NA
-#>    Mahalanobis_residual
-#>                   <num>
-#> 1:                   NA
-#> 2:                   NA
-#> 3:                   NA
+#>    Index_accuracy  MSPE Common_merit_response Common_merit_correlation
+#>             <num> <num>                 <num>                    <num>
+#> 1:      0.7158637    NA                    NA                       NA
+#> 2:      0.6950918    NA                    NA                       NA
+#> 3:             NA    NA                    NA                       NA
+#>    Worst_expected_attainment Mean_expected_attainment Worst_observed_attainment
+#>                        <num>                    <num>                     <num>
+#> 1:                        NA                       NA                        NA
+#> 2:                        NA                       NA                        NA
+#> 3:                        NA                       NA                        NA
+#>    Satoh_beta Mahalanobis_alignment Mahalanobis_residual
+#>         <num>                 <num>                <num>
+#> 1:         NA                    NA                   NA
+#> 2:         NA                    NA                   NA
+#> 3:         NA                    NA                   NA
+#>    Validation_utility_response Validation_utility_rank_correlation
+#>                          <num>                               <num>
+#> 1:                          NA                                  NA
+#> 2:                          NA                                  NA
+#> 3:                          NA                                  NA
+#>        Expected_response_basis
+#>                         <char>
+#> 1: exact linear-index response
+#> 2: exact linear-index response
+#> 3:                 unavailable
 round(comparison$rank_correlation, 2)
 #>             Smith_Hazel Base Rank_sum
 #> Smith_Hazel        1.00 0.98     0.94
@@ -346,46 +367,69 @@ smith_hazel$effective_weights[, c("Trait", "Genetic_share")]
 ## 9. Stage 8 — Optimise the desired-gain vector
 
 [`run_dgsi()`](https://FAkohoue.github.io/DesiredGainR/reference/run_dgsi.md)
-implements the iterative method of Joukhadar et al. (2024), searching
-for a desired-gain vector whose realised response in the selected set
+applies the iterative optimisation procedure of Joukhadar et al. (2024)
+to the established desired-gain index. It searches for an input
+desired-gain vector whose realised response in the selected set
 approaches the stated target.
 
 ``` r
+candidate_sd <- vapply(
+  dgr_candidates[, traits], stats::sd, numeric(1L)
+)
+target_original_units <- desired_gains * genetic_sd
+dg_target <- target_original_units / candidate_sd
+
 dgsi <- run_dgsi(
   init_data = dgr_candidates[, c("GenoID", "Family")],
   cand_data = dgr_candidates,
   trait_cols = traits,
-  dg = desired_gains,
+  dg = dg_target,
   G = dgr_G, P = dgr_P,
   lower_is_better = lower_is_better,
   scale_traits = TRUE,
   n_select = 20L, n_iter = 200L, n_rep = 5L, seed = 42L
 )
-round(dgsi$realised_response - desired_gains, 3)
+round(dgsi$realised_response - dg_target, 3)
 #>     GY    PHT     AD    ASI    EPP    GLS 
-#> -1.455 -0.117 -0.738  0.566  0.007 -0.038
+#>  0.422  0.221  0.858 -0.003  0.036 -0.139
 ```
 
-Read that against Stage 4. Feasibility constrains the requested
-*proportion*. the optimiser is not bound to it, and distributes the
-shortfall unevenly, overshooting grain yield while undershooting
-anthesis date. Whether that trade is acceptable is a breeding decision
-rather than a numerical one.
+`realised_response` is a selected-candidate differential in candidate
+standard deviations. Read the model-based transmitted response in the
+original genetic-standard-deviation units before judging attainment.
+
+``` r
+transmitted_genetic_sd <-
+  dgsi$theoretical_response$original_units / genetic_sd
+round(transmitted_genetic_sd, 3)
+#>     GY    PHT     AD    ASI    EPP    GLS 
+#>  0.259 -0.526 -1.014 -0.551  0.078  0.011
+round(transmitted_genetic_sd / desired_gains, 3)
+#>     GY    PHT     AD    ASI    EPP    GLS 
+#>  0.259 -1.316 -1.690 -1.101  0.195  0.018
+```
+
+Feasibility constrains the requested response ray. The iterative search
+can leave that ray. Therefore, inspect every trait-specific attainment
+value.
 
 The classical solution without iteration is returned as a comparator:
 
 ``` r
 round(dgsi$non_iterated$realised_response, 3)
 #>     GY    PHT     AD    ASI    EPP    GLS 
-#>  1.526  0.274  0.441 -0.256  0.562  0.228
+#>  1.468  0.425  0.536 -0.173  0.636  0.495
 ```
 
-The anthesis-silking interval moves in the wrong direction there.
-Joukhadar et al. reported exactly this failure of the unoptimised
-method, and it reproduces here on independent data.
+The anthesis-silking interval moves in the unfavourable direction in
+this candidate set. Joukhadar et al. (2024) introduced their iterative
+search to reduce this type of disagreement between a target and a
+selected-candidate differential. This is a finite-candidate result. It
+does not contradict the closed-form proportional-response identity under
+the covariance model.
 
-See [Optimising desired
-gains](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-dgsi.md).
+See [Iterative optimisation of the desired-gain
+index](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-dgsi.md).
 
 ------------------------------------------------------------------------
 
@@ -414,6 +458,10 @@ qgsi$expected_gain_per_trait
 #> 5:    EPP            0.97186893                     0.97429584
 #> 6:    GLS            0.93598981                     0.93832713
 ```
+
+Use the same call with a zero `W` matrix as the linear genomic
+benchmark. Keep all other inputs fixed. Compare per-trait response, rank
+correlation, selected overlap, and validated nonlinear utility.
 
 Standardisation matters more here than anywhere else in the package. On
 the original scale, plant height carries half the linear index despite
@@ -483,7 +531,7 @@ software](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-interope
 | 1-2 | [Obtaining G and P](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-covariance.md) |
 | 3-5 | [Defining a breeding objective](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-objective.md) |
 | 6-7 | [Multiple-trait selection](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-index-families.md) |
-| 8 | [Optimising desired gains](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-dgsi.md) |
+| 8 | [Iterative optimisation of the desired-gain index](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-dgsi.md) |
 | 9 | [Quadratic genomic selection](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-qgsi.md) |
 | 10 | [Defining a breeding objective](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-objective.md) |
 | Beyond | [Comparing objectives over several cycles](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-simulation.md) and [Working with other breeding software](https://FAkohoue.github.io/DesiredGainR/articles/DesiredGainR-interoperation.md) |

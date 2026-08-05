@@ -20,18 +20,19 @@ bibliography: paper.bib
 # Summary
 
 A selection index combines several traits into one score so that candidates can
-be ranked. The classical construction requires an economic weight for every
+be ranked. The classical economic construction requires a weight for every
 trait: how much a unit of grain yield is worth relative to a unit of plant
 height. Most breeding programmes cannot supply these. What they can supply is
 an intent — lift yield without lengthening the cycle, hold disease resistance
 where it is — and an intent is not a weight vector.
 
-`DesiredGainR` treats the intent as the input and the weights as a derived
-quantity. It converts in both directions, reports whether a stated objective is
-attainable at all before any index is built, implements the classical index
-families through one interface so that they can be compared on identical data,
-and reports how far a recommendation depends on covariance matrices that are
-themselves estimates.
+`DesiredGainR` accepts desired gains as a direct statement of breeding intent.
+It also maps desired gains and aggregate weights algebraically under a stated
+covariance model. An implied aggregate-weight vector reproduces an index
+direction. It is not an independently estimated economic value. The package
+reports whether a stated objective is attainable before an index is built. It
+implements the supported selection methods on common data and reports how far
+a recommendation depends on estimated covariance matrices.
 
 # Statement of need
 
@@ -54,18 +55,19 @@ before it is pursued.
 it as known.** Multi-trait restricted maximum likelihood typically estimates
 more variance components than the trial has independent families to determine.
 `index_uncertainty()` resamples the covariance and refits, and for the
-desired-gain families the resulting measure has an exact reference point:
-because $\mathbf{G}\mathbf{b} = \mathbf{d}$ identically for the Pesek–Baker
-index, an index fitted on the true covariance delivers the requested gains in
-the requested proportions, so any shortfall is attributable to estimation error
-alone.
+desired-gain families the resulting measure has an exact reference point.
+Because $\mathbf{G}\mathbf{b} = \mathbf{d}$ for the Pesek–Baker index, the
+model-based response follows the requested proportions when the same covariance
+model defines the fit and the evaluation. Departure after covariance
+resampling measures sensitivity to covariance estimation. The observed
+differential among a finite candidate set remains a separate quantity.
 
-**Constrained objectives are commonly approached by search when a closed form
-exists.** Where a constraint on the response is linear —hold this trait still,
-move these two in this ratio— the Kempthorne–Nordskog, Tallis, Mallard and
-Harville indices give the answer exactly. `restricted_index()` implements them,
-and they also serve as a convergence check on the iterative desired-gain
-search.
+**Many constrained linear objectives have closed-form solutions.** The
+Kempthorne–Nordskog, Tallis, Mallard and Harville indices constrain theoretical
+response under an aggregate-merit objective. `restricted_index()` implements
+these methods. `run_dgsi()` solves a different problem. It searches
+desired-gain directions to improve the selected differential in a finite
+candidate set.
 
 # Design
 
@@ -80,9 +82,12 @@ selection decision that has already been made, which is often the only way to
 discover what a programme's objective has actually been.
 
 The index layer implements Smith–Hazel, base, Pesek–Baker, Yamada,
-Mulamba–Mock, independent culling and tandem selection through
-`selection_index()`, with the restricted families in `restricted_index()` and a
-quadratic genomic index in `run_qgsi()` following Cerón-Rojas et al.
+Mulamba–Mock and Elston through `selection_index()`. The same function includes
+independent culling and a within-cohort sequential screen as operational
+comparators. The restricted families are available through
+`restricted_index()`. `run_dgsi()` applies iterative search to the established
+desired-gain index. `run_qgsi()` fits the quadratic genomic index of
+Cerón-Rojas et al.
 
 The simulation layer runs a programme forward through `AlphaSimR` to compare
 desired-gain directions over several cycles, because a direction maximising

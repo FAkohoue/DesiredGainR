@@ -1,12 +1,16 @@
-# Translate desired gains into the economic weights they imply
+# Map desired gains to the aggregate weights they imply
 
-The Smith-Hazel economic index and the Pesek-Baker desired-gain index
-are two parameterisations of one linear index. Setting \\b = P^{-1}Gw\\
-equal to \\b = P^{-1}G(GP^{-1}G)^{-1}d\\ gives \$\$w =
-G^{-1}PG^{-1}d.\$\$ Hence every desired-gain vector corresponds to
-exactly one economic-weight vector, and
+The Smith-Hazel economic index and the Yamada desired-gain index both
+use linear candidate scores. They express different breeding objectives.
+Setting their coefficient vectors equal gives an algebraic mapping.
+Thus, \\b = P^{-1}Gw\\ equal to \\b = P^{-1}G(GP^{-1}G)^{-1}d\\ gives
+\$\$w = G^{-1}PG^{-1}d.\$\$ Hence every desired-gain vector corresponds
+to one implied aggregate-weight vector under the supplied covariance
+model, provided the required inverses exist.
 [`implied_desired_gains()`](https://FAkohoue.github.io/DesiredGainR/reference/implied_desired_gains.md)
-performs the reverse translation.
+performs the reverse mapping. The implied vector reproduces the same
+index direction. It is not an independently estimated price, profit or
+biological value.
 
 ## Usage
 
@@ -75,8 +79,9 @@ hold it back, so its implied weight turns negative.
 
 When `lower_is_better` is supplied the weights are returned in the
 favourable-direction space, in which larger is better for every trait. A
-negative weight therefore never means that a trait should decrease; the
-direction has already been applied.
+negative implied weight can hold back favourable change that
+correlations would otherwise make larger than requested. The
+desired-gain vector remains the breeder's statement of direction.
 
 ## The desired gains may be standardised while the weights are not
 
@@ -131,5 +136,5 @@ implied_economic_weights(
 #>     yield   disease 
 #> 1.2212974 0.9845422 
 #> attr(,"provenance")
-#> [1] "Implied by the supplied desired gains through w = G^-1 P G^-1 d; not an independently estimated economic value. Expressed in the favourable-direction space, so a positive weight always means the trait matters."
+#> [1] "Implied by the supplied desired gains through w = G^-1 P G^-1 d; not an independently estimated economic value. Expressed in the favourable-direction space, so a positive weight favours movement in the breeder-defined direction."
 ```

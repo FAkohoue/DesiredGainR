@@ -62,7 +62,9 @@ involved.
 
 So: divide the article's published gains by the article's published $d$ vector.
 If the authors' implementation and this package's understanding of the method
-agree, all seven ratios must be the same number.
+agree, the seven ratios from the unrounded calculations must be the same
+number. Ratios calculated from the printed table can differ because both the
+numerator and denominator were rounded.
 
 ```{r identity}
 ratio <- reference$pesek_baker_gain / reference$desired_gains
@@ -77,94 +79,135 @@ c(
 )
 ```
 
-All seven agree to four significant figures. The relative spread is around
-one part in a thousand, which is what rounding to four figures in a printed
-table produces.
+The displayed ratios do not agree to three or four significant figures. Six
+round to 0.336 at three significant figures. `row_length` rounds to 0.335. All
+seven round to 0.34 at two significant figures. The relative standard
+deviation is about 0.00066. This small spread is descriptive evidence, but it
+does not define the reproduction tolerance.
 
-This is a stronger check than comparing coefficients would have been. Seven
-independent ratios cannot coincide by accident, and the test would fail if
-either party had the method wrong.
+The appropriate check propagates the printed decimal precision. The desired
+gains are printed to three decimal places. Their rounding half-unit is
+0.0005. The responses are printed to four decimal places. Their rounding
+half-unit is 0.00005.
 
-### Tolerances
+```{r identity-rounding-intervals}
+desired_half_unit <- 0.0005
+response_half_unit <- 0.00005
 
-| Quantity | Tolerance | Why |
-|---|---|---|
-| Relative spread of the seven ratios | $2\times10^{-3}$ | Table values are printed to four significant figures. The smallest, `row_length` = 0.224, carries the most rounding. |
-| Common ratio against 0.33585 | $10^{-3}$ | As above |
-| Each trait's ratio individually | $5\times10^{-3}$ | Dominated by `row_length`, where a half-unit in the fourth figure is 0.2 per cent |
+ratio_lower <-
+  (reference$pesek_baker_gain - response_half_unit) /
+  (reference$desired_gains + desired_half_unit)
+ratio_upper <-
+  (reference$pesek_baker_gain + response_half_unit) /
+  (reference$desired_gains - desired_half_unit)
 
-These are set by the precision of the published table, not fitted to make the
-test pass.
+common_ratio_interval <- c(
+  lower = max(ratio_lower),
+  upper = min(ratio_upper)
+)
+round(common_ratio_interval, 7)
+```
 
-## The $R_{HI} = 0.0018$ anomaly
+The seven intervals share the common range 0.3358452 to 0.3358549. The value
+0.33585 lies inside this range. One exact proportionality constant can
+therefore produce every published value after rounding.
 
-The article reports $R_{HI} = 0.0018$ for Pesek–Baker against $0.9887$ for the
-optimum index on the same data. Taken at face value that says the desired-gain
-index is uncorrelated with merit, which would make the entire family useless.
+### Rounding rules used by the test
 
-It is not an arithmetic error. It follows from using the desired-gain vector
-$\mathbf{d}$ as the aggregate weights $\mathbf{a}$, which is what their code
-does, and what this package did until version 0.5.0. The quantity computed is
-then
+| Published quantity | Printed precision | Rounding interval used |
+|---|---:|---:|
+| Desired gain | Three decimal places | Printed value $\pm 0.0005$ |
+| Expected response | Four decimal places | Printed value $\pm 0.00005$ |
+| Common proportionality constant | Intersection across all seven ratio intervals | 0.3358452 to 0.3358549 |
+
+These bounds come directly from the printed decimal places. They were not
+estimated from the observed ratio spread. The joint interval check is stronger
+than a loose comparison tolerance. It verifies the defining Pesek-Baker
+response identity against seven published traits. Direct coefficient
+reproduction still requires the unpublished covariance matrices.
+
+## Why the reported $R_{HI}=0.0018$ does not invalidate Pesek-Baker
+
+The article reports $R_{HI}=0.0018$ for Pesek-Baker and $0.9887$ for the
+Smith-Hazel optimum index. These values answer a net-merit question. They do
+not measure whether Pesek-Baker achieved its desired response direction.
+
+Pesek-Baker starts from a desired-gain vector $\mathbf{d}$. This vector states
+the relative genetic changes sought across traits. By contrast, $R_{HI}$ is the
+correlation between the index $I$ and an aggregate merit
+$H=\mathbf{a}^{\mathsf T}\mathbf{g}$. It requires a separate vector of merit
+weights $\mathbf{a}$.
+
+The article used $\mathbf{a}=\mathbf{d}$. With
+$\mathbf{b}=\mathbf{G}^{-1}\mathbf{d}$, this gives
 
 $$R_{HI} = \frac{\mathbf{d}^\mathsf{T}\mathbf{d}}
 {\sqrt{\mathbf{d}^\mathsf{T}\mathbf{G}^{-1}\mathbf{P}\mathbf{G}^{-1}\mathbf{d}}
-\;\sqrt{\mathbf{d}^\mathsf{T}\mathbf{G}\mathbf{d}}},$$
+\;\sqrt{\mathbf{d}^\mathsf{T}\mathbf{G}\mathbf{d}}}.$$
 
-which is not the correlation between the index and net merit under any
-definition of merit, and collapses when the trait scales differ by orders of
-magnitude.
+This expression is mathematically the correlation between the Pesek-Baker
+index and the constructed merit $H_{\mathbf d}=\mathbf{d}^{\mathsf T}\mathbf{g}$.
+The difficulty is biological interpretation. Desired gains carry response
+units. Merit weights carry value per trait unit. Substituting one for the other
+creates a merit definition that changes when trait measurement units change.
+
+The Pesek-Baker decision itself has the correct unit invariance. If traits are
+rescaled by a diagonal matrix $\mathbf{S}$, then
+$\mathbf{d}^{*}=\mathbf{S}\mathbf{d}$ and
+$\mathbf{b}^{*}=\mathbf{S}^{-1}\mathbf{b}$. Therefore,
+${\mathbf{b}^{*}}^{\mathsf T}\mathbf{x}^{*}=\mathbf{b}^{\mathsf T}\mathbf{x}$.
+The candidate ranking is unchanged. However, treating desired gains as merit
+weights gives
+$H_{\mathbf d}^{*}=\mathbf{d}^{\mathsf T}\mathbf{S}^{2}\mathbf{g}$.
+That merit definition changes with the units.
 
 ```{r scales}
 range(reference$desired_gains)
 max(reference$desired_gains) / min(reference$desired_gains)
 ```
 
-The traits span a factor of 200. That is the whole explanation.
+The numerical desired gains span a factor of about 200. This scale disparity
+makes the substitution especially fragile. The value 0.0018 therefore gives
+little information about attainment of the desired-gain objective.
 
-### What this package does instead
+### How to evaluate a desired-gain index
 
-There is no theory under which desired gains define net merit. DesiredGainR
-therefore withholds $R_{HI}$ and $\Delta H$ unless the analysis supplies one
-**common aggregate objective**. Implied economic weights
+Desired gains define a valid multivariate response objective. Economic weights
+are unnecessary for fitting that objective. The primary evaluation should
+report:
 
-$$\mathbf{w} = \mathbf{G}^{-1}\mathbf{P}\mathbf{G}^{-1}\mathbf{d},$$
+1. expected genetic response for every trait;
+2. proportionality or Mahalanobis alignment with $\mathbf{d}$;
+3. the attainable fraction at the planned selection intensity;
+4. worst-trait and joint attainment when targets are minimum floors;
+5. observed selection differentials for the current candidates; and
+6. stability under covariance and prediction uncertainty.
 
-remain available through `implied_economic_weights()` as a diagnostic, but are
-not substituted silently because every desired-gain direction would then be
-evaluated against a different definition of merit.
+$R_{HI}$ and $\Delta H$ remain useful when the breeding programme also defines
+one common aggregate merit vector $\mathbf{a}$. They then provide an additional
+economic comparison under the same merit definition for every method. They are
+not prerequisites for a valid desired-gain analysis.
 
-```{r fix}
-set.seed(23)
-traits <- reference$traits
-p <- length(traits)
-sd_vector <- reference$desired_gains
+### How DesiredGainR handles the distinction
 
-correlation <- diag(p)
-correlation[lower.tri(correlation)] <- correlation[upper.tri(correlation)] <- 0.25
-G <- outer(sd_vector, sd_vector) * correlation
-dimnames(G) <- list(traits, traits)
-P <- G + diag(sd_vector^2 * 1.5)
-dimnames(P) <- list(traits, traits)
+When `aggregate_weights` is absent, DesiredGainR still fits the desired-gain
+index and reports its per-trait response and attainment diagnostics. It returns
+`NA` for $R_{HI}$ and $\Delta H$ because the separate aggregate merit $H$ has
+not been defined.
 
-values <- as.data.frame(matrix(
-  stats::rnorm(p * 60, sd = rep(sd_vector, each = 60)),
-  ncol = p,
-  dimnames = list(paste0("g", 1:60), traits)
-))
+When the breeder supplies one common `aggregate_weights` vector, DesiredGainR
+reports $R_{HI}$ and $\Delta H$ against that same merit for every fitted method.
+The comparison then has a common economic yardstick.
 
-fit <- selection_index(
-  values, traits,
-  method = "pesek_baker", G = G, P = P,
-  desired_gains = sd_vector,
-  aggregate_weights = reference$economic_weights_method1,
-  scale_traits = FALSE, n_select = 12
-)
-round(fit$evaluation$R_HI, 4)
-```
+The implied weights
 
-On trait scales as disparate as this dataset's, $R_{HI}$ is an ordinary
-correlation rather than a number near zero.
+$$\mathbf{w}=\mathbf{G}^{-1}\mathbf{P}\mathbf{G}^{-1}\mathbf{d}$$
+
+identify the Smith-Hazel objective that reproduces a given Pesek-Baker
+coefficient direction. `implied_economic_weights()` provides this translation
+as a diagnostic. Using a different implied vector for each desired-gain
+direction would also change the comparison yardstick. DesiredGainR therefore
+keeps that choice explicit.
 
 ## The quadratic index: a reference implementation
 

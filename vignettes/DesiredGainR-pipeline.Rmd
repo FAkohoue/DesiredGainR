@@ -101,10 +101,12 @@ head(dgr_candidates[, c("GenoID", "GY", "PHT", "GLS")], 3)
 
 ## Stage 3 — Check the covariance matrices
 
-Every index in this package is computed by inverting $\mathbf{P}$,
-$\mathbf{G}$, or both. An ill-conditioned matrix produces coefficients that are
-numerically meaningless while looking entirely plausible, so this check comes
-before anything is built on top of them.
+Covariance-based linear indices solve systems involving $\mathbf{P}$,
+$\mathbf{G}$, or both. An ill-conditioned matrix can produce unstable
+coefficients while the output still looks plausible. Therefore, check the
+matrices before fitting a covariance-based index. Rank, threshold and
+quadratic genomic methods use different inputs, which require their own
+diagnostics.
 
 ```{r stage3}
 diagnostics_G <- matrix_diagnostics(dgr_G, "G")
@@ -174,7 +176,8 @@ automatically above fivefold.
 
 ## Stage 5 — State a first objective
 
-There are two ways to state a breeding objective, and they are equivalent.
+There are two common ways to state a linear breeding objective. They are
+algebraically related, but they have different biological meanings.
 
 **Economic weights** $\mathbf{w}$ say what a unit of each trait is worth.
 **Desired gains** $\mathbf{d}$ say how much of each trait you want. The
@@ -196,10 +199,10 @@ desired_gains <- c(
 This says: one standard deviation of extra yield, four tenths of a standard
 deviation shorter plants, six tenths earlier flowering, and so on.
 
-## Stage 6 — Translate to economic weights
+## Stage 6 — Calculate the algebraically implied weights
 
-Setting the two index formulae equal gives an exact translation in both
-directions:
+Setting the two coefficient formulae equal gives an exact algebraic translation
+in both directions:
 
 $$\mathbf{w} = \mathbf{G}^{-1}\mathbf{P}\mathbf{G}^{-1}\mathbf{d},
 \qquad
@@ -212,6 +215,12 @@ implied <- implied_economic_weights(
 )
 round(implied, 2)
 ```
+
+These are implied weights. They reproduce the desired-gain coefficient
+direction under the supplied covariance matrices. They are not observed
+prices, profit coefficients, or breeder preferences. Use them to diagnose the
+mathematical trade-offs. Use independently elicited economic weights when the
+objective is aggregate economic merit.
 
 **Two of these are negative, for traits you asked to improve.** That is
 correct. Once oriented, grain yield correlates $+0.55$ with the
@@ -373,7 +382,8 @@ forward-looking objective.
 
 ## Stage 9 — Build candidate indices
 
-`selection_index()` provides every classical family through one interface.
+`selection_index()` provides six classical index families and two operational
+comparators through one interface.
 
 ```{r stage9}
 economic_weights <- c(
@@ -410,7 +420,7 @@ smith_hazel
 | `mulamba_mock` | no | no | Weights unavailable or untrusted |
 | `independent_culling` | thresholds | no | Non-compensatory requirements |
 | `elston` | thresholds | no | Firm limits followed by balanced margins |
-| `tandem` | trait order | no | Comparator for sequential selection |
+| `tandem` | trait order | no | Within-cohort sequential-screen comparator |
 | `restricted_index()` | weights and restrictions | yes | One or more responses must be controlled |
 | `run_dgsi()` | desired gains | yes | Iterative selected-differential search is required |
 | `run_qgsi()` | linear and quadratic values | genomic covariance | Merit is curved or interactive |
@@ -447,8 +457,13 @@ response in the main trait for response elsewhere. Every value reported by
 Rahimi and Debnath was below 1. Conversely, a high relative efficiency is not
 proof that the desired multi-trait objective was attained.
 
-Use `compare_selection_methods()` to verify the common comparison conditions.
-Then compare responses, summary criteria, rankings, and selected sets.
+Use `comparison_objective()` to define one target and utility. Then use
+`compare_selection_methods()` to verify the common comparison conditions and
+compare every supported fitted family. Read response basis carefully. A QGSI
+with non-zero curvature has approximate per-trait gains. The $\mathbf{W}=0$
+special case and the other linear-index responses are exact under their stated
+covariance models. See [Multiple-trait
+selection](DesiredGainR-index-families.html).
 
 ```{r stage10}
 comparison <- compare_selection_methods(
@@ -476,16 +491,26 @@ smith_hazel$effective_weights[, c("Trait", "Genetic_share")]
 
 ## Stage 11 — Optimise the desired-gain vector
 
-`run_dgsi()` implements the iterative method of Joukhadar et al. (2024). It
-samples desired-gain vectors, builds the index from each, and keeps the one
+`run_dgsi()` applies the iterative optimisation procedure of Joukhadar et al.
+(2024) to the established desired-gain index. It samples desired-gain vectors,
+builds the same index formula from each vector, and keeps the one
 whose *realised* response in the selected set comes closest to your target.
 
+The target above uses genetic-standard-deviation units. `run_dgsi()` uses
+candidate-standard-deviation units. Convert once before fitting.
+
 ```{r stage11}
+candidate_sd <- vapply(
+  dgr_candidates[, traits], stats::sd, numeric(1L)
+)
+target_original_units <- desired_gains * genetic_sd
+dg_target <- target_original_units / candidate_sd
+
 dgsi <- run_dgsi(
   init_data = dgr_candidates[, c("GenoID", "Family")],
   cand_data = dgr_candidates,
   trait_cols = traits,
-  dg = desired_gains,
+  dg = dg_target,
   G = dgr_G, P = dgr_P,
   lower_is_better = lower_is_better,
   scale_traits = TRUE,
@@ -497,13 +522,25 @@ round(dgsi$realised_response, 3)
 Read the deviation from target against Stage 7:
 
 ```{r stage11-deviation}
-round(dgsi$realised_response - desired_gains, 3)
+round(dgsi$realised_response - dg_target, 3)
 ```
 
-Feasibility constrained the requested *proportion*. The optimiser is not bound
-to that proportion, so it distributes the shortfall unevenly, overshooting
-grain yield while undershooting anthesis date. Whether that trade is acceptable
-is a breeding decision, not a numerical one.
+`realised_response` is the selected-candidate differential in candidate
+standard deviations. It is the quantity used by the iterative objective. It is
+not transmitted genetic gain. Compare the model-based transmitted response on
+the original genetic-standard-deviation scale as follows.
+
+```{r stage11-transmitted}
+transmitted_genetic_sd <-
+  dgsi$theoretical_response$original_units / genetic_sd
+round(transmitted_genetic_sd, 3)
+round(transmitted_genetic_sd / desired_gains, 3)
+```
+
+Feasibility constrains the requested response ray. The iterative search is not
+forced to remain on that ray. Therefore, inspect every trait-specific
+attainment value. Whether an uneven shortfall is acceptable is a breeding
+decision.
 
 Always inspect the replicate diagnostics. The search is stochastic, so
 agreement across replicates is the evidence that the answer is stable:
@@ -518,8 +555,12 @@ And compare against the classical solution without iteration:
 round(dgsi$non_iterated$realised_response, 3)
 ```
 
-The anthesis-silking interval moves the *wrong way* there. Joukhadar et al.
-reported precisely this failure of the unoptimised method.
+The anthesis-silking interval moves in the unfavourable direction in this
+candidate set. Joukhadar et al. (2024) introduced their iterative search to
+reduce this type of disagreement between a target and a selected-candidate
+differential. This result concerns the current candidates. It does not alter
+the exact proportional-response property of the closed-form index under its
+covariance model.
 
 ## Stage 12 — Score genomic estimated breeding values
 
@@ -550,6 +591,13 @@ qgsi <- run_qgsi(
 )
 qgsi$expected_gain_per_trait
 ```
+
+Compare QGSI with a linear genomic selection index by fitting the same call
+with `W` set to a zero matrix. Keep the GEBVs, linear weights, genomic
+covariance, transformation, and selected count unchanged. Compare per-trait
+response, rank correlation, selected overlap, and validated nonlinear utility.
+The detailed code is given in [Multiple-trait
+selection](DesiredGainR-index-families.html#compare-a-linear-and-quadratic-genomic-index).
 
 **Standardisation matters more here than anywhere else in the package**,
 because economic weights multiply the breeding values directly. Left
@@ -775,7 +823,7 @@ sessionInfo()
 | 1-4 | [Obtaining G and P](DesiredGainR-covariance.html) |
 | 5-8 | [Defining a breeding objective](DesiredGainR-objective.html) |
 | 9-10 | [Multiple-trait selection](DesiredGainR-index-families.html) |
-| 11 | [Optimising desired gains](DesiredGainR-dgsi.html) |
+| 11 | [Iterative optimisation of the desired-gain index](DesiredGainR-dgsi.html) |
 | 12 | [Quadratic genomic selection](DesiredGainR-qgsi.html) |
 | 13-16 | [Comparing objectives over several cycles](DesiredGainR-simulation.html) |
 | Downstream decision | [Working with other breeding software](DesiredGainR-interoperation.html) |

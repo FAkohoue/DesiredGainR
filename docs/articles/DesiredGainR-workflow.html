@@ -87,7 +87,7 @@
     <li><h6 class="dropdown-header" data-toc-skip>Index methods</h6></li>
     <li><a class="dropdown-item" href="../articles/DesiredGainR-index-families.html">Multiple-trait selection and method comparison</a></li>
     <li><a class="dropdown-item" href="../articles/DesiredGainR-information.html">Using predictions and prediction errors</a></li>
-    <li><a class="dropdown-item" href="../articles/DesiredGainR-dgsi.html">Optimising desired gains</a></li>
+    <li><a class="dropdown-item" href="../articles/DesiredGainR-dgsi.html">Iterative optimisation of the desired-gain index</a></li>
     <li><a class="dropdown-item" href="../articles/DesiredGainR-qgsi.html">Quadratic genomic selection</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Looking ahead</h6></li>
@@ -241,7 +241,7 @@ signing by hand.</p>
 <span><span class="co">#&gt;     GY    PHT     AD    ASI    EPP    GLS </span></span>
 <span><span class="co">#&gt;  14.52   0.03   2.32 -13.21 -15.15   0.68 </span></span>
 <span><span class="co">#&gt; attr(,"provenance")</span></span>
-<span><span class="co">#&gt; [1] "Implied by the supplied desired gains through w = G^-1 P G^-1 d; not an independently estimated economic value. Expressed in the favourable-direction space, so a positive weight always means the trait matters."</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] "Implied by the supplied desired gains through w = G^-1 P G^-1 d; not an independently estimated economic value. Expressed in the favourable-direction space, so a positive weight favours movement in the breeder-defined direction."</span></span></code></pre></div>
 <p>Two of those weights are negative for traits the objective asks to
 improve, which is correct rather than an error. In addition, the target
 values are already genetic-standard-deviation gains, whereas the
@@ -370,9 +370,13 @@ Every value reported by Rahimi and Debnath (2023) was below one.</p>
 matrices. This explains its value as a low-assumption comparator. The
 base index shows how much the covariance adjustment contributes beyond
 direct weighting.</p>
-<p>Use <code><a href="../reference/compare_selection_methods.html">compare_selection_methods()</a></code> to verify the comparison
-conditions. Then read biological responses, summary criteria, rank
-agreement, and selected-set agreement.</p>
+<p>Use <code><a href="../reference/comparison_objective.html">comparison_objective()</a></code> to fix one target, utility
+and genetic covariance. Then use
+<code><a href="../reference/compare_selection_methods.html">compare_selection_methods()</a></code> across every supported fitted
+family. Read biological responses, response basis, target attainment,
+rank agreement, selected-set agreement and common validation response.
+See <a href="DesiredGainR-index-families.html">Multiple-trait
+selection</a> for the complete workflow.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">comparison</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compare_selection_methods.html">compare_selection_methods</a></span><span class="op">(</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
@@ -382,18 +386,24 @@ agreement, and selected-set agreement.</p>
 <span>  <span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span><span class="va">comparison</span><span class="op">$</span><span class="va">fairness</span></span>
-<span><span class="co">#&gt;                                              Condition Satisfied</span></span>
-<span><span class="co">#&gt; 1                      Same candidates and trait order      TRUE</span></span>
-<span><span class="co">#&gt; 2                Same direction, centring, and scaling      TRUE</span></span>
-<span><span class="co">#&gt; 3                                 Same number selected      TRUE</span></span>
-<span><span class="co">#&gt; 4                             Same selection intensity      TRUE</span></span>
-<span><span class="co">#&gt; 5 Common aggregate merit among merit-based comparisons      TRUE</span></span>
-<span><span class="co">#&gt;                                                             Interpretation</span></span>
-<span><span class="co">#&gt; 1                                  Required and enforced by this function.</span></span>
-<span><span class="co">#&gt; 2                                  Required and enforced by this function.</span></span>
-<span><span class="co">#&gt; 3  A culling method may select fewer candidates when few pass every limit.</span></span>
-<span><span class="co">#&gt; 4                Expected responses require one common selection pressure.</span></span>
-<span><span class="co">#&gt; 5 R_HI and Delta_H answer one common question only under one merit vector.</span></span>
+<span><span class="co">#&gt;                                             Condition Satisfied</span></span>
+<span><span class="co">#&gt; 1                Same candidates and objective traits      TRUE</span></span>
+<span><span class="co">#&gt; 2                    Same favourable trait directions      TRUE</span></span>
+<span><span class="co">#&gt; 3                               Common response units      TRUE</span></span>
+<span><span class="co">#&gt; 4                                Same number selected      TRUE</span></span>
+<span><span class="co">#&gt; 5                            Same selection intensity      TRUE</span></span>
+<span><span class="co">#&gt; 6 One common genetic covariance for response geometry     FALSE</span></span>
+<span><span class="co">#&gt; 7             Common genetic covariance is invertible      TRUE</span></span>
+<span><span class="co">#&gt; 8        Validation identifiers aligned when supplied      TRUE</span></span>
+<span><span class="co">#&gt;                                                                        Interpretation</span></span>
+<span><span class="co">#&gt; 1                                             Required and enforced by this function.</span></span>
+<span><span class="co">#&gt; 2                                             Required and enforced by this function.</span></span>
+<span><span class="co">#&gt; 3                                              Responses are reported in trait units.</span></span>
+<span><span class="co">#&gt; 4                            Hard culling can retain fewer candidates than requested.</span></span>
+<span><span class="co">#&gt; 5                        Model-based responses require one common selection pressure.</span></span>
+<span><span class="co">#&gt; 6                Alignment uses fitted genetic covariance ; disagreement is reported.</span></span>
+<span><span class="co">#&gt; 7 Mahalanobis alignment and Satoh projection require an invertible covariance matrix.</span></span>
+<span><span class="co">#&gt; 8 No validation data were supplied. External validation evidence remains unavailable.</span></span>
 <span><span class="va">comparison</span><span class="op">$</span><span class="va">summary</span></span>
 <span><span class="co">#&gt;         Method       Family Strategy N_selected Selected_fraction</span></span>
 <span><span class="co">#&gt;         &lt;char&gt;       &lt;char&gt;   &lt;char&gt;      &lt;int&gt;             &lt;num&gt;</span></span>
@@ -405,21 +415,31 @@ agreement, and selected-set agreement.</p>
 <span><span class="co">#&gt; 1:            1.754983 0.7088841 1.222814 0.7658206          0.5124609</span></span>
 <span><span class="co">#&gt; 2:            1.754983 0.6950918 1.199023 0.8431941          0.4831527</span></span>
 <span><span class="co">#&gt; 3:            1.754983        NA       NA        NA                 NA</span></span>
-<span><span class="co">#&gt;    Index_accuracy Worst_expected_attainment Mean_expected_attainment</span></span>
-<span><span class="co">#&gt;             &lt;num&gt;                     &lt;num&gt;                    &lt;num&gt;</span></span>
-<span><span class="co">#&gt; 1:      0.7158637                        NA                       NA</span></span>
-<span><span class="co">#&gt; 2:      0.6950918                        NA                       NA</span></span>
-<span><span class="co">#&gt; 3:             NA                        NA                       NA</span></span>
-<span><span class="co">#&gt;    Worst_observed_attainment Satoh_beta Mahalanobis_alignment</span></span>
-<span><span class="co">#&gt;                        &lt;num&gt;      &lt;num&gt;                 &lt;num&gt;</span></span>
-<span><span class="co">#&gt; 1:                        NA         NA                    NA</span></span>
-<span><span class="co">#&gt; 2:                        NA         NA                    NA</span></span>
-<span><span class="co">#&gt; 3:                        NA         NA                    NA</span></span>
-<span><span class="co">#&gt;    Mahalanobis_residual</span></span>
-<span><span class="co">#&gt;                   &lt;num&gt;</span></span>
-<span><span class="co">#&gt; 1:                   NA</span></span>
-<span><span class="co">#&gt; 2:                   NA</span></span>
-<span><span class="co">#&gt; 3:                   NA</span></span>
+<span><span class="co">#&gt;    Index_accuracy  MSPE Common_merit_response Common_merit_correlation</span></span>
+<span><span class="co">#&gt;             &lt;num&gt; &lt;num&gt;                 &lt;num&gt;                    &lt;num&gt;</span></span>
+<span><span class="co">#&gt; 1:      0.7158637    NA                    NA                       NA</span></span>
+<span><span class="co">#&gt; 2:      0.6950918    NA                    NA                       NA</span></span>
+<span><span class="co">#&gt; 3:             NA    NA                    NA                       NA</span></span>
+<span><span class="co">#&gt;    Worst_expected_attainment Mean_expected_attainment Worst_observed_attainment</span></span>
+<span><span class="co">#&gt;                        &lt;num&gt;                    &lt;num&gt;                     &lt;num&gt;</span></span>
+<span><span class="co">#&gt; 1:                        NA                       NA                        NA</span></span>
+<span><span class="co">#&gt; 2:                        NA                       NA                        NA</span></span>
+<span><span class="co">#&gt; 3:                        NA                       NA                        NA</span></span>
+<span><span class="co">#&gt;    Satoh_beta Mahalanobis_alignment Mahalanobis_residual</span></span>
+<span><span class="co">#&gt;         &lt;num&gt;                 &lt;num&gt;                &lt;num&gt;</span></span>
+<span><span class="co">#&gt; 1:         NA                    NA                   NA</span></span>
+<span><span class="co">#&gt; 2:         NA                    NA                   NA</span></span>
+<span><span class="co">#&gt; 3:         NA                    NA                   NA</span></span>
+<span><span class="co">#&gt;    Validation_utility_response Validation_utility_rank_correlation</span></span>
+<span><span class="co">#&gt;                          &lt;num&gt;                               &lt;num&gt;</span></span>
+<span><span class="co">#&gt; 1:                          NA                                  NA</span></span>
+<span><span class="co">#&gt; 2:                          NA                                  NA</span></span>
+<span><span class="co">#&gt; 3:                          NA                                  NA</span></span>
+<span><span class="co">#&gt;        Expected_response_basis</span></span>
+<span><span class="co">#&gt;                         &lt;char&gt;</span></span>
+<span><span class="co">#&gt; 1: exact linear-index response</span></span>
+<span><span class="co">#&gt; 2: exact linear-index response</span></span>
+<span><span class="co">#&gt; 3:                 unavailable</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">comparison</span><span class="op">$</span><span class="va">rank_correlation</span>, <span class="fl">2</span><span class="op">)</span></span>
 <span><span class="co">#&gt;             Smith_Hazel Base Rank_sum</span></span>
 <span><span class="co">#&gt; Smith_Hazel        1.00 0.98     0.94</span></span>
@@ -455,45 +475,66 @@ selection</a>.</p>
 <div class="section level2">
 <h2 id="stage-8-optimise-the-desired-gain-vector">9. Stage 8 — Optimise the desired-gain vector<a class="anchor" aria-label="anchor" href="#stage-8-optimise-the-desired-gain-vector"></a>
 </h2>
-<p><code><a href="../reference/run_dgsi.html">run_dgsi()</a></code> implements the iterative method of Joukhadar
-et al. (2024), searching for a desired-gain vector whose realised
-response in the selected set approaches the stated target.</p>
+<p><code><a href="../reference/run_dgsi.html">run_dgsi()</a></code> applies the iterative optimisation procedure
+of Joukhadar et al. (2024) to the established desired-gain index. It
+searches for an input desired-gain vector whose realised response in the
+selected set approaches the stated target.</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">dgsi</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/run_dgsi.html">run_dgsi</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="va">candidate_sd</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">vapply</a></span><span class="op">(</span></span>
+<span>  <span class="va">dgr_candidates</span><span class="op">[</span>, <span class="va">traits</span><span class="op">]</span>, <span class="fu">stats</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/r/stats/sd.html" class="external-link">sd</a></span>, <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></span><span class="op">(</span><span class="fl">1L</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">target_original_units</span> <span class="op">&lt;-</span> <span class="va">desired_gains</span> <span class="op">*</span> <span class="va">genetic_sd</span></span>
+<span><span class="va">dg_target</span> <span class="op">&lt;-</span> <span class="va">target_original_units</span> <span class="op">/</span> <span class="va">candidate_sd</span></span>
+<span></span>
+<span><span class="va">dgsi</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/run_dgsi.html">run_dgsi</a></span><span class="op">(</span></span>
 <span>  init_data <span class="op">=</span> <span class="va">dgr_candidates</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"GenoID"</span>, <span class="st">"Family"</span><span class="op">)</span><span class="op">]</span>,</span>
 <span>  cand_data <span class="op">=</span> <span class="va">dgr_candidates</span>,</span>
 <span>  trait_cols <span class="op">=</span> <span class="va">traits</span>,</span>
-<span>  dg <span class="op">=</span> <span class="va">desired_gains</span>,</span>
+<span>  dg <span class="op">=</span> <span class="va">dg_target</span>,</span>
 <span>  G <span class="op">=</span> <span class="va">dgr_G</span>, P <span class="op">=</span> <span class="va">dgr_P</span>,</span>
 <span>  lower_is_better <span class="op">=</span> <span class="va">lower_is_better</span>,</span>
 <span>  scale_traits <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  n_select <span class="op">=</span> <span class="fl">20L</span>, n_iter <span class="op">=</span> <span class="fl">200L</span>, n_rep <span class="op">=</span> <span class="fl">5L</span>, seed <span class="op">=</span> <span class="fl">42L</span></span>
 <span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">dgsi</span><span class="op">$</span><span class="va">realised_response</span> <span class="op">-</span> <span class="va">desired_gains</span>, <span class="fl">3</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">dgsi</span><span class="op">$</span><span class="va">realised_response</span> <span class="op">-</span> <span class="va">dg_target</span>, <span class="fl">3</span><span class="op">)</span></span>
 <span><span class="co">#&gt;     GY    PHT     AD    ASI    EPP    GLS </span></span>
-<span><span class="co">#&gt; -1.455 -0.117 -0.738  0.566  0.007 -0.038</span></span></code></pre></div>
-<p>Read that against Stage 4. Feasibility constrains the requested
-<em>proportion</em>. the optimiser is not bound to it, and distributes
-the shortfall unevenly, overshooting grain yield while undershooting
-anthesis date. Whether that trade is acceptable is a breeding decision
-rather than a numerical one.</p>
+<span><span class="co">#&gt;  0.422  0.221  0.858 -0.003  0.036 -0.139</span></span></code></pre></div>
+<p><code>realised_response</code> is a selected-candidate differential
+in candidate standard deviations. Read the model-based transmitted
+response in the original genetic-standard-deviation units before judging
+attainment.</p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">transmitted_genetic_sd</span> <span class="op">&lt;-</span></span>
+<span>  <span class="va">dgsi</span><span class="op">$</span><span class="va">theoretical_response</span><span class="op">$</span><span class="va">original_units</span> <span class="op">/</span> <span class="va">genetic_sd</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">transmitted_genetic_sd</span>, <span class="fl">3</span><span class="op">)</span></span>
+<span><span class="co">#&gt;     GY    PHT     AD    ASI    EPP    GLS </span></span>
+<span><span class="co">#&gt;  0.259 -0.526 -1.014 -0.551  0.078  0.011</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">transmitted_genetic_sd</span> <span class="op">/</span> <span class="va">desired_gains</span>, <span class="fl">3</span><span class="op">)</span></span>
+<span><span class="co">#&gt;     GY    PHT     AD    ASI    EPP    GLS </span></span>
+<span><span class="co">#&gt;  0.259 -1.316 -1.690 -1.101  0.195  0.018</span></span></code></pre></div>
+<p>Feasibility constrains the requested response ray. The iterative
+search can leave that ray. Therefore, inspect every trait-specific
+attainment value.</p>
 <p>The classical solution without iteration is returned as a
 comparator:</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">dgsi</span><span class="op">$</span><span class="va">non_iterated</span><span class="op">$</span><span class="va">realised_response</span>, <span class="fl">3</span><span class="op">)</span></span>
 <span><span class="co">#&gt;     GY    PHT     AD    ASI    EPP    GLS </span></span>
-<span><span class="co">#&gt;  1.526  0.274  0.441 -0.256  0.562  0.228</span></span></code></pre></div>
-<p>The anthesis-silking interval moves in the wrong direction there.
-Joukhadar et al. reported exactly this failure of the unoptimised
-method, and it reproduces here on independent data.</p>
-<p>See <a href="DesiredGainR-dgsi.html">Optimising desired
-gains</a>.</p>
+<span><span class="co">#&gt;  1.468  0.425  0.536 -0.173  0.636  0.495</span></span></code></pre></div>
+<p>The anthesis-silking interval moves in the unfavourable direction in
+this candidate set. Joukhadar et al. (2024) introduced their iterative
+search to reduce this type of disagreement between a target and a
+selected-candidate differential. This is a finite-candidate result. It
+does not contradict the closed-form proportional-response identity under
+the covariance model.</p>
+<p>See <a href="DesiredGainR-dgsi.html">Iterative optimisation of the
+desired-gain index</a>.</p>
 <hr>
 </div>
 <div class="section level2">
 <h2 id="stage-9-score-genomic-estimated-breeding-values">10. Stage 9 — Score genomic estimated breeding values<a class="anchor" aria-label="anchor" href="#stage-9-score-genomic-estimated-breeding-values"></a>
 </h2>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">quadratic_weights</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/diag.html" class="external-link">diag</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
 <span>  GY <span class="op">=</span> <span class="fl">0.05</span>, PHT <span class="op">=</span> <span class="op">-</span><span class="fl">0.03</span>, AD <span class="op">=</span> <span class="op">-</span><span class="fl">0.03</span>, ASI <span class="op">=</span> <span class="op">-</span><span class="fl">0.04</span>, EPP <span class="op">=</span> <span class="fl">0.02</span>, GLS <span class="op">=</span> <span class="op">-</span><span class="fl">0.03</span></span>
 <span><span class="op">)</span><span class="op">)</span></span>
@@ -515,6 +556,10 @@ gains</a>.</p>
 <span><span class="co">#&gt; 4:    ASI            1.21214644                     1.21517336</span></span>
 <span><span class="co">#&gt; 5:    EPP            0.97186893                     0.97429584</span></span>
 <span><span class="co">#&gt; 6:    GLS            0.93598981                     0.93832713</span></span></code></pre></div>
+<p>Use the same call with a zero <code>W</code> matrix as the linear
+genomic benchmark. Keep all other inputs fixed. Compare per-trait
+response, rank correlation, selected overlap, and validated nonlinear
+utility.</p>
 <p>Standardisation matters more here than anywhere else in the package.
 On the original scale, plant height carries half the linear index
 despite holding nearly the smallest weight, and the expected gain in
@@ -528,7 +573,7 @@ selection</a>.</p>
 <div class="section level2">
 <h2 id="stage-10-ask-how-much-the-objective-matters">11. Stage 10 — Ask how much the objective matters<a class="anchor" aria-label="anchor" href="#stage-10-ask-how-much-the-objective-matters"></a>
 </h2>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/weight_sensitivity.html">weight_sensitivity</a></span><span class="op">(</span></span>
 <span>  <span class="va">economic_weights</span>, <span class="va">dgr_candidates</span>, <span class="va">dgr_G</span>, <span class="va">dgr_P</span>,</span>
 <span>  n_select <span class="op">=</span> <span class="fl">20L</span>, trait_cols <span class="op">=</span> <span class="va">traits</span>, n_draws <span class="op">=</span> <span class="fl">100L</span></span>
@@ -597,7 +642,8 @@ selection</a></td>
 </tr>
 <tr class="even">
 <td>8</td>
-<td><a href="DesiredGainR-dgsi.html">Optimising desired gains</a></td>
+<td><a href="DesiredGainR-dgsi.html">Iterative optimisation of the
+desired-gain index</a></td>
 </tr>
 <tr class="odd">
 <td>9</td>
@@ -619,7 +665,7 @@ software</a>
 </tr>
 </tbody>
 </table>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/sessionInfo.html" class="external-link">sessionInfo</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; R version 4.5.0 (2025-04-11 ucrt)</span></span>
 <span><span class="co">#&gt; Platform: x86_64-w64-mingw32/x64</span></span>

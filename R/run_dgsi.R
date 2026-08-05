@@ -765,6 +765,8 @@ run_dgsi <- function(
   result <- list(
     method = "DGSI",
     call = match.call(),
+    id_col = id_col,
+    candidate_id = as.character(prep$init_data[[id_col]]),
     trait_cols = trait_cols,
     desired_gain = dg,
     P = P,
@@ -835,6 +837,7 @@ run_dgsi <- function(
     optimised_d = best$d,
     coefficients = best$b,
     realised_response = best$response,
+    candidate_sd_analysis = gain_scale,
     # The empirical differential above is a property of the candidates that
     # happened to be selected. The transmitted genetic response is a different
     # quantity, is what the next generation actually inherits, and is the

@@ -9,7 +9,8 @@
     unknown <- setdiff(lower_is_better, objective_names)
     if (length(unknown)) {
       stop("Unknown lower-is-better objective traits: ",
-        paste(unknown, collapse = ", "), call. = FALSE
+        paste(unknown, collapse = ", "),
+        call. = FALSE
       )
     }
     if (any(input < 0)) {
@@ -64,7 +65,8 @@ selection_information <- function(values, P, C, G, id_col = NULL) {
   absent <- setdiff(information_names, names(frame))
   if (length(absent)) {
     stop("values is missing information columns: ",
-      paste(absent, collapse = ", "), call. = FALSE
+      paste(absent, collapse = ", "),
+      call. = FALSE
     )
   }
   X <- as.matrix(frame[, information_names, drop = FALSE])
@@ -460,7 +462,8 @@ print.desiredgainr_information <- function(x, ...) {
   cat("  Candidates:", nrow(x$values), "\n")
   cat("  Information variables:", length(x$information_names), "\n")
   cat("  Objective traits:", length(x$objective_names), "\n")
-  cat("  Joint minimum eigenvalue:",
+  cat(
+    "  Joint minimum eigenvalue:",
     format(x$joint_minimum_eigenvalue, digits = 4), "\n"
   )
   invisible(x)

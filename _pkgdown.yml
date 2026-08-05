@@ -90,7 +90,7 @@ navbar:
           href: articles/DesiredGainR-index-families.html
         - text: Using predictions and prediction errors
           href: articles/DesiredGainR-information.html
-        - text: Optimising desired gains
+        - text: Iterative optimisation of the desired-gain index
           href: articles/DesiredGainR-dgsi.html
         - text: Quadratic genomic selection
           href: articles/DesiredGainR-qgsi.html
@@ -117,17 +117,20 @@ home:
     rather than around the index. Computing an index is arithmetic; deciding
     what it should select for is the difficult part, and the literature
     identifies the specification of economic weights as the principal obstacle
-    to routine index use. DesiredGainR translates exactly between economic
-    weights and desired gains, tests whether a stated objective is attainable
+    to routine index use. DesiredGainR provides an explicit algebraic mapping
+    between economic weights and desired gains. The two inputs retain different
+    biological meanings. The package tests whether a stated objective is attainable
     at the planned selection intensity, recovers the objective a programme has
     been applying implicitly from its historical selection differentials, and
     reports how far a decision depends on weights that are themselves
-    uncertain. It provides the classical index families through one interface
-    (Smith-Hazel, base, Pesek-Baker, Yamada, Mulamba-Mock rank-sum, Elston,
-    independent culling and tandem selection), the iterative desired-gain index of
-    Joukhadar et al. (2024), and the quadratic genomic selection index of
-    Ceron-Rojas et al. (2026), each reported with the standard evaluation
-    criteria. A multi-cycle simulation layer compares desired-gain directions
+    uncertain. It provides six classical index families through one interface
+    (Smith-Hazel, base, Pesek-Baker, Yamada, Mulamba-Mock rank-sum and Elston).
+    Independent culling and a within-cohort sequential screen are operational
+    comparators. The package also provides the iterative
+    optimisation procedure applied to the desired-gain index by Joukhadar et
+    al. (2024), and the quadratic genomic selection index of
+    Ceron-Rojas et al. (2026). Each method is reported with criteria that its
+    statistical contract supports. A multi-cycle simulation layer compares desired-gain directions
     over successive breeding cycles, with founders built from the breeder's own
     phased marker data rather than from a simulated genome.
   links:
@@ -193,9 +196,11 @@ reference:
 
   - title: "Defining the breeding objective"
     desc: >
-      The distinctive layer of the package. Economic weights and desired gains
-      are two parameterisations of one linear index, so each implies the other
-      exactly; those translations, a feasibility test derived from the
+      The distinctive layer of the package. Economic weights define aggregate
+      merit. Desired gains define a response direction. An exact algebraic map
+      connects these statements under the stated covariance model, but it does
+      not give them the same biological meaning. This section covers that map,
+      a feasibility test derived from the
       achievable-response ellipsoid, recovery of the objective implicit in past
       selection decisions, and a sensitivity analysis reporting whether the
       decision depends on the stated weights at all.
@@ -234,10 +239,11 @@ reference:
 
   - title: "Building a selection index"
     desc: >
-      The classical index families through one interface, so that alternative
-      objectives and alternative families can be compared on identical data,
-      together with the iterative desired-gain index and the quadratic genomic
-      selection index.
+      The classical and restricted index families, the iterative search applied
+      to the desired-gain index, and the quadratic genomic selection index.
+      A common comparison objective and internal result adapters allow these
+      families to be evaluated on the same candidates, trait units, target,
+      utility and validation values.
     contents:
       - selection_index
       - selection_information
@@ -268,6 +274,7 @@ reference:
     contents:
       - evaluate_index
       - compare_selection_methods
+      - comparison_objective
       - summary.desiredgainr_index
       - predict.desiredgainr_index
       - index_uncertainty

@@ -2,84 +2,56 @@
 % Please edit documentation in R/compare_selection_methods.R
 \name{compare_selection_methods}
 \alias{compare_selection_methods}
-\title{Compare multi-trait selection methods on one decision problem}
+\title{Compare selection methods on one common decision problem}
 \usage{
-compare_selection_methods(models, target_gains = NULL)
+compare_selection_methods(
+  models,
+  target_gains = NULL,
+  objective = NULL,
+  validation_data = NULL
+)
 }
 \arguments{
-\item{models}{Named list containing at least two fitted
-\code{desiredgainr_index} objects.}
+\item{models}{Named list containing at least two supported fitted objects.}
 
-\item{target_gains}{Optional named vector of favourable desired gains on the
-common fitted analysis scale.}
+\item{target_gains}{Optional legacy target on the common fitted analysis
+scale.}
+
+\item{objective}{Optional object returned by \code{\link[=comparison_objective]{comparison_objective()}}.}
+
+\item{validation_data}{Optional data frame containing one common set of
+objective-trait values for every candidate. One non-trait identifier
+column, or the row names, must match the fitted candidate identifiers.}
 }
 \value{
-An object of class \code{desiredgainr_method_comparison}. The \code{summary}
-component contains one row per method. The \code{responses} component contains
-one row per method and trait. The three matrices are \code{rank_correlation},
-\code{selected_jaccard}, and \code{selected_overlap}. The \code{fairness} component
-records the conditions required for interpretation.
+An object of class \code{desiredgainr_method_comparison}. It contains
+method summaries, model-based responses, optional validation responses,
+fairness checks, rank correlations, and selected-set agreement.
 }
 \description{
-A fair comparison uses the same candidates, trait orientation, measurement
-scale, selection intensity, and definition of aggregate merit. This function
-checks those conditions. It then places biological response, objective
-attainment, ranking agreement, and selected-set agreement in one result.
+This function accepts results from \code{\link[=selection_index]{selection_index()}}, \code{\link[=restricted_index]{restricted_index()}},
+\code{\link[=generalized_index]{generalized_index()}}, \code{\link[=run_dgsi]{run_dgsi()}}, and \code{\link[=run_qgsi]{run_qgsi()}}. Internal adapters put
+response vectors in favourable original trait units. A
+\code{\link[=comparison_objective]{comparison_objective()}} can then place them in trait or genetic-standard-
+deviation units and evaluate every method against one fixed target and
+utility.
 }
 \details{
-The function compares fitted objects returned by \code{\link[=selection_index]{selection_index()}}. It
-keeps expected response separate from the observed differential among the
-supplied candidates. Expected response follows selection-index theory.
-Observed differential describes the present candidate set.
+Coefficients are never compared across families. Candidate ranks, selected
+sets, per-trait responses, target alignment, and common utility are compared.
+QGSI expected gains retain their documented linear-regression approximation
+when \code{W} contains curvature. The \code{W = 0} special case has the exact linear
+response. A quadratic common utility is evaluated exactly only from
+\code{validation_data}. A singular common \code{G} still permits response and decision
+comparisons. Mahalanobis alignment and Satoh projection remain missing
+because those criteria require an inverse.
 
-When \code{target_gains} is supplied, it must use the analysis scale stored in the
-fitted objects. For example, a model fitted to genetic-standard-deviation
-values requires targets in genetic standard deviations. Positive values
-mean improvement because trait direction has already been applied by
-\code{\link[=selection_index]{selection_index()}}.
-
-Methods based on ranks or thresholds lack a closed-form expected response in
-this implementation. Their expected-response fields remain missing. Their
-observed differentials, ranks, and selected sets remain comparable.
-}
-\examples{
-traits <- c("yield", "disease")
-values <- data.frame(
-  id = paste0("L", 1:30),
-  yield = seq(-1.5, 1.5, length.out = 30),
-  disease = seq(1.5, -1.5, length.out = 30)
-)
-G <- matrix(c(1, -0.2, -0.2, 0.8), 2,
-  dimnames = list(traits, traits)
-)
-P <- matrix(c(1.8, -0.2, -0.2, 1.4), 2,
-  dimnames = list(traits, traits)
-)
-objective <- c(yield = 1, disease = 0.5)
-fits <- list(
-  Smith_Hazel = selection_index(
-    values, traits, id_col = "id", method = "smith_hazel",
-    G = G, P = P, economic_weights = objective,
-    lower_is_better = "disease", scale_traits = FALSE, n_select = 6
-  ),
-  Base = selection_index(
-    values, traits, id_col = "id", method = "base",
-    G = G, P = P, economic_weights = objective,
-    lower_is_better = "disease", scale_traits = FALSE, n_select = 6
-  )
-)
-compare_selection_methods(fits)
-
-}
-\references{
-Beavis W, Lamkey K, Mahama AA, Suza W (2023). Multiple Trait Selection.
-In Suza WP and Lamkey KR, editors, \emph{Quantitative Genetics for Plant
-Breeding}. Iowa State University Digital Press.
-
-Cunningham EP (1969). The relative efficiencies of selection indexes.
-\emph{Acta Agriculturae Scandinavica} 19:45-48.
+\code{target_gains} is retained for backward compatibility. It uses the analysis
+scale of the first fitted \code{desiredgainr_index} and requires every model to
+have the same transformation. New cross-family analyses should use
+\code{objective}.
 }
 \seealso{
-\code{\link[=selection_index]{selection_index()}}, \code{\link[=evaluate_index]{evaluate_index()}},
-\code{\link[=candidate_score_uncertainty]{candidate_score_uncertainty()}}, \code{\link[=index_information_efficiency]{index_information_efficiency()}}
+\code{\link[=comparison_objective]{comparison_objective()}}, \code{\link[=compare_dg_and_qgsi]{compare_dg_and_qgsi()}},
+\code{\link[=evaluate_index]{evaluate_index()}}, \code{\link[=candidate_score_uncertainty]{candidate_score_uncertainty()}}
 }
